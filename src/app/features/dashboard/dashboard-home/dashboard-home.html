@@ -24,54 +24,154 @@
     <h1 class="text-xl md:text-3xl font-bold text-[var(--color-text)]">Willkommen!</h1>
     }
 
-    <!-- Onboarding Checklist (for new members or incomplete onboarding) -->
-    @if (auth.isLoggedIn() && !onboardingService.isComplete()) {
-    <div class="bg-[var(--color-surface-raised)] rounded-xl border border-[var(--color-border)] p-4 md:p-5">
-        <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-                <div class="p-2 bg-linke/10 rounded-lg">
-                    <i class="pi pi-flag text-linke"></i>
+    <!-- Onboarding Quest Section -->
+    @if (auth.isLoggedIn()) {
+    <div class="bg-[var(--color-surface-raised)] rounded-2xl border border-[var(--color-border)] p-5 md:p-6 mb-6 shadow-xl overflow-hidden relative group">
+        <!-- Decoration Glow -->
+        <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full group-hover:bg-indigo-500/15 transition-colors"></div>
+        
+        @if (!onboardingService.isComplete()) {
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 relative z-10">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <i class="pi pi-compass text-white text-2xl animate-pulse"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-[var(--color-text)] tracking-tight">Deine Onboarding Quest</h3>
+                        <p class="text-sm text-[var(--color-text-muted)]">Schließe alle Aufgaben ab, um dein volles Potential zu entfalten.</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="font-semibold text-[var(--color-text)]">Erste Schritte</h3>
-                    <p class="text-xs text-[var(--color-text-muted)]">
-                        {{ onboardingService.completedCount() }} von {{ onboardingService.totalSteps() }} erledigt
-                    </p>
+                <div class="flex flex-col items-end">
+                    <span class="text-2xl font-black text-indigo-500 italic">{{ onboardingService.progress() }}%</span>
+                    <span class="text-[10px] uppercase font-bold tracking-[0.2em] text-[var(--color-text-muted)]">Fortschritt</span>
                 </div>
             </div>
-            <span class="text-sm font-bold text-linke">{{ onboardingService.progress() }}%</span>
-        </div>
 
-        <!-- Progress Bar -->
-        <div class="w-full h-2 bg-[var(--color-surface-overlay)] rounded-full overflow-hidden mb-4">
-            <div class="h-full bg-gradient-to-r from-linke to-teal rounded-full transition-all duration-500"
-                [style.width.%]="onboardingService.progress()"></div>
-        </div>
+            <!-- Progress Bar Premium -->
+            <div class="w-full h-3 bg-[var(--color-surface-overlay)] rounded-full overflow-hidden mb-8 relative z-10 border border-[var(--color-border)]">
+                <div class="h-full bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 rounded-full transition-all duration-1000 ease-out relative shadow-[0_0_15px_rgba(99,102,241,0.5)]"
+                    [style.width.%]="onboardingService.progress()">
+                    <div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:50px_50px] animate-[slide_2s_linear_infinite]"></div>
+                </div>
+            </div>
 
-        <!-- Steps Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
-            @for (step of onboardingService.steps(); track step.key) {
-            <a [routerLink]="getStepLink(step.key)" class="flex flex-col items-center p-2 rounded-lg transition-colors"
-                [class.bg-teal/10]="step.completed" [class.bg-[var(--color-surface-overlay)]]="!step.completed"
-                [class.opacity-50]="step.completed" [class.cursor-pointer]="!step.completed"
-                [class.hover:bg-teal/5]="!step.completed" [pTooltip]="step.completed ? 'Erledigt!' : step.description"
-                tooltipPosition="bottom">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center mb-1" [class.bg-teal]="step.completed"
-                    [class.bg-[var(--color-border)]]="!step.completed">
-                    @if (step.completed) {
-                    <i class="pi pi-check text-white text-xs"></i>
+            <!-- Quest Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 relative z-10">
+                @for (step of onboardingService.steps(); track step.key) {
+                <div class="relative group/step">
+                    @if (step.link.startsWith('#')) {
+                    <button (click)="handleMikrotask({id: step.key})" 
+                        class="w-full text-left flex flex-col items-center p-4 rounded-xl transition-all duration-300 border h-full"
+                        [class.bg-emerald-500/5]="step.completed" [class.border-emerald-500/20]="step.completed"
+                        [class.bg-[var(--color-surface-overlay)]]="!step.completed" [class.border-[var(--color-border)]]="!step.completed"
+                        [class.hover:border-indigo-500/50]="!step.completed"
+                        [disabled]="step.completed">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-transform group-hover/step:scale-110" 
+                            [class.bg-emerald-500]="step.completed" [class.shadow-lg]="step.completed" [class.shadow-emerald-500/30]="step.completed"
+                            [class.bg-[var(--color-border)]]="!step.completed">
+                            @if (step.completed) {
+                            <i class="pi pi-check text-white text-sm"></i>
+                            } @else {
+                            <i class="pi {{ step.icon }} text-[var(--color-text-muted)] text-sm"></i>
+                            }
+                        </div>
+                        <span class="text-xs font-bold text-center text-[var(--color-text)] leading-tight">{{ step.label }}</span>
+                        @if (step.completed) {
+                            <span class="text-[9px] text-emerald-500 font-medium mt-1 uppercase tracking-tighter">{{ step.rewardLabel }}</span>
+                        } @else {
+                            <span class="text-[9px] text-[var(--color-text-muted)] mt-1 opacity-0 group-hover/step:opacity-100 transition-opacity">Jetzt starten</span>
+                        }
+                    </button>
                     } @else {
-                    <i class="pi {{ step.icon }} text-[var(--color-text-muted)] text-xs"></i>
+                    <a [routerLink]="step.link" 
+                        class="w-full flex flex-col items-center p-4 rounded-xl transition-all duration-300 border h-full"
+                        [class.bg-emerald-500/5]="step.completed" [class.border-emerald-500/20]="step.completed"
+                        [class.bg-[var(--color-surface-overlay)]]="!step.completed" [class.border-[var(--color-border)]]="!step.completed"
+                        [class.hover:border-indigo-500/50]="!step.completed"
+                        [class.pointer-events-none]="step.completed">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-transform group-hover/step:scale-110" 
+                            [class.bg-emerald-500]="step.completed" [class.shadow-lg]="step.completed" [class.shadow-emerald-500/30]="step.completed"
+                            [class.bg-[var(--color-border)]]="!step.completed">
+                            @if (step.completed) {
+                            <i class="pi pi-check text-white text-sm"></i>
+                            } @else {
+                            <i class="pi {{ step.icon }} text-[var(--color-text-muted)] text-sm"></i>
+                            }
+                        </div>
+                        <span class="text-xs font-bold text-center text-[var(--color-text)] leading-tight">{{ step.label }}</span>
+                        @if (step.completed) {
+                            <span class="text-[9px] text-emerald-500 font-medium mt-1 uppercase tracking-tighter">{{ step.rewardLabel }}</span>
+                        } @else {
+                            <span class="text-[9px] text-[var(--color-text-muted)] mt-1 opacity-0 group-hover/step:opacity-100 transition-opacity">Jetzt starten</span>
+                        }
+                    </a>
                     }
                 </div>
-                <span class="text-[10px] text-center text-[var(--color-text)] leading-tight">
-                    {{ step.label }}
-                </span>
-            </a>
+                }
+            </div>
+        } @else {
+            <div class="flex flex-col items-center py-6 text-center animate-[fadeIn_0.5s_ease-out]">
+                <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center shadow-2xl shadow-emerald-500/40 mb-4 animate-bounce">
+                    <i class="pi pi-verified text-white text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-black text-[var(--color-text)]">Quest Abgeschlossen!</h2>
+                <p class="text-[var(--color-text-muted)] max-w-md mt-2">Du hast alle Onboarding-Schritte gemeistert. Du bist nun ein vollwertiges Mitglied der Community!</p>
+                <div class="mt-6 flex gap-2">
+                    <div class="px-4 py-2 bg-indigo-500/10 rounded-full text-indigo-500 text-xs font-bold border border-indigo-500/20">
+                        Level 1 Power-User
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    }
+
+
+
+    <!-- Mikrotasks Section -->
+    @if (auth.isLoggedIn() && mikrotaskService.tasks().length > 0) {
+    <div class="bg-[var(--color-surface-raised)] rounded-xl border border-[var(--color-border)] p-4 md:p-5 shadow-sm">
+        <div class="flex items-center gap-2 mb-4">
+            <div class="p-2 bg-indigo-500/10 rounded-lg">
+                <i class="pi pi-check-square text-indigo-500"></i>
+            </div>
+            <div>
+                <h3 class="font-semibold text-[var(--color-text)]">Deine Mikrotasks</h3>
+                <p class="text-xs text-[var(--color-text-muted)]">Kurze Erledigungen für zwischendurch</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            @for (task of mikrotaskService.tasks(); track task.id) {
+            <div class="flex items-start gap-3 p-3 rounded-lg bg-[var(--color-surface-overlay)] border border-[var(--color-border)] hover:border-indigo-500/30 transition-all group">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-indigo-500/10 group-hover:bg-indigo-500/20 transition-colors">
+                    <i class="pi {{ task.icon }} text-indigo-500"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-medium text-sm text-[var(--color-text)] truncate">{{ task.title }}</div>
+                    <div class="text-[10px] text-[var(--color-text-muted)] leading-tight mt-0.5 line-clamp-2">
+                        {{ task.description }}
+                    </div>
+                    <div class="mt-2">
+                        @if (task.link.startsWith('#')) {
+                        <button (click)="handleMikrotask(task)" 
+                            class="text-[10px] font-bold text-indigo-500 hover:indigo-600 flex items-center gap-1 uppercase tracking-wider">
+                            Jetzt erledigen <i class="pi pi-arrow-right text-[8px]"></i>
+                        </button>
+                        } @else {
+                        <a [routerLink]="task.link" 
+                            class="text-[10px] font-bold text-indigo-500 hover:indigo-600 flex items-center gap-1 uppercase tracking-wider">
+                            Jetzt erledigen <i class="pi pi-arrow-right text-[8px]"></i>
+                        </a>
+                        }
+                    </div>
+                </div>
+            </div>
             }
         </div>
     </div>
     }
+
 
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">

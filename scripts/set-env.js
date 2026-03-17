@@ -48,3 +48,5 @@ fs.writeFileSync(path.join(envDir, 'environment.prod.ts'), prodEnvContent);
 console.log('✅ Environment files generated successfully');
 console.log(`   SUPABASE_URL: ${supabaseUrl.substring(0, 30)}...`);
 console.log(`   SUPABASE_ANON_KEY: ${supabaseAnonKey.substring(0, 20)}...`);
+
+

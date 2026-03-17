@@ -43,10 +43,11 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 | 6 | **Teilnehmerlisten** | ✅ Fertig | "Wer kommt?" sichtbar machen (Social Proof) |
 | 7 | **Öffentliche Events** | ✅ Fertig | Shareable Links für WhatsApp (ohne Login lesbar) |
 | 8 | **Einfache Umfragen** | ✅ Fertig | Abstimmungen im Feed ("Terminfindung") |
-| 9 | **Push-Notifications** | 🏃 In Arbeit | Zielgruppen-Push (Basis & UI steht) |
+| 9 | **Push-Notifications** | ✅ Fertig | Zielgruppen-Push (Basis & UI steht) |
 | 10 | **Smart Matching** | ✅ Fertig | "Deine Skills werden gebraucht" Dashboard-Karte |
-| 11 | **Mikrotasks** | 🏃 In Arbeit | "5-Minuten-Hilfe" (Beitrag teilen, Umfrage) |
-| 12 | **Onboarding Quest** | ⏳ Geplant | Gamification-Balken für neue Mitglieder (Ausbau) |
+| 11 | **Mikrotasks** | ✅ Fertig | "5-Minuten-Hilfe" (Beitrag teilen, Umfrage) |
+| 12 | **Onboarding Quest** | ✅ Fertig | Gamification-Balken für neue Mitglieder (Ausbau) |
+
 
 ### Phase 3: Profi-Features ⭐
 

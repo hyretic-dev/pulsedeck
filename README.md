@@ -1,3 +1,8 @@
+🚧 WIP / ALPHA STATUS 🚧
+Willkommen! Dieses Projekt ist aktuell in einer sehr frühen Alpha-Phase. Der Code ist an vielen Stellen noch experimentell, unaufgeräumt und ein "Work in Progress". Ich mache das Repo jetzt schon öffentlich im Sinne von "Build in Public".
+Alpha-Tester für die App sind herzlich willkommen! Wenn ihr den Code lest: Bitte habt Nachsicht mit dem Chaos. Pull Requests für große Refactorings sind aktuell noch verfrüht, aber Bug-Reports in den Issues sind extrem wertvoll!
+
+
 # PulseDeck - The Engagement Layer for Modern Organizations 🇪🇺
 
 ![PulseDeck Badge](https://img.shields.io/badge/Status-Alpha-orange) ![License](https://img.shields.io/badge/License-AGPLv3-blue) ![Made in EU](https://img.shields.io/badge/Made_in-EU-blue?labelColor=yellow)

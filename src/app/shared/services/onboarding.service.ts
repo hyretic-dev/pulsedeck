@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { SupabaseService } from './supabase';
 import { AuthService } from './auth.service';
 import { WorkingGroupsService } from './working-groups.service';
+import { NotificationService } from './notification.service';
 
 /**
  * Onboarding step definition
@@ -12,7 +13,10 @@ export interface OnboardingStep {
     description: string;
     icon: string;
     completed: boolean;
+    rewardLabel?: string;
+    link: string;
 }
+
 
 /**
  * Service for managing member onboarding progress
@@ -24,6 +28,8 @@ export class OnboardingService {
     private supabase = inject(SupabaseService);
     private auth = inject(AuthService);
     private workingGroupsService = inject(WorkingGroupsService);
+    private notificationService = inject(NotificationService);
+
 
     private _completedSteps = signal<Set<string>>(new Set());
     private _loading = signal(false);
@@ -42,38 +48,48 @@ export class OnboardingService {
         return [
             {
                 key: 'profile_complete',
-                label: 'Profil vervollständigen',
-                description: 'Füge deine Kontaktdaten hinzu',
+                label: 'Profil-Held',
+                description: 'Vervollständige dein Profil',
                 icon: 'pi-user-edit',
                 completed: this.isProfileComplete(member),
+                rewardLabel: 'Identität bestätigt',
+                link: 'profile'
             },
             {
                 key: 'joined_ag',
-                label: 'Einer AG beitreten',
-                description: 'Werde Teil einer Arbeitsgruppe',
+                label: 'Team-Player',
+                description: 'Tritt einer Arbeitsgruppe bei',
                 icon: 'pi-users',
                 completed: memberships.size > 0,
+                rewardLabel: 'Platz gefunden',
+                link: 'ags'
             },
             {
                 key: 'visited_wiki',
-                label: 'Wiki erkunden',
-                description: 'Lies unsere Dokumentation',
+                label: 'Wissens-Sucher',
+                description: 'Erkunden das Wiki',
                 icon: 'pi-book',
                 completed: completed.has('visited_wiki'),
+                rewardLabel: 'Weisheit erlangt',
+                link: 'wiki'
             },
             {
-                key: 'visited_calendar',
-                label: 'Termine ansehen',
-                description: 'Schau dir kommende Events an',
-                icon: 'pi-calendar',
-                completed: completed.has('visited_calendar'),
+                key: 'enable_notifications',
+                label: 'Wächter',
+                description: 'Aktiviere Benachrichtigungen',
+                icon: 'pi-bell',
+                completed: this.notificationService.isSubscribed(),
+                rewardLabel: 'Sinn geschärft',
+                link: '#enable-notifications'
             },
             {
                 key: 'added_task',
-                label: 'Erste Aufgabe erstellen',
-                description: 'Organisiere dich mit Aufgaben',
+                label: 'Macher',
+                description: 'Erstelle deine erste Aufgabe',
                 icon: 'pi-check-circle',
                 completed: completed.has('added_task'),
+                rewardLabel: 'Tatkraft bewiesen',
+                link: 'tasks'
             },
         ];
     });
@@ -84,16 +100,18 @@ export class OnboardingService {
     readonly progress = computed(() => {
         const steps = this.steps();
         if (steps.length === 0) return 0;
-        const completed = steps.filter(s => s.completed).length;
+        const completed = steps.filter((s: OnboardingStep) => s.completed).length;
         return Math.round((completed / steps.length) * 100);
     });
+
 
     /**
      * Number of completed steps
      */
     readonly completedCount = computed(() => {
-        return this.steps().filter(s => s.completed).length;
+        return this.steps().filter((s: OnboardingStep) => s.completed).length;
     });
+
 
     /**
      * Total number of steps
@@ -160,12 +178,13 @@ export class OnboardingService {
             .eq('member_id', memberId);
 
         if (count && count > 0) {
-            this._completedSteps.update(s => {
+            this._completedSteps.update((s: Set<string>) => {
                 const newSet = new Set(s);
                 newSet.add('added_task');
                 return newSet;
             });
         }
+
     }
 
     /**
@@ -193,11 +212,12 @@ export class OnboardingService {
             }
         }
 
-        this._completedSteps.update(s => {
+        this._completedSteps.update((s: Set<string>) => {
             const newSet = new Set(s);
             newSet.add(stepKey);
             return newSet;
         });
+
     }
 
     /**
