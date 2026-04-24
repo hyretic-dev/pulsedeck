@@ -85,12 +85,12 @@
             }
 
             <!-- AG Wikis -->
-            @if (myAgs().length > 0) {
+            @if (myGroups().length > 0) {
             <div class="border-t border-[var(--color-border)] mt-2 pt-2">
                 <div class="px-2.5 py-1 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
                     Arbeitsgruppen
                 </div>
-                @for (ag of myAgs(); track ag.id) {
+                @for (ag of myGroups(); track ag.id) {
                 <div>
                     <button (click)="toggleCategory('AG:' + ag.id!)"
                         [class]="selectedCategory() === 'AG:' + ag.id ? 'bg-[var(--color-surface-raised)] border-l-2 border-l-purple-500 font-medium' : 'border-l-2 border-l-transparent hover:bg-[var(--color-surface-raised)]'"

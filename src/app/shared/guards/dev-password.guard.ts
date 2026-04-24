@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
-const DEV_PASSWORD = 'lexion2026'; // Einfaches Dev-Passwort
+const DEV_PASSWORD = 'pulsedeck2026'; // Einfaches Dev-Passwort
 const STORAGE_KEY = 'dev_access_granted';
 
 /**

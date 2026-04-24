@@ -113,8 +113,8 @@ export class WikiComponent implements OnInit {
     { label: 'Nur Admin', value: 'admin' },
   ];
 
-  // AGs where current user is member
-  myAgs = computed(() => {
+  // Gruppen where current user is member
+  myGroups = computed(() => {
     const all = this.wgService.workingGroups();
     const myIds = this.wgService.myMemberships();
     return all.filter(g => myIds.has(g.id || ''));

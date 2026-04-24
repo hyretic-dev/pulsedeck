@@ -5,7 +5,7 @@
     <!-- Loading -->
     @if (loading()) {
     <div class="flex justify-center items-center py-8">
-        <p-progressSpinner strokeWidth="4" ariaLabel="Lade AGs..." />
+        <p-progressSpinner strokeWidth="4" ariaLabel="Lade Gruppen..." />
     </div>
     }
 
@@ -17,7 +17,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-4">
         <div>
-            <h1 class="text-xl md:text-3xl font-bold text-[var(--color-text)]">Arbeitsgemeinschaften (AGs)</h1>
+            <h1 class="text-xl md:text-3xl font-bold text-[var(--color-text)]">Gruppen</h1>
             <p class="text-[var(--color-text-muted)] text-sm hidden md:block mt-1">Hier findest du alle aktiven Gruppen
             </p>
         </div>
@@ -187,7 +187,7 @@
         } @empty {
         <div class="text-center py-8 text-[var(--color-text-muted)]">
             <i class="pi pi-users text-3xl mb-2"></i>
-            <p class="text-sm">Keine AGs gefunden</p>
+            <p class="text-sm">Keine Gruppen gefunden</p>
         </div>
         }
     </div>

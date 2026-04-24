@@ -1,4 +1,4 @@
-package com.lexion.app;
+package com.pulsedeck.app;
 
 import com.getcapacitor.BridgeActivity;
 

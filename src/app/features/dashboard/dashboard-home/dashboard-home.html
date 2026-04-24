@@ -265,18 +265,18 @@
                         <div class="p-2 bg-linke/10 rounded-lg">
                             <i class="pi pi-briefcase text-linke"></i>
                         </div>
-                        <h3 class="font-semibold text-[var(--color-text)]">Meine Arbeitsgruppen</h3>
+                        <h3 class="font-semibold text-[var(--color-text)]">Meine Gruppen</h3>
                     </div>
-                    <a routerLink="ags"
-                        class="text-xs text-[var(--color-text-muted)] hover:text-linke transition-colors">
-                        Alle AGs <i class="pi pi-arrow-right text-[10px] ml-0.5"></i>
+                    <a routerLink="gruppen"
+                        class="text-[10px] uppercase tracking-wider font-bold text-linke hover:text-linke/80 transition-colors flex items-center group">
+                        Alle Gruppen <i class="pi pi-arrow-right text-[10px] ml-0.5"></i>
                     </a>
                 </div>
 
                 @if (myWorkingGroups.length > 0) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     @for (ag of myWorkingGroups; track ag.id) {
-                    <a routerLink="ags"
+                    <a routerLink="gruppen"
                         class="flex items-center gap-3 p-3 rounded-lg bg-[var(--color-surface-overlay)] hover:bg-linke/10 border border-[var(--color-border)] hover:border-linke/30 transition-colors group">
                         <div class="w-10 h-10 rounded-lg bg-linke/20 flex items-center justify-center">
                             <i class="pi pi-users text-linke"></i>
@@ -301,11 +301,11 @@
                         <i class="pi pi-users text-xl text-[var(--color-text-muted)]"></i>
                     </div>
                     <p class="text-sm text-[var(--color-text-muted)] mb-3">
-                        Du bist noch keiner AG beigetreten
+                        Du bist noch keiner Gruppe beigetreten
                     </p>
-                    <a routerLink="ags" class="inline-flex items-center gap-1.5 text-sm text-linke hover:underline">
+                    <a routerLink="gruppen" class="inline-flex items-center gap-1.5 text-sm text-linke hover:underline">
                         <i class="pi pi-plus text-xs"></i>
-                        AG beitreten
+                        Gruppe beitreten
                     </a>
                 </div>
                 }
@@ -478,7 +478,7 @@
                         </div>
                         <div class="text-right hidden md:block">
                             <span class="text-xs font-medium text-[var(--color-text-muted)]">
-                                {{ statsService.stats()?.totalWorkingGroups ?? 0 }} AGs
+                                {{ statsService.stats()?.totalWorkingGroups ?? 0 }} Gruppen
                             </span>
                         </div>
                     </div>

@@ -162,7 +162,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 - [x] **Settings:** Icon-Liste im Admin-Dialog scrollbar gemacht
 - [x] **Profil:** "Fast geschafft"-Meldung verschwindet sofort nach Speichern
 - [x] **Sicherheit:** Wiki & News strikt abgesichert (RLS: "In Prüfung" ist unsichtbar)
-- [x] **Wiki:** Eigene Wiki-Bereiche für Arbeitsgruppen (AGs)
+- [x] **Wiki:** Eigene Wiki-Bereiche für Gruppen
 - [x] **Workflow:** Sicherheitsmechanismus für bearbeitete Live-Artikel (Auto-Reset)
 - [x] **Login:** Intelligenter Auto-Redirect zur letzten Organisation
 

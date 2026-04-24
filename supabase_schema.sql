@@ -296,12 +296,12 @@ USING (get_my_role() = 'admin');
 
 -- DUMMY DATA (Only if empty, to avoid duplicates)
 INSERT INTO members (name, role, department, status, email, join_date, app_role)
-SELECT 'Super Admin', 'Vorstand', 'Management', 'Active', 'admin@lexion.de', '01.01.2020', 'admin'
-WHERE NOT EXISTS (SELECT 1 FROM members WHERE email = 'admin@lexion.de');
+SELECT 'Super Admin', 'Vorstand', 'Management', 'Active', 'admin@pulsedeck.de', '01.01.2020', 'admin'
+WHERE NOT EXISTS (SELECT 1 FROM members WHERE email = 'admin@pulsedeck.de');
 
 INSERT INTO members (name, role, department, status, email, join_date, app_role)
-SELECT 'Normal Member', 'Mitglied', 'Diverse', 'Active', 'member@lexion.de', '01.06.2024', 'member'
-WHERE NOT EXISTS (SELECT 1 FROM members WHERE email = 'member@lexion.de');
+SELECT 'Normal Member', 'Mitglied', 'Diverse', 'Active', 'member@pulsedeck.de', '01.06.2024', 'member'
+WHERE NOT EXISTS (SELECT 1 FROM members WHERE email = 'member@pulsedeck.de');
 
 -- Important: To test Admin rights, you must link your Supabase Auth UID to the 'Super Admin' member row!
--- Run: UPDATE members SET user_id = 'YOUR-AUTH-UID' WHERE email = 'admin@lexion.de';
+-- Run: UPDATE members SET user_id = 'YOUR-AUTH-UID' WHERE email = 'admin@pulsedeck.de';

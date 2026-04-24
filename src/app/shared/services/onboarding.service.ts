@@ -62,7 +62,7 @@ export class OnboardingService {
                 icon: 'pi-users',
                 completed: memberships.size > 0,
                 rewardLabel: 'Platz gefunden',
-                link: 'ags'
+                link: 'gruppen'
             },
             {
                 key: 'visited_wiki',

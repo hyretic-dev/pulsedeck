@@ -210,7 +210,7 @@ export class DashboardHome implements OnInit {
   getStepLink(stepKey: string): string {
     switch (stepKey) {
       case 'profile_complete': return 'profile';
-      case 'joined_ag': return 'ags';
+      case 'joined_ag': return 'gruppen';
       case 'visited_wiki': return 'wiki';
       case 'enable_notifications': return '#enable-notifications';
       case 'added_task': return 'tasks';
