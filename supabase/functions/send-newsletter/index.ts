@@ -18,32 +18,23 @@ function generateNewsletterHtml(
 ): string {
   const color = config.primary_color || '#DE0000';
   const footer = config.footer_text || 'PulseDeck - Vereinsverwaltung';
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://pulsedeck.de';
 
   // Simple link list - accessible and lightweight
   const itemsHtml = items.map((item: any) => {
     const date = new Date(item.created_at).toLocaleDateString('de-DE');
     const author = item.author?.name || 'Unbekannt';
+    const itemUrl = item.url || `${siteUrl}/dashboard/feed`;
 
-    if (item.type === 'link') {
-      return `
+    return `
 <tr>
   <td style="padding: 12px 0; border-bottom: 1px solid #eee;">
-    <a href="${item.url}" style="color: ${color}; text-decoration: none; font-weight: 600;">${item.title}</a>
+    <a href="${itemUrl}" style="color: ${color}; text-decoration: none; font-weight: 600; font-size: 16px;">${item.title}</a>
     <br>
     <small style="color: #666;">${date} – ${author}</small>
+    ${item.content ? `<p style="margin: 8px 0 0; color: #333; line-height: 1.5;">${stripHtml(item.content).slice(0, 150)}...</p>` : ''}
   </td>
 </tr>`;
-    } else {
-      return `
-<tr>
-  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">
-    <strong>${item.title}</strong>
-    <br>
-    <small style="color: #666;">${date} – ${author}</small>
-    ${item.content ? `<p style="margin: 8px 0 0; color: #333;">${stripHtml(item.content).slice(0, 200)}...</p>` : ''}
-  </td>
-</tr>`;
-    }
   }).join('');
 
   // Logo: Image if URL provided, otherwise text

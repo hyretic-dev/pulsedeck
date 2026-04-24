@@ -16,12 +16,12 @@ Wir ersetzen das Chaos aus WhatsApp-Gruppen, Excel-Listen und verlorenen E-Mails
 
 ## 🚀 Warum PulseDeck?
 
-### Das Problem (The Horror)
+### Das Problem
 *   **Datenschutz-Albtraum:** In WhatsApp-Gruppen sieht jeder jede Handynummer.
 *   **Info-Friedhof:** Wichtige Ankündigungen verschwinden nach 5 Minuten im Chat-Verlauf.
 *   **Verbindlichkeit = 0:** "Wer bringt den Grill mit?" -> 50 Nachrichten, kein Ergebnis.
 
-### Die Lösung (The Fix)
+### Die Lösung
 *   **📌 Pinned News:** Wichtiges bleibt oben. Lesebestätigungen (anonymisiert) für Vorstände.
 *   **📅 Event Slots:** Klickbare Aufgabenverteilung. Einer klickt, Job erledigt.
 *   **🔒 Privacy First:** Volle Datensouveränität. Gehostet in der EU. Sicher vor dem US Cloud Act.
