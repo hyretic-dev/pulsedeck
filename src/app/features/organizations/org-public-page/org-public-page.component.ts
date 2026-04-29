@@ -568,12 +568,21 @@ export class OrgPublicPageComponent implements OnInit {
     private async loadWikiArticles(orgId: string): Promise<void> {
         const { data } = await this.supabase.client
             .from('wiki_docs')
-            .select('id, title, content, category')
+            .select('id, title, content, wiki_categories!inner(name)')
             .eq('organization_id', orgId)
+            .eq('status', 'Published')
+            .eq('allowed_roles', '{public}')
+            .is('working_group_id', null)
             .order('title', { ascending: true })
             .limit(6);
 
-        this.wikiArticles.set((data as PublicWikiArticle[]) || []);
+        const articles = (data || []).map((d: any) => ({
+            id: d.id,
+            title: d.title,
+            content: d.content,
+            category: d.wiki_categories?.name || 'Allgemein'
+        }));
+        this.wikiArticles.set(articles);
     }
 
     private async loadFeedItems(orgId: string): Promise<void> {
