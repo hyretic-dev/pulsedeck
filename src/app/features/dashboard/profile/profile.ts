@@ -67,6 +67,14 @@ export class ProfileComponent implements OnInit {
         city: '',
     };
 
+    // Contact channels for group communication
+    contactChannels = {
+        Discord: '',
+        WhatsApp: '',
+        Signal: '',
+        Email: '',
+    };
+
     // Skills
     selectedSkillIds = signal<string[]>([]);
     originalSkillIds = signal<string[]>([]);
@@ -99,21 +107,38 @@ export class ProfileComponent implements OnInit {
             };
 
             if (member.birthday) {
-                this.birthdayDate = new Date(member.birthday);
+                this.birthdayDate =
+                    new Date(member.birthday);
+            }
+
+            // Load contact channels
+            if (member.contact_channels) {
+                this.contactChannels = {
+                    Discord: '',
+                    WhatsApp: '',
+                    Signal: '',
+                    Email: '',
+                    ...member.contact_channels,
+                };
             }
 
             // Load skills for organization
-            const orgId = this.org.currentOrganization()?.id;
+            const orgId =
+                this.org.currentOrganization()?.id;
             if (orgId) {
-                await this.skillService.loadSkills(orgId);
+                await this.skillService
+                    .loadSkills(orgId);
             }
 
             // Load member's selected skills
             if (member.id) {
                 const memberSkills =
-                    await this.skillService.getMemberSkillIds(member.id);
-                this.selectedSkillIds.set(memberSkills);
-                this.originalSkillIds.set([...memberSkills]);
+                    await this.skillService
+                        .getMemberSkillIds(member.id);
+                this.selectedSkillIds
+                    .set(memberSkills);
+                this.originalSkillIds
+                    .set([...memberSkills]);
             }
         }
 
@@ -145,8 +170,12 @@ export class ProfileComponent implements OnInit {
         const updates = {
             ...this.formData,
             birthday: this.birthdayDate
-                ? this.birthdayDate.toISOString().split('T')[0]
+                ? this.birthdayDate
+                    .toISOString().split('T')[0]
                 : undefined,
+            contact_channels: this.filterEmptyChannels(
+                this.contactChannels
+            ),
         };
 
         const success = await this.members.updateMember(member.id, updates);
@@ -172,6 +201,22 @@ export class ProfileComponent implements OnInit {
         }
 
         this.saving.set(false);
+    }
+
+    /**
+     * Filter out empty contact channel values.
+     */
+    private filterEmptyChannels(
+        channels: Record<string, string>
+    ): Record<string, string> {
+        const result: Record<string, string> = {};
+        for (const [key, value] of
+            Object.entries(channels)) {
+            if (value?.trim()) {
+                result[key] = value.trim();
+            }
+        }
+        return result;
     }
 
     // =========================================================================

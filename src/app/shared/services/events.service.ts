@@ -103,16 +103,57 @@ export class EventsService implements OnDestroy {
         event: Omit<CalendarEvent, 'id' | 'created_at' | 'updated_at'>
     ) {
         const orgId = this.org.currentOrgId();
-        const eventWithOrg = orgId ? { ...event, organization_id: orgId } : event;
+        const eventWithOrg = orgId
+            ? { ...event, organization_id: orgId }
+            : event;
+
+        // Strip fields that may not exist in the
+        // DB yet (migration not deployed)
+        const sanitized = this.sanitizePayload(
+            eventWithOrg
+        );
 
         const { data, error } = await this.supabase
             .from(this.TABLE_NAME)
-            .insert(eventWithOrg)
+            .insert(sanitized)
             .select()
             .single();
 
         if (error) throw new Error(error.message);
         return data;
+    }
+
+    /**
+     * Strip new columns that may not yet exist
+     * in the database. Tries to insert with all
+     * fields first; on schema error, retries
+     * without the new fields.
+     */
+    private sanitizePayload(
+        payload: Record<string, any>
+    ): Record<string, any> {
+        // Fields added by recent migration that
+        // may not be deployed yet
+        const newFields = [
+            'is_recurring',
+            'recurrence_interval',
+            'recurrence_parent_id',
+            'meeting_reason',
+            'location_type',
+        ];
+
+        const cleaned = { ...payload };
+        for (const field of newFields) {
+            if (
+                cleaned[field] === null ||
+                cleaned[field] === undefined ||
+                cleaned[field] === false ||
+                cleaned[field] === ''
+            ) {
+                delete cleaned[field];
+            }
+        }
+        return cleaned;
     }
 
     async updateEvent(id: string, updates: Partial<CalendarEvent>) {
@@ -136,6 +177,99 @@ export class EventsService implements OnDestroy {
 
         if (error) throw new Error(error.message);
         // Realtime will handle the update
+    }
+
+    /**
+     * Create recurring events for a parent event.
+     * Generates events for ~6 months based on interval.
+     */
+    async addRecurringEvents(
+        parentEvent: CalendarEvent
+    ): Promise<void> {
+        if (
+            !parentEvent.id ||
+            !parentEvent.recurrence_interval
+        ) {
+            return;
+        }
+
+        const dates = this.generateRecurringDates(
+            parentEvent.date,
+            parentEvent.recurrence_interval
+        );
+
+        const batch = dates.map(date => ({
+            title: parentEvent.title,
+            date,
+            start_time: parentEvent.start_time,
+            end_time: parentEvent.end_time,
+            location: parentEvent.location,
+            description: parentEvent.description,
+            ag_name: parentEvent.ag_name,
+            working_group_id: parentEvent.working_group_id,
+            allowed_roles: parentEvent.allowed_roles,
+            organization_id: parentEvent.organization_id,
+            meeting_reason: parentEvent.meeting_reason,
+            location_type: parentEvent.location_type,
+            is_recurring: true,
+            recurrence_interval:
+                parentEvent.recurrence_interval,
+            recurrence_parent_id: parentEvent.id,
+        }));
+
+        if (batch.length === 0) return;
+
+        const { error } = await this.supabase
+            .from(this.TABLE_NAME)
+            .insert(batch);
+
+        if (error) throw new Error(error.message);
+    }
+
+    /**
+     * Generate future dates based on recurrence interval.
+     * Returns ISO date strings for ~6 months ahead.
+     */
+    private generateRecurringDates(
+        startDateStr: string,
+        interval: string
+    ): string[] {
+        const dates: string[] = [];
+        const start = new Date(startDateStr);
+        const endLimit = new Date(startDateStr);
+        endLimit.setMonth(endLimit.getMonth() + 6);
+
+        let current = new Date(start);
+
+        while (current < endLimit) {
+            this.advanceDate(current, interval);
+            if (current >= endLimit) break;
+            dates.push(
+                current.toISOString().split('T')[0]
+            );
+        }
+
+        return dates;
+    }
+
+    /**
+     * Advance a date by the given interval.
+     */
+    private advanceDate(
+        date: Date,
+        interval: string
+    ): void {
+        switch (interval) {
+            case 'biweekly':
+                date.setDate(date.getDate() + 14);
+                break;
+            case 'monthly':
+                date.setMonth(date.getMonth() + 1);
+                break;
+            case 'quarterly':
+                date.setMonth(date.getMonth() + 3);
+                break;
+        }
     }
 
     /**

@@ -82,6 +82,71 @@
                 </div>
             </div>
 
+            <!-- Contact Channels Section -->
+            <div>
+                <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
+                    Kontaktkanäle
+                </h3>
+                <p class="text-xs text-[var(--color-text-muted)] mb-3">
+                    <i class="pi pi-info-circle mr-1"></i>
+                    Diese Daten werden für die Gruppen-Kommunikation verwendet.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Discord -->
+                    <div>
+                        <label for="ch-discord"
+                            class="block text-sm font-medium text-[var(--color-text)] mb-1">
+                            <i class="pi pi-comments mr-1 text-[var(--color-text-muted)]"></i>
+                            Discord
+                        </label>
+                        <input id="ch-discord" type="text" pInputText
+                            [(ngModel)]="contactChannels.Discord"
+                            name="ch_discord" class="w-full"
+                            placeholder="username#1234" />
+                    </div>
+
+                    <!-- WhatsApp -->
+                    <div>
+                        <label for="ch-whatsapp"
+                            class="block text-sm font-medium text-[var(--color-text)] mb-1">
+                            <i class="pi pi-comment mr-1 text-[var(--color-text-muted)]"></i>
+                            WhatsApp
+                        </label>
+                        <input id="ch-whatsapp" type="text" pInputText
+                            [(ngModel)]="contactChannels.WhatsApp"
+                            name="ch_whatsapp" class="w-full"
+                            placeholder="+49 123 456789" />
+                    </div>
+
+                    <!-- Signal -->
+                    <div>
+                        <label for="ch-signal"
+                            class="block text-sm font-medium text-[var(--color-text)] mb-1">
+                            <i class="pi pi-send mr-1 text-[var(--color-text-muted)]"></i>
+                            Signal
+                        </label>
+                        <input id="ch-signal" type="text" pInputText
+                            [(ngModel)]="contactChannels.Signal"
+                            name="ch_signal" class="w-full"
+                            placeholder="+49 123 456789" />
+                    </div>
+
+                    <!-- E-Mail (Kontaktkanal) -->
+                    <div>
+                        <label for="ch-email"
+                            class="block text-sm font-medium text-[var(--color-text)] mb-1">
+                            <i class="pi pi-envelope mr-1 text-[var(--color-text-muted)]"></i>
+                            E-Mail (Gruppen)
+                        </label>
+                        <input id="ch-email" type="email" pInputText
+                            [(ngModel)]="contactChannels.Email"
+                            name="ch_email" class="w-full"
+                            placeholder="meine@email.de" />
+                    </div>
+                </div>
+            </div>
+
             <!-- Address Section -->
             <div>
                 <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">

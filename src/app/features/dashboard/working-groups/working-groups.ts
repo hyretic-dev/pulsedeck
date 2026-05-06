@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WorkingGroupsService } from '../../../shared/services/working-groups.service';
 import { WorkingGroup } from '../../../shared/models/working-group.model';
-import { AgRole } from '../../../shared/models/member.model';
+import { AgRole, Member } from '../../../shared/models/member.model';
 import { AuthService } from '../../../shared/services/auth.service';
 import {
   PermissionsService,
@@ -114,27 +114,59 @@ export class WorkingGroupsComponent implements OnInit {
   }
 
   contactTypes = [
-    { label: 'Discord', value: 'Discord', icon: 'pi pi-comments' },
-    { label: 'E-Mail', value: 'Email', icon: 'pi pi-envelope' },
-    { label: 'WhatsApp', value: 'WhatsApp', icon: 'pi pi-comment' },
-    { label: 'Signal', value: 'Signal', icon: 'pi pi-send' },
+    {
+      label: 'Discord',
+      value: 'Discord',
+      icon: 'pi pi-comments'
+    },
+    {
+      label: 'E-Mail',
+      value: 'Email',
+      icon: 'pi pi-envelope'
+    },
+    {
+      label: 'WhatsApp',
+      value: 'WhatsApp',
+      icon: 'pi pi-comment'
+    },
+    {
+      label: 'Signal',
+      value: 'Signal',
+      icon: 'pi pi-send'
+    },
   ];
+
+  // Contact validation: count missing per AG
+  missingContactCounts = signal<Map<string, number>>(
+    new Map()
+  );
 
 
   constructor() {
-    // React to organization changes - reload working groups
+    // React to organization changes
     effect(() => {
-      const currentOrg = this.orgService.currentOrgId();
+      const currentOrg =
+        this.orgService.currentOrgId();
       if (currentOrg) {
-        this.workingGroupsService.fetchWorkingGroups();
+        this.workingGroupsService
+          .fetchWorkingGroups();
       }
     });
 
-    // React to Member changes to load memberships
+    // React to Member changes
     effect(() => {
       const member = this.auth.currentMember();
       if (member && member.id) {
-        this.workingGroupsService.fetchMyMemberships(member.id);
+        this.workingGroupsService
+          .fetchMyMemberships(member.id);
+      }
+    });
+
+    // Contact validation on groups change
+    effect(() => {
+      const groups = this.groups();
+      if (groups.length > 0) {
+        this.loadContactValidation(groups);
       }
     });
   }
@@ -364,7 +396,9 @@ export class WorkingGroupsComponent implements OnInit {
       // Update local state
       this.agMembers.update(members =>
         members.map(m =>
-          m.member_id === memberId ? { ...m, role: newRole } : m
+          m.member_id === memberId
+            ? { ...m, role: newRole }
+            : m
         )
       );
       this.messageService.add({
@@ -379,5 +413,120 @@ export class WorkingGroupsComponent implements OnInit {
         detail: (e as Error).message,
       });
     }
+  }
+
+  /**
+   * Dynamic link placeholder based on contact type.
+   */
+  getLinkPlaceholder(contactType: string): string {
+    const placeholders: Record<string, string> = {
+      Discord: 'https://discord.gg/...',
+      Email: 'vorname@email.de',
+      WhatsApp: 'https://wa.me/...',
+      Signal: 'https://signal.group/...',
+    };
+    return (
+      placeholders[contactType] ||
+      'https://... oder Adresse'
+    );
+  }
+
+  /**
+   * Calculate the next meeting date and time from the group's events.
+   * Returns "Nicht geplant" if no upcoming events exist.
+   */
+  calculateNextMeeting(groupId: string): string {
+    const events = this.getAgEvents(groupId);
+    if (!events || events.length === 0) return 'Nicht geplant';
+
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+
+    // Filter and sort for the next upcoming event
+    const futureEvents = events
+      .filter((e) => e.date >= todayStr)
+      .sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.start_time.localeCompare(b.start_time);
+      });
+
+    if (futureEvents.length === 0) return 'Nicht geplant';
+
+    const next = futureEvents[0];
+    const [y, m, d] = next.date.split('-');
+    return `${d}.${m}.${y} - ${next.start_time} Uhr`;
+  }
+
+  /**
+   * Get count of AG members missing the
+   * contact channel matching the AG contact_type.
+   */
+  getMissingContactCount(
+    groupId: string
+  ): number {
+    return (
+      this.missingContactCounts().get(groupId) ?? 0
+    );
+  }
+
+  /**
+   * Load contact validation for all groups.
+   * Checks which members are missing the
+   * required contact channel.
+   */
+  private async loadContactValidation(
+    groups: WorkingGroup[]
+  ): Promise<void> {
+    const counts = new Map<string, number>();
+
+    try {
+      for (const group of groups) {
+        if (!group.id || !group.contact_type) {
+          continue;
+        }
+
+        const members = await this
+          .workingGroupsService
+          .getAgMembers(group.id);
+
+        if (members.length === 0) continue;
+
+        // For each member, check if they have
+        // the matching contact_channel filled
+        // We need full member data with channels
+        const { data: fullMembers, error } = await (
+          this.workingGroupsService as any
+        )
+          .supabase.from('members')
+          .select('id, contact_channels')
+          .in(
+            'id',
+            members.map(m => m.member_id)
+          );
+
+        // Column may not exist yet (migration
+        // not deployed) — skip silently
+        if (error || !fullMembers) continue;
+
+        let missing = 0;
+        for (const fm of fullMembers) {
+          const channels =
+            fm.contact_channels || {};
+          const key = group.contact_type;
+          if (!channels[key]) {
+            missing++;
+          }
+        }
+
+        if (missing > 0) {
+          counts.set(group.id, missing);
+        }
+      }
+    } catch {
+      // Gracefully ignore — column may not
+      // exist until migration is deployed
+    }
+
+    this.missingContactCounts.set(counts);
   }
 }

@@ -5,6 +5,17 @@
  * - AG event: working_group_id is set
  * - General event: working_group_id is null
  */
+export type LocationType =
+    | 'discord'
+    | 'zoom'
+    | 'onsite'
+    | 'other';
+
+export type RecurrenceInterval =
+    | 'biweekly'
+    | 'monthly'
+    | 'quarterly';
+
 export interface CalendarEvent {
     id?: string;
     organization_id?: string;
@@ -19,6 +30,16 @@ export interface CalendarEvent {
     created_at?: string;
     updated_at?: string;
     allowed_roles?: string[];
+    /** Reason / purpose of the meeting */
+    meeting_reason?: string | null;
+    /** Location type: discord, zoom, onsite, other */
+    location_type?: LocationType | null;
+    /** Whether this is a recurring event */
+    is_recurring?: boolean;
+    /** Recurrence interval */
+    recurrence_interval?: RecurrenceInterval | null;
+    /** Parent event ID for recurring series */
+    recurrence_parent_id?: string | null;
 }
 
 /**

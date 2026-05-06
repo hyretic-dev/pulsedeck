@@ -113,19 +113,37 @@ export class DashboardHome implements OnInit {
     events: CalendarEvent[],
     memberships: Set<string>
   ): void {
+    // Guard: if memberships is empty but there
+    // are AG events, memberships may not have
+    // loaded yet — skip to avoid filtering them out
+    const hasAgEvents = events.some(
+      e => !!e.working_group_id
+    );
+    if (hasAgEvents && memberships.size === 0) {
+      return;
+    }
+
     const now = new Date();
     const currentHours = now.getHours();
     const currentMinutes = now.getMinutes();
-    const localTodayStr = now.toISOString().split('T')[0];
+    const localTodayStr =
+      now.toISOString().split('T')[0];
 
     this.myUpcomingEvents = events
       .filter(e => {
         if (e.date < localTodayStr) return false;
         if (e.date === localTodayStr) {
-          const timeStr = e.end_time || e.start_time;
+          const timeStr =
+            e.end_time || e.start_time;
           if (timeStr) {
-            const [h, m] = timeStr.split(':').map((x: any) => parseInt(x, 10));
-            if (h < currentHours || (h === currentHours && m < currentMinutes)) {
+            const [h, m] = timeStr
+              .split(':')
+              .map((x: string) => parseInt(x, 10));
+            if (
+              h < currentHours ||
+              (h === currentHours &&
+                m < currentMinutes)
+            ) {
               return false;
             }
           }

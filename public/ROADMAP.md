@@ -1,7 +1,7 @@
 # 🚀 PulseDeck Roadmap
 
-> **Letzte Aktualisierung:** 4. Februar 2026  
-> **Aktuelle Version:** Alpha 0.0.99
+> **Letzte Aktualisierung:** 6. Mai 2026  
+> **Aktuelle Version:** v0.1.0
 
 ---
 
@@ -43,10 +43,11 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 | 6 | **Teilnehmerlisten** | ✅ Fertig | "Wer kommt?" sichtbar machen (Social Proof) |
 | 7 | **Öffentliche Events** | ✅ Fertig | Shareable Links für WhatsApp (ohne Login lesbar) |
 | 8 | **Einfache Umfragen** | ✅ Fertig | Abstimmungen im Feed ("Terminfindung") |
-| 9 | **Push-Notifications** | 🏃 In Arbeit | Zielgruppen-Push (Basis & UI steht) |
+| 9 | **Push-Notifications** | ✅ Fertig | Zielgruppen-Push (Basis & UI steht) |
 | 10 | **Smart Matching** | ✅ Fertig | "Deine Skills werden gebraucht" Dashboard-Karte |
-| 11 | **Mikrotasks** | 🏃 In Arbeit | "5-Minuten-Hilfe" (Beitrag teilen, Umfrage) |
-| 12 | **Onboarding Quest** | ⏳ Geplant | Gamification-Balken für neue Mitglieder (Ausbau) |
+| 11 | **Mikrotasks** | ✅ Fertig | "5-Minuten-Hilfe" (Beitrag teilen, Umfrage) |
+| 12 | **Onboarding Quest** | ✅ Fertig | Gamification-Balken für neue Mitglieder (Ausbau) |
+
 
 ### Phase 3: Profi-Features ⭐
 
@@ -60,6 +61,23 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 ---
 
 ## ✅ Abgeschlossen (Patch Notes)
+
+### v0.1.0 – 6. Mai 2026 (Gruppen & Termine Power-Update)
+
+**📅 Kalender & Termine**
+- [x] **Serientermine:** Erstellen von wiederkehrenden Terminen (alle 2 Wochen, monatlich, quartalsweise) für bis zu 6 Monate im Voraus
+- [x] **Erweiterte Metadaten:** Neue Felder für "Grund des Treffens" und "Ort des Treffens" (Discord, Zoom, Vor Ort, Sonstiges)
+- [x] **Multi-Create Workflow:** Nach dem Speichern eines Termins können sofort weitere Termine angelegt werden (Datum & AG bleiben erhalten)
+- [x] **Smart "Nächstes Treffen":** Das Feld in den AGs wird nun automatisch aus dem Kalender berechnet (inkl. "Nicht geplant"-Status)
+- [x] **Fix: Dashboard-Kalender:** Behebung einer Race-Condition, durch die persönliche AG-Termine beim ersten Laden nicht angezeigt wurden
+- [x] **UX Polish:** Turnus-Feld und Dropdowns für bessere Bedienbarkeit optimiert (Overflow-Fix)
+
+**👥 Gruppen (AGs) & Kommunikation**
+- [x] **Kontakt-Validierung:** AG-Karten zeigen jetzt eine Warnung (Durchstreichung), wenn Mitglieder den erforderlichen Kontaktkanal (z.B. Discord) noch nicht im Profil hinterlegt haben
+- [x] **Dynamische Placeholder:** Das Link/Adress-Feld passt sich nun visuell an den gewählten Kontakttyp an
+- [x] **Profil-Erweiterung:** Neue Sektion für Kontaktkanäle (Discord, WhatsApp, Signal, E-Mail) im Nutzerprofil zur besseren Vernetzung
+
+---
 
 ### v0.0.99 – 4. Februar 2026 (Unified Public Page)
 
@@ -162,7 +180,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 - [x] **Settings:** Icon-Liste im Admin-Dialog scrollbar gemacht
 - [x] **Profil:** "Fast geschafft"-Meldung verschwindet sofort nach Speichern
 - [x] **Sicherheit:** Wiki & News strikt abgesichert (RLS: "In Prüfung" ist unsichtbar)
-- [x] **Wiki:** Eigene Wiki-Bereiche für Gruppen
+- [x] **Wiki:** Eigene Wiki-Bereiche für Arbeitsgruppen (AGs)
 - [x] **Workflow:** Sicherheitsmechanismus für bearbeitete Live-Artikel (Auto-Reset)
 - [x] **Login:** Intelligenter Auto-Redirect zur letzten Organisation
 

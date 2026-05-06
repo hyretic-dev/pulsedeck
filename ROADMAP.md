@@ -1,7 +1,7 @@
 # 🚀 PulseDeck Roadmap
 
-> **Letzte Aktualisierung:** 4. Februar 2026  
-> **Aktuelle Version:** Alpha 0.0.99
+> **Letzte Aktualisierung:** 6. Mai 2026  
+> **Aktuelle Version:** v0.1.0
 
 ---
 
@@ -61,6 +61,23 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 ---
 
 ## ✅ Abgeschlossen (Patch Notes)
+
+### v0.1.0 – 6. Mai 2026 (Gruppen & Termine Power-Update)
+
+**📅 Kalender & Termine**
+- [x] **Serientermine:** Erstellen von wiederkehrenden Terminen (alle 2 Wochen, monatlich, quartalsweise) für bis zu 6 Monate im Voraus
+- [x] **Erweiterte Metadaten:** Neue Felder für "Grund des Treffens" und "Ort des Treffens" (Discord, Zoom, Vor Ort, Sonstiges)
+- [x] **Multi-Create Workflow:** Nach dem Speichern eines Termins können sofort weitere Termine angelegt werden (Datum & AG bleiben erhalten)
+- [x] **Smart "Nächstes Treffen":** Das Feld in den AGs wird nun automatisch aus dem Kalender berechnet (inkl. "Nicht geplant"-Status)
+- [x] **Fix: Dashboard-Kalender:** Behebung einer Race-Condition, durch die persönliche AG-Termine beim ersten Laden nicht angezeigt wurden
+- [x] **UX Polish:** Turnus-Feld und Dropdowns für bessere Bedienbarkeit optimiert (Overflow-Fix)
+
+**👥 Gruppen (AGs) & Kommunikation**
+- [x] **Kontakt-Validierung:** AG-Karten zeigen jetzt eine Warnung (Durchstreichung), wenn Mitglieder den erforderlichen Kontaktkanal (z.B. Discord) noch nicht im Profil hinterlegt haben
+- [x] **Dynamische Placeholder:** Das Link/Adress-Feld passt sich nun visuell an den gewählten Kontakttyp an
+- [x] **Profil-Erweiterung:** Neue Sektion für Kontaktkanäle (Discord, WhatsApp, Signal, E-Mail) im Nutzerprofil zur besseren Vernetzung
+
+---
 
 ### v0.0.99 – 4. Februar 2026 (Unified Public Page)
 

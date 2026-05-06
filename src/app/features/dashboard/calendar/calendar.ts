@@ -1,4 +1,7 @@
-import { Component, inject, OnInit, OnDestroy, signal, effect } from '@angular/core';
+import {
+  Component, inject, OnInit,
+  OnDestroy, signal, effect
+} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -15,13 +18,17 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { CheckboxModule } from 'primeng/checkbox';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import {
   InviteGuestOrgDialogComponent
 } from '../../../shared/components/invite-guest-org-dialog.component';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { EventsService } from '../../../shared/services/events.service';
-import { CalendarEvent, getEventType } from '../../../shared/models/calendar-event.model';
+import {
+  CalendarEvent, getEventType,
+  LocationType, RecurrenceInterval
+} from '../../../shared/models/calendar-event.model';
 import { AuthService } from '../../../shared/services/auth.service';
 import { PermissionsService } from '../../../shared/services/permissions.service';
 import { WorkingGroupsService } from '../../../shared/services/working-groups.service';
@@ -58,6 +65,7 @@ import { AnalyticsService } from '../../../shared/services/analytics.service';
     TooltipModule,
     InputNumberModule,
     MultiSelectModule,
+    CheckboxModule,
     InviteGuestOrgDialogComponent,
   ],
   providers: [ConfirmationService, MessageService],
@@ -97,9 +105,16 @@ export class CalendarComponent implements OnInit, OnDestroy {
   participants = signal<EventRegistration[]>([]);
   participantCounts = signal<Map<string, number>>(new Map());
 
-  currentEvent: Partial<CalendarEvent> = this.getEmptyEvent();
+  currentEvent: Partial<CalendarEvent> =
+    this.getEmptyEvent();
   eventDate: Date | null = null;
   tempVisibility = 'public';
+
+  // Recurring events
+  isRecurring = signal(false);
+
+  // Multi-create workflow
+  showCreateAnother = signal(false);
 
   // Realtime
   private subscription: RealtimeChannel | null = null;
@@ -110,6 +125,19 @@ export class CalendarComponent implements OnInit, OnDestroy {
     { label: 'Nur Vorstand', value: 'committee' },
     { label: 'Nur Admin', value: 'admin' },
     { label: 'Nur AG-Mitglieder', value: 'ag-only' },
+  ];
+
+  locationTypeOptions = [
+    { label: 'Discord', value: 'discord' },
+    { label: 'Zoom', value: 'zoom' },
+    { label: 'Vor Ort', value: 'onsite' },
+    { label: 'Sonstiges', value: 'other' },
+  ];
+
+  recurrenceOptions = [
+    { label: 'Alle 2 Wochen', value: 'biweekly' },
+    { label: 'Monatlich', value: 'monthly' },
+    { label: 'Quartal', value: 'quarterly' },
   ];
 
   // Social Proof / Attendees
@@ -217,7 +245,13 @@ export class CalendarComponent implements OnInit, OnDestroy {
       description: null,
       ag_name: null,
       working_group_id: null,
-      allowed_roles: ['public', 'member', 'committee', 'admin']
+      allowed_roles: [
+        'public', 'member', 'committee', 'admin'
+      ],
+      meeting_reason: null,
+      location_type: null,
+      is_recurring: false,
+      recurrence_interval: null,
     };
   }
 
@@ -231,6 +265,8 @@ export class CalendarComponent implements OnInit, OnDestroy {
     this.currentEvent = this.getEmptyEvent();
     this.eventDate = new Date();
     this.tempVisibility = 'public';
+    this.isRecurring.set(false);
+    this.showCreateAnother.set(false);
     this.editMode.set(false);
     this.dialogVisible.set(true);
   }
@@ -249,23 +285,35 @@ export class CalendarComponent implements OnInit, OnDestroy {
   }
 
   async saveEvent() {
-    if (!this.currentEvent.title || !this.currentEvent.location) return;
+    if (!this.currentEvent.title) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Pflichtfeld',
+        detail: 'Bitte einen Titel eingeben.',
+      });
+      return;
+    }
 
     if (this.eventDate) {
-      this.currentEvent.date = this.eventDate.toISOString().split('T')[0];
+      this.currentEvent.date =
+        this.eventDate.toISOString().split('T')[0];
     }
 
     // Handle AG-only visibility
     if (this.tempVisibility === 'ag-only') {
-      this.currentEvent.allowed_roles = []; // Empty = relies on AG membership check in RLS
+      this.currentEvent.allowed_roles = [];
     } else {
-      this.currentEvent.allowed_roles = this.getRolesFromVisibility(this.tempVisibility);
+      this.currentEvent.allowed_roles =
+        this.getRolesFromVisibility(
+          this.tempVisibility
+        );
     }
 
-    // Set ag_name from selected working group if one is selected
+    // Set ag_name from selected working group
     if (this.currentEvent.working_group_id) {
       const selectedGroup = this.workingGroups().find(
-        g => g.id === this.currentEvent.working_group_id
+        g => g.id ===
+          this.currentEvent.working_group_id
       );
       if (selectedGroup) {
         this.currentEvent.ag_name = selectedGroup.name;
@@ -274,9 +322,19 @@ export class CalendarComponent implements OnInit, OnDestroy {
       this.currentEvent.ag_name = null;
     }
 
+    // Set recurring fields
+    if (this.isRecurring()) {
+      this.currentEvent.is_recurring = true;
+    } else {
+      this.currentEvent.is_recurring = false;
+      this.currentEvent.recurrence_interval = null;
+    }
+
     this.saving.set(true);
     try {
-      if (this.editMode() && this.currentEvent.id) {
+      if (
+        this.editMode() && this.currentEvent.id
+      ) {
         await this.eventsService.updateEvent(
           this.currentEvent.id,
           this.currentEvent
@@ -286,15 +344,36 @@ export class CalendarComponent implements OnInit, OnDestroy {
           summary: 'Erfolg',
           detail: 'Termin aktualisiert',
         });
+        this.dialogVisible.set(false);
       } else {
-        await this.eventsService.addEvent(this.currentEvent as CalendarEvent);
+        const created =
+          await this.eventsService.addEvent(
+            this.currentEvent as CalendarEvent
+          );
+
+        // Generate recurring events if applicable
+        if (
+          this.isRecurring() &&
+          this.currentEvent.recurrence_interval &&
+          created?.id
+        ) {
+          await this.eventsService.addRecurringEvents(
+            created as CalendarEvent
+          );
+          await this.eventsService.fetchEvents();
+        }
+
         this.messageService.add({
           severity: 'success',
           summary: 'Erfolg',
-          detail: 'Termin erstellt',
+          detail: this.isRecurring()
+            ? 'Serientermin erstellt'
+            : 'Termin erstellt',
         });
+
+        // Multi-create: show "create another"
+        this.showCreateAnother.set(true);
       }
-      this.dialogVisible.set(false);
     } catch (e) {
       this.messageService.add({
         severity: 'error',
@@ -303,6 +382,39 @@ export class CalendarComponent implements OnInit, OnDestroy {
       });
     }
     this.saving.set(false);
+  }
+
+  /**
+   * Reset form for creating another event.
+   * Keeps the date and working group.
+   */
+  createAnother(): void {
+    const keepDate = this.eventDate;
+    const keepWgId =
+      this.currentEvent.working_group_id;
+    this.currentEvent = this.getEmptyEvent();
+    this.currentEvent.working_group_id = keepWgId;
+    this.eventDate = keepDate;
+    this.isRecurring.set(false);
+    this.showCreateAnother.set(false);
+  }
+
+  /**
+   * Get placeholder text for location field
+   * based on location_type.
+   */
+  getLocationPlaceholder(): string {
+    const type = this.currentEvent.location_type;
+    switch (type) {
+      case 'discord':
+        return 'https://discord.gg/ oder Adresse';
+      case 'zoom':
+        return 'https://zoom.us/j/...';
+      case 'onsite':
+        return 'Adresse eingeben';
+      default:
+        return 'Ort / Link eingeben';
+    }
   }
 
   confirmDelete(event: CalendarEvent) {

@@ -45,9 +45,16 @@
                         <h3 class="text-sm md:text-base font-bold text-[var(--color-text)] truncate">{{group.name}}</h3>
                         <div
                             class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-muted)] mt-0.5">
-                            <span class="flex items-center gap-1">
+                            <span class="flex items-center gap-1"
+                                [class.line-through]="getMissingContactCount(group.id!) > 0"
+                                [class.opacity-60]="getMissingContactCount(group.id!) > 0">
                                 <i [ngClass]="getIconForType(group.contact_type)" class="text-[10px]"></i>
                                 {{group.contact_type}}
+                                @if (getMissingContactCount(group.id!) > 0) {
+                                <i class="pi pi-exclamation-triangle text-amber-500 text-[10px]"
+                                    [pTooltip]="getMissingContactCount(group.id!) + ' Mitglied(er) ohne ' + group.contact_type"
+                                    tooltipPosition="top"></i>
+                                }
                             </span>
                             <span class="flex items-center gap-1">
                                 <i class="pi pi-users text-[10px]"></i>
@@ -132,13 +139,13 @@
                         <div class="text-[10px] uppercase text-[var(--color-text-muted)] font-semibold">Leitung</div>
                         <div class="text-[var(--color-text)]">{{group.lead || '-'}}</div>
                     </div>
-                    @if (group.next_meeting) {
                     <div>
                         <div class="text-[10px] uppercase text-[var(--color-text-muted)] font-semibold">Nächstes Treffen
                         </div>
-                        <div class="text-[var(--color-text)]">{{group.next_meeting}}</div>
+                        <div class="text-[var(--color-text)]" [class.italic]="calculateNextMeeting(group.id!) === 'Nicht geplant'">
+                            {{calculateNextMeeting(group.id!)}}
+                        </div>
                     </div>
-                    }
                 </div>
 
                 <!-- Upcoming Events -->
@@ -214,7 +221,14 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Nächstes Treffen</label>
-                <input pInputText [(ngModel)]="currentGroup.next_meeting" class="w-full" placeholder="Montags 19:00" />
+                <div class="w-full bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded px-3 py-2 text-sm flex items-center gap-2"
+                    [class.text-[var(--color-text-muted)]]="calculateNextMeeting(currentGroup.id!) === 'Nicht geplant'">
+                    <i class="pi pi-calendar text-amber-500 text-xs"></i>
+                    {{ currentGroup.id ? calculateNextMeeting(currentGroup.id) : 'Speichern um Termine zu verknüpfen' }}
+                </div>
+                <p class="text-[10px] text-[var(--color-text-muted)] mt-1 italic">
+                    (Wird automatisch aus den Terminen berechnet)
+                </p>
             </div>
         </div>
 
@@ -246,7 +260,11 @@
                 <div class="col-span-2">
                     <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Link</label>
                     <input pInputText [(ngModel)]="currentGroup.contact_link" class="w-full"
-                        placeholder="https://discord.gg/..." />
+                        [placeholder]="getLinkPlaceholder(currentGroup.contact_type)" />
+                    <p class="text-xs text-[var(--color-text-muted)] mt-1">
+                        <i class="pi pi-info-circle mr-0.5"></i>
+                        https://discord.gg/ oder Adresse eingeben
+                    </p>
                 </div>
             </div>
         </div>

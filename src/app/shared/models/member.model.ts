@@ -40,6 +40,8 @@ export interface Member {
     birthday?: string;
     calendar_token?: string;
     custom_info?: string;
+    /** Contact channels, e.g. { Discord: "user#123" } */
+    contact_channels?: Record<string, string>;
     created_at?: string;
     updated_at?: string;
 }
