@@ -273,35 +273,53 @@ export class AuthCallbackComponent implements OnInit {
     }
 
     /**
-     * Handle redirect after successful auth
-     * Shows org selector if multiple memberships, otherwise redirects directly
+     * Handle redirect after successful auth.
+     * Checks for pending organization from registration
+     * flow, then falls back to membership-based routing.
      */
     private async handleRedirect() {
         this.processing.set(true);
+
+        // Check for pending org from registration flow
+        const created = await this.createPendingOrganization();
+        if (created) {
+            return;
+        }
+
         this.statusMessage.set('Lade Mitgliedschaften...');
 
         // Wait for AuthService to load memberships
         await this.auth.refreshMember();
 
         // Small delay to ensure signals are updated
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve =>
+            setTimeout(resolve, 500)
+        );
 
         const userMemberships = this.auth.userMemberships();
 
         if (userMemberships.length === 0) {
             this.processing.set(false);
-            this.error.set('Kein Mitgliedsprofil gefunden. Bitte wende dich an den Vorstand.');
+            this.error.set(
+                'Kein Mitgliedsprofil gefunden. '
+                + 'Bitte registriere dich erneut oder '
+                + 'wende dich an den Vorstand.'
+            );
             return;
         }
 
         if (userMemberships.length === 1) {
             // Single org - redirect directly
             const org = userMemberships[0];
-            await this.auth.setActiveOrganization(org.organizationId);
+            await this.auth.setActiveOrganization(
+                org.organizationId
+            );
             this.processing.set(false);
             this.success.set(true);
             setTimeout(() => {
-                this.router.navigate(['/', org.organizationSlug, 'dashboard']);
+                this.router.navigate([
+                    '/', org.organizationSlug, 'dashboard'
+                ]);
             }, 1500);
         } else {
             // Multiple orgs - show selector
@@ -312,20 +330,120 @@ export class AuthCallbackComponent implements OnInit {
     }
 
     /**
-     * User selected an organization from the multi-org selector
+     * If registration stored pending org data,
+     * create the organization and member now.
+     * Returns true if a pending org was processed.
      */
-    async selectOrganization(membership: UserMembership) {
+    private async createPendingOrganization():
+        Promise<boolean> {
+        const raw = localStorage.getItem(
+            'pendingOrganization'
+        );
+        if (!raw) {
+            return false;
+        }
+
+        try {
+            const pending = JSON.parse(raw);
+            this.statusMessage.set(
+                'Erstelle Organisation...'
+            );
+
+            const { data: { user: authUser } } =
+                await this.supabase.client.auth.getUser();
+
+            if (!authUser) {
+                return false;
+            }
+
+            // Create organization
+            const { data: orgData, error: orgError } =
+                await this.supabase.client
+                    .from('organizations')
+                    .insert({
+                        name: pending.orgName,
+                        slug: pending.slug,
+                        owner_id: authUser.id,
+                    })
+                    .select()
+                    .single();
+
+            if (orgError) {
+                console.error(
+                    'Pending org creation failed:',
+                    orgError
+                );
+                localStorage.removeItem(
+                    'pendingOrganization'
+                );
+                return false;
+            }
+
+            // Create admin member
+            await this.supabase.client
+                .from('members')
+                .insert({
+                    name: pending.userName,
+                    email: pending.email,
+                    user_id: authUser.id,
+                    organization_id: orgData.id,
+                    app_role: 'admin',
+                    role: 'Admin',
+                    status: 'Active',
+                    join_date: new Date()
+                        .toLocaleDateString('de-DE'),
+                });
+
+            // Clean up
+            localStorage.removeItem('pendingOrganization');
+
+            // Refresh memberships and redirect
+            await this.auth.refreshMember();
+
+            this.processing.set(false);
+            this.success.set(true);
+            setTimeout(() => {
+                this.router.navigate([
+                    '/', pending.slug, 'dashboard'
+                ]);
+            }, 1500);
+
+            return true;
+        } catch (e) {
+            console.error(
+                'Error processing pending org:', e
+            );
+            localStorage.removeItem('pendingOrganization');
+            return false;
+        }
+    }
+
+    /**
+     * User selected an organization from the
+     * multi-org selector.
+     */
+    async selectOrganization(
+        membership: UserMembership
+    ) {
         this.showOrgSelector.set(false);
         this.processing.set(true);
-        this.statusMessage.set(`Wechsle zu ${membership.organizationName}...`);
+        this.statusMessage.set(
+            `Wechsle zu ${membership.organizationName}...`
+        );
 
-        await this.auth.setActiveOrganization(membership.organizationId);
+        await this.auth.setActiveOrganization(
+            membership.organizationId
+        );
 
         this.processing.set(false);
         this.success.set(true);
 
         setTimeout(() => {
-            this.router.navigate(['/', membership.organizationSlug, 'dashboard']);
+            this.router.navigate([
+                '/',
+                membership.organizationSlug,
+                'dashboard'
+            ]);
         }, 1500);
     }
 

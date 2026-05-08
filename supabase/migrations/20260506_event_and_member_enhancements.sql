@@ -46,3 +46,34 @@ COMMENT ON COLUMN events.recurrence_parent_id IS
   'Reference to the first event in a recurring series';
 COMMENT ON COLUMN members.contact_channels IS
   'JSONB with contact info, e.g. {"Discord":"user#123","WhatsApp":"+49..."}';
+
+-- 4. Cascade delete: AG löschen → verknüpfte Termine löschen
+-- Drop existing FK (ON DELETE SET NULL) and recreate with CASCADE
+DO $$
+DECLARE
+  fk_name TEXT;
+BEGIN
+  -- Find the FK constraint name dynamically
+  SELECT conname INTO fk_name
+  FROM pg_constraint
+  WHERE conrelid = 'events'::regclass
+    AND confrelid = 'working_groups'::regclass
+    AND contype = 'f';
+
+  IF fk_name IS NOT NULL THEN
+    EXECUTE format(
+      'ALTER TABLE events DROP CONSTRAINT %I',
+      fk_name
+    );
+  END IF;
+
+  -- Re-add with ON DELETE CASCADE
+  ALTER TABLE events
+    ADD CONSTRAINT fk_events_working_group
+    FOREIGN KEY (working_group_id)
+    REFERENCES working_groups(id)
+    ON DELETE CASCADE;
+END $$;
+
+COMMENT ON CONSTRAINT fk_events_working_group ON events IS
+  'Cascade delete: removing a working group deletes all linked events';

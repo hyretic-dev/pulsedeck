@@ -238,71 +238,118 @@ export class RegisterOrganizationComponent {
 
         try {
             // 1. Create user account
-            const { data: authData, error: authError } = await this.supabase.client.auth.signUp({
-                email: this.email,
-                password: this.password,
-                options: {
-                    emailRedirectTo: `${window.location.origin}/auth/callback`,
-                },
-            });
+            const { data: authData, error: authError } =
+                await this.supabase.client.auth.signUp({
+                    email: this.email,
+                    password: this.password,
+                    options: {
+                        emailRedirectTo:
+                            `${window.location.origin}/auth/callback`,
+                    },
+                });
 
             if (authError) {
                 if (authError.message.includes('already registered')) {
-                    throw new Error('Diese E-Mail ist bereits registriert. Bitte einloggen.');
+                    throw new Error(
+                        'Diese E-Mail ist bereits registriert.'
+                        + ' Bitte einloggen.'
+                    );
                 }
                 throw new Error(authError.message);
             }
 
             if (!authData.user) {
-                throw new Error('Benutzer konnte nicht erstellt werden');
+                throw new Error(
+                    'Benutzer konnte nicht erstellt werden'
+                );
             }
 
-            // 2. Create organization
-            const { data: orgData, error: orgError } = await this.supabase.client
-                .from('organizations')
-                .insert({
-                    name: this.orgName.trim(),
-                    slug: this.slug,
-                    owner_id: authData.user.id,
-                })
-                .select()
-                .single();
-
-            if (orgError) {
-                throw new Error(orgError.message);
-            }
-
-            // 3. Create owner as admin member
-            const { error: memberError } = await this.supabase.client
-                .from('members')
-                .insert({
-                    name: this.userName.trim(),
-                    email: this.email,
-                    user_id: authData.user.id,
-                    organization_id: orgData.id,
-                    app_role: 'admin',
-                    role: 'Admin',
-                    status: 'Active',
-                    join_date: new Date().toLocaleDateString('de-DE'),
-                });
-
-            if (memberError) {
-                console.error('Failed to create member:', memberError);
-            }
-
-            // 4. Navigate to new organization
-            // If email confirmation required, show message
+            // 2. Check if session exists
+            // (no session = email confirmation required)
             if (!authData.session) {
-                this.error.set('Bitte bestätige deine E-Mail-Adresse und logge dich dann ein.');
+                this.savePendingOrganization(authData.user.id);
+                this.error.set(
+                    'Bitte bestätige deine E-Mail-Adresse. '
+                    + 'Deine Organisation wird nach der '
+                    + 'Bestätigung automatisch erstellt.'
+                );
                 this.loading.set(false);
                 return;
             }
 
-            this.router.navigate(['/', this.slug, 'dashboard']);
+            // 3. Session exists → create org + member now
+            await this.createOrganizationAndMember(
+                authData.user.id
+            );
+
+            this.router.navigate(
+                ['/', this.slug, 'dashboard']
+            );
         } catch (e) {
             this.error.set((e as Error).message);
         }
 
         this.loading.set(false);
+    }
+
+    /**
+     * Store pending org data in localStorage for
+     * creation after email confirmation.
+     */
+    private savePendingOrganization(userId: string): void {
+        const pending = {
+            orgName: this.orgName.trim(),
+            slug: this.slug,
+            userName: this.userName.trim(),
+            email: this.email,
+            userId,
+        };
+        localStorage.setItem(
+            'pendingOrganization',
+            JSON.stringify(pending)
+        );
+    }
+
+    /**
+     * Create the organization and admin member.
+     */
+    private async createOrganizationAndMember(
+        userId: string
+    ): Promise<void> {
+        const { data: orgData, error: orgError } =
+            await this.supabase.client
+                .from('organizations')
+                .insert({
+                    name: this.orgName.trim(),
+                    slug: this.slug,
+                    owner_id: userId,
+                })
+                .select()
+                .single();
+
+        if (orgError) {
+            throw new Error(orgError.message);
+        }
+
+        const { error: memberError } =
+            await this.supabase.client
+                .from('members')
+                .insert({
+                    name: this.userName.trim(),
+                    email: this.email,
+                    user_id: userId,
+                    organization_id: orgData.id,
+                    app_role: 'admin',
+                    role: 'Admin',
+                    status: 'Active',
+                    join_date: new Date()
+                        .toLocaleDateString('de-DE'),
+                });
+
+        if (memberError) {
+            console.error(
+                'Failed to create member:', memberError
+            );
+        }
     }
 }

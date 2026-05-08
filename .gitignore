@@ -38,7 +38,7 @@ testem.log
 /typings
 __screenshots__/
 
-
+supabase/.temp
 
 # System files
 .DS_Store
