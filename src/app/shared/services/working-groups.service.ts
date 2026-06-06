@@ -396,4 +396,36 @@ export class WorkingGroupsService implements OnDestroy {
             role: m.role as AgRole
         })) || [];
     }
+
+    /**
+     * Fetch all distinct, non-null categories used within the current organization.
+     * Results are alphabetically sorted for use in AutoComplete suggestions.
+     */
+    async fetchDistinctCategories(): Promise<string[]> {
+        const orgId = this.org.currentOrgId();
+
+        let query = this.supabase
+            .from(this.TABLE_NAME)
+            .select('category')
+            .not('category', 'is', null);
+
+        if (orgId) {
+            query = query.eq('organization_id', orgId);
+        }
+
+        const { data, error } = await query;
+
+        if (error || !data) {
+            console.error('Error fetching categories:', error);
+            return [];
+        }
+
+        const unique = new Set<string>(
+            data
+                .map((d: { category: string }) => d.category)
+                .filter(Boolean)
+        );
+
+        return [...unique].sort((a, b) => a.localeCompare(b));
+    }
 }

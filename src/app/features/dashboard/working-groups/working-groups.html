@@ -27,9 +27,39 @@
         }
     </div>
 
+    <!-- Kategorie-Filterleiste -->
+    @if (availableCategories().length > 0) {
+    <div class="flex flex-wrap items-center gap-2 mb-4">
+        <button
+            class="px-3 py-1 rounded-full text-xs font-medium border transition-colors"
+            [class.bg-[var(--linke-rot)]]="selectedCategoryFilters().size === 0"
+            [class.text-white]="selectedCategoryFilters().size === 0"
+            [class.border-[var(--linke-rot)]]="selectedCategoryFilters().size === 0"
+            [class.border-[var(--color-border)]]="selectedCategoryFilters().size > 0"
+            [class.text-[var(--color-text-muted)]]="selectedCategoryFilters().size > 0"
+            [class.bg-transparent]="selectedCategoryFilters().size > 0"
+            (click)="clearCategoryFilters()">
+            Alle
+        </button>
+        @for (cat of availableCategories(); track cat) {
+        <button
+            class="px-3 py-1 rounded-full text-xs font-medium border transition-colors"
+            [class.bg-[var(--linke-rot)]]="selectedCategoryFilters().has(cat)"
+            [class.text-white]="selectedCategoryFilters().has(cat)"
+            [class.border-[var(--linke-rot)]]="selectedCategoryFilters().has(cat)"
+            [class.border-[var(--color-border)]]="!selectedCategoryFilters().has(cat)"
+            [class.text-[var(--color-text-muted)]]="!selectedCategoryFilters().has(cat)"
+            [class.bg-transparent]="!selectedCategoryFilters().has(cat)"
+            (click)="toggleCategoryFilter(cat)">
+            {{ cat }}
+        </button>
+        }
+    </div>
+    }
+
     <!-- AG List -->
     <div class="space-y-2">
-        @for (group of groups(); track group.id) {
+        @for (group of filteredGroups(); track group.id) {
         <div class="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg overflow-hidden">
             <!-- Header (Always Visible) -->
             <div class="p-3 cursor-pointer" (click)="toggleExpand(group.id!)">
@@ -42,7 +72,16 @@
 
                     <!-- Info -->
                     <div class="flex-1 min-w-0">
-                        <h3 class="text-sm md:text-base font-bold text-[var(--color-text)] truncate">{{group.name}}</h3>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-sm md:text-base font-bold text-[var(--color-text)] truncate">{{group.name}}</h3>
+                            @if (group.category) {
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold
+                                bg-[var(--linke-rot)]/10 text-[var(--linke-rot)]
+                                border border-[var(--linke-rot)]/20">
+                                {{ group.category }}
+                            </span>
+                            }
+                        </div>
                         <div
                             class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-muted)] mt-0.5">
                             <span class="flex items-center gap-1"
@@ -194,7 +233,14 @@
         } @empty {
         <div class="text-center py-8 text-[var(--color-text-muted)]">
             <i class="pi pi-users text-3xl mb-2"></i>
+            @if (selectedCategoryFilters().size > 0) {
+            <p class="text-sm">Keine Gruppen in den gewählten Kategorien</p>
+            <button class="mt-2 text-xs text-[var(--linke-rot)] underline" (click)="clearCategoryFilters()">
+                Filter zurücksetzen
+            </button>
+            } @else {
             <p class="text-sm">Keine Gruppen gefunden</p>
+            }
         </div>
         }
     </div>
@@ -269,6 +315,22 @@
             </div>
         </div>
 
+        <div>
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Kategorie</label>
+            <p-autoComplete
+                [(ngModel)]="currentGroup.category"
+                [suggestions]="categorySuggestions"
+                (completeMethod)="searchCategories($event)"
+                [forceSelection]="false"
+                [dropdown]="availableCategories().length > 0"
+                placeholder="z.B. AGs, Mandatsträger..."
+                styleClass="w-full"
+                inputStyleClass="w-full" />
+            <p class="text-xs text-[var(--color-text-muted)] mt-1">
+                <i class="pi pi-info-circle mr-0.5"></i>
+                Freitext – vorhandene Kategorien werden vorgeschlagen
+            </p>
+        </div>
         <div>
             <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Tags (Komma-getrennt)</label>
             <input pInputText [(ngModel)]="tagsInput" class="w-full" placeholder="technik, design..." />

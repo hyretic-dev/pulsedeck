@@ -13,6 +13,8 @@ export interface WorkingGroup {
     contact_link?: string | null;
     contact_icon: string;
     tags: string[];
+    /** Optional free-text category for grouping/filtering (e.g. 'AGs', 'Mandatsträger'). */
+    category?: string | null;
     created_at?: string;
     updated_at?: string;
 }

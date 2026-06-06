@@ -184,9 +184,22 @@ CREATE TABLE IF NOT EXISTS working_groups (
   contact_link TEXT,
   contact_icon TEXT NOT NULL,
   tags TEXT[] DEFAULT '{}',
+  category TEXT, -- Optional free-text category (e.g. AGs, Mandatsträger)
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- MIGRATION: Add category column if missing
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'working_groups'
+        AND column_name = 'category'
+    ) THEN
+        ALTER TABLE working_groups ADD COLUMN category TEXT;
+    END IF;
+END $$;
 
 ALTER TABLE working_groups ENABLE ROW LEVEL SECURITY;
 

@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WorkingGroupsService } from '../../../shared/services/working-groups.service';
@@ -33,6 +33,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { SelectModule } from 'primeng/select';
 import { RippleModule } from 'primeng/ripple';
 import { AccordionModule } from 'primeng/accordion';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -61,6 +62,7 @@ import { RouterModule } from '@angular/router';
     SelectModule,
     RippleModule,
     AccordionModule,
+    AutoCompleteModule,
     RouterModule
   ],
   providers: [ConfirmationService, MessageService],
@@ -88,6 +90,24 @@ export class WorkingGroupsComponent implements OnInit {
   currentGroup: WorkingGroup = this.getEmptyGroup();
   tagsInput = ''; // Comma-separated string for tags input
   expandedGroups: Record<string, boolean> = {}; // Custom expand state
+
+  // Kategorie-Filter
+  /** Alle in der Organisation vorhandenen Kategorien (für AutoComplete + Filter-Chips). */
+  availableCategories = signal<string[]>([]);
+  /** Aktuell aktive Kategorie-Filter (Multiselect). */
+  selectedCategoryFilters = signal<Set<string>>(new Set());
+  /** AutoComplete-Vorschläge (gefiltert nach Eingabe). */
+  categorySuggestions: string[] = [];
+
+  /** Gefilterte Gruppenliste basierend auf selectedCategoryFilters. */
+  filteredGroups = computed(() => {
+    const active = this.selectedCategoryFilters();
+    if (active.size === 0) return this.groups();
+    return this.groups().filter((g) => {
+      const cat = g.category ?? null;
+      return cat !== null && active.has(cat);
+    });
+  });
 
   // AG Member Management
   membersDialogVisible = signal(false);
@@ -173,6 +193,13 @@ export class WorkingGroupsComponent implements OnInit {
 
   ngOnInit(): void {
     this.workingGroupsService.fetchWorkingGroups();
+    this.loadCategories();
+  }
+
+  /** Lädt alle eindeutigen Kategorien der aktuellen Organisation. */
+  private async loadCategories(): Promise<void> {
+    const cats = await this.workingGroupsService.fetchDistinctCategories();
+    this.availableCategories.set(cats);
   }
 
   getEmptyGroup(): WorkingGroup {
@@ -188,6 +215,7 @@ export class WorkingGroupsComponent implements OnInit {
       contact_link: '',
       contact_icon: 'pi pi-comments',
       tags: [],
+      category: null,
     };
   }
 
@@ -253,6 +281,8 @@ export class WorkingGroupsComponent implements OnInit {
         });
       }
       this.dialogVisible.set(false);
+      // Kategorien neu laden, da ggf. neue Kategorie hinzugekommen
+      await this.loadCategories();
     } catch (e) {
       this.messageService.add({
         severity: 'error',
@@ -413,6 +443,36 @@ export class WorkingGroupsComponent implements OnInit {
         detail: (e as Error).message,
       });
     }
+  }
+
+  /**
+   * Filtert AutoComplete-Vorschläge nach dem eingegebenen Suchbegriff.
+   */
+  searchCategories(event: { query: string }): void {
+    const q = event.query.toLowerCase();
+    this.categorySuggestions = this.availableCategories().filter((c) =>
+      c.toLowerCase().includes(q)
+    );
+  }
+
+  /**
+   * Schaltet einen Kategorie-Filter-Chip an oder aus.
+   */
+  toggleCategoryFilter(category: string): void {
+    this.selectedCategoryFilters.update((active) => {
+      const next = new Set(active);
+      if (next.has(category)) {
+        next.delete(category);
+      } else {
+        next.add(category);
+      }
+      return next;
+    });
+  }
+
+  /** Setzt alle aktiven Kategorie-Filter zurück. */
+  clearCategoryFilters(): void {
+    this.selectedCategoryFilters.set(new Set());
   }
 
   /**
