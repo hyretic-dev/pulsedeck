@@ -1,0 +1,43 @@
+/* Markdown Styles within the Chatbot */
+::ng-deep .chatbot-markdown p {
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+::ng-deep .chatbot-markdown p:last-child {
+    margin-bottom: 0;
+}
+
+::ng-deep .chatbot-markdown ul {
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1.25rem;
+    list-style-type: disc;
+}
+
+::ng-deep .chatbot-markdown li {
+    margin-bottom: 0.25rem;
+}
+
+::ng-deep .chatbot-markdown strong {
+    font-weight: 600;
+}
+
+::ng-deep .chatbot-markdown a {
+    color: var(--color-linke, #0ea5e9); /* fallback color if var is missing */
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+::ng-deep .chatbot-markdown a:hover {
+    text-decoration: none;
+}
+
+/* Hide scrollbar for quick replies area but allow scrolling */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

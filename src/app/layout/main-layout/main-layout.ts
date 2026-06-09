@@ -4,6 +4,7 @@ import { trigger, style, animate, transition } from '@angular/animations';
 import { SidebarLeft } from '../sidebar-left/sidebar-left';
 import { SidebarRight } from '../sidebar-right/sidebar-right';
 import { FeedbackBadgeComponent } from '../../features/feedback/feedback-badge/feedback-badge.component';
+import { ChatbotComponent } from '../../shared/components/chatbot/chatbot.component';
 import { ThemeService } from '../../shared/services/theme.service';
 import { OrganizationService } from '../../shared/services/organization.service';
 import { DrawerModule } from 'primeng/drawer';
@@ -19,6 +20,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     SidebarLeft,
     SidebarRight,
     FeedbackBadgeComponent,
+    ChatbotComponent,
     DrawerModule,
     ButtonModule,
     TooltipModule,

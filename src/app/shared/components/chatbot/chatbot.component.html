@@ -1,0 +1,107 @@
+<!-- Floating Action Button -->
+<button 
+  class="fixed bottom-6 right-6 z-50 w-14 h-14 bg-linke text-white rounded-full shadow-lg hover:bg-linke/90 flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
+  (click)="chatbotService.toggle()"
+  [class.hidden]="chatbotService.isOpen()">
+  <i class="pi pi-comments text-2xl"></i>
+</button>
+
+<!-- Bottom Sheet Drawer -->
+<p-drawer 
+  [(visible)]="chatbotService.isOpen" 
+  position="bottom" 
+  [styleClass]="'!bg-[var(--color-surface)] !h-[80vh] md:!h-[600px] !rounded-t-3xl !border-t !border-[var(--color-border)] shadow-2xl mx-auto max-w-3xl'"
+  [modal]="true" 
+  [dismissible]="true">
+  
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-linke/10 flex items-center justify-center text-linke">
+        <i class="pi pi-sparkles text-xl"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-[var(--color-text)] m-0">PulseDeck Assistant</h3>
+        <p class="text-xs text-[var(--color-text-muted)] m-0">Dein Onboarding-Coach</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="content">
+    <div class="flex flex-col h-full relative -m-4">
+      <!-- Chat Messages Area -->
+      <div #scrollMe class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 pb-24 scroll-smooth">
+        @for (msg of chatbotService.messages(); track msg.id) {
+          <div class="flex" [class.justify-end]="msg.role === 'user'">
+            <div 
+              class="max-w-[85%] rounded-2xl p-3"
+              [class.bg-linke]="msg.role === 'user'"
+              [class.text-white]="msg.role === 'user'"
+              [class.bg-[var(--color-surface-raised)]]="msg.role === 'assistant'"
+              [class.text-[var(--color-text)]]="msg.role === 'assistant'"
+              [class.rounded-tr-sm]="msg.role === 'user'"
+              [class.rounded-tl-sm]="msg.role === 'assistant'">
+              
+              <!-- User Message -->
+              @if (msg.role === 'user') {
+                <div class="text-sm whitespace-pre-wrap">{{ msg.content }}</div>
+              }
+              
+              <!-- Assistant Message (Markdown) -->
+              @if (msg.role === 'assistant') {
+                <div class="text-sm prose prose-sm dark:prose-invert max-w-none chatbot-markdown" 
+                     [innerHTML]="parseMarkdown(msg.content)">
+                </div>
+              }
+            </div>
+          </div>
+        }
+        
+        <!-- Loading Indicator -->
+        @if (chatbotService.isLoading()) {
+          <div class="flex justify-start">
+            <div class="bg-[var(--color-surface-raised)] rounded-2xl rounded-tl-sm p-4 flex gap-1">
+              <div class="w-2 h-2 rounded-full bg-[var(--color-text-muted)] animate-bounce"></div>
+              <div class="w-2 h-2 rounded-full bg-[var(--color-text-muted)] animate-bounce" style="animation-delay: 0.15s"></div>
+              <div class="w-2 h-2 rounded-full bg-[var(--color-text-muted)] animate-bounce" style="animation-delay: 0.3s"></div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Quick Replies -->
+      @if (chatbotService.messages().length < 3 && !chatbotService.isLoading()) {
+        <div class="absolute bottom-16 left-0 right-0 p-4 flex gap-2 overflow-x-auto pointer-events-auto bg-gradient-to-t from-[var(--color-surface)] to-transparent pt-8">
+          @for (reply of quickReplies; track reply) {
+            <button 
+              class="whitespace-nowrap px-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-full text-xs font-medium text-[var(--color-text)] shadow-sm hover:text-linke hover:border-linke hover:bg-linke/5 transition-all"
+              (click)="sendQuickReply(reply)">
+              {{ reply }}
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Input Area -->
+      <div class="absolute bottom-0 left-0 right-0 p-4 bg-[var(--color-surface)] border-t border-[var(--color-border)] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div class="relative flex items-center">
+          <input 
+            type="text" 
+            pInputText
+            [ngModel]="newMessage()"
+            (ngModelChange)="newMessage.set($event)"
+            (keyup.enter)="sendMessage()"
+            placeholder="Schreibe eine Nachricht..."
+            class="w-full !rounded-full !py-3 !pl-5 !pr-12 !bg-[var(--color-surface-overlay)] !border-[var(--color-border)] focus:!border-linke shadow-inner"
+            [disabled]="chatbotService.isLoading()" />
+          
+          <button 
+            class="absolute right-2 w-10 h-10 flex items-center justify-center rounded-full bg-linke text-white hover:bg-linke/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            (click)="sendMessage()"
+            [disabled]="!newMessage().trim() || chatbotService.isLoading()">
+            <i class="pi pi-send"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</p-drawer>
