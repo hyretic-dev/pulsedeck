@@ -68,7 +68,7 @@ Deno.serve(async (req: Request) => {
     // Get the member record for this organization
     const { data: memberRecord, error: memberError } = await supabaseAdmin
       .from("members")
-      .select("id, organization_id, name, app_role")
+      .select("id, organization_id, name, app_role, permissions")
       .eq("user_id", user.id)
       .eq("organization_id", organization_id)
       .single();
@@ -139,6 +139,8 @@ Deno.serve(async (req: Request) => {
 Dein Gesprächspartner ist "${memberRecord.name}". Die Berechtigungsrolle des Nutzers in dieser Organisation ist "${memberRecord.app_role}". Beachte diese Rechte bei deinen Antworten (z.B. können nur Admins Einstellungen ändern).
 Du hilfst Nutzern sich auf der Plattform zurechtzufinden, ihr Profil auszufüllen und relevanten Arbeitsgruppen (AGs) beizutreten. Du bist freundlich, professionell und fasst dich kurz.
 Das System ist mandantenfähig, d.h. du arbeitest im Kontext der Organisation des Nutzers.
+Du kannst Termine erstellen, beachte aber, dass der Nutzer ggf. Rechte dafür haben muss. Das System prüft die Rechte beim Aufruf der Aktion.
+
 
 WICHTIG FÜR VORSCHLÄGE: Wenn du dem Nutzer nächste Schritte anbietest, musst du diese zwingend in <suggestions> Tags hüllen, wobei jede Option ein Bullet Point ist!
 Beispiel:
@@ -227,7 +229,7 @@ Beispiel:
              birthday: z.string().optional(),
              status: z.string().optional().describe("Z.B. Active")
            }),
-           execute: async (args) => {
+           execute: async (args: any) => {
               const updateData: any = {};
               if (args.street) updateData.street = args.street;
               if (args.zip_code) updateData.zip_code = args.zip_code;
@@ -250,6 +252,59 @@ Beispiel:
               }
               return { success: true, message: "Profil erfolgreich aktualisiert." };
            }
+        },
+        createEvent: {
+          description: "Erstellt einen neuen Termin. Du musst Titel, Datum, Startzeit und Ort angeben. Für einen Arbeitsgruppen-Termin gibst du die working_group_id mit an.",
+          parameters: z.object({
+            title: z.string().describe("Titel des Termins"),
+            date: z.string().describe("Datum im Format YYYY-MM-DD"),
+            start_time: z.string().describe("Startzeit im Format HH:MM"),
+            end_time: z.string().optional().describe("Endzeit im Format HH:MM"),
+            location: z.string().describe("Ort, Link oder Adresse"),
+            description: z.string().optional().describe("Beschreibung oder Agenda"),
+            working_group_id: z.string().optional().describe("UUID der Arbeitsgruppe (optional)")
+          }),
+          execute: async (args: any) => {
+             // Berechtigungsprüfung
+             if (args.working_group_id) {
+                 if (memberRecord.app_role !== 'admin' && memberRecord.app_role !== 'committee') {
+                     const { data: agMember } = await supabaseAdmin
+                        .from('ag_memberships')
+                        .select('role')
+                        .eq('working_group_id', args.working_group_id)
+                        .eq('member_id', memberId)
+                        .single();
+                     if (!agMember || (agMember.role !== 'admin' && agMember.role !== 'lead')) {
+                         return { success: false, message: "Du bist kein Admin oder Leiter dieser AG und darfst daher keine Termine für sie erstellen." };
+                     }
+                 }
+             } else {
+                 if (memberRecord.app_role !== 'admin' && memberRecord.app_role !== 'committee') {
+                     const permissions = memberRecord.permissions || [];
+                     if (!permissions.includes('events:create')) {
+                         return { success: false, message: "Du hast nicht die Berechtigung, allgemeine Termine zu erstellen." };
+                     }
+                 }
+             }
+
+             const { error } = await supabaseAdmin
+               .from("events")
+               .insert({
+                  organization_id: organizationId,
+                  working_group_id: args.working_group_id || null,
+                  title: args.title,
+                  date: args.date,
+                  start_time: args.start_time,
+                  end_time: args.end_time || null,
+                  location: args.location,
+                  description: args.description || null
+               });
+
+             if (error) {
+                 return { success: false, message: `Fehler beim Erstellen des Termins: ${error.message}` };
+             }
+             return { success: true, message: "Termin erfolgreich erstellt." };
+          }
         }
       },
       onFinish: async ({ text, toolCalls, toolResults }) => {
