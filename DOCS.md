@@ -7,136 +7,143 @@ Willkommen in der offiziellen Dokumentation von PulseDeck. Dieses Handbuch begle
 ## 🏁 Erste Schritte
 
 ### Anmeldung & Sicherheit
-PulseDeck verzichtet auf komplizierte Passwort-Regeln und setzt auf **Passwortlosen Login (Magic Link)**.
-1.  Gib deine E-Mail-Adresse ein.
-2.  Du erhältst sofort einen Link per E-Mail.
-3.  Klicke den Link – du bist eingeloggt.
+PulseDeck verzichtet auf komplizierte Passwort-Regeln und setzt auf passwortlosen Login per E-Mail (Magic Link).
+1. Rufe die Login-Seite auf. Trage deine E-Mail-Adresse in das Textfeld "E-Mail Adresse" ein und klicke auf den roten Button "Weiter" (mit dem Pfeil-Icon).
+2. Du erhältst sofort einen Link per E-Mail.
+3. Klicke auf den Link in der E-Mail – du bist eingeloggt.
 
 **Optionales Passwort:**
-Wenn du dich klassisch anmelden möchtest, kannst du in deinem **Profil** (`Avatar > Mein Profil`) ein Passwort festlegen. Du hast dann beim Login die Wahl zwischen Magic Link und Passwort.
+Wenn du dich klassisch anmelden möchtest, kannst du in deinem Profil ein Passwort festlegen. Du hast dann beim Login die Wahl zwischen Magic Link und Passwort. Klicke dazu links unten in der Navigation auf "Profil bearbeiten" (Stift-Icon). Scrolle zum Bereich "Passwort (optional)", klicke auf "Passwort setzen", gib dein neues Passwort ein und bestätige es mit "Passwort speichern".
 
 ### Profil & Skills
 Ein vollständiges Profil hilft deiner Organisation, deine Talente zu nutzen.
-*   **Foto:** Lädt ein Gesicht zur E-Mail (sichtbar für eingeloggte Mitglieder).
-*   **Kontaktdaten:** Telefon und Adresse für die interne Vernetzung.
-*   **Skills (Fähigkeiten):**
-    *   Im Reiter **"Fähigkeiten & Interessen"** kannst du angeben, was du gut kannst (z.B. *Grafikdesign*, *Fahrdienst*, *Juristisches*).
-    *   Diese "Tags" helfen dem Vorstand, bei Bedarf die richtigen Personen anzusprechen.
+* **Foto:** Dein Profilbild wird automatisch (z.B. über Gravatar) anhand deiner E-Mail-Adresse geladen. Es ist für eingeloggte Mitglieder sichtbar.
+* **Kontaktdaten:** Telefon und Adresse für die interne Vernetzung.
+* **Skills (Fähigkeiten):** Gib an, was du gut kannst (z.B. Grafikdesign, Fahrdienst). Klicke in der Menüleiste unten links auf "Profil bearbeiten". Scrolle nach unten zum Bereich "Meine Fähigkeiten & Interessen". Klicke in den Reitern auf die gewünschten Fähigkeiten, um sie auszuwählen (sie werden rot markiert). Klicke abschließend auf den Button "Speichern".
 
 ### Benachrichtigungen
-PulseDeck nutzt **Push-Benachrichtigungen** direkt im Browser.
-*   Aktiviere sie im Profil unter "Benachrichtigungen".
-*   Du wirst informiert über neue Termine, Umfragen oder wenn du erwähnt wirst.
-*   Funktioniert auch auf dem Smartphone (Android & iOS), wenn du die App zum Startbildschirm hinzufügst.
+PulseDeck nutzt Push-Benachrichtigungen direkt im Browser oder auf dem Smartphone.
+* Du wirst informiert über neue Termine, Umfragen oder wenn du erwähnt wirst.
+* Klicke links unten auf "Profil bearbeiten". Klicke im Bereich "Benachrichtigungen" (Browser-Benachrichtigungen) auf den Button "Aktivieren" und erlaube die Benachrichtigungen im Pop-up-Fenster deines Browsers.
+
+### PulseDeck AI Agent (Chatbot)
+Ein KI-gestützter Onboarding-Assistent steht dir für Fragen zur Verfügung.
+* Der Assistent hilft dir, dich im System zurechtzufinden und beantwortet Fragen zur Bedienung.
+* Auf der rechten Seite deines Bildschirms befindet sich der "PulseDeck AI Agent". Gib deine Frage unten in das Feld "Frag den AI-Assistenten..." ein und klicke auf das Senden-Icon (Papierflieger) oder drücke Enter.
 
 ---
 
 ## 📅 Kalender & Events
 
-### Termine finden & Filtern
+### Termine finden & Exportieren
 Der Kalender zeigt alle Veranstaltungen deiner Organisation.
-*   **Ansichten:** Wechsele zwischen Liste, Woche und Monat.
-*   **Filter:** Blende Termine von Arbeitsgruppen (AGs) aus, die dich nicht interessieren.
-*   **Sync:** Nutze den **"Exportieren"** Button, um den Kalender in dein privates Outlook, Google Calendar oder Apple Calendar zu abonnieren. Der Link enthält ein sicheres Token.
+* **Alle Termine:** Klicke im linken Menü auf "Termine" (Kalender-Icon), um eine Liste aller geplanten Events zu sehen.
+* **Sync:** Exportiere den Kalender, um ihn in privaten Kalender-Apps (Outlook, Google Calendar, etc.) zu abonnieren. Klicke oben rechts auf das Download-Icon ("Kalender exportieren (.ics)") oder kopiere den Abo-Link (Link-Icon).
 
 ### Anmelden & Helferslots
-Bei den meisten Terminen wird um eine Rückmeldung gebeten.
-*   **Status:** Klicke auf "Zusagen", "Absagen" oder "Vielleicht".
-*   **Helferslots (Schichtplan):**
-    *   Bei großen Events (Sommerfeste, Stände) werden konkrete Aufgaben vergeben.
-    *   Du siehst Slots wie *"14:00 - 16:00 Uhr Aufbau"*.
-    *   Klicke auf einen freien Slot, um ihn zu übernehmen. Dein Name erscheint dann für alle sichtbar im Plan.
+Bei den meisten Terminen wird um eine Rückmeldung gebeten oder es werden Helfer gesucht.
+* **Status:** Klicke bei einem Termin in der Übersicht auf das "+"-Icon ("Anmelden"), um zuzusagen. Möchtest du dich wieder abmelden, klicke auf das Häkchen-Icon.
+* **Helferslots (Schichtplan):**
+  * Bei Events werden konkrete Aufgaben und Schichten vergeben.
+  * Klicke beim entsprechenden Termin auf das Listen-Icon ("Helferschichten"). Es öffnet sich eine Übersicht aller Schichten.
+  * Klicke bei einer freien Schicht auf den Button "Ich bin dabei" (Häkchen-Icon), um die Aufgabe zu übernehmen.
 
 ### Events teilen & Gäste
 Du willst Freunde oder externe Gäste einladen?
-*   **Public Page:** Jeder Termin hat eine öffentliche Vorschau-Seite. Kopiere einfach den Link aus dem Browser oder nutze den "Teilen"-Button.
-*   **Gäste-Organisationen:** Admins können befreundete Vereine direkt einladen. Diese sehen den Termin dann in ihrem eigenen Dashboard (Einladungskarte).
+* **Public Page:** Jeder Termin kann eine öffentliche Seite haben. Klicke beim Termin auf das Teilen-Icon ("Link teilen") oder das WhatsApp-Icon, um den Link zum Event zu kopieren und weiterzugeben.
+* **Gäste-Organisationen:** Admins können befreundete Vereine direkt einladen (Gebäude-Icon "Gast-Org einladen").
 
 ---
 
 ## 📢 Kommunikation
 
-### News Feed
-Der Feed ist der zentrale Nachrichtenkanal. Anders als im Chat verschwinden wichtige Infos hier nicht.
-*   **Formatierung:** Du kannst Texte fett/kursiv schreiben, Listen nutzen und Bilder anhängen.
-*   **Sichtbarkeit:** Beiträge müssen oft erst von einem Moderator freigegeben werden (Status "Review").
-
-### Umfragen & Abstimmungen
-Für schnelle Meinungsbilder gibt es Umfragen direkt im Feed.
-*   **Abstimmen:** Klicke einfach auf eine Option. Das Ergebnis wird sofort als Balkengrafik angezeigt.
-*   **Live-Update:** Du siehst Änderungen in Echtzeit.
-*   **Ändern:** Du kannst deine Stimme jederzeit ändern, solange die Umfrage läuft.
+### News Feed & Umfragen
+Der Feed ist der zentrale Nachrichtenkanal für Ankündigungen und schnelle Meinungsbilder.
+* **Beiträge:** Klicke links im Menü auf "Aktuelles" (Home-Icon). Um selbst einen Beitrag zu verfassen, klicke oben rechts auf "Neuer Beitrag" (Plus-Icon). Wähle den Typ und klicke nach dem Ausfüllen auf "Speichern".
+* **Umfragen:** Wähle beim Erstellen eines Beitrags den Typ "Abstimmung". Gib die Frage in den Textbereich ein und füge über "Option hinzufügen" die Antwortmöglichkeiten ein. Um an der Umfrage teilzunehmen, klicke einfach auf die gewünschte Antwort im Feed.
 
 ### E-Mail Newsletter
-Wichtige Ankündigungen landen zusätzlich als E-Mail in deinem Postfach.
-*   Das Design ist automatisch im Branding deiner Organisation gehalten.
-*   Du kannst dich nicht von systemkritischen Mails abmelden, aber Marketing-Mails reduzieren.
+Wichtige Ankündigungen landen zusätzlich als E-Mail in deinem Postfach im Design deiner Organisation.
 
 ---
 
-## 👥 Mitglieder & Rollen
+## 👥 Mitglieder & Gruppen
 
 ### Mitgliederliste
 Finde Ansprechpartner in deiner Organisation.
-*   **Suche:** Suche nach Namen oder filtere nach Skills ("Wer kann Video-Schnitt?").
-*   **Karten:** Zeigen Rolle (Vorstand, Mitglied) und Kontaktinfos.
+* **Suche:** Klicke links im Menü auf "Mitglieder" (Personen-Icon). Gib einen Namen oder eine E-Mail in das Suchfeld ("Suchen...") ein oder nutze den Button mit dem Filter-Icon, um gezielt nach Fähigkeiten oder PLZ zu filtern.
+
+### Arbeitsgruppen (AGs)
+Organisiere dich in spezifischen Gruppen für bestimmte Themen oder Projekte.
+* Klicke links im Menü auf "Gruppen" (Gruppen-Icon). Klicke bei der gewünschten AG auf "Beitreten", um Mitglied zu werden und zugehörige Termine im Kalender zu sehen. Zum Austreten klicke auf "Verlassen".
 
 ### Rollenkonzept
-*   **Mitglied:** Standard-Recht. Kann Termine sehen, zusagen, Beiträge vorschlagen.
-*   **Committee (Vorstand):** Kann Beiträge freigeben, vertrauliche Ordner sehen, Termine anlegen.
-*   **Admin:** Technischer Vollzugriff. Bearbeitet Einstellungen, Design und Nutzer.
+* **Mitglied:** Standard-Recht. Kann Termine sehen, zusagen, Beiträge lesen.
+* **Committee (Vorstand):** Erweiterte Rechte zur Inhaltsverwaltung und Terminplanung.
+* **Admin:** Technischer Vollzugriff. Bearbeitet Einstellungen, Design und Nutzer.
 
 ---
 
 ## 📂 Dateien & Wiki
 
 ### Dateiverwaltung
-Der Cloud-Speicher ersetzt Dropbox & Co.
-*   **Sichtbarkeit:** Ordner können auf "Nur Vorstand" oder "Nur AG XY" beschränkt sein. Achte auf das Schloss-Icon.
-*   **Preview:** PDFs und Bilder können direkt im Browser angesehen werden.
+Der interne Cloud-Speicher für Dokumente.
+* Ordner können mit Zugriffsbeschränkungen versehen sein.
+* Klicke links im Menü auf "Dateien" (Ordner-Icon). Um ein Dokument hinzuzufügen, klicke oben rechts auf "Hochladen" (Upload-Icon) und wähle die Datei aus. Mit Klick auf den "Download"-Button kannst du Dateien herunterladen.
 
 ### Wiki (Wissensdatenbank)
-Hier wird langfristiges Wissen dokumentiert (Satzung, Protokolle, How-Tos).
-*   **Struktur:** Artikel sind hierarchisch sortiert.
-*   **Bearbeiten:** Jeder kann Änderungen vorschlagen. Die Formatierung erfolgt in Markdown.
+Hier wird langfristiges Wissen dokumentiert (Protokolle, How-Tos).
+* Artikel sind strukturiert abgelegt und dienen als Nachschlagewerk.
+* Klicke im Menü links auf "Wiki" (Buch-Icon). Wähle in der Liste links eine Kategorie (wie "Alle Artikel" oder "Globale Kategorien") aus, um die zugehörigen Dokumente zu lesen. Klicke oben rechts auf das "Neuer Artikel"-Icon (Plus-Icon), um selbst einen Text zu verfassen.
+
+---
+
+## 🛠️ Feedback & Roadmap
+
+### Issue Tracker
+Du hast einen Fehler (Bug) gefunden oder eine Idee (Suggestion) für PulseDeck?
+* Melde Probleme oder Vorschläge direkt im Issue Tracker.
+* Klicke im Menü links auf "Feedback" (Inbox-Icon). Du siehst dort eine Liste aller eingereichten Vorschläge und Bugs.
+
+### Roadmap
+Informiere dich über geplante Funktionen und den aktuellen Entwicklungsfortschritt von PulseDeck.
+* Klicke im Menü links auf "Roadmap" (Flaggen-Icon), um die Liste kommender Features und Updates einzusehen.
 
 ---
 
 ## 🏢 Für Admins: Verwaltung
 
 ### Einstellungen & Branding
-Im Bereich `Einstellungen > Organisation` definierst du den Look & Feel.
-*   **Branding:** Lade Logo und Icon hoch. Wähle die **Primärfarbe** (z.B. Parteifarbe). Dies färbt Buttons, Links und E-Mails automatisch ein.
-*   **Rechtliches:** Hinterlege Impressum und Datenschutz-Links für die öffentlichen Seiten.
+Definiere den Look & Feel der Organisationsoberfläche.
+* Klicke im linken Menü auf "Organisation" und dann auf "System-Einstellungen" (Zahnrad-Icon). Wechsle oben auf den Reiter "Organisation", um Primärfarbe, Logo-URL und den Namen deiner Gruppe anzupassen. Klicke unten rechts auf "Speichern".
 
 ### Nutzer einladen
-1.  Gehe zu `Mitglieder > Hinzufügen`.
-2.  Gib die E-Mail ein.
-3.  Der Nutzer erhält eine Einladungs-Mail mit Link.
-4.  **Tipp:** Du kannst den Einladungs-Link auch kopieren und per WhatsApp senden.
+* Gehe zu "Mitglieder". Klicke bei einer bestimmten Person (z.B. nach dem Import oder Neuanlegen) auf den Button "Einladen" (E-Mail-Icon), um ihr den Login zu senden. Alternativ kopierst du über das Kopieren-Icon ("Link kopieren") den direkten Link (z.B. für WhatsApp).
 
 ### E-Mail Setup (SMTP)
-Damit PulseDeck E-Mails versenden kann (Newsletter, Einladungen), musst du einen SMTP-Server hinterlegen.
-*   Gehe zu `Einstellungen > Newsletter`.
-*   Trage Host, Port, User und Passwort deines Mail-Providers ein.
-*   Teste die Verbindung mit "Test-Mail senden".
+Damit PulseDeck Newsletter und Einladungen versenden kann, muss ein SMTP-Server hinterlegt werden.
+* Klicke in den System-Einstellungen auf den Reiter "Newsletter". Klappe den Bereich "E-Mail Server (SMTP)" auf, gib die Zugangsdaten deines Providers ein und aktiviere den Schalter für "Automatischer Versand". Klicke auf "Speichern".
+
+### Audit Logs
+Super Admins können zur Nachverfolgbarkeit ein Änderungsprotokoll einsehen.
+* Klicke im linken Menü auf "System Audit" (Schild-Icon), um die Liste der protokollierten Aktionen (Insert, Update, Delete) für Datenbank-Tätigkeiten anzuzeigen.
 
 ---
 
 ## ❓ Häufige Fragen (FAQ)
 
 ### Ich kann mich nicht einloggen.
-*   Prüfe den Spam-Ordner nach dem Magic Link.
-*   Der Link ist nur 15 Minuten gültig. Fordere notfalls einen neuen an.
-*   Wenn du ein Passwort gesetzt hast, kannst du es über "Passwort vergessen" zurücksetzen (sendet wieder einen Magic Link).
+* Prüfe den Spam-Ordner nach dem Magic Link.
+* Der Link ist nur begrenzt gültig. Fordere notfalls einen neuen an.
+* Wenn du ein Passwort gesetzt hast, kannst du es über die "Passwort vergessen"-Funktion zurücksetzen. Klicke auf der Passwort-Eingabeseite auf den entsprechenden Text-Link.
 
 ### Ich sehe keine Dateien/Termine.
 Wahrscheinlich fehlen dir Berechtigungen.
-*   Bist du in der richtigen **Organisation** (oben links wechseln)?
-*   Gehört der Inhalt zu einer **AG**, in der du nicht bist? (Tritt der AG bei).
+* Bist du in der richtigen Organisation angemeldet? Klicke oben links auf den Namen deiner aktuellen Organisation (neben dem Dropdown-Pfeil), um in einen anderen Arbeitsbereich zu wechseln.
+* Gehört der Inhalt zu einer AG, in der du nicht bist? Tritt in der Gruppen-Übersicht der entsprechenden AG bei.
 
 ### Wie lade ich Dateien hoch?
-Navigiere in den gewünschten Ordner und klicke auf "Hochladen". Wenn der Button fehlt, hast du keine Schreibrechte in diesem Ordner (z.B. Vorstandsbereich).
+Navigiere in den gewünschten Ordner (unter "Dateien"). Wenn dir der "Hochladen"-Button fehlt, hast du keine Schreibrechte in diesem Bereich (z.B. wenn es ein reiner Vorstandsbereich ist).
 
 ---
-*© 2026 PulseDeck Dokumentation • v1.2*
+*© 2026 PulseDeck Dokumentation*
