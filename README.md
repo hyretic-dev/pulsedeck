@@ -89,6 +89,16 @@ npx cap open android
 
 ---
 
+## 🤖 AI / RAG Aktualisieren
+
+Um die Wissensbasis (RAG) des PulseDeck AI Agents mit der aktuellen `DOCS.md` zu synchronisieren, klicke auf folgenden Link:
+
+[RAG aktualisieren (Supabase Edge Function)](https://dniozpfdldgtvpaehuux.supabase.co/functions/v1/ingest-docs)
+
+*Dieser Link liest die `DOCS.md` von der produktiven Seite ein, erstellt neue Embeddings und überschreibt die globalen Wissensdaten in der Datenbank.*
+
+---
+
 ## 🤝 Contributing & Support
 
 PulseDeck ist Open Source, um demokratische Strukturen zu stärken.

@@ -189,12 +189,15 @@ export class DocsComponent implements OnInit {
                 .toPromise();
 
             if (markdown) {
-                const { html, toc } = this.processMarkdown(markdown);
+                // Parse markdown strictly first without altering raw structure
+                const rawHtml = await marked.parse(markdown, { async: false }) as string;
+                
+                // Add IDs and extract TOC from the resulting HTML
+                const { html, toc } = this.processHtml(rawHtml);
+                
                 this.toc.set(toc);
-
-                const parsedHtml = await marked.parse(html);
                 this.htmlContent.set(
-                    this.sanitizer.bypassSecurityTrustHtml(parsedHtml)
+                    this.sanitizer.bypassSecurityTrustHtml(html)
                 );
 
                 if (toc.length > 0) this.activeId.set(toc[0].id);
@@ -207,11 +210,11 @@ export class DocsComponent implements OnInit {
         }
     }
 
-    private processMarkdown(md: string): { html: string, toc: TocItem[] } {
+    private processHtml(htmlContent: string): { html: string, toc: TocItem[] } {
         const toc: TocItem[] = [];
-        const html = md.replace(/^(#{2,3})\s+(.*)$/gm, (match, hashes, title) => {
-            const level = hashes.length;
-            const text = title.trim();
+        const html = htmlContent.replace(/<h([23])[^>]*>(.*?)<\/h\1>/gi, (match, levelStr, content) => {
+            const level = parseInt(levelStr, 10);
+            const text = content.replace(/<[^>]+>/g, '').trim();
             const id = this.slugify(text);
 
             let uniqueId = id;
@@ -221,7 +224,7 @@ export class DocsComponent implements OnInit {
             }
 
             toc.push({ id: uniqueId, text, level });
-            return `<h${level} id="${uniqueId}">${text}</h${level}>`;
+            return `<h${level} id="${uniqueId}">${content}</h${level}>`;
         });
         return { html, toc };
     }
