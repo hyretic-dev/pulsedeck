@@ -46,7 +46,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // We expect the client to send: messages array, optionally session_id, and organization_id
-    const { messages, session_id, organization_id } = await req.json();
+    const { messages: rawMessages, session_id, organization_id } = await req.json();
 
     if (!organization_id) {
       return new Response(JSON.stringify({ error: "Organization ID is required" }), {
@@ -54,6 +54,16 @@ Deno.serve(async (req: Request) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    if (!rawMessages || !Array.isArray(rawMessages)) {
+      return new Response(JSON.stringify({ error: "Messages array is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Filter out empty assistant messages that might have been created by unhandled tool calls
+    const messages = rawMessages.filter(m => m.content && m.content.trim() !== "");
 
     // Get the member record for this organization
     const { data: memberRecord, error: memberError } = await supabaseAdmin
@@ -72,13 +82,6 @@ Deno.serve(async (req: Request) => {
 
     const organizationId = memberRecord.organization_id;
     const memberId = memberRecord.id;
-
-    if (!messages || !Array.isArray(messages)) {
-      return new Response(JSON.stringify({ error: "Messages array is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
     let currentSessionId = session_id;
 
@@ -116,6 +119,7 @@ Das System ist mandantenfähig, d.h. du arbeitest im Kontext der Organisation de
       model: mistral("mistral-small-latest"),
       system: systemPrompt,
       messages,
+      maxSteps: 5,
       tools: {
         getUpcomingEvents: {
           description: "Holt anstehende Termine und Events der Organisation.",

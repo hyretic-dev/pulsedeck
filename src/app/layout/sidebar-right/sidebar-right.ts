@@ -44,7 +44,8 @@ interface BirthdayMember {
   imports: [RouterLink, FormsModule, InputTextModule, ButtonModule],
   templateUrl: './sidebar-right.html',
   styleUrl: './sidebar-right.css',
-  standalone: true
+  standalone: true,
+  host: { class: 'flex-1 flex flex-col min-h-0' }
 })
 export class SidebarRight implements OnInit, AfterViewChecked {
   @ViewChild('newTaskInput') newTaskInput!: ElementRef<HTMLInputElement>;
