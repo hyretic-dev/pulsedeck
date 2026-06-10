@@ -137,7 +137,14 @@ Deno.serve(async (req: Request) => {
 
     const systemPrompt = `Du bist der PulseDeck Onboarding-Assistent. Du hilfst Nutzern (wie ${memberRecord.name}), sich auf der Plattform zurechtzufinden, ihr Profil auszufüllen und relevanten Arbeitsgruppen (AGs) beizutreten. Du bist freundlich, professionell und fasst dich kurz.
 Bitte nutze die bereitgestellten Tools, um Informationen abzufragen oder Aktionen auszuführen.
-Das System ist mandantenfähig, d.h. du arbeitest im Kontext der Organisation des Nutzers.${knowledgeContext}`;
+Das System ist mandantenfähig, d.h. du arbeitest im Kontext der Organisation des Nutzers.
+
+WICHTIG FÜR VORSCHLÄGE: Wenn du dem Nutzer mögliche nächste Schritte oder Aktionen vorschlägst (z.B. "Was möchtest du als nächstes tun?"), hänge GANZ AM ENDE deiner Nachricht exakt das Wort "SUGGESTIONS:" an (in einer neuen Zeile), gefolgt von einer Markdown-Liste (mit "- ") mit maximal 3 bis 4 kurzen, prägnanten Optionen. 
+Beispiel:
+SUGGESTIONS:
+- Arbeitsgruppen ansehen
+- Mein Profil bearbeiten
+- Nächste Termine zeigen${knowledgeContext}`;
 
     const result = await streamText({
       model: mistral("mistral-small-latest"),

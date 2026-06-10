@@ -62,6 +62,16 @@ export class SidebarRight implements OnInit, AfterViewChecked {
   isLoggedIn = computed(() => !!this.supabase.user());
   private memberId = signal<string | null>(null);
 
+  // Dynamic suggestions for the latest assistant message
+  latestSuggestions = computed(() => {
+    const msgs = this.chatbotService.messages();
+    if (msgs.length === 0) return [];
+    const lastMsg = msgs[msgs.length - 1];
+    if (lastMsg.role !== 'assistant' || this.chatbotService.isLoading()) return [];
+    
+    return this.extractSuggestions(lastMsg.content);
+  });
+
   // Inline add task
   showAddInput = signal(false);
   newTaskTitle = signal('');
@@ -395,9 +405,25 @@ export class SidebarRight implements OnInit, AfterViewChecked {
   parseMarkdown(content: string): string {
     if (!content) return '';
     try {
-      return marked.parse(content, { async: false }) as string;
+      // Remove SUGGESTIONS block from display
+      const displayContent = content.split('SUGGESTIONS:')[0].trim();
+      return marked.parse(displayContent, { async: false }) as string;
     } catch {
       return content;
     }
+  }
+
+  extractSuggestions(content: string): string[] {
+    if (!content.includes('SUGGESTIONS:')) return [];
+    const suggestionsPart = content.split('SUGGESTIONS:')[1];
+    if (!suggestionsPart) return [];
+    
+    return suggestionsPart
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.startsWith('-'))
+      .map(line => line.substring(1).trim())
+      .filter(line => line.length > 0)
+      .slice(0, 4); // max 4 suggestions
   }
 }

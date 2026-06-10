@@ -162,13 +162,13 @@
         </div>
 
         <!-- Quick Replies -->
-        @if (chatbotService.messages().length <= 1 && !chatbotService.isLoading()) {
+        @if (!chatbotService.isLoading() && (chatbotService.messages().length <= 1 || latestSuggestions().length > 0)) {
             <div class="px-4 py-2 flex flex-col gap-2 bg-[var(--color-surface-raised)] border-t border-[var(--color-border)] flex-shrink-0">
                 <span class="text-[9px] text-[var(--color-text-muted)] uppercase font-semibold tracking-wider flex items-center gap-1">
                     <i class="pi pi-info-circle text-[9px]"></i> Vorschläge:
                 </span>
                 <div class="flex flex-col gap-1.5">
-                    @for (reply of quickReplies; track reply) {
+                    @for (reply of (chatbotService.messages().length <= 1 ? quickReplies : latestSuggestions()); track reply) {
                         <button 
                             class="text-left px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-violet-500/30 rounded-xl text-[10px] text-[var(--color-text)] hover:text-violet-400 hover:bg-violet-500/5 transition-all truncate shadow-sm flex items-center justify-between group"
                             (click)="sendQuickReply(reply)">
