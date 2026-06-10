@@ -41,10 +41,9 @@ Deno.serve(async (req) => {
     // 3. Clear existing global docs to avoid duplicates
     await supabaseAdmin.from("knowledge_base").delete().is("organization_id", null);
 
-    // 4. Generate Embeddings & Insert
+    // 4. Generate Embeddings & Insert for DOCS
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i];
-      // Extract title from first line if possible
       const lines = chunk.trim().split("\n");
       const title = lines[0].replace(/#/g, "").trim();
 
@@ -61,9 +60,78 @@ Deno.serve(async (req) => {
       });
 
       if (error) {
-        console.error(`Error inserting chunk ${i}:`, error.message);
+        console.error(`Error inserting docs chunk ${i}:`, error.message);
       } else {
         inserted++;
+      }
+    }
+
+    // 5. Ingest Database Content (Working Groups and Events)
+    console.log("Fetching database content...");
+    
+    // Clear existing DB-generated knowledge
+    await supabaseAdmin.from("knowledge_base").delete().like("title", "Arbeitsgruppe: %");
+    await supabaseAdmin.from("knowledge_base").delete().like("title", "Termin: %");
+
+    // 5.1 Working Groups
+    const { data: workingGroups } = await supabaseAdmin.from("working_groups").select("*");
+    if (workingGroups) {
+      for (const wg of workingGroups) {
+        const content = `Informationen zur Arbeitsgruppe (AG):
+Name: ${wg.name}
+Kategorie: ${wg.category || 'Keine'}
+Beschreibung: ${wg.description || 'Keine Beschreibung vorhanden'}
+Diese AG dient der vereinsinternen Organisation.`;
+
+        const { embedding } = await embed({
+          model: mistral.textEmbeddingModel("mistral-embed"),
+          value: content,
+        });
+
+        const { error } = await supabaseAdmin.from("knowledge_base").insert({
+          title: `Arbeitsgruppe: ${wg.name}`,
+          content: content,
+          embedding: embedding,
+          organization_id: wg.organization_id
+        });
+
+        if (error) console.error(`Error inserting AG ${wg.name}:`, error.message);
+        else inserted++;
+      }
+    }
+
+    // 5.2 Upcoming Events
+    const today = new Date().toISOString().split("T")[0];
+    const { data: events } = await supabaseAdmin
+      .from("events")
+      .select("*, working_groups(name)")
+      .gte("date", today);
+
+    if (events) {
+      for (const evt of events) {
+        const agInfo = evt.working_groups?.name ? ` (Gehört zur AG: ${evt.working_groups.name})` : '';
+        const content = `Informationen zum Termin${agInfo}:
+Titel: ${evt.title}
+Datum: ${evt.date}
+Startzeit: ${evt.start_time}
+Endzeit: ${evt.end_time || 'Nicht definiert'}
+Ort/Location: ${evt.location}
+Beschreibung/Agenda: ${evt.description || 'Keine weitere Beschreibung'}`;
+
+        const { embedding } = await embed({
+          model: mistral.textEmbeddingModel("mistral-embed"),
+          value: content,
+        });
+
+        const { error } = await supabaseAdmin.from("knowledge_base").insert({
+          title: `Termin: ${evt.title}`,
+          content: content,
+          embedding: embedding,
+          organization_id: evt.organization_id
+        });
+
+        if (error) console.error(`Error inserting event ${evt.title}:`, error.message);
+        else inserted++;
       }
     }
 

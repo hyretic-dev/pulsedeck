@@ -83,8 +83,20 @@ Deno.serve(async (req: Request) => {
     const organizationId = memberRecord.organization_id;
     const memberId = memberRecord.id;
 
+    // Load member skills
+    const { data: memberSkillsData } = await supabaseAdmin
+      .from('member_skills')
+      .select('skills(name)')
+      .eq('member_id', memberId);
+
+    const memberSkills = memberSkillsData 
+      ? memberSkillsData.map((s: any) => s.skills?.name).filter(Boolean) 
+      : [];
+    const skillsText = memberSkills.length > 0 ? memberSkills.join(', ') : 'Keine Skills hinterlegt';
+
     let currentSessionId = session_id;
 
+    // ... (rest of the code for sessions)
     // If no session_id is provided, create a new one
     if (!currentSessionId) {
       const { data: sessionData, error: sessionError } = await supabaseAdmin
@@ -139,6 +151,7 @@ Deno.serve(async (req: Request) => {
 Dein Gesprächspartner ist "${memberRecord.name}". Die Berechtigungsrolle des Nutzers in dieser Organisation ist "${memberRecord.app_role}". Beachte diese Rechte bei deinen Antworten (z.B. können nur Admins Einstellungen ändern).
 Du hilfst Nutzern sich auf der Plattform zurechtzufinden, ihr Profil auszufüllen und relevanten Arbeitsgruppen (AGs) beizutreten. Du bist freundlich, professionell und fasst dich kurz.
 Das System ist mandantenfähig, d.h. du arbeitest im Kontext der Organisation des Nutzers.
+Der Nutzer hat aktuell folgende Skills in seinem Profil hinterlegt: ${skillsText}
 Du kannst Termine erstellen, beachte aber, dass der Nutzer ggf. Rechte dafür haben muss. Das System prüft die Rechte beim Aufruf der Aktion.
 
 
