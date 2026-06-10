@@ -24,7 +24,7 @@
   "private": true,
   "packageManager": "npm@11.6.2",
   "dependencies": {
-    "@ai-sdk/mistral": "^3.0.37",
+    "@ai-sdk/mistral": "^0.0.40",
     "@angular/animations": "^21.0.6",
     "@angular/common": "^21.0.0",
     "@angular/compiler": "^21.0.0",
@@ -38,7 +38,7 @@
     "@capacitor/core": "^8.0.1",
     "@primeng/themes": "^21.0.2",
     "@supabase/supabase-js": "^2.89.0",
-    "ai": "^6.0.199",
+    "ai": "^3.4.15",
     "marked": "^17.0.1",
     "primeicons": "^7.0.0",
     "primeng": "^21.0.2",

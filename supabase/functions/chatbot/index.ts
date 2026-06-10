@@ -112,7 +112,7 @@ Deno.serve(async (req: Request) => {
 Bitte nutze die bereitgestellten Tools, um Informationen abzufragen oder Aktionen auszuführen.
 Das System ist mandantenfähig, d.h. du arbeitest im Kontext der Organisation des Nutzers.`;
 
-    const result = streamText({
+    const result = await streamText({
       model: mistral("mistral-small-latest"),
       system: systemPrompt,
       messages,
