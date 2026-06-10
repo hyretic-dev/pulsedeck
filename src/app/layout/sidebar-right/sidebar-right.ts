@@ -405,8 +405,8 @@ export class SidebarRight implements OnInit, AfterViewChecked {
   parseMarkdown(content: string): string {
     if (!content) return '';
     try {
-      // Remove SUGGESTIONS block from display
-      const displayContent = content.split('SUGGESTIONS:')[0].trim();
+      // Remove <suggestions> block from display
+      const displayContent = content.replace(/<suggestions>[\s\S]*?<\/suggestions>/i, '').trim();
       return marked.parse(displayContent, { async: false }) as string;
     } catch {
       return content;
@@ -414,11 +414,10 @@ export class SidebarRight implements OnInit, AfterViewChecked {
   }
 
   extractSuggestions(content: string): string[] {
-    if (!content.includes('SUGGESTIONS:')) return [];
-    const suggestionsPart = content.split('SUGGESTIONS:')[1];
-    if (!suggestionsPart) return [];
+    const match = content.match(/<suggestions>([\s\S]*?)<\/suggestions>/i);
+    if (!match) return [];
     
-    return suggestionsPart
+    return match[1]
       .split('\n')
       .map(line => line.trim())
       .filter(line => line.startsWith('-'))
