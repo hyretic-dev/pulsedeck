@@ -19,6 +19,7 @@ export class ChatbotService {
     isLoading = signal(false);
     messages = signal<ChatMessage[]>([]);
     sessionId = signal<string | null>(null);
+    isDesktopSidebarVisible = signal(false);
 
     constructor() { }
 
@@ -138,7 +139,7 @@ export class ChatbotService {
                 if (value) {
                     const chunk = decoder.decode(value, { stream: true });
                     const lines = chunk.split('\n');
-                    
+
                     lines.map((line: string) => {
                         if (line.startsWith('0:')) {
                             try {

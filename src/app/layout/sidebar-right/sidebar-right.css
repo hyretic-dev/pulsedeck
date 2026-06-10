@@ -70,3 +70,54 @@
     color: rgb(107 114 128);
     font-size: 0.65rem;
 }
+
+/* Markdown Styles within the Chatbot inside Sidebar */
+:host ::ng-deep .chatbot-markdown p {
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+:host ::ng-deep .chatbot-markdown p:last-child {
+    margin-bottom: 0;
+}
+
+:host ::ng-deep .chatbot-markdown ul {
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1.25rem;
+    list-style-type: disc;
+}
+
+:host ::ng-deep .chatbot-markdown li {
+    margin-bottom: 0.25rem;
+}
+
+:host ::ng-deep .chatbot-markdown strong {
+    font-weight: 600;
+}
+
+:host ::ng-deep .chatbot-markdown a {
+    color: var(--color-linke, #0ea5e9);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+:host ::ng-deep .chatbot-markdown a:hover {
+    text-decoration: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.2s ease-out forwards;
+}

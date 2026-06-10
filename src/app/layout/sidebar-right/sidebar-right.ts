@@ -7,12 +7,20 @@ import {
   OnInit,
   signal,
   ViewChild,
+  AfterViewChecked,
+  DestroyRef,
+  PLATFORM_ID
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { InputTextModule } from 'primeng/inputtext';
+import { ButtonModule } from 'primeng/button';
 import { SupabaseService } from '../../shared/services/supabase';
 import { AuthService } from '../../shared/services/auth.service';
 import { OrganizationService } from '../../shared/services/organization.service';
+import { ChatbotService } from '../../shared/services/chatbot.service';
+import { marked } from 'marked';
 import { Member } from '../../shared/models/member.model';
 
 interface Task {
@@ -33,17 +41,19 @@ interface BirthdayMember {
 
 @Component({
   selector: 'app-sidebar-right',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, InputTextModule, ButtonModule],
   templateUrl: './sidebar-right.html',
   styleUrl: './sidebar-right.css',
   standalone: true
 })
-export class SidebarRight implements OnInit {
+export class SidebarRight implements OnInit, AfterViewChecked {
   @ViewChild('newTaskInput') newTaskInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('chatScrollContainer') chatScrollContainer!: ElementRef;
 
   private supabase = inject(SupabaseService);
   private auth = inject(AuthService);
   private orgService = inject(OrganizationService);
+  chatbotService = inject(ChatbotService);
 
   upcomingEvents = signal<any[]>([]);
   upcomingBirthdays = signal<BirthdayMember[]>([]);
@@ -56,7 +66,28 @@ export class SidebarRight implements OnInit {
   newTaskTitle = signal('');
   addingTask = signal(false);
 
+  chatNewMessage = '';
+  quickReplies = [
+    'Wie trage ich mich in eine AG ein?',
+    'Zeige mir anstehende Termine',
+    'Wie geht mein Onboarding weiter?'
+  ];
+
   constructor() {
+    const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+    if (isBrowser) {
+      const mediaQuery = window.matchMedia('(min-width: 1280px)');
+      const update = () => {
+        this.chatbotService.isDesktopSidebarVisible.set(mediaQuery.matches);
+      };
+      update();
+      mediaQuery.addEventListener('change', update);
+      
+      inject(DestroyRef).onDestroy(() => {
+        this.chatbotService.isDesktopSidebarVisible.set(false);
+      });
+    }
+
     // Re-fetch tasks when current member changes
     effect(() => {
       const member = this.auth.currentMember();
@@ -322,5 +353,50 @@ export class SidebarRight implements OnInit {
       .join('')
       .substring(0, 2)
       .toUpperCase();
+  }
+
+  ngAfterViewChecked() {
+    this.scrollToBottom();
+  }
+
+  scrollToBottom(): void {
+    if (!this.chatScrollContainer) return;
+    try {
+      const el = this.chatScrollContainer.nativeElement;
+      el.scrollTop = el.scrollHeight;
+    } catch (err) { }
+  }
+
+  sendChatMessage() {
+    const text = this.chatNewMessage.trim();
+    if (!text) return;
+    this.chatbotService.sendMessage(text);
+    this.chatNewMessage = '';
+  }
+
+  sendQuickReply(reply: string) {
+    this.chatbotService.sendMessage(reply);
+  }
+
+  clearChat() {
+    this.chatbotService.sessionId.set(null);
+    this.chatbotService.messages.set([
+      {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content:
+          'Hallo! Ich bin dein PulseDeck Onboarding-Assistent. ' +
+          'Wie kann ich dir helfen?'
+      }
+    ]);
+  }
+
+  parseMarkdown(content: string): string {
+    if (!content) return '';
+    try {
+      return marked.parse(content, { async: false }) as string;
+    } catch {
+      return content;
+    }
   }
 }

@@ -73,7 +73,7 @@
     <!-- Right Sidebar (Desktop) - Collapsible -->
     @if (!rightSidebarCollapsed()) {
     <aside
-        class="hidden xl:flex w-72 flex-col border-l border-[var(--color-border)] bg-[var(--color-surface)] p-4 z-20 relative">
+        class="hidden xl:flex w-[400px] flex-col border-l border-[var(--color-border)] bg-[var(--color-surface)] p-4 z-20 relative">
         <!-- Collapse Button -->
         <button (click)="toggleRightSidebar()" pTooltip="Sidebar einklappen" tooltipPosition="left"
             class="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-12 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-l-lg flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors z-30">
