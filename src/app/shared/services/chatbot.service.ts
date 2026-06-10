@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { SupabaseService } from './supabase';
 import { environment } from '../../../environments/environment';
+import { OrganizationService } from './organization.service';
 
 export interface ChatMessage {
     id: string;
@@ -14,6 +15,7 @@ export interface ChatMessage {
 })
 export class ChatbotService {
     private supabaseService = inject(SupabaseService);
+    private org = inject(OrganizationService);
 
     isOpen = signal(false);
     isLoading = signal(false);
@@ -114,7 +116,8 @@ export class ChatbotService {
                 },
                 body: JSON.stringify({
                     messages: currentMessages,
-                    session_id: this.sessionId()
+                    session_id: this.sessionId(),
+                    organization_id: this.org.currentOrgId()
                 })
             });
 

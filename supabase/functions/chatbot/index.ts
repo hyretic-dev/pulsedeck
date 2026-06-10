@@ -45,11 +45,22 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Get the member record to find the organization_id
+    // We expect the client to send: messages array, optionally session_id, and organization_id
+    const { messages, session_id, organization_id } = await req.json();
+
+    if (!organization_id) {
+      return new Response(JSON.stringify({ error: "Organization ID is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Get the member record for this organization
     const { data: memberRecord, error: memberError } = await supabaseAdmin
       .from("members")
       .select("id, organization_id, name, app_role")
       .eq("user_id", user.id)
+      .eq("organization_id", organization_id)
       .single();
 
     if (memberError || !memberRecord) {
@@ -61,9 +72,6 @@ Deno.serve(async (req: Request) => {
 
     const organizationId = memberRecord.organization_id;
     const memberId = memberRecord.id;
-
-    // We expect the client to send: messages array, and optionally a session_id
-    const { messages, session_id } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: "Messages array is required" }), {
