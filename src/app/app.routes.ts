@@ -97,6 +97,7 @@ export const routes: Routes = [
                     { path: 'members', canActivate: [adminGuard], loadComponent: () => import('./features/dashboard/members/members').then(m => m.MembersComponent) },
                     { path: 'calendar', loadComponent: () => import('./features/dashboard/calendar/calendar').then(m => m.CalendarComponent) },
                     { path: 'gruppen', loadComponent: () => import('./features/dashboard/working-groups/working-groups').then(m => m.WorkingGroupsComponent) },
+                    { path: 'contacts', loadComponent: () => import('./features/dashboard/contacts/contacts').then(m => m.ContactsComponent) },
                     { path: 'files', loadComponent: () => import('./features/dashboard/files/files.component').then(m => m.FilesComponent) },
                     { path: 'profile', loadComponent: () => import('./features/dashboard/profile/profile').then(m => m.ProfileComponent) },
                     { path: 'issue-tracker', canActivate: [issueTrackerGuard], loadComponent: () => import('./features/dashboard/issue-tracker/issue-tracker.component').then(m => m.IssueTrackerComponent) },
