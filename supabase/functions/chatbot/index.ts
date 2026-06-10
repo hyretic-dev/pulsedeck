@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { streamText } from "npm:ai";
-import { createOpenAI } from "npm:@ai-sdk/openai";
+import { createMistral } from "npm:@ai-sdk/mistral";
 import { z } from "npm:zod";
 
 const corsHeaders = {
@@ -17,10 +17,10 @@ Deno.serve(async (req: Request) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-    const openaiKey = Deno.env.get("OPENAI_API_KEY");
+    const mistralKey = Deno.env.get("MISTRAL_API_KEY");
 
-    if (!openaiKey) {
-        throw new Error("OPENAI_API_KEY is not configured.");
+    if (!mistralKey) {
+        throw new Error("MISTRAL_API_KEY is not configured.");
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
@@ -98,14 +98,14 @@ Deno.serve(async (req: Request) => {
        });
     }
 
-    const openai = createOpenAI({ apiKey: openaiKey });
+    const mistral = createMistral({ apiKey: mistralKey });
 
     const systemPrompt = `Du bist der PulseDeck Onboarding-Assistent. Du hilfst Nutzern (wie ${memberRecord.name}), sich auf der Plattform zurechtzufinden, ihr Profil auszufüllen und relevanten Arbeitsgruppen (AGs) beizutreten. Du bist freundlich, professionell und fasst dich kurz.
 Bitte nutze die bereitgestellten Tools, um Informationen abzufragen oder Aktionen auszuführen.
 Das System ist mandantenfähig, d.h. du arbeitest im Kontext der Organisation des Nutzers.`;
 
     const result = streamText({
-      model: openai("gpt-4o-mini"),
+      model: mistral("mistral-small-latest"),
       system: systemPrompt,
       messages,
       tools: {
