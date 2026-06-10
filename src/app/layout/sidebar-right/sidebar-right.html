@@ -123,7 +123,7 @@
                 <!-- User Message -->
                 @if (msg.role === 'user') {
                     <div class="flex justify-end w-full animate-fadeIn">
-                        <div class="max-w-[85%] bg-[var(--color-surface-overlay)] border border-[var(--color-border)] rounded-2xl px-3 py-2 text-xs text-[var(--color-text)] leading-relaxed shadow-sm">
+                        <div class="max-w-[85%] bg-[var(--color-surface-overlay)] border border-[var(--color-border)] rounded-2xl px-3 py-2 text-sm text-[var(--color-text)] leading-relaxed shadow-sm">
                             <div class="whitespace-pre-wrap">{{ msg.content }}</div>
                         </div>
                     </div>
@@ -137,8 +137,8 @@
                             <i class="pi pi-sparkles text-[10px]"></i>
                         </div>
                         <!-- AI Response content -->
-                        <div class="flex-1 min-w-0 text-xs leading-relaxed text-[var(--color-text)]">
-                            <div class="prose prose-xs dark:prose-invert max-w-none chatbot-markdown" 
+                        <div class="flex-1 min-w-0 text-sm leading-relaxed text-[var(--color-text)]">
+                            <div class="prose prose-sm dark:prose-invert max-w-none chatbot-markdown" 
                                  [innerHTML]="parseMarkdown(msg.content)">
                             </div>
                         </div>
@@ -170,10 +170,10 @@
                 <div class="flex flex-col gap-1.5">
                     @for (reply of (chatbotService.messages().length <= 1 ? quickReplies : latestSuggestions()); track reply) {
                         <button 
-                            class="text-left px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-violet-500/30 rounded-xl text-[10px] text-[var(--color-text)] hover:text-violet-400 hover:bg-violet-500/5 transition-all truncate shadow-sm flex items-center justify-between group"
+                            class="text-left px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-violet-500/30 rounded-xl text-xs text-[var(--color-text)] hover:text-violet-400 hover:bg-violet-500/5 transition-all shadow-sm flex items-center justify-between group"
                             (click)="sendQuickReply(reply)">
-                            <span>{{ reply }}</span>
-                            <i class="pi pi-chevron-right text-[8px] text-[var(--color-text-muted)] group-hover:text-violet-400 transition-colors"></i>
+                            <span class="flex-1 min-w-0 pr-2 [&>strong]:font-bold [&>strong]:text-[var(--color-text)] group-hover:[&>strong]:text-violet-400" [innerHTML]="parseMarkdownInline(reply)"></span>
+                            <i class="pi pi-chevron-right text-[10px] text-[var(--color-text-muted)] group-hover:text-violet-400 transition-colors flex-shrink-0"></i>
                         </button>
                     }
                 </div>
@@ -189,7 +189,7 @@
                     [(ngModel)]="chatNewMessage"
                     (keyup.enter)="sendChatMessage()"
                     placeholder="Frag den AI-Assistenten..."
-                    class="w-full !bg-transparent !border-none !py-2 !pl-2 !pr-8 focus:!ring-0 text-xs text-[var(--color-text)] outline-none placeholder-[var(--color-text-muted)]"
+                    class="w-full !bg-transparent !border-none !py-2 !pl-2 !pr-8 focus:!ring-0 text-sm text-[var(--color-text)] outline-none placeholder-[var(--color-text-muted)]"
                     [disabled]="chatbotService.isLoading()" />
                 
                 <button 

@@ -413,6 +413,15 @@ export class SidebarRight implements OnInit, AfterViewChecked {
     }
   }
 
+  parseMarkdownInline(content: string): string {
+    if (!content) return '';
+    try {
+      return marked.parseInline(content, { async: false }) as string;
+    } catch {
+      return content;
+    }
+  }
+
   extractSuggestions(content: string): string[] {
     const match = content.match(/<suggestions>([\s\S]*?)<\/suggestions>/i);
     if (!match) return [];
