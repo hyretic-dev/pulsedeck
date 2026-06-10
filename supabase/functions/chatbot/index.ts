@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { streamText } from "npm:ai@3.4.15";
+import { streamText, embed } from "npm:ai@3.4.15";
 import { createMistral } from "npm:@ai-sdk/mistral@0.0.40";
 import { z } from "npm:zod@3.23.8";
 
@@ -111,9 +111,33 @@ Deno.serve(async (req: Request) => {
 
     const mistral = createMistral({ apiKey: mistralKey });
 
+    let knowledgeContext = "";
+    if (lastMessage && lastMessage.role === "user" && lastMessage.content) {
+      try {
+        const { embedding } = await embed({
+          model: mistral.textEmbeddingModel("mistral-embed"),
+          value: lastMessage.content,
+        });
+
+        const { data: knowledgeDocs, error: knowledgeError } = await supabaseAdmin.rpc("match_knowledge", {
+          query_embedding: embedding,
+          match_threshold: 0.7,
+          match_count: 3,
+          org_id: organizationId
+        });
+
+        if (!knowledgeError && knowledgeDocs && knowledgeDocs.length > 0) {
+          knowledgeContext = "\n\nHier sind relevante Informationen aus der Dokumentation/Wiki:\n" + 
+            knowledgeDocs.map((doc: any) => `### ${doc.title}\n${doc.content}`).join("\n\n");
+        }
+      } catch (err) {
+        console.error("Embedding / RAG error:", err);
+      }
+    }
+
     const systemPrompt = `Du bist der PulseDeck Onboarding-Assistent. Du hilfst Nutzern (wie ${memberRecord.name}), sich auf der Plattform zurechtzufinden, ihr Profil auszufüllen und relevanten Arbeitsgruppen (AGs) beizutreten. Du bist freundlich, professionell und fasst dich kurz.
 Bitte nutze die bereitgestellten Tools, um Informationen abzufragen oder Aktionen auszuführen.
-Das System ist mandantenfähig, d.h. du arbeitest im Kontext der Organisation des Nutzers.`;
+Das System ist mandantenfähig, d.h. du arbeitest im Kontext der Organisation des Nutzers.${knowledgeContext}`;
 
     const result = await streamText({
       model: mistral("mistral-small-latest"),
