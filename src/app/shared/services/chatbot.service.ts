@@ -109,6 +109,7 @@ export class ChatbotService {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${session.access_token}`,
+                    'apikey': environment.supabase.anonKey,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
