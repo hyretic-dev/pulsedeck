@@ -1,8 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { streamText } from "npm:ai";
-import { createMistral } from "npm:@ai-sdk/mistral";
-import { z } from "npm:zod";
+import { streamText } from "npm:ai@3.4.15";
+import { createMistral } from "npm:@ai-sdk/mistral@0.0.40";
+import { z } from "npm:zod@3.23.8";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
