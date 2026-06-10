@@ -187,14 +187,28 @@ Beispiel:
             workingGroupId: z.string().describe("Die UUID der Arbeitsgruppe"),
           }),
           execute: async ({ workingGroupId }) => {
-             const { error } = await supabaseAdmin
-               .from("working_group_members")
+             // Zuerst in die neue Tabelle ag_memberships einfügen
+             let { error } = await supabaseAdmin
+               .from("ag_memberships")
                .insert({
                   working_group_id: workingGroupId,
-                  member_id: memberId
+                  member_id: memberId,
+                  role: "member"
                });
+               
+             // Fallback auf die alte Tabelle, falls die neue nicht greift (außer bei Unique Constraint)
+             if (error && error.code !== '23505') {
+                 const { error: oldError } = await supabaseAdmin
+                   .from("working_group_members")
+                   .insert({
+                      working_group_id: workingGroupId,
+                      member_id: memberId
+                   });
+                 error = oldError;
+             }
+
              if (error) {
-                // If it's a unique constraint violation, they are already a member
+                // Unique constraint violation (bereits Mitglied)
                 if (error.code === '23505') {
                     return { success: false, message: "Nutzer ist bereits Mitglied dieser AG." };
                 }
