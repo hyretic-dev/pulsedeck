@@ -329,6 +329,27 @@ export class FileService {
     }
 
     /**
+     * Trigger RAG ingestion for a specific file
+     */
+    async triggerFileIngestion(fileId: string): Promise<{ success: boolean; message?: string }> {
+        try {
+            const { data, error } = await this.supabase.client.functions.invoke('ingest-file', {
+                body: { file_id: fileId }
+            });
+            
+            if (error) {
+                console.error("Ingestion error:", error);
+                return { success: false, message: "Konnte Datei nicht für KI indizieren." };
+            }
+            
+            return data as { success: boolean; message?: string };
+        } catch (e: any) {
+            console.error("Ingestion trigger failed:", e);
+            return { success: false, message: e.message };
+        }
+    }
+
+    /**
      * Toggle pin status of a file
      */
     async togglePin(

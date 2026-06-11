@@ -131,7 +131,12 @@ Deno.serve(async (req: Request) => {
           value: lastMessage.content,
         });
 
-        const { data: knowledgeDocs, error: knowledgeError } = await supabaseAdmin.rpc("match_knowledge", {
+        const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+        const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+          global: { headers: { Authorization: authHeader } }
+        });
+
+        const { data: knowledgeDocs, error: knowledgeError } = await supabaseUser.rpc("match_knowledge", {
           query_embedding: embedding,
           match_threshold: 0.7,
           match_count: 3,

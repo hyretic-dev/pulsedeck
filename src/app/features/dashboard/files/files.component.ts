@@ -206,7 +206,7 @@ export class FilesComponent implements OnInit {
             this.fileService.currentFolderId() ?? undefined;
 
         try {
-            await this.fileService.uploadFile(
+            const uploadedFile = await this.fileService.uploadFile(
                 file,
                 this.fileService.currentFolder(),
                 {
@@ -224,6 +224,19 @@ export class FilesComponent implements OnInit {
                 summary: 'Hochgeladen',
                 detail: `${file.name} wurde hochgeladen.`,
             });
+
+            // Trigger AI Ingestion
+            if (uploadedFile.mime_type === 'application/pdf' || uploadedFile.mime_type?.startsWith('text/')) {
+                const ingestionResult = await this.fileService.triggerFileIngestion(uploadedFile.id!);
+                if (ingestionResult && !ingestionResult.success && ingestionResult.message) {
+                    this.msg.add({
+                        severity: 'warn',
+                        summary: 'KI-Indizierung',
+                        detail: ingestionResult.message,
+                        life: 6000
+                    });
+                }
+            }
 
             this.uploadDialogVisible.set(false);
             await this.refreshCurrentView();
