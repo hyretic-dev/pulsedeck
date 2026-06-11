@@ -359,7 +359,7 @@
         <div class="flex flex-col gap-2">
             <label class="text-sm font-medium">Sichtbarkeit</label>
             <p-select [options]="visibilityOptions" [(ngModel)]="uploadVisibility" optionLabel="label"
-                optionValue="value" styleClass="w-full" />
+                optionValue="value" styleClass="w-full" appendTo="body" />
         </div>
 
         <!-- Working Group (if AG-only) -->
@@ -367,7 +367,7 @@
         <div class="flex flex-col gap-2">
             <label class="text-sm font-medium">Arbeitsgruppe</label>
             <p-select [options]="workingGroups()" [(ngModel)]="uploadWorkingGroupId" optionLabel="name" optionValue="id"
-                placeholder="AG auswählen..." styleClass="w-full" />
+                placeholder="AG auswählen..." styleClass="w-full" appendTo="body" />
         </div>
         }
 
@@ -415,7 +415,7 @@
         <div class="flex flex-col gap-2">
             <label class="text-sm font-medium">Zielordner</label>
             <p-select [options]="getMoveTargetOptions()" [(ngModel)]="moveTargetFolderId" optionLabel="label"
-                optionValue="value" placeholder="Ordner wählen..." styleClass="w-full" />
+                optionValue="value" placeholder="Ordner wählen..." styleClass="w-full" appendTo="body" />
         </div>
     </div>
 
