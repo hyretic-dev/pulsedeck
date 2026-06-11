@@ -6,13 +6,14 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
             <h1 class="text-xl md:text-3xl font-bold text-[var(--color-text)]">Dateien</h1>
-            <p class="text-[var(--color-text-muted)] text-sm hidden md:block">Dokumente hochladen und verwalten</p>
+            <p class="text-[var(--color-text-muted)] text-sm hidden md:block">
+                Dokumente hochladen, organisieren und verwalten
+            </p>
         </div>
         <div class="flex items-center gap-2">
             <!-- Search -->
             <div class="relative">
-                <i
-                    class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] text-sm"></i>
+                <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] text-sm"></i>
                 <input type="text" pInputText [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
                     (keyup.enter)="onSearch()" placeholder="Suchen..."
                     class="pl-9 pr-8 py-2 w-48 md:w-64 text-sm bg-[var(--color-surface-raised)] border-[var(--color-border)]" />
@@ -23,38 +24,37 @@
                 </button>
                 }
             </div>
+            @if (canManage()) {
+            <p-button label="Ordner" icon="pi pi-folder-plus" severity="secondary" [outlined]="true" size="small"
+                (click)="openCreateFolderDialog()" />
+            }
             <p-button label="Hochladen" icon="pi pi-upload" severity="danger" [raised]="true" size="small"
-                (click)="openUploadDialog()"></p-button>
+                (click)="openUploadDialog()" />
         </div>
     </div>
 
     <!-- Breadcrumbs -->
-    @if (!isSearching()) {
-    <div class="flex items-center gap-2 mb-4 text-sm">
-        @for (crumb of getBreadcrumbs(); track crumb.path; let last = $last) {
-        <button (click)="navigateToFolder(crumb.path)"
-            class="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-            [class.font-semibold]="last" [class.text-[var(--color-text)]]="last">
+    @if (viewMode() === 'folder') {
+    <div class="flex items-center gap-2 mb-6 text-sm">
+        @for (crumb of breadcrumbs(); track crumb.folderId; let last = $last) {
+        <button (click)="navigateToBreadcrumb(crumb)"
+            class="transition-colors"
+            [class.text-[var(--color-text-muted)]]="!last"
+            [class.hover:text-[var(--color-text)]]="!last"
+            [class.text-[var(--color-text)]]="last"
+            [class.font-semibold]="last">
             {{ crumb.label }}
         </button>
         @if (!last) {
         <i class="pi pi-chevron-right text-[var(--color-text-muted)] text-xs"></i>
         }
         }
-
-        @if (fileService.currentFolder() !== '/') {
-        <button (click)="navigateUp()"
-            class="ml-4 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-            pTooltip="Eine Ebene hoch">
-            <i class="pi pi-arrow-up mr-1"></i>Zurück
-        </button>
-        }
     </div>
     }
 
-    <!-- Search Results Header -->
+    <!-- Search Results -->
     @if (isSearching()) {
-    <div class="flex items-center gap-2 mb-4">
+    <div class="flex items-center gap-2 mb-6">
         <i class="pi pi-search text-[var(--color-text-muted)]"></i>
         <span class="text-[var(--color-text-muted)] text-sm">
             {{ searchResults().length }} Ergebnis(se) für "{{ searchQuery() }}"
@@ -63,77 +63,200 @@
             Suche beenden
         </button>
     </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        @for (file of searchResults(); track file.id) {
+        <ng-container *ngTemplateOutlet="fileCard; context: { $implicit: file }" />
+        } @empty {
+        <div class="col-span-full text-center py-16">
+            <i class="pi pi-search text-5xl text-[var(--color-text-muted)] mb-4 block"></i>
+            <p class="text-[var(--color-text-muted)]">Keine Dateien gefunden.</p>
+        </div>
+        }
+    </div>
     }
 
     <!-- Loading -->
-    @if (fileService.loading()) {
+    @if (fileService.loading() && !isSearching()) {
     <div class="flex justify-center items-center py-16">
         <p-progressSpinner strokeWidth="4" ariaLabel="Lade Dateien..." />
     </div>
     }
 
-    <!-- Files Grid -->
-    @if (!fileService.loading()) {
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        @for (file of (isSearching() ? searchResults() : fileService.files()); track file.id) {
-        <div
-            class="bg-[var(--color-surface-card)] rounded-xl border border-[var(--color-border)] p-4 hover:border-linke/50 hover:shadow-lg transition-all group">
-            <!-- File Icon + Name -->
-            <div class="flex items-start gap-3 mb-3">
-                <div
-                    class="w-10 h-10 rounded-lg bg-[var(--color-surface-raised)] flex items-center justify-center flex-shrink-0">
-                    <i
-                        class="pi {{ fileService.getFileIcon(file.mime_type) }} text-lg text-[var(--color-text-muted)]"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-medium text-[var(--color-text)] truncate" [pTooltip]="file.name">{{ file.name }}
-                    </h3>
-                    <p class="text-xs text-[var(--color-text-muted)]">{{ fileService.formatFileSize(file.size_bytes) }}
-                    </p>
-                </div>
-            </div>
+    <!-- OVERVIEW MODE -->
+    @if (!fileService.loading() && !isSearching() && viewMode() === 'overview') {
 
-            <!-- Meta -->
-            <div class="flex items-center gap-2 mb-3 text-xs text-[var(--color-text-muted)]">
-                <span>{{ file.created_at | date:'dd.MM.yyyy' }}</span>
-                @if (file.uploader) {
-                <span>• {{ file.uploader.name }}</span>
-                }
-            </div>
-
-            <!-- Tags -->
-            <div class="flex items-center gap-2 mb-3">
-                <p-tag [value]="getVisibilityLabel(file.visibility)"
-                    [severity]="$any(getVisibilitySeverity(file.visibility))" styleClass="!text-[10px] !px-2 !py-0.5" />
-                @if (file.working_group) {
-                <p-tag [value]="file.working_group.name" severity="secondary" styleClass="!text-[10px] !px-2 !py-0.5" />
-                }
-            </div>
-
-            <!-- Actions -->
-            <div class="flex items-center gap-2 pt-3 border-t border-[var(--color-border)]">
-                <button (click)="downloadFile(file)"
-                    class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-[var(--color-surface-raised)] hover:bg-linke/20 text-[var(--color-text)] transition-colors">
-                    <i class="pi pi-download mr-1"></i>Download
-                </button>
-                @if (canDelete(file)) {
-                <button (click)="confirmDelete(file)"
-                    class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:text-red-400 hover:bg-red-500/10 transition-colors">
-                    <i class="pi pi-trash text-sm"></i>
-                </button>
-                }
-            </div>
+    <!-- 1. Pinned Downloads -->
+    @if (fileService.pinnedFiles().length > 0) {
+    <section class="mb-8">
+        <div class="flex items-center gap-2 mb-4">
+            <i class="pi pi-bookmark-fill text-amber-400"></i>
+            <h2 class="text-base font-bold text-[var(--color-text)]">Angepinnte Downloads</h2>
         </div>
+        <div class="flex gap-3 overflow-x-auto pb-2 custom-scrollbar-h">
+            @for (file of fileService.pinnedFiles(); track file.id) {
+            <div
+                class="flex-shrink-0 w-64 bg-[var(--color-surface-card)] rounded-xl border border-amber-500/30 p-4 hover:border-amber-500/60 hover:shadow-lg hover:shadow-amber-500/5 transition-all group">
+                <div class="flex items-center gap-3 mb-2">
+                    <div
+                        class="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                        <i class="pi {{ fileService.getFileIcon(file.mime_type) }} text-amber-400"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-medium text-sm text-[var(--color-text)] truncate" [pTooltip]="file.name">
+                            {{ file.name }}
+                        </h3>
+                        <p class="text-[10px] text-[var(--color-text-muted)]">
+                            {{ fileService.formatFileSize(file.size_bytes) }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 mt-3">
+                    <button (click)="downloadFile(file)"
+                        class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 transition-colors">
+                        <i class="pi pi-download mr-1"></i>Download
+                    </button>
+                    @if (canManage()) {
+                    <button (click)="togglePin(file)" pTooltip="Lösen"
+                        class="w-7 h-7 rounded-lg flex items-center justify-center text-amber-400 hover:bg-amber-500/20 transition-colors">
+                        <i class="pi pi-bookmark-fill text-xs"></i>
+                    </button>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+    </section>
+    }
+
+    <!-- 2. Recently Uploaded -->
+    @if (fileService.recentFiles().length > 0) {
+    <section class="mb-8">
+        <div class="flex items-center gap-2 mb-4">
+            <i class="pi pi-clock text-linke"></i>
+            <h2 class="text-base font-bold text-[var(--color-text)]">Zuletzt hochgeladen</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            @for (file of fileService.recentFiles(); track file.id) {
+            <ng-container *ngTemplateOutlet="fileCard; context: { $implicit: file }" />
+            }
+        </div>
+    </section>
+    }
+
+    <!-- 3. Folders / Categories -->
+    <section class="mb-8">
+        <div class="flex items-center gap-2 mb-4">
+            <i class="pi pi-folder text-[var(--color-text-muted)]"></i>
+            <h2 class="text-base font-bold text-[var(--color-text)]">Ordner</h2>
+        </div>
+        @if (fileService.folderList().length > 0) {
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            @for (folder of fileService.folderList(); track folder.id) {
+            <div (click)="openFolder(folder)"
+                class="bg-[var(--color-surface-card)] rounded-xl border border-[var(--color-border)] p-4 hover:border-linke/50 hover:shadow-lg transition-all cursor-pointer group relative">
+                <div class="flex flex-col items-center text-center gap-2">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-linke/10 flex items-center justify-center group-hover:bg-linke/20 transition-colors">
+                        <i class="pi pi-folder text-2xl text-linke"></i>
+                    </div>
+                    <h3 class="text-sm font-medium text-[var(--color-text)] truncate w-full">
+                        {{ folder.name }}
+                    </h3>
+                    <span class="text-[10px] text-[var(--color-text-muted)]">
+                        {{ folder.file_count || 0 }} Dateien
+                    </span>
+                </div>
+                @if (canManage()) {
+                <button (click)="confirmDeleteFolder(folder); $event.stopPropagation()"
+                    class="absolute top-2 right-2 w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 text-[var(--color-text-muted)] hover:text-red-400 hover:bg-red-500/10 transition-all">
+                    <i class="pi pi-trash text-[10px]"></i>
+                </button>
+                }
+            </div>
+            }
+        </div>
+        } @else {
+        <div
+            class="rounded-xl border border-dashed border-[var(--color-border)] py-8 text-center text-[var(--color-text-muted)] text-sm">
+            <i class="pi pi-folder-open text-3xl mb-2 block"></i>
+            Noch keine Ordner erstellt.
+            @if (canManage()) {
+            <br />
+            <button (click)="openCreateFolderDialog()" class="text-linke hover:underline mt-2 inline-block">
+                Ersten Ordner anlegen
+            </button>
+            }
+        </div>
+        }
+    </section>
+
+    <!-- 4. Uncategorized files (root) -->
+    @if (fileService.files().length > 0) {
+    <section>
+        <div class="flex items-center gap-2 mb-4">
+            <i class="pi pi-file text-[var(--color-text-muted)]"></i>
+            <h2 class="text-base font-bold text-[var(--color-text)]">Nicht zugeordnete Dateien</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            @for (file of fileService.files(); track file.id) {
+            <ng-container *ngTemplateOutlet="fileCard; context: { $implicit: file }" />
+            }
+        </div>
+    </section>
+    }
+
+    <!-- Empty state: nothing at all -->
+    @if (fileService.pinnedFiles().length === 0 && fileService.recentFiles().length === 0 && fileService.folderList().length === 0 && fileService.files().length === 0) {
+    <div class="text-center py-20">
+        <i class="pi pi-cloud-upload text-6xl text-[var(--color-text-muted)] mb-4 block"></i>
+        <h2 class="text-lg font-bold text-[var(--color-text)] mb-2">Noch keine Dateien</h2>
+        <p class="text-[var(--color-text-muted)] text-sm mb-4">Lade deine ersten Dokumente hoch.</p>
+        <p-button label="Datei hochladen" icon="pi pi-upload" severity="danger" size="small"
+            (click)="openUploadDialog()" />
+    </div>
+    }
+    }
+
+    <!-- FOLDER MODE -->
+    @if (!fileService.loading() && !isSearching() && viewMode() === 'folder') {
+    <!-- Sub-Folders -->
+    @if (fileService.folderList().length > 0) {
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 mb-6">
+        @for (folder of fileService.folderList(); track folder.id) {
+        <div (click)="openFolder(folder)"
+            class="bg-[var(--color-surface-card)] rounded-xl border border-[var(--color-border)] p-4 hover:border-linke/50 hover:shadow-lg transition-all cursor-pointer group relative">
+            <div class="flex flex-col items-center text-center gap-2">
+                <div
+                    class="w-12 h-12 rounded-xl bg-linke/10 flex items-center justify-center group-hover:bg-linke/20 transition-colors">
+                    <i class="pi pi-folder text-2xl text-linke"></i>
+                </div>
+                <h3 class="text-sm font-medium text-[var(--color-text)] truncate w-full">
+                    {{ folder.name }}
+                </h3>
+                <span class="text-[10px] text-[var(--color-text-muted)]">
+                    {{ folder.file_count || 0 }} Dateien
+                </span>
+            </div>
+            @if (canManage()) {
+            <button (click)="confirmDeleteFolder(folder); $event.stopPropagation()"
+                class="absolute top-2 right-2 w-6 h-6 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 text-[var(--color-text-muted)] hover:text-red-400 hover:bg-red-500/10 transition-all">
+                <i class="pi pi-trash text-[10px]"></i>
+            </button>
+            }
+        </div>
+        }
+    </div>
+    }
+
+    <!-- Files in Folder -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        @for (file of fileService.files(); track file.id) {
+        <ng-container *ngTemplateOutlet="fileCard; context: { $implicit: file }" />
         } @empty {
         <div class="col-span-full text-center py-16">
-            <i class="pi pi-folder-open text-5xl text-[var(--color-text-muted)] mb-4"></i>
-            <p class="text-[var(--color-text-muted)]">
-                @if (isSearching()) {
-                Keine Dateien gefunden.
-                } @else {
-                Dieser Ordner ist leer.
-                }
-            </p>
+            <i class="pi pi-folder-open text-5xl text-[var(--color-text-muted)] mb-4 block"></i>
+            <p class="text-[var(--color-text-muted)]">Dieser Ordner ist leer.</p>
             <p-button label="Datei hochladen" icon="pi pi-upload" severity="secondary" [outlined]="true" size="small"
                 (click)="openUploadDialog()" styleClass="mt-4" />
         </div>
@@ -142,12 +265,91 @@
     }
 </div>
 
-<!-- Upload Dialog -->
+<!-- ===== FILE CARD TEMPLATE ===== -->
+<ng-template #fileCard let-file>
+    <div
+        class="bg-[var(--color-surface-card)] rounded-xl border border-[var(--color-border)] p-4 hover:border-linke/50 hover:shadow-lg transition-all group">
+        <!-- File Icon + Name -->
+        <div class="flex items-start gap-3 mb-2">
+            <div
+                class="w-10 h-10 rounded-lg bg-[var(--color-surface-raised)] flex items-center justify-center flex-shrink-0">
+                <i class="pi {{ fileService.getFileIcon(file.mime_type) }} text-lg text-[var(--color-text-muted)]"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="font-medium text-[var(--color-text)] truncate text-sm" [pTooltip]="file.name">
+                    {{ file.name }}
+                </h3>
+                <p class="text-xs text-[var(--color-text-muted)]">
+                    {{ fileService.formatFileSize(file.size_bytes) }}
+                </p>
+            </div>
+            @if (file.is_pinned) {
+            <i class="pi pi-bookmark-fill text-amber-400 text-xs flex-shrink-0"></i>
+            }
+        </div>
+
+        <!-- Description -->
+        @if (file.description) {
+        <p class="text-xs text-[var(--color-text-muted)] line-clamp-2 mb-2 leading-relaxed">
+            {{ file.description }}
+        </p>
+        }
+
+        <!-- Meta -->
+        <div class="flex items-center gap-2 mb-3 text-[10px] text-[var(--color-text-muted)]">
+            <span>{{ file.created_at | date:'dd.MM.yyyy' }}</span>
+            @if (file.uploader) {
+            <span>• {{ file.uploader.name }}</span>
+            }
+        </div>
+
+        <!-- Tags -->
+        <div class="flex items-center gap-1.5 flex-wrap mb-3">
+            <p-tag [value]="getVisibilityLabel(file.visibility)"
+                [severity]="$any(getVisibilitySeverity(file.visibility))"
+                styleClass="!text-[10px] !px-2 !py-0.5" />
+            @if (file.working_group) {
+            <p-tag [value]="file.working_group.name" severity="secondary"
+                styleClass="!text-[10px] !px-2 !py-0.5" />
+            }
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-1.5 pt-3 border-t border-[var(--color-border)]">
+            <button (click)="downloadFile(file)"
+                class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-[var(--color-surface-raised)] hover:bg-linke/20 text-[var(--color-text)] transition-colors">
+                <i class="pi pi-download mr-1"></i>Download
+            </button>
+            @if (canManage()) {
+            <button (click)="togglePin(file)" [pTooltip]="file.is_pinned ? 'Lösen' : 'Anpinnen'"
+                class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                [class.text-amber-400]="file.is_pinned"
+                [class.hover:bg-amber-500/10]="file.is_pinned"
+                [class.text-[var(--color-text-muted)]]="!file.is_pinned"
+                [class.hover:bg-[var(--color-surface-raised)]]="!file.is_pinned">
+                <i class="pi text-xs" [class.pi-bookmark-fill]="file.is_pinned"
+                    [class.pi-bookmark]="!file.is_pinned"></i>
+            </button>
+            <button (click)="openMoveDialog(file)" pTooltip="Verschieben"
+                class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:bg-[var(--color-surface-raised)] transition-colors">
+                <i class="pi pi-arrow-right-arrow-left text-xs"></i>
+            </button>
+            }
+            @if (canDelete(file)) {
+            <button (click)="confirmDelete(file)"
+                class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                <i class="pi pi-trash text-xs"></i>
+            </button>
+            }
+        </div>
+    </div>
+</ng-template>
+
+<!-- ===== UPLOAD DIALOG ===== -->
 <p-dialog header="Datei hochladen" [(visible)]="uploadDialogVisible" [modal]="true" [draggable]="false"
     [resizable]="false" maskStyleClass="backdrop-blur-sm bg-black/50" [style]="{width: '500px', maxWidth: '95vw'}">
 
     <div class="space-y-4">
-        <!-- File Upload -->
         <p-fileUpload mode="advanced" name="file" [auto]="false" [customUpload]="true"
             (uploadHandler)="handleUpload($event)" chooseLabel="Datei auswählen" uploadLabel="Hochladen"
             cancelLabel="Abbrechen" [maxFileSize]="50000000"
@@ -176,4 +378,53 @@
                 class="w-full"></textarea>
         </div>
     </div>
+</p-dialog>
+
+<!-- ===== CREATE FOLDER DIALOG ===== -->
+<p-dialog header="Neuen Ordner erstellen" [(visible)]="createFolderDialogVisible" [modal]="true" [draggable]="false"
+    [resizable]="false" maskStyleClass="backdrop-blur-sm bg-black/50" [style]="{width: '400px', maxWidth: '95vw'}">
+
+    <div class="space-y-4">
+        <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium">Ordnername</label>
+            <input type="text" pInputText [(ngModel)]="newFolderName" placeholder="z. B. Protokolle"
+                class="w-full" (keyup.enter)="createFolder()" />
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2">
+            <p-button label="Abbrechen" severity="secondary" [outlined]="true" size="small"
+                (click)="createFolderDialogVisible.set(false)" />
+            <p-button label="Erstellen" icon="pi pi-check" severity="danger" size="small"
+                (click)="createFolder()" [disabled]="!newFolderName.trim()" />
+        </div>
+    </ng-template>
+</p-dialog>
+
+<!-- ===== MOVE FILE DIALOG ===== -->
+<p-dialog header="Datei verschieben" [(visible)]="moveFileDialogVisible" [modal]="true" [draggable]="false"
+    [resizable]="false" maskStyleClass="backdrop-blur-sm bg-black/50" [style]="{width: '400px', maxWidth: '95vw'}">
+
+    <div class="space-y-4">
+        @if (moveFileTarget) {
+        <p class="text-sm text-[var(--color-text-muted)]">
+            <i class="pi pi-file mr-1"></i>{{ moveFileTarget.name }}
+        </p>
+        }
+        <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium">Zielordner</label>
+            <p-select [options]="getMoveTargetOptions()" [(ngModel)]="moveTargetFolderId" optionLabel="label"
+                optionValue="value" placeholder="Ordner wählen..." styleClass="w-full" />
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2">
+            <p-button label="Abbrechen" severity="secondary" [outlined]="true" size="small"
+                (click)="moveFileDialogVisible.set(false)" />
+            <p-button label="Verschieben" icon="pi pi-arrow-right" severity="danger" size="small"
+                (click)="moveFile()" />
+        </div>
+    </ng-template>
 </p-dialog>

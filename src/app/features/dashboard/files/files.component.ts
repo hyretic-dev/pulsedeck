@@ -1,4 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {
+    Component,
+    OnInit,
+    inject,
+    signal,
+    computed,
+} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -12,14 +18,29 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
-import { FileUploadModule, FileUploadHandlerEvent } from 'primeng/fileupload';
+import {
+    FileUploadModule,
+    FileUploadHandlerEvent,
+} from 'primeng/fileupload';
 import { TagModule } from 'primeng/tag';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
 // Services
-import { FileService, FileMetadata, FileVisibility } from '../../../shared/services/file.service';
+import {
+    FileService,
+    FileMetadata,
+    FileVisibility,
+    FolderMetadata,
+} from '../../../shared/services/file.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { WorkingGroupsService } from '../../../shared/services/working-groups.service';
+
+type ViewMode = 'overview' | 'folder';
+
+interface BreadcrumbItem {
+    label: string;
+    folderId: string | null;
+}
 
 @Component({
     selector: 'app-files',
@@ -46,15 +67,25 @@ import { WorkingGroupsService } from '../../../shared/services/working-groups.se
 export class FilesComponent implements OnInit {
     public fileService = inject(FileService);
     public auth = inject(AuthService);
-    private workingGroupsService = inject(WorkingGroupsService);
-    private messageService = inject(MessageService);
-    private confirmationService = inject(ConfirmationService);
+    private wgService = inject(WorkingGroupsService);
+    private msg = inject(MessageService);
+    private confirm = inject(ConfirmationService);
 
-    workingGroups = this.workingGroupsService.workingGroups;
+    workingGroups = this.wgService.workingGroups;
 
-    // State
+    // View state
+    viewMode = signal<ViewMode>('overview');
+    breadcrumbs = signal<BreadcrumbItem[]>([
+        { label: 'Dateien', folderId: null },
+    ]);
+
+    // Dialogs
     uploadDialogVisible = signal(false);
     uploading = signal(false);
+    createFolderDialogVisible = signal(false);
+    moveFileDialogVisible = signal(false);
+
+    // Search
     searchQuery = signal('');
     searchResults = signal<FileMetadata[]>([]);
     isSearching = signal(false);
@@ -64,6 +95,14 @@ export class FilesComponent implements OnInit {
     uploadDescription = '';
     uploadWorkingGroupId: string | null = null;
 
+    // Create folder form
+    newFolderName = '';
+
+    // Move file
+    moveFileTarget: FileMetadata | null = null;
+    moveTargetFolderId: string | null = null;
+    allFolders = signal<FolderMetadata[]>([]);
+
     visibilityOptions = [
         { label: 'Alle Mitglieder', value: 'member' },
         { label: 'Nur Vorstand', value: 'committee' },
@@ -71,43 +110,80 @@ export class FilesComponent implements OnInit {
         { label: 'Nur AG-Mitglieder', value: 'ag-only' },
     ];
 
+    /** True wenn der User Admin oder Committee ist */
+    canManage = computed(() => {
+        const role = this.auth.currentMember()?.app_role;
+        return role === 'admin' || role === 'committee';
+    });
+
     ngOnInit(): void {
-        this.fileService.fetchFiles('/');
-        this.fileService.fetchFolders();
-        this.workingGroupsService.fetchWorkingGroups();
+        this.loadOverview();
+        this.wgService.fetchWorkingGroups();
+    }
+
+    // --- Overview ---
+
+    async loadOverview(): Promise<void> {
+        this.viewMode.set('overview');
+        this.breadcrumbs.set([
+            { label: 'Dateien', folderId: null },
+        ]);
+        this.fileService.loading.set(true);
+
+        await Promise.all([
+            this.fileService.fetchPinnedFiles(),
+            this.fileService.fetchRecentFiles(8),
+            this.fileService.fetchFolderList(null),
+            this.fileService.fetchFilesByFolderId(null),
+        ]);
+
+        this.fileService.loading.set(false);
     }
 
     // --- Folder Navigation ---
 
-    navigateToFolder(folder: string): void {
-        this.fileService.fetchFiles(folder);
+    async openFolder(folder: FolderMetadata): Promise<void> {
+        this.viewMode.set('folder');
         this.clearSearch();
+
+        const crumbs = [...this.breadcrumbs()];
+        crumbs.push({
+            label: folder.name,
+            folderId: folder.id,
+        });
+        this.breadcrumbs.set(crumbs);
+
+        this.fileService.loading.set(true);
+        await Promise.all([
+            this.fileService.fetchFolderList(folder.id),
+            this.fileService.fetchFilesByFolderId(folder.id),
+        ]);
+        this.fileService.loading.set(false);
     }
 
-    navigateUp(): void {
-        const current = this.fileService.currentFolder();
-        if (current === '/') return;
-
-        const parts = current.split('/').filter(Boolean);
-        parts.pop();
-        const parent = parts.length === 0 ? '/' : '/' + parts.join('/');
-        this.navigateToFolder(parent);
-    }
-
-    getBreadcrumbs(): { label: string; path: string }[] {
-        const current = this.fileService.currentFolder();
-        if (current === '/') return [{ label: 'Dateien', path: '/' }];
-
-        const parts = current.split('/').filter(Boolean);
-        const breadcrumbs = [{ label: 'Dateien', path: '/' }];
-
-        let path = '';
-        for (const part of parts) {
-            path += '/' + part;
-            breadcrumbs.push({ label: part, path });
+    async navigateToBreadcrumb(
+        item: BreadcrumbItem
+    ): Promise<void> {
+        if (!item.folderId) {
+            await this.loadOverview();
+            return;
         }
 
-        return breadcrumbs;
+        const crumbs = this.breadcrumbs();
+        const idx = crumbs.findIndex(
+            c => c.folderId === item.folderId
+        );
+        if (idx >= 0) {
+            this.breadcrumbs.set(crumbs.slice(0, idx + 1));
+        }
+
+        this.viewMode.set('folder');
+        this.fileService.loading.set(true);
+        await Promise.all([
+            this.fileService.fetchFolderList(item.folderId),
+            this.fileService.fetchFilesByFolderId(item.folderId),
+        ]);
+        this.fileService.loading.set(false);
     }
 
     // --- Upload ---
@@ -119,28 +195,40 @@ export class FilesComponent implements OnInit {
         this.uploadDialogVisible.set(true);
     }
 
-    async handleUpload(event: FileUploadHandlerEvent): Promise<void> {
+    async handleUpload(
+        event: FileUploadHandlerEvent
+    ): Promise<void> {
         const file = event.files[0];
         if (!file) return;
 
         this.uploading.set(true);
+        const folderId =
+            this.fileService.currentFolderId() ?? undefined;
 
         try {
-            await this.fileService.uploadFile(file, this.fileService.currentFolder(), {
-                visibility: this.uploadVisibility,
-                description: this.uploadDescription || undefined,
-                workingGroupId: this.uploadWorkingGroupId || undefined,
-            });
+            await this.fileService.uploadFile(
+                file,
+                this.fileService.currentFolder(),
+                {
+                    visibility: this.uploadVisibility,
+                    description:
+                        this.uploadDescription || undefined,
+                    workingGroupId:
+                        this.uploadWorkingGroupId || undefined,
+                    folderId,
+                }
+            );
 
-            this.messageService.add({
+            this.msg.add({
                 severity: 'success',
                 summary: 'Hochgeladen',
                 detail: `${file.name} wurde hochgeladen.`,
             });
 
             this.uploadDialogVisible.set(false);
+            await this.refreshCurrentView();
         } catch (e) {
-            this.messageService.add({
+            this.msg.add({
                 severity: 'error',
                 summary: 'Fehler',
                 detail: (e as Error).message,
@@ -150,13 +238,129 @@ export class FilesComponent implements OnInit {
         this.uploading.set(false);
     }
 
+    // --- Create Folder ---
+
+    openCreateFolderDialog(): void {
+        this.newFolderName = '';
+        this.createFolderDialogVisible.set(true);
+    }
+
+    async createFolder(): Promise<void> {
+        const name = this.newFolderName.trim();
+        if (!name) return;
+
+        try {
+            const parentId =
+                this.fileService.currentFolderId();
+            await this.fileService.createPersistentFolder(
+                name,
+                parentId
+            );
+
+            this.msg.add({
+                severity: 'success',
+                summary: 'Ordner erstellt',
+                detail: `„${name}" wurde angelegt.`,
+            });
+
+            this.createFolderDialogVisible.set(false);
+            await this.refreshCurrentView();
+        } catch (e) {
+            this.msg.add({
+                severity: 'error',
+                summary: 'Fehler',
+                detail: (e as Error).message,
+            });
+        }
+    }
+
+    // --- Pin / Unpin ---
+
+    async togglePin(file: FileMetadata): Promise<void> {
+        const newState = !file.is_pinned;
+        try {
+            await this.fileService.togglePin(
+                file.id!,
+                newState
+            );
+            this.msg.add({
+                severity: 'success',
+                summary: newState ? 'Angepinnt' : 'Gelöst',
+                detail: newState
+                    ? `${file.name} wurde angepinnt.`
+                    : `${file.name} wurde gelöst.`,
+            });
+            await this.refreshCurrentView();
+        } catch (e) {
+            this.msg.add({
+                severity: 'error',
+                summary: 'Fehler',
+                detail: (e as Error).message,
+            });
+        }
+    }
+
+    // --- Move File ---
+
+    async openMoveDialog(
+        file: FileMetadata
+    ): Promise<void> {
+        this.moveFileTarget = file;
+        this.moveTargetFolderId = null;
+
+        const orgId = this.fileService['org'].currentOrgId();
+        if (!orgId) return;
+
+        const { data } = await this.fileService[
+            'supabase'
+        ].client
+            .from('folders')
+            .select('*')
+            .eq('organization_id', orgId)
+            .order('name', { ascending: true });
+
+        this.allFolders.set(
+            (data as FolderMetadata[]) || []
+        );
+        this.moveFileDialogVisible.set(true);
+    }
+
+    async moveFile(): Promise<void> {
+        if (!this.moveFileTarget?.id) return;
+
+        try {
+            await this.fileService.moveFile(
+                this.moveFileTarget.id,
+                this.moveTargetFolderId
+            );
+
+            this.msg.add({
+                severity: 'success',
+                summary: 'Verschoben',
+                detail: `${this.moveFileTarget.name} wurde verschoben.`,
+            });
+
+            this.moveFileDialogVisible.set(false);
+            this.moveFileTarget = null;
+            await this.refreshCurrentView();
+        } catch (e) {
+            this.msg.add({
+                severity: 'error',
+                summary: 'Fehler',
+                detail: (e as Error).message,
+            });
+        }
+    }
+
     // --- Download ---
 
-    async downloadFile(file: FileMetadata): Promise<void> {
+    async downloadFile(
+        file: FileMetadata
+    ): Promise<void> {
         try {
             await this.fileService.downloadFile(file);
         } catch (e) {
-            this.messageService.add({
+            this.msg.add({
                 severity: 'error',
                 summary: 'Fehler',
                 detail: 'Download fehlgeschlagen.',
@@ -164,11 +368,11 @@ export class FilesComponent implements OnInit {
         }
     }
 
-    // --- Delete ---
+    // --- Delete File ---
 
     confirmDelete(file: FileMetadata): void {
-        this.confirmationService.confirm({
-            message: `Möchtest du "${file.name}" wirklich löschen?`,
+        this.confirm.confirm({
+            message: `„${file.name}" wirklich löschen?`,
             header: 'Löschen bestätigen',
             icon: 'pi pi-exclamation-triangle',
             acceptLabel: 'Ja, löschen',
@@ -176,13 +380,45 @@ export class FilesComponent implements OnInit {
             accept: async () => {
                 try {
                     await this.fileService.deleteFile(file);
-                    this.messageService.add({
+                    this.msg.add({
                         severity: 'success',
                         summary: 'Gelöscht',
                         detail: 'Datei wurde gelöscht.',
                     });
+                    await this.refreshCurrentView();
                 } catch (e) {
-                    this.messageService.add({
+                    this.msg.add({
+                        severity: 'error',
+                        summary: 'Fehler',
+                        detail: (e as Error).message,
+                    });
+                }
+            },
+        });
+    }
+
+    // --- Delete Folder ---
+
+    confirmDeleteFolder(folder: FolderMetadata): void {
+        this.confirm.confirm({
+            message: `Ordner „${folder.name}" und alle Inhalte löschen?`,
+            header: 'Ordner löschen',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Ja, löschen',
+            rejectLabel: 'Abbrechen',
+            accept: async () => {
+                try {
+                    await this.fileService.deleteFolder(
+                        folder.id
+                    );
+                    this.msg.add({
+                        severity: 'success',
+                        summary: 'Gelöscht',
+                        detail: 'Ordner wurde gelöscht.',
+                    });
+                    await this.refreshCurrentView();
+                } catch (e) {
+                    this.msg.add({
                         severity: 'error',
                         summary: 'Fehler',
                         detail: (e as Error).message,
@@ -203,7 +439,8 @@ export class FilesComponent implements OnInit {
 
         this.isSearching.set(true);
         try {
-            const results = await this.fileService.searchFiles(query);
+            const results =
+                await this.fileService.searchFiles(query);
             this.searchResults.set(results);
         } catch (e) {
             console.error('Search error:', e);
@@ -221,7 +458,10 @@ export class FilesComponent implements OnInit {
     canDelete(file: FileMetadata): boolean {
         const member = this.auth.currentMember();
         if (!member) return false;
-        return file.uploaded_by === member.id || member.app_role === 'admin';
+        return (
+            file.uploaded_by === member.id ||
+            member.app_role === 'admin'
+        );
     }
 
     getVisibilityLabel(visibility: FileVisibility): string {
@@ -235,14 +475,45 @@ export class FilesComponent implements OnInit {
         return labels[visibility];
     }
 
-    getVisibilitySeverity(visibility: FileVisibility): string {
-        const severities: Record<FileVisibility, string> = {
+    getVisibilitySeverity(
+        visibility: FileVisibility
+    ): string {
+        const map: Record<FileVisibility, string> = {
             public: 'success',
             member: 'info',
             committee: 'warn',
             admin: 'danger',
             'ag-only': 'secondary',
         };
-        return severities[visibility];
+        return map[visibility];
+    }
+
+    getMoveTargetOptions(): {
+        label: string;
+        value: string | null;
+    }[] {
+        const root = [
+            { label: '/ Hauptverzeichnis', value: null as string | null },
+        ];
+        const folderOpts = this.allFolders().map(f => ({
+            label: f.name,
+            value: f.id as string | null,
+        }));
+        return [...root, ...folderOpts];
+    }
+
+    private async refreshCurrentView(): Promise<void> {
+        if (this.viewMode() === 'overview') {
+            await this.loadOverview();
+            return;
+        }
+        const folderId =
+            this.fileService.currentFolderId();
+        await Promise.all([
+            this.fileService.fetchFolderList(folderId),
+            this.fileService.fetchFilesByFolderId(folderId),
+            this.fileService.fetchPinnedFiles(),
+            this.fileService.fetchRecentFiles(8),
+        ]);
     }
 }
