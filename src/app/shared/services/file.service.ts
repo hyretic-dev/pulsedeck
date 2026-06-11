@@ -21,6 +21,7 @@ export interface FileMetadata {
     working_group_id?: string;
     visibility: FileVisibility;
     organization_id?: string;
+    is_indexed?: boolean;
     created_at?: string;
     updated_at?: string;
     // Joined

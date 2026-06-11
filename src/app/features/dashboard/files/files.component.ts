@@ -246,9 +246,35 @@ export class FilesComponent implements OnInit {
                 summary: 'Fehler',
                 detail: (e as Error).message,
             });
+        } finally {
+            this.uploading.set(false);
         }
+    }
 
-        this.uploading.set(false);
+    async triggerIndexing(file: FileMetadata): Promise<void> {
+        if (!file.id) return;
+        this.msg.add({
+            severity: 'info',
+            summary: 'KI-Indizierung',
+            detail: 'Indizierung gestartet...',
+        });
+
+        const result = await this.fileService.triggerFileIngestion(file.id);
+        if (result && result.success) {
+            this.msg.add({
+                severity: 'success',
+                summary: 'KI-Indizierung',
+                detail: 'Datei wurde erfolgreich für die KI verarbeitet.',
+            });
+            await this.refreshCurrentView();
+        } else {
+            this.msg.add({
+                severity: 'warn',
+                summary: 'KI-Indizierung fehlgeschlagen',
+                detail: result?.message || 'Unbekannter Fehler',
+                life: 6000
+            });
+        }
     }
 
     // --- Create Folder ---

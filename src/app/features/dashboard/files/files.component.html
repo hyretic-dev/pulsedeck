@@ -321,6 +321,12 @@
                 <i class="pi pi-download mr-1"></i>Download
             </button>
             @if (canManage()) {
+            @if (!file.is_indexed && (file.mime_type === 'application/pdf' || file.mime_type?.startsWith('text/'))) {
+            <button (click)="triggerIndexing(file)" pTooltip="KI-Index aktualisieren"
+                class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:text-teal hover:bg-teal/10 transition-colors">
+                <i class="pi pi-sync text-xs"></i>
+            </button>
+            }
             <button (click)="togglePin(file)" [pTooltip]="file.is_pinned ? 'Lösen' : 'Anpinnen'"
                 class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
                 [class.text-amber-400]="file.is_pinned"
