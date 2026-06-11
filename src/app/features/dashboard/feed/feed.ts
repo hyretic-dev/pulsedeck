@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal, effect, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -24,6 +24,7 @@ import { FeedService, FeedItem, NewsletterConfig } from '../../../shared/service
 import { NotificationService } from '../../../shared/services/notification.service';
 
 import { RichTextRendererComponent } from '../../../shared/components/rich-text-renderer/rich-text-renderer.component';
+import { WorkingGroupsService } from '../../../shared/services/working-groups.service';
 
 @Component({
     selector: 'app-feed',
@@ -53,10 +54,23 @@ export class FeedComponent {
     canCreate = this.permissions.canCreateFeed;
     canApprove = this.permissions.canApproveFeed;
 
+    wgService = inject(WorkingGroupsService);
+    workingGroups = this.wgService.workingGroups;
+
+    // Filter
+    selectedWorkingGroupFilter = signal<string | null>(null);
+
     feedItems = signal<FeedItem[]>([]);
     myItems = signal<FeedItem[]>([]);
     reviewItems = signal<FeedItem[]>([]);
     sentItems = signal<FeedItem[]>([]);
+
+    filteredFeedItems = computed(() => {
+        const filter = this.selectedWorkingGroupFilter();
+        const items = this.feedItems();
+        if (!filter) return items;
+        return items.filter(i => i.working_group_id === filter);
+    });
 
     // Admin View Switch
     adminView = signal<'review' | 'sent'>('review');
@@ -109,6 +123,7 @@ export class FeedComponent {
     }
 
     loadData() {
+        this.wgService.fetchWorkingGroups();
         this.loadFeed();
         if (this.auth.isMember()) this.loadMyItems();
         if (this.auth.isAdmin()) {

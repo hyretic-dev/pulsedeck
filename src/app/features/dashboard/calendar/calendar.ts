@@ -616,6 +616,61 @@ export class CalendarComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Download iCal file for a single event
+   */
+  downloadEventIcal(event: CalendarEvent): void {
+    if (!event.date) return;
+
+    const startDate = new Date(event.date);
+    const [startH, startM] = (event.start_time || '10:00').split(':').map(Number);
+    startDate.setHours(startH, startM, 0, 0);
+
+    let endDate = new Date(startDate);
+    if (event.end_time) {
+      const [endH, endM] = event.end_time.split(':').map(Number);
+      endDate.setHours(endH, endM, 0, 0);
+    } else {
+      endDate.setHours(endDate.getHours() + 2); // Default 2h
+    }
+
+    const formatDate = (d: Date) =>
+      d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+    const title = event.title;
+    const location = event.location || '';
+    const description = event.description || '';
+
+    const ical = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//PulseDeck//DE',
+      'BEGIN:VEVENT',
+      `DTSTART:${formatDate(startDate)}`,
+      `DTEND:${formatDate(endDate)}`,
+      `SUMMARY:${title}`,
+      `LOCATION:${location}`,
+      `DESCRIPTION:${description}`,
+      `UID:${event.id}@pulsedeck.de`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+
+    const blob = new Blob([ical], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${event.title.replace(/\s+/g, '_')}.ics`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    this.messageService.add({
+      severity: 'success',
+      summary: 'iCal heruntergeladen',
+      detail: 'Öffne die Datei, um sie zum Kalender hinzuzufügen.'
+    });
+  }
+
+  /**
    * Generate a formatted WhatsApp-friendly text and copy to clipboard
    */
   async copyWhatsAppText(event: CalendarEvent) {

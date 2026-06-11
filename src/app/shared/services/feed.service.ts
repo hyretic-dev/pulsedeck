@@ -32,9 +32,11 @@ export interface FeedItem {
     is_public?: boolean;
     author_id?: string;
     sent_at?: string;
+    working_group_id?: string;
 
     // joined
     author?: { name: string };
+    working_group?: { name: string; category?: string };
 }
 
 @Injectable({ providedIn: 'root' })
@@ -49,7 +51,7 @@ export class FeedService {
 
         let query = this.supabase.client
             .from('feed_items')
-            .select('*, author:members(name), poll_options(id, text, sort_order, poll_votes(member_id))')
+            .select('*, author:members(name), working_group:working_groups(name, category), poll_options(id, text, sort_order, poll_votes(member_id))')
             .in('status', ['approved', 'sent'])
             .order('created_at', { ascending: false });
 
@@ -70,7 +72,7 @@ export class FeedService {
 
         const { data, error } = await this.supabase.client
             .from('feed_items')
-            .select('*, author:members(name), poll_options(id, text, sort_order, poll_votes(member_id))')
+            .select('*, author:members(name), working_group:working_groups(name, category), poll_options(id, text, sort_order, poll_votes(member_id))')
             .eq('author_id', memberId)
             .order('created_at', { ascending: false });
 
@@ -84,7 +86,7 @@ export class FeedService {
 
         let query = this.supabase.client
             .from('feed_items')
-            .select('*, author:members(name), poll_options(id, text, sort_order, poll_votes(member_id))')
+            .select('*, author:members(name), working_group:working_groups(name, category), poll_options(id, text, sort_order, poll_votes(member_id))')
             .eq('status', 'review')
             .order('created_at', { ascending: false });
 
@@ -103,7 +105,7 @@ export class FeedService {
 
         let query = this.supabase.client
             .from('feed_items')
-            .select('*, author:members(name), poll_options(id, text, sort_order, poll_votes(member_id))')
+            .select('*, author:members(name), working_group:working_groups(name, category), poll_options(id, text, sort_order, poll_votes(member_id))')
             .eq('status', 'approved')
             .order('created_at', { ascending: false });
 
@@ -122,7 +124,7 @@ export class FeedService {
 
         let query = this.supabase.client
             .from('feed_items')
-            .select('*, author:members(name)')
+            .select('*, author:members(name), working_group:working_groups(name, category)')
             .eq('status', 'sent')
             .order('sent_at', { ascending: false });
 
@@ -141,7 +143,7 @@ export class FeedService {
         if (!memberId) throw new Error('Not member');
 
         // Remove joined fields and temp options
-        const { author, poll_options, options, ...cleanItem } = item as any;
+        const { author, poll_options, options, working_group, ...cleanItem } = item as any;
 
         const { data: newItem, error } = await this.supabase.client
             .from('feed_items')
@@ -174,7 +176,7 @@ export class FeedService {
     }
 
     async updateItem(id: string, updates: Partial<FeedItem>) {
-        const { author, ...cleanUpdates } = updates as any;
+        const { author, poll_options, working_group, ...cleanUpdates } = updates as any;
 
         const { data, error } = await this.supabase.client
             .from('feed_items')

@@ -41,8 +41,23 @@
         <p-tabpanels>
             <!-- Tab 1: Feed (Öffentlich/Approved) -->
             <p-tabpanel value="0">
+                <div class="mb-6 flex gap-2 overflow-x-auto pb-2">
+                    <p-button label="Alle" [rounded]="true" size="small"
+                        [severity]="selectedWorkingGroupFilter() === null ? 'primary' : 'secondary'"
+                        [outlined]="selectedWorkingGroupFilter() !== null"
+                        (click)="selectedWorkingGroupFilter.set(null)">
+                    </p-button>
+                    @for (group of workingGroups(); track group.id) {
+                        <p-button [label]="group.name" [rounded]="true" size="small"
+                            [severity]="selectedWorkingGroupFilter() === group.id ? 'primary' : 'secondary'"
+                            [outlined]="selectedWorkingGroupFilter() !== group.id"
+                            (click)="selectedWorkingGroupFilter.set(group.id || null)">
+                        </p-button>
+                    }
+                </div>
+
                 <div class="grid gap-6">
-                    @for (item of feedItems(); track item.id) {
+                    @for (item of filteredFeedItems(); track item.id) {
                     <div
                         class="bg-[var(--color-surface-card)] rounded-xl border border-[var(--color-border)] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                         <div class="p-6">
@@ -57,6 +72,11 @@
                                         <span>{{ item.author?.name || 'Unbekannt' }}</span>
                                         <p-tag [value]="item.type === 'link' ? 'Link' : 'Artikel'" severity="info"
                                             styleClass="text-xs ml-2"></p-tag>
+                                        @if (item.working_group) {
+                                        <span class="text-teal-600 bg-teal-500/10 px-2 py-0.5 rounded text-xs ml-2 border border-teal-500/20 whitespace-nowrap">
+                                            {{ item.working_group.name }}
+                                        </span>
+                                        }
                                     </div>
                                 </div>
                                 <div *ngIf="item.status === 'sent'"
@@ -132,7 +152,7 @@
                         </div>
                     </div>
                     }
-                    @if (feedItems().length === 0) {
+                    @if (filteredFeedItems().length === 0) {
                     <div
                         class="flex flex-col items-center justify-center py-16 text-[var(--color-text-muted)] bg-[var(--color-surface-raised)] rounded-xl border border-[var(--color-border)] border-dashed">
                         <i class="pi pi-inbox text-4xl mb-3 opacity-50"></i>
@@ -150,7 +170,7 @@
                         class="bg-[var(--color-surface-card)] p-4 rounded-lg border border-[var(--color-border)] flex flex-col md:flex-row gap-4 justify-between items-start md:items-center hover:bg-[var(--color-surface-overlay)] transition-colors">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center flex-wrap gap-2 mb-1">
-                                <h3 class="font-bold text-lg truncate">{{ item.title }}</h3>
+                                <h3 class="font-bold text-lg text-wrap break-words line-clamp-2 md:line-clamp-none w-full md:w-auto">{{ item.title }}</h3>
                                 <p-tag [value]="item.status" [severity]="getStatusSeverity(item.status)"></p-tag>
                             </div>
                             <div class="text-sm text-[var(--color-text-muted)] flex items-center gap-2">
@@ -248,7 +268,7 @@
                             class="bg-[var(--color-surface-card)] p-4 rounded-lg border border-[var(--color-border)] flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center flex-wrap gap-2 mb-1">
-                                    <h3 class="font-bold text-lg truncate">{{ item.title }}</h3>
+                                    <h3 class="font-bold text-lg text-wrap break-words line-clamp-2 md:line-clamp-none w-full md:w-auto">{{ item.title }}</h3>
                                     <p-tag value="Versendet" severity="info"></p-tag>
                                     <p-tag [value]="item.type" severity="secondary"></p-tag>
                                 </div>
@@ -310,6 +330,12 @@
             <div class="flex flex-col gap-2">
                 <label class="font-medium text-sm text-[var(--color-text-muted)]">Titel</label>
                 <input pInputText [(ngModel)]="currentItem.title" placeholder="Titel des Beitrags" class="w-full" />
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="font-medium text-sm text-[var(--color-text-muted)]">Interessensgruppe (Optional)</label>
+                <p-select [options]="workingGroups()" [(ngModel)]="currentItem.working_group_id" optionLabel="name" optionValue="id"
+                    placeholder="Wähle eine AG/Interessensgruppe" [showClear]="true" styleClass="w-full" appendTo="body"></p-select>
             </div>
 
             <!-- Visibility & Status Control -->
