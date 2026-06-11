@@ -150,7 +150,7 @@
         <!-- File Upload -->
         <p-fileUpload mode="advanced" name="file" [auto]="false" [customUpload]="true"
             (uploadHandler)="handleUpload($event)" chooseLabel="Datei auswählen" uploadLabel="Hochladen"
-            cancelLabel="Abbrechen" accept="*/*" [maxFileSize]="50000000"
+            cancelLabel="Abbrechen" [maxFileSize]="50000000"
             styleClass="[&_.p-fileupload-content]:bg-[var(--color-surface-raised)] [&_.p-fileupload-content]:border-[var(--color-border)]" />
 
         <!-- Visibility -->
