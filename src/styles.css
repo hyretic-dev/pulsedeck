@@ -1112,3 +1112,17 @@ section {
         font-size: 0.8125rem !important;
     }
 }
+
+/* Mobile Sidebar Drawer Overrides */
+.mobile-sidebar-drawer {
+    overflow: visible !important;
+}
+
+.mobile-sidebar-drawer .p-drawer-header {
+    padding: 0 !important;
+}
+
+.mobile-sidebar-drawer .p-drawer-content {
+    padding: 0 !important;
+    overflow: visible !important;
+}

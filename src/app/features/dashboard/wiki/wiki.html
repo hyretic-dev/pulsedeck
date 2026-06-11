@@ -266,12 +266,14 @@
         </div>
         } @else {
         <!-- Empty State -->
-        <div class="flex-1 flex items-center justify-center bg-[var(--color-surface)]/30 border border-[var(--color-border)] rounded-xl">
-            <div class="text-center">
-                <i class="pi pi-book text-4xl text-[var(--color-text-muted)] mb-3"></i>
-                <p class="text-[var(--color-text-muted)] text-sm">Wähle einen Artikel aus der Liste</p>
+        <div class="flex-1 flex items-center justify-center bg-[var(--color-surface)]/30 border border-[var(--color-border)] rounded-xl p-8 lg:p-12">
+            <div class="text-center max-w-md mx-auto">
+                <div class="w-16 h-16 rounded-full bg-[var(--color-surface-raised)] flex items-center justify-center mx-auto mb-4">
+                    <i class="pi pi-book text-2xl text-[var(--color-text-muted)]"></i>
+                </div>
+                <p class="text-[var(--color-text-muted)] text-sm mb-6">Wähle einen Artikel aus der Liste auf der linken Seite, um ihn hier zu lesen, oder erstelle direkt einen neuen Artikel für deine Organisation.</p>
                 @if (canEdit()) {
-                <p-button label="Neuen Artikel erstellen" icon="pi pi-plus" [text]="true" size="small" styleClass="mt-3"
+                <p-button label="Neuen Artikel erstellen" icon="pi pi-plus" severity="danger" [outlined]="true" [rounded]="true"
                     (click)="openNew()"></p-button>
                 }
             </div>

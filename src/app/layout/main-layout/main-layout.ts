@@ -1,5 +1,10 @@
 import { Component, signal, inject } from '@angular/core';
-import { Router, NavigationStart, RouterOutlet, RouterModule } from '@angular/router';
+import {
+  Router,
+  NavigationStart,
+  RouterOutlet,
+  RouterModule
+} from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
 import { SidebarLeft } from '../sidebar-left/sidebar-left';
 import { SidebarRight } from '../sidebar-right/sidebar-right';

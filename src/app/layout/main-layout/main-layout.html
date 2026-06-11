@@ -11,9 +11,7 @@
         <header class="lg:hidden flex items-center justify-between p-4
             bg-[var(--color-surface)] border-b border-[var(--color-border)]
             z-10 sticky top-0">
-            <p-button icon="pi pi-bars" [text]="true"
-                (click)="leftSidebarVisible.set(true)"
-                styleClass="text-[var(--color-text-muted)]
+            <p-button icon="pi pi-bars" [text]="true" (click)="leftSidebarVisible.set(true)" styleClass="text-[var(--color-text-muted)]
                     hover:text-[var(--color-text)]" />
             <span class="text-lg font-bold text-linke">PulseDeck</span>
             <div class="w-10"></div>
@@ -133,21 +131,56 @@
     }
 </div>
 
+<!-- Custom stable backdrop for left sidebar -->
+@if (leftSidebarVisible()) {
+    <div 
+        class="fixed inset-0 bg-surface-900/40 z-[1000] lg:hidden animate-fadein" 
+        (click)="leftSidebarVisible.set(false)">
+    </div>
+}
+
 <!-- Mobile Left Drawer (Navigation) -->
-<p-drawer [(visible)]="leftSidebarVisible" position="left"
-    [styleClass]="'!bg-[var(--color-surface)] !border-r !border-[var(--color-border)] !w-[85vw] max-w-xs'"
-    [modal]="true" [dismissible]="true">
+<p-drawer [visible]="leftSidebarVisible()" (visibleChange)="leftSidebarVisible.set($event)" appendTo="body"
+    position="left" styleClass="!bg-[var(--color-surface)]
+        !border-r
+        !border-[var(--color-border)]
+        !w-[85vw]
+        max-w-xs
+        mobile-sidebar-drawer" [modal]="false" [showCloseIcon]="false" [blockScroll]="false"
+    [transitionOptions]="'150ms cubic-bezier(0, 0, 0.2, 1)'">
     <ng-template pTemplate="content">
-        <div class="h-full py-2">
+        <div class="h-full pt-4 px-4 pb-2 relative">
+            <!-- Close Arrow Button -->
+            <button (click)="leftSidebarVisible.set(false); $event.stopPropagation()" class="absolute -right-6 top-1/2 -translate-y-1/2 w-6 h-12
+                    bg-[var(--color-surface)] border-y border-r
+                    border-[var(--color-border)] rounded-r-lg flex
+                    items-center justify-center
+                    text-[var(--color-text-muted)]
+                    hover:text-[var(--color-text)]
+                    hover:bg-[var(--color-surface-overlay)]
+                    transition-colors z-50">
+                <i class="pi pi-chevron-left text-[10px]"></i>
+            </button>
             <app-sidebar-left></app-sidebar-left>
         </div>
     </ng-template>
 </p-drawer>
 
+<!-- Custom stable backdrop for right sidebar -->
+@if (rightSidebarVisible()) {
+    <div 
+        class="fixed inset-0 bg-surface-900/40 z-[1000] xl:hidden animate-fadein" 
+        (click)="rightSidebarVisible.set(false)">
+    </div>
+}
+
 <!-- Mobile Right Drawer (Widgets) -->
-<p-drawer [(visible)]="rightSidebarVisible" position="right"
-    [styleClass]="'!bg-[var(--color-surface)] !border-l !border-[var(--color-border)] !w-[85vw] max-w-xs'"
-    [modal]="true" [dismissible]="true">
+<p-drawer [visible]="rightSidebarVisible()" (visibleChange)="rightSidebarVisible.set($event)" appendTo="body"
+    position="right" styleClass="!bg-[var(--color-surface)]
+        !border-l
+        !border-[var(--color-border)]
+        !w-[85vw]
+        max-w-xs" [modal]="false" [blockScroll]="false" [transitionOptions]="'150ms cubic-bezier(0, 0, 0.2, 1)'">
     <ng-template pTemplate="content">
         <div class="h-full py-2">
             <app-sidebar-right></app-sidebar-right>
