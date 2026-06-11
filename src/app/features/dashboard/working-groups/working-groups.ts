@@ -138,6 +138,21 @@ export class WorkingGroupsComponent implements OnInit {
     return this.agEvents().get(groupId) ?? [];
   }
 
+  /**
+   * Download a file from the AG file list
+   */
+  async downloadAgFile(file: any): Promise<void> {
+    try {
+      await this.fileService.downloadFile(file);
+    } catch {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Fehler',
+        detail: 'Download fehlgeschlagen.',
+      });
+    }
+  }
+
   contactTypes = [
     {
       label: 'Discord',

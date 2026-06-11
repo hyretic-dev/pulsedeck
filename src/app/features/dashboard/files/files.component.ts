@@ -36,6 +36,7 @@ import { AuthService } from '../../../shared/services/auth.service';
 import { WorkingGroupsService } from '../../../shared/services/working-groups.service';
 
 type ViewMode = 'overview' | 'folder';
+type DisplayMode = 'list' | 'grid';
 
 interface BreadcrumbItem {
     label: string;
@@ -75,6 +76,7 @@ export class FilesComponent implements OnInit {
 
     // View state
     viewMode = signal<ViewMode>('overview');
+    displayMode = signal<DisplayMode>('list');
     breadcrumbs = signal<BreadcrumbItem[]>([
         { label: 'Dateien', folderId: null },
     ]);
@@ -132,12 +134,18 @@ export class FilesComponent implements OnInit {
 
         await Promise.all([
             this.fileService.fetchPinnedFiles(),
-            this.fileService.fetchRecentFiles(8),
             this.fileService.fetchFolderList(null),
             this.fileService.fetchFilesByFolderId(null),
         ]);
 
         this.fileService.loading.set(false);
+    }
+
+    toggleDisplayMode(): void {
+        const current = this.displayMode();
+        this.displayMode.set(
+            current === 'list' ? 'grid' : 'list'
+        );
     }
 
     // --- Folder Navigation ---
@@ -552,7 +560,6 @@ export class FilesComponent implements OnInit {
             this.fileService.fetchFolderList(folderId),
             this.fileService.fetchFilesByFolderId(folderId),
             this.fileService.fetchPinnedFiles(),
-            this.fileService.fetchRecentFiles(8),
         ]);
     }
 }

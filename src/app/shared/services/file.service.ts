@@ -219,13 +219,14 @@ export class FileService {
     }
 
     /**
-     * Fetch files for a specific working group
+     * Fetch pinned files for a specific working group
      */
     async fetchFilesByAg(agId: string): Promise<void> {
         const { data, error } = await this.supabase.client
             .from('files')
             .select(FILE_SELECT)
             .eq('working_group_id', agId)
+            .eq('is_pinned', true)
             .order('name', { ascending: true });
 
         if (error) {
