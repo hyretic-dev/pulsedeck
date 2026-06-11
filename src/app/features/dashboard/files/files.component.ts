@@ -18,10 +18,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
-import {
-    FileUploadModule,
-    FileUploadHandlerEvent,
-} from 'primeng/fileupload';
 import { TagModule } from 'primeng/tag';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
@@ -59,7 +55,6 @@ interface BreadcrumbItem {
         ToastModule,
         ConfirmDialogModule,
         TooltipModule,
-        FileUploadModule,
         TagModule,
     ],
     providers: [MessageService, ConfirmationService],
@@ -86,6 +81,10 @@ export class FilesComponent implements OnInit {
     uploading = signal(false);
     createFolderDialogVisible = signal(false);
     moveFileDialogVisible = signal(false);
+
+    // Upload
+    selectedFile = signal<File | null>(null);
+    isDragging = signal(false);
 
     // Search
     searchQuery = signal('');
@@ -200,13 +199,33 @@ export class FilesComponent implements OnInit {
         this.uploadVisibility = 'member';
         this.uploadDescription = '';
         this.uploadWorkingGroupId = null;
+        this.selectedFile.set(null);
+        this.isDragging.set(false);
         this.uploadDialogVisible.set(true);
     }
 
-    async handleUpload(
-        event: FileUploadHandlerEvent
-    ): Promise<void> {
-        const file = event.files[0];
+    onFileSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files.length > 0) {
+            this.selectedFile.set(input.files[0]);
+        }
+    }
+
+    onFileDrop(event: DragEvent): void {
+        event.preventDefault();
+        this.isDragging.set(false);
+        const files = event.dataTransfer?.files;
+        if (files && files.length > 0) {
+            this.selectedFile.set(files[0]);
+        }
+    }
+
+    clearSelectedFile(): void {
+        this.selectedFile.set(null);
+    }
+
+    async uploadSelectedFile(): Promise<void> {
+        const file = this.selectedFile();
         if (!file) return;
 
         this.uploading.set(true);
@@ -214,18 +233,20 @@ export class FilesComponent implements OnInit {
             this.fileService.currentFolderId() ?? undefined;
 
         try {
-            const uploadedFile = await this.fileService.uploadFile(
-                file,
-                this.fileService.currentFolder(),
-                {
-                    visibility: this.uploadVisibility,
-                    description:
-                        this.uploadDescription || undefined,
-                    workingGroupId:
-                        this.uploadWorkingGroupId || undefined,
-                    folderId,
-                }
-            );
+            const uploadedFile =
+                await this.fileService.uploadFile(
+                    file,
+                    this.fileService.currentFolder(),
+                    {
+                        visibility: this.uploadVisibility,
+                        description:
+                            this.uploadDescription || undefined,
+                        workingGroupId:
+                            this.uploadWorkingGroupId
+                            || undefined,
+                        folderId,
+                    }
+                );
 
             this.msg.add({
                 severity: 'success',
@@ -234,19 +255,31 @@ export class FilesComponent implements OnInit {
             });
 
             // Trigger AI Ingestion
-            if (uploadedFile.mime_type === 'application/pdf' || uploadedFile.mime_type?.startsWith('text/')) {
-                const ingestionResult = await this.fileService.triggerFileIngestion(uploadedFile.id!);
-                if (ingestionResult && !ingestionResult.success && ingestionResult.message) {
+            if (
+                uploadedFile.mime_type === 'application/pdf'
+                || uploadedFile.mime_type?.startsWith('text/')
+            ) {
+                const result =
+                    await this.fileService
+                        .triggerFileIngestion(
+                            uploadedFile.id!
+                        );
+                if (
+                    result
+                    && !result.success
+                    && result.message
+                ) {
                     this.msg.add({
                         severity: 'warn',
                         summary: 'KI-Indizierung',
-                        detail: ingestionResult.message,
-                        life: 6000
+                        detail: result.message,
+                        life: 6000,
                     });
                 }
             }
 
             this.uploadDialogVisible.set(false);
+            this.selectedFile.set(null);
             await this.refreshCurrentView();
         } catch (e) {
             this.msg.add({

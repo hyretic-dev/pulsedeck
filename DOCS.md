@@ -27,8 +27,9 @@ PulseDeck nutzt Push-Benachrichtigungen direkt im Browser oder auf dem Smartphon
 * Klicke links unten auf "Profil bearbeiten". Klicke im Bereich "Benachrichtigungen" (Browser-Benachrichtigungen) auf den Button "Aktivieren" und erlaube die Benachrichtigungen im Pop-up-Fenster deines Browsers.
 
 ### PulseDeck AI Agent (Chatbot)
-Ein KI-gestützter Onboarding-Assistent steht dir für Fragen zur Verfügung.
+Ein KI-gestützter Assistent steht dir für Fragen zur Verfügung.
 * Der Assistent hilft dir, dich im System zurechtzufinden und beantwortet Fragen zur Bedienung.
+* **Erweitertes Wissen (RAG):** Der Chatbot hat Zugriff auf die hochgeladenen Dokumente und PDFs deiner Organisation. Du kannst ihn direkt nach Inhalten aus diesen Dateien fragen (z.B. *"Was steht im Mailbox-Handbuch?"* oder *"Welche Regeln gelten laut Satzung?"*).
 * Auf der rechten Seite deines Bildschirms befindet sich der "PulseDeck AI Agent". Gib deine Frage unten in das Feld "Frag den AI-Assistenten..." ein und klicke auf das Senden-Icon (Papierflieger) oder drücke Enter.
 
 ---
@@ -76,6 +77,7 @@ Finde Ansprechpartner in deiner Organisation.
 ### Arbeitsgruppen (AGs)
 Organisiere dich in spezifischen Gruppen für bestimmte Themen oder Projekte.
 * Klicke links im Menü auf "Gruppen" (Gruppen-Icon). Klicke bei der gewünschten AG auf "Beitreten", um Mitglied zu werden und zugehörige Termine im Kalender zu sehen. Zum Austreten klicke auf "Verlassen".
+* **Angepinnte Dateien:** In der Detailansicht jeder AG findest du die wichtigsten Dokumente dieser Gruppe. Du kannst sie direkt per Klick auf die Datei herunterladen.
 
 ### Rollenkonzept
 * **Mitglied:** Standard-Recht. Kann Termine sehen, zusagen, Beiträge lesen.
@@ -88,8 +90,14 @@ Organisiere dich in spezifischen Gruppen für bestimmte Themen oder Projekte.
 
 ### Dateiverwaltung
 Der interne Cloud-Speicher für Dokumente.
-* Ordner können mit Zugriffsbeschränkungen versehen sein.
-* Klicke links im Menü auf "Dateien" (Ordner-Icon). Um ein Dokument hinzuzufügen, klicke oben rechts auf "Hochladen" (Upload-Icon) und wähle die Datei aus. Mit Klick auf den "Download"-Button kannst du Dateien herunterladen.
+* **Layout & Ansichten:** Standardmäßig werden deine Dateien in einer kompakten **Listenansicht (Tabelle)** sortiert nach dem Upload-Datum dargestellt. Über den Toggle-Button oben rechts kannst du auf eine **Kachelansicht** umschalten.
+* **Schnellzugriff:** Ganz oben findest du eine Leiste mit **angepinnten Downloads**, die besonders häufig gebraucht werden.
+* **Ordner:** Ordner werden platzsparend als Chips dargestellt. Klicke darauf, um in das entsprechende Verzeichnis zu wechseln.
+* **Hochladen:** Klicke oben rechts auf "Hochladen". Es öffnet sich ein modernes Upload-Modal. Ziehe deine Datei einfach per **Drag & Drop** in die markierte Zone oder klicke darauf, um sie manuell auszuwählen. Bestimme die Sichtbarkeit, wähle bei Bedarf eine Arbeitsgruppe oder füge eine Beschreibung hinzu und klicke auf "Hochladen".
+* **Aktionen:** Wenn du mit der Maus über eine Datei fährst (Listenansicht) oder in der Kachelansicht, stehen dir verschiedene Aktionen zur Verfügung: Download (Pfeil-Icon), Anpinnen/Lösen (Lesezeichen-Icon), Verschieben (Pfeil-Symbol) oder Löschen (Mülleimer-Icon).
+* **KI-Indexierung:** Hochgeladene PDF- und Textdateien (.txt, .md) werden automatisch für den KI-Assistenten indiziert. 
+  * *Hinweis:* Dateien über 10 MB werden aus Performancegründen nicht indiziert.
+  * Sollte eine Indizierung fehlschlagen oder es sich um ein älteres Dokument handeln, können Admins über das **Synchronisations-Icon (Kreispfeile)** die Indizierung manuell anstoßen.
 
 ### Wiki (Wissensdatenbank)
 Hier wird langfristiges Wissen dokumentiert (Protokolle, How-Tos).
