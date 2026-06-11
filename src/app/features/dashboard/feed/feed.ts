@@ -41,6 +41,8 @@ import { WorkingGroupsService } from '../../../shared/services/working-groups.se
     templateUrl: './feed.html',
     styles: [`
     :host ::ng-deep .p-editor-content { height: 320px; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   `]
 })
 export class FeedComponent {
@@ -412,4 +414,18 @@ export class FeedComponent {
         if (!item.poll_options) return 0;
         return item.poll_options.reduce((acc, o) => acc + (o.poll_votes?.length || 0), 0);
     }
+
+    getInitials(name: string | undefined): string {
+        if (!name) {
+            return '?';
+        }
+        const parts = name.trim().split(/\s+/);
+        if (parts.length >= 2) {
+            const first = parts[0][0] || '';
+            const second = parts[1][0] || '';
+            return (first + second).toUpperCase();
+        }
+        return (parts[0]?.[0] || '?').toUpperCase();
+    }
 }
+

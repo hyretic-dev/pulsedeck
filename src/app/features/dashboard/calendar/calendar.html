@@ -99,73 +99,94 @@
                             </span>
                             }
 
-                            <!-- Registration Button -->
-                            @if (auth.isLoggedIn()) {
-                            <button (click)="toggleRegistration(event); $event.stopPropagation()"
-                                class="w-7 h-7 rounded-full flex items-center justify-center transition-colors" [class]="getMyRegistration(event.id!) === 'confirmed' 
-                                    ? 'bg-teal/20 text-teal hover:bg-red-500/20 hover:text-red-400' 
-                                    : 'text-[var(--color-text-muted)] hover:text-teal hover:bg-teal/10'"
-                                [pTooltip]="getMyRegistration(event.id!) === 'confirmed' ? 'Abmelden' : 'Anmelden'"
-                                tooltipPosition="top">
-                                <i class="pi text-xs"
-                                    [class]="getMyRegistration(event.id!) === 'confirmed' ? 'pi-check' : 'pi-user-plus'"></i>
-                            </button>
+                            <!-- ========== MOBILE: CTA + Overflow ========== -->
+                            <div class="flex md:hidden items-center gap-1">
+                                @if (auth.isLoggedIn()) {
+                                <button (click)="toggleRegistration(event); $event.stopPropagation()"
+                                    class="h-7 px-2.5 rounded-full flex items-center gap-1.5 text-xs font-medium transition-colors"
+                                    [class]="getMyRegistration(event.id!) === 'confirmed'
+                                        ? 'bg-teal/20 text-teal'
+                                        : 'bg-[var(--color-surface-overlay)] text-[var(--color-text-muted)]'">
+                                    <i class="pi text-[10px]"
+                                        [class]="getMyRegistration(event.id!) === 'confirmed' ? 'pi-check' : 'pi-user-plus'"></i>
+                                    {{ getMyRegistration(event.id!) === 'confirmed' ? 'Dabei' : 'Teilnehmen' }}
+                                </button>
+                                }
 
-                            <!-- Share Button -->
-                            <button (click)="copyEventLink(event); $event.stopPropagation()"
-                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-linke hover:bg-linke/10 transition-colors"
-                                pTooltip="Link teilen" tooltipPosition="top">
-                                <i class="pi pi-share-alt text-xs"></i>
-                            </button>
+                                <!-- Overflow Menu Trigger -->
+                                <button (click)="mobileMenu.toggle($event); $event.stopPropagation()"
+                                    class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors">
+                                    <i class="pi pi-ellipsis-v text-xs"></i>
+                                </button>
+                                <p-menu #mobileMenu
+                                    [model]="buildMobileMenuItems(event)"
+                                    [popup]="true"
+                                    appendTo="body" />
+                            </div>
 
-                            <!-- WhatsApp Share Button -->
-                            <button (click)="copyWhatsAppText(event); $event.stopPropagation()"
-                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-green-500 hover:bg-green-500/10 transition-colors"
-                                pTooltip="Für WhatsApp kopieren" tooltipPosition="top">
-                                <i class="pi pi-whatsapp text-xs"></i>
-                            </button>
+                            <!-- ========== DESKTOP: Full icon row ========== -->
+                            <div class="hidden md:flex items-center gap-1">
+                                @if (auth.isLoggedIn()) {
+                                <button (click)="toggleRegistration(event); $event.stopPropagation()"
+                                    class="w-7 h-7 rounded-full flex items-center justify-center transition-colors" [class]="getMyRegistration(event.id!) === 'confirmed' 
+                                        ? 'bg-teal/20 text-teal hover:bg-red-500/20 hover:text-red-400' 
+                                        : 'text-[var(--color-text-muted)] hover:text-teal hover:bg-teal/10'"
+                                    [pTooltip]="getMyRegistration(event.id!) === 'confirmed' ? 'Abmelden' : 'Anmelden'"
+                                    tooltipPosition="top">
+                                    <i class="pi text-xs"
+                                        [class]="getMyRegistration(event.id!) === 'confirmed' ? 'pi-check' : 'pi-user-plus'"></i>
+                                </button>
 
-                            <!-- Export to Calendar Button -->
-                            <button (click)="downloadEventIcal(event); $event.stopPropagation()"
-                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-blue-500 hover:bg-blue-500/10 transition-colors"
-                                pTooltip="In den Kalender" tooltipPosition="top">
-                                <i class="pi pi-calendar-plus text-xs"></i>
-                            </button>
+                                <button (click)="copyEventLink(event); $event.stopPropagation()"
+                                    class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-linke hover:bg-linke/10 transition-colors"
+                                    pTooltip="Link teilen" tooltipPosition="top">
+                                    <i class="pi pi-share-alt text-xs"></i>
+                                </button>
 
-                            <!-- Participants Button -->
-                            <button (click)="openParticipantsDialog(event); $event.stopPropagation()"
-                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors"
-                                pTooltip="Teilnehmer anzeigen" tooltipPosition="top">
-                                <i class="pi pi-users text-xs"></i>
-                            </button>
+                                <button (click)="copyWhatsAppText(event); $event.stopPropagation()"
+                                    class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-green-500 hover:bg-green-500/10 transition-colors"
+                                    pTooltip="Für WhatsApp kopieren" tooltipPosition="top">
+                                    <i class="pi pi-whatsapp text-xs"></i>
+                                </button>
 
-                            <!-- Helper Slots Button -->
-                            <button (click)="openManageSlots(event); $event.stopPropagation()"
-                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors"
-                                pTooltip="Helferschichten" tooltipPosition="top">
-                                <i class="pi pi-list-check text-xs"></i>
-                            </button>
+                                <button (click)="downloadEventIcal(event); $event.stopPropagation()"
+                                    class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-blue-500 hover:bg-blue-500/10 transition-colors"
+                                    pTooltip="In den Kalender" tooltipPosition="top">
+                                    <i class="pi pi-calendar-plus text-xs"></i>
+                                </button>
 
-                            <!-- Invite Guest Org Button (Viral Loop) -->
-                            @if (canCreateEvent()) {
-                            <button (click)="openGuestInvite(event); $event.stopPropagation()"
-                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-amber-500 hover:bg-amber-500/10 transition-colors"
-                                pTooltip="Gast-Org einladen" tooltipPosition="top">
-                                <i class="pi pi-building text-xs"></i>
-                            </button>
-                            }
-                            }
+                                <button (click)="openParticipantsDialog(event); $event.stopPropagation()"
+                                    class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors"
+                                    pTooltip="Teilnehmer anzeigen" tooltipPosition="top">
+                                    <i class="pi pi-users text-xs"></i>
+                                </button>
 
-                            @if (canCreateEvent()) {
-                            <button (click)="editEvent(event)"
-                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors">
-                                <i class="pi pi-pencil text-xs"></i>
-                            </button>
-                            <button (click)="confirmDelete(event)"
-                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-red-400 hover:bg-[var(--color-surface-overlay)] transition-colors">
-                                <i class="pi pi-trash text-xs"></i>
-                            </button>
-                            }
+                                <button (click)="openManageSlots(event); $event.stopPropagation()"
+                                    class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors"
+                                    pTooltip="Helferschichten" tooltipPosition="top">
+                                    <i class="pi pi-list-check text-xs"></i>
+                                </button>
+
+                                @if (canCreateEvent()) {
+                                <button (click)="openGuestInvite(event); $event.stopPropagation()"
+                                    class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-amber-500 hover:bg-amber-500/10 transition-colors"
+                                    pTooltip="Gast-Org einladen" tooltipPosition="top">
+                                    <i class="pi pi-building text-xs"></i>
+                                </button>
+                                }
+                                }
+
+                                @if (canCreateEvent()) {
+                                <button (click)="editEvent(event)"
+                                    class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors">
+                                    <i class="pi pi-pencil text-xs"></i>
+                                </button>
+                                <button (click)="confirmDelete(event)"
+                                    class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-red-400 hover:bg-[var(--color-surface-overlay)] transition-colors">
+                                    <i class="pi pi-trash text-xs"></i>
+                                </button>
+                                }
+                            </div>
                         </div>
                     </div>
 

@@ -1,33 +1,42 @@
 <p-toast></p-toast>
-<div class="p-4 md:p-6 max-w-7xl mx-auto animate-fade-in">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+<div class="px-0 py-3 md:p-6 max-w-7xl mx-auto animate-fade-in
+    pb-20 md:pb-6">
+    <div class="flex flex-row justify-between items-center mb-4 md:mb-6 gap-3">
         <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-[var(--color-text)]">Aktuelles & Beiträge</h1>
-            <p class="text-[var(--color-text-muted)] text-sm mt-1">Neuigkeiten und Artikel aus der Community</p>
+            <h1 class="text-xl md:text-3xl font-bold text-[var(--color-text)]">Aktuelles</h1>
+            <p class="hidden md:block text-[var(--color-text-muted)] text-sm mt-1">Neuigkeiten und Artikel aus der Community</p>
         </div>
         @if (canCreate()) {
-        <p-button label="Neuer Beitrag" icon="pi pi-plus" (click)="openNew()" severity="primary"
-            [raised]="true"></p-button>
+        <p-button label="Neuer Beitrag" icon="pi pi-plus"
+            (click)="openNew()" severity="primary" [raised]="true"
+            class="hidden md:inline-flex"></p-button>
+        <p-button icon="pi pi-plus" (click)="openNew()"
+            severity="primary" [raised]="true" [rounded]="true"
+            class="md:hidden"></p-button>
         }
     </div>
 
     <!-- Notification Onboarding Banner -->
-    @if (notificationService.permissionStatus() === 'default' && notificationService.isSupported()) {
-    <div
-        class="mb-6 p-4 rounded-xl bg-gradient-to-r from-teal-500/10 to-blue-500/10 border border-teal-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fadein">
-        <div class="flex items-center gap-4">
-            <div
-                class="w-10 h-10 rounded-full bg-[var(--color-surface)] flex items-center justify-center border border-teal-500/30 shadow-sm shrink-0">
-                <i class="pi pi-bell text-teal-500 text-lg"></i>
-            </div>
-            <div>
-                <h3 class="font-bold text-[var(--color-text)]">Nichts Wichtiges verpassen</h3>
-                <p class="text-sm text-[var(--color-text-muted)]">Erhalte Benachrichtigungen bei neuen Beiträgen &
-                    Terminen.</p>
-            </div>
+    @if (notificationService.permissionStatus() === 'default' &&
+        notificationService.isSupported()) {
+    <div class="mb-3.5 p-2 px-3 rounded-xl
+        bg-[var(--color-surface-card)] border border-[var(--color-border)]
+        flex items-center justify-between gap-2.5 shadow-sm animate-fadein">
+        <div class="flex items-center gap-2 min-w-0">
+            <i class="pi pi-bell text-teal-600 text-xs md:text-sm shrink-0"></i>
+            <span class="text-xs font-semibold text-[var(--color-text)]
+                truncate">
+                Benachrichtigungen aktivieren
+            </span>
+            <span class="text-[10px] text-[var(--color-text-muted)]
+                hidden md:inline">
+                - Erhalte Updates bei neuen Beiträgen
+            </span>
         </div>
-        <p-button label="Aktivieren" icon="pi pi-check" (click)="enableNotifications()" size="small" [raised]="true"
-            severity="info"></p-button>
+        <p-button label="Aktivieren" (click)="enableNotifications()"
+            size="small" [text]="true" severity="primary"
+            styleClass="shrink-0 text-xs font-bold whitespace-nowrap p-0">
+        </p-button>
     </div>
     }
 
@@ -41,68 +50,125 @@
         <p-tabpanels>
             <!-- Tab 1: Feed (Öffentlich/Approved) -->
             <p-tabpanel value="0">
-                <div class="mb-6 flex gap-2 overflow-x-auto pb-2">
-                    <p-button label="Alle" [rounded]="true" size="small"
-                        [severity]="selectedWorkingGroupFilter() === null ? 'primary' : 'secondary'"
-                        [outlined]="selectedWorkingGroupFilter() !== null"
-                        (click)="selectedWorkingGroupFilter.set(null)">
-                    </p-button>
-                    @for (group of workingGroups(); track group.id) {
-                        <p-button [label]="group.name" [rounded]="true" size="small"
-                            [severity]="selectedWorkingGroupFilter() === group.id ? 'primary' : 'secondary'"
-                            [outlined]="selectedWorkingGroupFilter() !== group.id"
-                            (click)="selectedWorkingGroupFilter.set(group.id || null)">
+                <div class="mb-4 md:mb-6 relative">
+                    <div class="flex flex-nowrap gap-2 overflow-x-auto pb-2
+                        scrollbar-hide feed-filter-chips">
+                        <p-button label="Alle" [rounded]="true" size="small"
+                            [severity]="selectedWorkingGroupFilter() === null ?
+                                'primary' : 'secondary'"
+                            [outlined]="selectedWorkingGroupFilter() !== null"
+                            styleClass="shrink-0 whitespace-nowrap"
+                            (click)="selectedWorkingGroupFilter.set(null)">
                         </p-button>
-                    }
+                        @for (group of workingGroups(); track group.id) {
+                            <p-button [label]="group.name" [rounded]="true"
+                                size="small"
+                                [severity]="selectedWorkingGroupFilter() ===
+                                    group.id ? 'primary' : 'secondary'"
+                                [outlined]="selectedWorkingGroupFilter() !==
+                                    group.id"
+                                styleClass="shrink-0 whitespace-nowrap"
+                                (click)="selectedWorkingGroupFilter.set(
+                                    group.id || null)">
+                            </p-button>
+                        }
+                    </div>
+                    <div class="absolute right-0 top-0 bottom-2 w-8
+                        bg-gradient-to-l from-[var(--color-bg)] to-transparent
+                        pointer-events-none md:hidden"></div>
                 </div>
 
-                <div class="grid gap-6">
+                <div class="grid gap-3 md:gap-6">
                     @for (item of filteredFeedItems(); track item.id) {
-                    <div
-                        class="bg-[var(--color-surface-card)] rounded-xl border border-[var(--color-border)] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                        <div class="p-6">
-                            <div class="flex flex-wrap justify-between items-start gap-4 mb-4">
-                                <div>
-                                    <h2 class="text-xl font-bold text-[var(--color-text)] mb-2">{{ item.title }}</h2>
-                                    <div class="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-                                        <i class="pi pi-calendar"></i>
-                                        <span>{{ item.created_at | date:'dd.MM.yyyy' }}</span>
-                                        <span>•</span>
-                                        <i class="pi pi-user"></i>
-                                        <span>{{ item.author?.name || 'Unbekannt' }}</span>
-                                        <p-tag [value]="item.type === 'link' ? 'Link' : 'Artikel'" severity="info"
-                                            styleClass="text-xs ml-2"></p-tag>
-                                        @if (item.working_group) {
-                                        <span class="text-teal-600 bg-teal-500/10 px-2 py-0.5 rounded text-xs ml-2 border border-teal-500/20 whitespace-nowrap">
-                                            {{ item.working_group.name }}
-                                        </span>
-                                        }
+                    <div class="bg-[var(--color-surface-card)] rounded-2xl
+                        border border-[var(--color-border)] overflow-hidden
+                        shadow-sm hover:shadow-md transition-all duration-200">
+                        <div class="px-3.5 py-4 md:p-6">
+                            <!-- Header: Autor Info & Badges -->
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <!-- Avatar -->
+                                    <div class="w-8 h-8 rounded-full bg-teal-500/10
+                                        text-teal-600 flex items-center justify-center
+                                        font-bold text-xs border border-teal-500/20 shrink-0">
+                                        {{ getInitials(item.author?.name) }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-semibold text-[var(--color-text)]
+                                            leading-tight truncate">
+                                            {{ item.author?.name || 'Unbekannt' }}
+                                        </div>
+                                        <div class="text-[10px] text-[var(--color-text-muted)]
+                                            flex items-center gap-1 mt-0.5">
+                                            <i class="pi pi-calendar text-[10px]"></i>
+                                            <span>{{ item.created_at | date:'dd.MM.yyyy' }}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div *ngIf="item.status === 'sent'"
-                                    class="text-xs text-green-500 font-medium border border-green-500/20 bg-green-500/10 px-2 py-1 rounded">
-                                    <i class="pi pi-check"></i> Newsletter versendet
+
+                                <!-- Badges -->
+                                <div class="flex flex-wrap items-center gap-1.5 shrink-0 justify-end">
+                                    @if (item.working_group) {
+                                    <span class="text-teal-600 bg-teal-500/10
+                                        px-2 py-0.5 rounded text-[10px]
+                                        border border-teal-500/20 whitespace-nowrap">
+                                        {{ item.working_group.name }}
+                                    </span>
+                                    }
+                                    <p-tag [value]="item.type === 'link' ? 'Link' :
+                                        item.type === 'poll' ? 'Umfrage' : 'Artikel'"
+                                        severity="info" styleClass="text-[10px] px-1.5 py-0.5"></p-tag>
+                                    @if (item.status === 'sent') {
+                                    <span class="text-xs text-green-500 font-medium
+                                        bg-green-500/10 px-2 py-0.5 rounded
+                                        border border-green-500/20 whitespace-nowrap"
+                                        title="Newsletter versendet">
+                                        <i class="pi pi-check text-[10px]"></i>
+                                    </span>
+                                    }
                                 </div>
                             </div>
 
+                            <!-- Titel -->
+                            <h2 class="text-base font-bold md:text-lg text-[var(--color-text)] mb-2.5 leading-snug">
+                                {{ item.title }}
+                            </h2>
+
                             <div>
                                 @if (item.type === 'link') {
-                                <a [href]="item.url" target="_blank" class="block group mt-1 mb-4 no-underline">
-                                    <div
-                                        class="p-3 rounded-lg bg-[var(--color-surface-ground)] border border-[var(--color-border)] group-hover:border-[var(--linke)] transition-all flex items-center gap-3">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-[var(--color-surface-raised)] flex items-center justify-center shrink-0 border border-[var(--color-border)]">
-                                            <i
-                                                class="pi pi-link text-[var(--color-text-muted)] group-hover:text-[var(--linke)] transition-colors"></i>
+                                <a [href]="item.url" target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="block group mb-2 no-underline">
+                                    <div class="p-2 md:p-3 rounded-xl
+                                        bg-[var(--color-surface-ground)]
+                                        border border-[var(--color-border)]
+                                        group-hover:border-[var(--linke)]
+                                        transition-all flex items-center
+                                        gap-2 md:gap-3">
+                                        <div class="w-7 h-7 md:w-9 md:h-9
+                                            rounded-full bg-[var(--color-surface-raised)]
+                                            flex items-center justify-center
+                                            shrink-0 border border-[var(--color-border)]">
+                                            <i class="pi pi-link text-[10px] md:text-sm
+                                                text-[var(--color-text-muted)]
+                                                group-hover:text-[var(--linke)]
+                                                transition-colors"></i>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <div
-                                                class="text-sm font-medium truncate text-[var(--linke)] group-hover:underline">
-                                                {{ item.url }}</div>
-                                            <div class="text-xs text-[var(--color-text-muted)]">Externer Link</div>
+                                            <div class="text-xs md:text-sm
+                                                font-medium truncate text-[var(--linke)]
+                                                group-hover:underline">
+                                                {{ item.url }}
+                                            </div>
+                                            <div class="text-[10px] md:text-xs
+                                                text-[var(--color-text-muted)]">
+                                                Externer Link
+                                            </div>
                                         </div>
-                                        <i
-                                            class="pi pi-external-link text-[var(--color-text-muted)] opacity-50 group-hover:opacity-100 transition-opacity"></i>
+                                        <i class="pi pi-external-link text-xs
+                                            text-[var(--color-text-muted)]
+                                            opacity-50 group-hover:opacity-100
+                                            transition-opacity"></i>
                                     </div>
                                 </a>
                                 @if (item.content) {
@@ -111,37 +177,64 @@
                                 </div>
                                 }
                                 } @else if (item.type === 'poll') {
-                                <div class="mb-4">
+                                <div class="mb-3">
                                     <app-rich-text-renderer [content]="item.content || ''"></app-rich-text-renderer>
                                 </div>
-                                <div class="space-y-2 max-w-lg">
-                                    @for (option of item.poll_options; track option.id) {
-                                    <div class="relative p-3 rounded-lg border border-[var(--color-border)] cursor-pointer hover:bg-[var(--color-surface-hover)] transition-all overflow-hidden"
+                                <div class="space-y-2">
+                                    @for (option of item.poll_options;
+                                        track option.id) {
+                                    <div class="relative p-2.5 md:p-3 rounded-xl
+                                        border border-[var(--color-border)]
+                                        cursor-pointer
+                                        hover:bg-[var(--color-surface-hover)]
+                                        transition-all overflow-hidden
+                                        min-h-[44px] flex items-center"
                                         (click)="vote(item, option.id)">
                                         <!-- Progress Bar Background -->
-                                        <div class="absolute inset-0 bg-[var(--primary-color)] opacity-10 transition-all duration-500"
-                                            [style.width.%]="getVotePercentage(item, option.id)"></div>
+                                        <div class="absolute inset-0
+                                            bg-[var(--primary-color)] opacity-10
+                                            transition-all duration-500"
+                                            [style.width.%]="getVotePercentage(
+                                                item, option.id)"></div>
 
-                                        <div class="flex justify-between items-center relative z-10">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-5 h-5 rounded-full border border-[var(--color-text-muted)] flex items-center justify-center transition-colors"
-                                                    [class.bg-[var(--primary-color)]]="hasVotedFor(item, option.id)"
-                                                    [class.border-[var(--primary-color)]]="hasVotedFor(item, option.id)">
-                                                    <i class="pi pi-check text-white text-xs"
-                                                        *ngIf="hasVotedFor(item, option.id)"></i>
+                                        <div class="flex justify-between
+                                            items-center relative z-10 w-full">
+                                            <div class="flex items-center
+                                                gap-2.5 md:gap-3">
+                                                <div class="w-5 h-5 rounded-full
+                                                    border
+                                                    border-[var(--color-text-muted)]
+                                                    flex items-center
+                                                    justify-center
+                                                    transition-colors shrink-0"
+                                                    [class.bg-[var(--primary-color)]]="
+                                                        hasVotedFor(item, option.id)"
+                                                    [class.border-[var(--primary-color)]]="
+                                                        hasVotedFor(item, option.id)">
+                                                    <i class="pi pi-check
+                                                        text-white text-xs"
+                                                        *ngIf="hasVotedFor(
+                                                            item, option.id)">
+                                                    </i>
                                                 </div>
-                                                <span class="font-medium text-[var(--color-text)]">{{ option.text
-                                                    }}</span>
+                                                <span class="font-medium text-sm
+                                                    md:text-base
+                                                    text-[var(--color-text)]">
+                                                    {{ option.text }}
+                                                </span>
                                             </div>
-                                            <span class="text-xs font-bold text-[var(--color-text-muted)]"
+                                            <span class="text-xs font-bold
+                                                text-[var(--color-text-muted)]
+                                                shrink-0 ml-2"
                                                 *ngIf="getTotalVotes(item) > 0">
-                                                {{ getVotePercentage(item, option.id) }}%
+                                                {{ getVotePercentage(
+                                                    item, option.id) }}%
                                             </span>
                                         </div>
                                     </div>
                                     }
                                     <div
-                                        class="flex justify-end items-center mt-2 text-xs text-[var(--color-text-muted)]">
+                                        class="flex justify-end items-center mt-1 text-xs text-[var(--color-text-muted)]">
                                         <span>{{ getTotalVotes(item) }} Stimmen</span>
                                     </div>
                                 </div>
@@ -154,9 +247,9 @@
                     }
                     @if (filteredFeedItems().length === 0) {
                     <div
-                        class="flex flex-col items-center justify-center py-16 text-[var(--color-text-muted)] bg-[var(--color-surface-raised)] rounded-xl border border-[var(--color-border)] border-dashed">
-                        <i class="pi pi-inbox text-4xl mb-3 opacity-50"></i>
-                        <p>Keine Beiträge vorhanden.</p>
+                        class="flex flex-col items-center justify-center py-10 md:py-16 text-[var(--color-text-muted)] bg-[var(--color-surface-raised)] rounded-lg md:rounded-xl border border-[var(--color-border)] border-dashed">
+                        <i class="pi pi-inbox text-3xl md:text-4xl mb-3 opacity-50"></i>
+                        <p class="text-sm md:text-base">Keine Beiträge vorhanden.</p>
                     </div>
                     }
                 </div>
@@ -296,8 +389,10 @@
     </p-tabs>
 
     <!-- Test Email Dialog -->
-    <p-dialog [(visible)]="testEmailDialogVisible" header="Newsletter Vorschau senden" [modal]="true"
-        [style]="{width: '400px'}" [resizable]="false">
+    <p-dialog [(visible)]="testEmailDialogVisible"
+        header="Newsletter Vorschau senden" [modal]="true"
+        [style]="{width: '400px'}" [resizable]="false"
+        appendTo="body">
         <div class="flex flex-col gap-4 pt-2">
             <p class="text-[var(--color-text-muted)] text-sm">Sendet eine Vorschau aller aktuellen Beiträge an die
                 angegebene Adresse, ohne den Status "Versendet" zu setzen.</p>
@@ -317,8 +412,11 @@
     </p-dialog>
 
     <!-- Create/Edit Dialog remains same -->
-    <p-dialog [(visible)]="dialogVisible" [header]="editMode() ? 'Beitrag bearbeiten' : 'Neuer Beitrag'" [modal]="true"
-        [style]="{width: '90vw', maxWidth: '800px'}" [maximizable]="true" [draggable]="false" [resizable]="false">
+    <p-dialog [(visible)]="dialogVisible"
+        [header]="editMode() ? 'Beitrag bearbeiten' : 'Neuer Beitrag'"
+        [modal]="true" [style]="{width: '90vw', maxWidth: '800px'}"
+        [maximizable]="true" [draggable]="false" [resizable]="false"
+        appendTo="body">
         <div class="flex flex-col gap-5 pt-2">
 
             <div class="flex flex-col gap-2">
@@ -412,4 +510,5 @@
             </div>
         </ng-template>
     </p-dialog>
+
 </div>

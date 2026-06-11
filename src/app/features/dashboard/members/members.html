@@ -236,8 +236,10 @@
                     </th>
                     }
                     <th style="width: 2.5rem"></th>
-                    <th pSortableColumn="name" class="!min-w-[140px] w-[15%] text-left">Name <p-sortIcon
-                            field="name"></p-sortIcon></th>
+                    <th pSortableColumn="name"
+                        class="!min-w-[200px] w-[25%] text-left">
+                        Name <p-sortIcon field="name"></p-sortIcon>
+                    </th>
                     <th pSortableColumn="role" class="!min-w-[120px] w-[10%] text-left">Funktion <p-sortIcon
                             field="role"></p-sortIcon></th>
                     <th class="text-left">Fähigkeiten</th>
@@ -272,8 +274,10 @@
                                 [style]="{'background-color': getAvatarColor(member.name), 'color': '#ffffff'}" />
                             <div class="flex flex-col min-w-0">
                                 <div class="flex items-center gap-1.5">
-                                    <span class="font-medium text-[var(--color-text)] text-sm truncate">{{ member.name
-                                        }}</span>
+                                    <span class="font-medium
+                                        text-[var(--color-text)] text-sm">
+                                        {{ member.name }}
+                                    </span>
                                     @if(member.user_id) {
                                     <i class="pi pi-link text-green-500 text-xs" pTooltip="Login verbunden"></i>
                                     }

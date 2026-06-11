@@ -27,7 +27,7 @@ import { AvatarGroupModule } from 'primeng/avatargroup';
 import { MessageModule } from 'primeng/message';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -35,6 +35,7 @@ import { SelectModule } from 'primeng/select';
 import { RippleModule } from 'primeng/ripple';
 import { AccordionModule } from 'primeng/accordion';
 import { AutoCompleteModule } from 'primeng/autocomplete';
+import { MenuModule } from 'primeng/menu';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -64,7 +65,8 @@ import { RouterModule } from '@angular/router';
     RippleModule,
     AccordionModule,
     AutoCompleteModule,
-    RouterModule
+    RouterModule,
+    MenuModule,
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './working-groups.html',
@@ -608,5 +610,45 @@ export class WorkingGroupsComponent implements OnInit {
     }
 
     this.missingContactCounts.set(counts);
+  }
+  /**
+   * Build mobile overflow menu items for a group.
+   */
+  buildGroupMenuItems(
+    group: WorkingGroup
+  ): MenuItem[] {
+    const items: MenuItem[] = [];
+    const canEdit =
+      this.auth.isAdmin() || this.canEditAg(group.id!);
+
+    if (canEdit) {
+      items.push(
+        {
+          label: 'Mitglieder verwalten',
+          icon: 'pi pi-users',
+          command: () =>
+            this.openMembersDialog(group),
+        },
+        {
+          label: 'Bearbeiten',
+          icon: 'pi pi-pencil',
+          command: () => this.editGroup(group),
+        }
+      );
+    }
+
+    if (this.auth.isAdmin()) {
+      if (items.length > 0) {
+        items.push({ separator: true });
+      }
+      items.push({
+        label: 'Löschen',
+        icon: 'pi pi-trash',
+        styleClass: 'text-red-400',
+        command: () => this.confirmDelete(group),
+      });
+    }
+
+    return items;
   }
 }

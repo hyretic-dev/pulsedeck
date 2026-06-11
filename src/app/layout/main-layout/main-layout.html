@@ -8,13 +8,15 @@
     <!-- Main Content Wrapper -->
     <div class="flex-1 flex flex-col min-w-0 h-full relative">
         <!-- Mobile Header -->
-        <header
-            class="lg:hidden flex items-center justify-between p-4 bg-[var(--color-surface)] border-b border-[var(--color-border)] z-10 sticky top-0">
-            <p-button icon="pi pi-bars" [text]="true" (click)="leftSidebarVisible.set(true)"
-                styleClass="text-[var(--color-text-muted)] hover:text-[var(--color-text)]" />
+        <header class="lg:hidden flex items-center justify-between p-4
+            bg-[var(--color-surface)] border-b border-[var(--color-border)]
+            z-10 sticky top-0">
+            <p-button icon="pi pi-bars" [text]="true"
+                (click)="leftSidebarVisible.set(true)"
+                styleClass="text-[var(--color-text-muted)]
+                    hover:text-[var(--color-text)]" />
             <span class="text-lg font-bold text-linke">PulseDeck</span>
-            <p-button icon="pi pi-calendar" [text]="true" (click)="rightSidebarVisible.set(true)"
-                styleClass="text-[var(--color-text-muted)] hover:text-[var(--color-text)]" />
+            <div class="w-10"></div>
         </header>
 
         <!-- Main Content Scroll Area -->
@@ -25,9 +27,9 @@
             </div>
 
             <!-- Footer -->
-            <footer class="mt-8 pt-6 pb-24 lg:pb-6 border-t border-[var(--color-border)]">
+            <footer class="mt-8 pt-4 pl-2 md:pl-0 md:pt-8 md:pb-6 border-t border-[var(--color-border)]">
                 <div
-                    class="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[var(--color-text-muted)]">
+                    class="flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs text-[var(--color-text-muted)]">
                     <div class="flex items-center gap-3">
                         <!-- Mobile/Tablet: Helper Buttons -->
                         <div class="lg:hidden flex items-center gap-3">
@@ -53,17 +55,44 @@
 
 
                     </div>
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 md:gap-4 md:pr-24 lg:pr-0">
                         <button (click)="theme.toggle()"
                             class="p-1.5 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--color-surface-overlay)] transition-colors text-[var(--color-text-muted)] hover:text-linke"
                             [title]="theme.isDark() ? 'Light Mode aktivieren' : 'Dark Mode aktivieren'">
                             <i class="pi text-sm" [class.pi-moon]="theme.isDark()" [class.pi-sun]="!theme.isDark()"></i>
                         </button>
                         <div class="w-px h-4 bg-[var(--color-border)] mx-1"></div>
-                        <a routerLink="/impressum" class="hover:text-linke transition-colors">Impressum</a>
-                        <a routerLink="/datenschutz" class="hover:text-linke transition-colors">Datenschutz</a>
-                        <a routerLink="/docs" class="hover:text-linke transition-colors">Handbuch</a>
-                        <a href="mailto:support@example.com" class="hover:text-linke transition-colors">Hilfe</a>
+
+                        <!-- Desktop Links -->
+                        <div class="hidden md:flex items-center gap-4">
+                            <a routerLink="/impressum" class="hover:text-linke transition-colors">Impressum</a>
+                            <a routerLink="/datenschutz" class="hover:text-linke transition-colors">Datenschutz</a>
+                            <a routerLink="/docs" class="hover:text-linke transition-colors">Handbuch</a>
+                            <a href="mailto:support@example.com" class="hover:text-linke transition-colors">Hilfe</a>
+                        </div>
+
+                        <!-- Mobile Burger Menu -->
+                        <div class="relative md:hidden">
+                            <button (click)="footerMenuOpen.set(!footerMenuOpen())"
+                                class="p-1.5 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--color-surface-overlay)] transition-colors text-[var(--color-text-muted)] hover:text-linke"
+                                title="Menü">
+                                <i class="pi pi-bars text-sm"></i>
+                            </button>
+
+                            @if (footerMenuOpen()) {
+                            <div
+                                class="absolute bottom-full left-0 mb-2 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-xl flex flex-col min-w-[160px] p-1.5 z-50 animate-fade-in origin-bottom-left">
+                                <a routerLink="/impressum" (click)="footerMenuOpen.set(false)"
+                                    class="px-3 py-2 text-sm hover:bg-[var(--color-surface-overlay)] hover:text-linke rounded transition-colors text-left">Impressum</a>
+                                <a routerLink="/datenschutz" (click)="footerMenuOpen.set(false)"
+                                    class="px-3 py-2 text-sm hover:bg-[var(--color-surface-overlay)] hover:text-linke rounded transition-colors text-left">Datenschutz</a>
+                                <a routerLink="/docs" (click)="footerMenuOpen.set(false)"
+                                    class="px-3 py-2 text-sm hover:bg-[var(--color-surface-overlay)] hover:text-linke rounded transition-colors text-left">Handbuch</a>
+                                <a href="mailto:support@example.com" (click)="footerMenuOpen.set(false)"
+                                    class="px-3 py-2 text-sm hover:bg-[var(--color-surface-overlay)] hover:text-linke rounded transition-colors text-left">Hilfe</a>
+                            </div>
+                            }
+                        </div>
                     </div>
                 </div>
             </footer>

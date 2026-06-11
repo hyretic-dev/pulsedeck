@@ -47,6 +47,7 @@ export class MainLayout {
 
   leftSidebarVisible = signal(false);
   rightSidebarVisible = signal(false);
+  footerMenuOpen = signal(false);
 
   /** Desktop: Right sidebar collapsed state (default: expanded) */
   rightSidebarCollapsed = signal(false);
@@ -56,6 +57,7 @@ export class MainLayout {
       if (event instanceof NavigationStart) {
         this.leftSidebarVisible.set(false);
         this.rightSidebarVisible.set(false);
+        this.footerMenuOpen.set(false);
       }
     });
   }

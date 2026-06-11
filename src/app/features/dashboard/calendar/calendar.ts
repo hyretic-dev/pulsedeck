@@ -16,6 +16,8 @@ import { MessageModule } from 'primeng/message';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -62,6 +64,7 @@ import { AnalyticsService } from '../../../shared/services/analytics.service';
     MessageModule,
     ConfirmDialogModule,
     ToastModule,
+    MenuModule,
     TooltipModule,
     InputNumberModule,
     MultiSelectModule,
@@ -759,6 +762,70 @@ export class CalendarComponent implements OnInit, OnDestroy {
   // Guest Organization Invites (Viral Loop)
   guestInviteDialogVisible = signal(false);
   guestInviteEventId = signal<string | null>(null);
+
+  // Mobile overflow menu
+  mobileMenuRef = signal<any>(null);
+
+  /**
+   * Build mobile overflow menu items for a given event.
+   */
+  buildMobileMenuItems(
+    event: CalendarEvent
+  ): MenuItem[] {
+    const items: MenuItem[] = [
+      {
+        label: 'Link teilen',
+        icon: 'pi pi-share-alt',
+        command: () => this.copyEventLink(event),
+      },
+      {
+        label: 'Für WhatsApp kopieren',
+        icon: 'pi pi-whatsapp',
+        command: () => this.copyWhatsAppText(event),
+      },
+      {
+        label: 'In den Kalender',
+        icon: 'pi pi-calendar-plus',
+        command: () => this.downloadEventIcal(event),
+      },
+      {
+        label: 'Teilnehmer',
+        icon: 'pi pi-users',
+        command: () =>
+          this.openParticipantsDialog(event),
+      },
+      {
+        label: 'Helferschichten',
+        icon: 'pi pi-list-check',
+        command: () => this.openManageSlots(event),
+      },
+    ];
+
+    if (this.canCreateEvent()) {
+      items.push(
+        {
+          label: 'Gast-Org einladen',
+          icon: 'pi pi-building',
+          command: () =>
+            this.openGuestInvite(event),
+        },
+        { separator: true },
+        {
+          label: 'Bearbeiten',
+          icon: 'pi pi-pencil',
+          command: () => this.editEvent(event),
+        },
+        {
+          label: 'Löschen',
+          icon: 'pi pi-trash',
+          styleClass: 'text-red-400',
+          command: () => this.confirmDelete(event),
+        }
+      );
+    }
+
+    return items;
+  }
 
   async openManageSlots(event: CalendarEvent): Promise<void> {
     this.currentEvent = JSON.parse(JSON.stringify(event)); // Deep copy

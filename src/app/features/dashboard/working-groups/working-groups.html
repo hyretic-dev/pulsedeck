@@ -30,27 +30,23 @@
     <!-- Kategorie-Filterleiste -->
     @if (availableCategories().length > 0) {
     <div class="flex flex-wrap items-center gap-2 mb-4">
-        <button
-            class="px-3 py-1 rounded-full text-xs font-medium border transition-colors"
+        <button class="px-3 py-1 rounded-full text-xs font-medium border transition-colors"
             [class.bg-[var(--linke-rot)]]="selectedCategoryFilters().size === 0"
             [class.text-white]="selectedCategoryFilters().size === 0"
             [class.border-[var(--linke-rot)]]="selectedCategoryFilters().size === 0"
             [class.border-[var(--color-border)]]="selectedCategoryFilters().size > 0"
             [class.text-[var(--color-text-muted)]]="selectedCategoryFilters().size > 0"
-            [class.bg-transparent]="selectedCategoryFilters().size > 0"
-            (click)="clearCategoryFilters()">
+            [class.bg-transparent]="selectedCategoryFilters().size > 0" (click)="clearCategoryFilters()">
             Alle
         </button>
         @for (cat of availableCategories(); track cat) {
-        <button
-            class="px-3 py-1 rounded-full text-xs font-medium border transition-colors"
+        <button class="px-3 py-1 rounded-full text-xs font-medium border transition-colors"
             [class.bg-[var(--linke-rot)]]="selectedCategoryFilters().has(cat)"
             [class.text-white]="selectedCategoryFilters().has(cat)"
             [class.border-[var(--linke-rot)]]="selectedCategoryFilters().has(cat)"
             [class.border-[var(--color-border)]]="!selectedCategoryFilters().has(cat)"
             [class.text-[var(--color-text-muted)]]="!selectedCategoryFilters().has(cat)"
-            [class.bg-transparent]="!selectedCategoryFilters().has(cat)"
-            (click)="toggleCategoryFilter(cat)">
+            [class.bg-transparent]="!selectedCategoryFilters().has(cat)" (click)="toggleCategoryFilter(cat)">
             {{ cat }}
         </button>
         }
@@ -73,7 +69,8 @@
                     <!-- Info -->
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-sm md:text-base font-bold text-[var(--color-text)] truncate">{{group.name}}</h3>
+                            <h3 class="text-sm md:text-base font-bold text-[var(--color-text)] truncate">{{group.name}}
+                            </h3>
                             @if (group.category) {
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold
                                 bg-[var(--linke-rot)]/10 text-[var(--linke-rot)]
@@ -125,23 +122,38 @@
 
                     <!-- Actions + Expand -->
                     <div class="flex items-center gap-1 flex-shrink-0">
+                        <!-- MOBILE: Overflow menu -->
                         @if (auth.isAdmin() || canEditAg(group.id!)) {
-                        <button (click)="openMembersDialog(group); $event.stopPropagation()"
-                            class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-teal hover:bg-[var(--color-surface-overlay)] transition-colors"
-                            pTooltip="Mitglieder verwalten">
-                            <i class="pi pi-users text-xs"></i>
-                        </button>
-                        <button (click)="editGroup(group); $event.stopPropagation()"
-                            class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors">
-                            <i class="pi pi-pencil text-xs"></i>
-                        </button>
+                        <div class="flex md:hidden items-center">
+                            <button (click)="groupMenu.toggle($event); $event.stopPropagation()"
+                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors">
+                                <i class="pi pi-ellipsis-v text-xs"></i>
+                            </button>
+                            <p-menu #groupMenu [model]="buildGroupMenuItems(group)" [popup]="true" appendTo="body" />
+                        </div>
                         }
-                        @if (auth.isAdmin()) {
-                        <button (click)="confirmDelete(group); $event.stopPropagation()"
-                            class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-red-400 hover:bg-[var(--color-surface-overlay)] transition-colors">
-                            <i class="pi pi-trash text-xs"></i>
-                        </button>
-                        }
+
+                        <!-- DESKTOP: Full icon row -->
+                        <div class="hidden md:flex items-center gap-1">
+                            @if (auth.isAdmin() || canEditAg(group.id!)) {
+                            <button (click)="openMembersDialog(group); $event.stopPropagation()"
+                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-teal hover:bg-[var(--color-surface-overlay)] transition-colors"
+                                pTooltip="Mitglieder verwalten">
+                                <i class="pi pi-users text-xs"></i>
+                            </button>
+                            <button (click)="editGroup(group); $event.stopPropagation()"
+                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors">
+                                <i class="pi pi-pencil text-xs"></i>
+                            </button>
+                            }
+                            @if (auth.isAdmin()) {
+                            <button (click)="confirmDelete(group); $event.stopPropagation()"
+                                class="w-7 h-7 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-red-400 hover:bg-[var(--color-surface-overlay)] transition-colors">
+                                <i class="pi pi-trash text-xs"></i>
+                            </button>
+                            }
+                        </div>
+
                         <i class="pi text-[var(--color-text-muted)] text-xs ml-1"
                             [class]="expandedGroups[group.id!] ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
                     </div>
@@ -181,7 +193,8 @@
                     <div>
                         <div class="text-[10px] uppercase text-[var(--color-text-muted)] font-semibold">Nächstes Treffen
                         </div>
-                        <div class="text-[var(--color-text)]" [class.italic]="calculateNextMeeting(group.id!) === 'Nicht geplant'">
+                        <div class="text-[var(--color-text)]"
+                            [class.italic]="calculateNextMeeting(group.id!) === 'Nicht geplant'">
                             {{calculateNextMeeting(group.id!)}}
                         </div>
                     </div>
@@ -206,7 +219,8 @@
                 <!-- Angepinnte Dateien -->
                 @if (fileService.agFiles().get(group.id!) && fileService.agFiles().get(group.id!)!.length > 0) {
                 <div>
-                    <div class="text-[10px] uppercase text-[var(--color-text-muted)] font-semibold mb-1">Angepinnte Dateien</div>
+                    <div class="text-[10px] uppercase text-[var(--color-text-muted)] font-semibold mb-1">Angepinnte
+                        Dateien</div>
                     <div class="space-y-1">
                         @for (file of fileService.agFiles().get(group.id!); track file.id) {
                         <div class="flex items-center justify-between text-xs bg-[var(--color-surface)]/50 rounded px-2 py-1.5 hover:bg-[var(--color-surface-raised)] transition-colors cursor-pointer"
@@ -217,8 +231,10 @@
                                 <i class="pi pi-bookmark-fill text-amber-400 text-[8px] flex-shrink-0"></i>
                             </div>
                             <div class="flex items-center gap-2 ml-2 flex-shrink-0">
-                                <span class="text-[var(--color-text-muted)] whitespace-nowrap">{{ (file.size_bytes || 0) / 1024 | number:'1.0-0' }} KB</span>
-                                <i class="pi pi-download text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"></i>
+                                <span class="text-[var(--color-text-muted)] whitespace-nowrap">{{ (file.size_bytes || 0)
+                                    / 1024 | number:'1.0-0' }} KB</span>
+                                <i
+                                    class="pi pi-download text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"></i>
                             </div>
                         </div>
                         }
@@ -229,18 +245,20 @@
                 <!-- Join Actions -->
                 <div class="pt-2 border-t border-[var(--color-border)]">
                     @if (auth.isLoggedIn()) {
-                    <div class="flex flex-wrap gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         @if (group.contact_link) {
-                        <a [href]="group.contact_link" target="_blank" class="flex-1 min-w-[120px]">
+                        <a [href]="group.contact_link" target="_blank" class="flex-1 min-w-[60%]">
                             <p-button [label]="group.contact_type" [icon]="getIconForType(group.contact_type)"
-                                styleClass="w-full" severity="danger" size="small"></p-button>
+                                styleClass="w-full" severity="danger" size="small">
+                            </p-button>
                         </a>
                         }
-                        <p-button [label]="myMemberships().has(group.id!) ? 'Verlassen' : 'Beitreten'"
-                            [icon]="myMemberships().has(group.id!) ? 'pi pi-sign-out' : 'pi pi-user-plus'"
-                            [severity]="myMemberships().has(group.id!) ? 'secondary' : 'contrast'"
-                            [outlined]="myMemberships().has(group.id!)" size="small"
-                            (click)="toggleMembership(group); $event.stopPropagation()">
+                        <p-button [label]="myMemberships().has(group.id!) ?
+                                'Verlassen' : 'Beitreten'" [icon]="myMemberships().has(group.id!) ?
+                                'pi pi-sign-out' : 'pi pi-user-plus'" [severity]="myMemberships().has(group.id!) ?
+                                'secondary' : 'contrast'" [outlined]="myMemberships().has(group.id!)" size="small"
+                            (click)="toggleMembership(group);
+                                $event.stopPropagation()" class="flex-1 min-w-[120px]" styleClass="w-full">
                         </p-button>
                     </div>
                     } @else {
@@ -340,15 +358,10 @@
 
         <div>
             <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Kategorie</label>
-            <p-autoComplete
-                [(ngModel)]="currentGroup.category"
-                [suggestions]="categorySuggestions"
-                (completeMethod)="searchCategories($event)"
-                [forceSelection]="false"
-                [dropdown]="availableCategories().length > 0"
-                placeholder="z.B. AGs, Mandatsträger..."
-                styleClass="w-full"
-                inputStyleClass="w-full" />
+            <p-autoComplete [(ngModel)]="currentGroup.category" [suggestions]="categorySuggestions"
+                (completeMethod)="searchCategories($event)" [forceSelection]="false"
+                [dropdown]="availableCategories().length > 0" placeholder="z.B. AGs, Mandatsträger..."
+                styleClass="w-full" inputStyleClass="w-full" />
             <p class="text-xs text-[var(--color-text-muted)] mt-1">
                 <i class="pi pi-info-circle mr-0.5"></i>
                 Freitext – vorhandene Kategorien werden vorgeschlagen

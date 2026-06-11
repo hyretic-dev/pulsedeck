@@ -1078,3 +1078,37 @@ section {
         animation: none !important;
     }
 }
+
+/* Mobile Tablist & Feed Optimizations */
+@media (max-width: 768px) {
+    .p-tablist-nav-button,
+    .p-tablist-prev-button,
+    .p-tablist-next-button,
+    button[class*="p-tablist-nav"],
+    button[class*="p-tablist-button"],
+    button[class*="p-tabs-nav"] {
+        display: none !important;
+    }
+
+    .p-tablist-content {
+        overflow-x: auto !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+
+    .p-tablist-content::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    .p-tabs,
+    .p-tabpanels,
+    .p-tabpanel {
+        --p-tabs-tabpanel-padding: 0.75rem 0rem !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    app-rich-text-renderer p {
+        font-size: 0.8125rem !important;
+    }
+}

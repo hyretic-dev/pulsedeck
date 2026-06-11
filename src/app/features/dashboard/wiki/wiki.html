@@ -12,12 +12,27 @@
             </div>
             <div class="flex items-center gap-1">
                 @if (canManageCategories()) {
-                <p-button icon="pi pi-cog" [text]="true" [rounded]="true" severity="secondary" size="small"
-                    pTooltip="Kategorien verwalten" (click)="openCategoryManager('global')"></p-button>
+                <p-button
+                    icon="pi pi-cog"
+                    [text]="true"
+                    [rounded]="true"
+                    severity="secondary"
+                    size="small"
+                    pTooltip="Kategorien verwalten"
+                    tooltipPosition="left"
+                    (click)="openCategoryManager('global')">
+                </p-button>
                 }
                 @if (canEdit()) {
-                <p-button icon="pi pi-plus" severity="danger" [rounded]="true" size="small" pTooltip="Neuer Artikel"
-                    (click)="openNew()"></p-button>
+                <p-button
+                    icon="pi pi-plus"
+                    severity="danger"
+                    [rounded]="true"
+                    size="small"
+                    pTooltip="Neuer Artikel"
+                    tooltipPosition="left"
+                    (click)="openNew()">
+                </p-button>
                 }
             </div>
         </div>
@@ -216,10 +231,26 @@
                 </div>
                 @if (canEdit()) {
                 <div class="flex items-center gap-1 flex-shrink-0">
-                    <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" size="small"
-                        pTooltip="Bearbeiten" (click)="editDoc(selectedArticle()!)"></p-button>
-                    <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small"
-                        pTooltip="Löschen" (click)="confirmDelete(selectedArticle()!)"></p-button>
+                    <p-button
+                        icon="pi pi-pencil"
+                        [text]="true"
+                        [rounded]="true"
+                        severity="secondary"
+                        size="small"
+                        pTooltip="Bearbeiten"
+                        tooltipPosition="left"
+                        (click)="editDoc(selectedArticle()!)">
+                    </p-button>
+                    <p-button
+                        icon="pi pi-trash"
+                        [text]="true"
+                        [rounded]="true"
+                        severity="danger"
+                        size="small"
+                        pTooltip="Löschen"
+                        tooltipPosition="left"
+                        (click)="confirmDelete(selectedArticle()!)">
+                    </p-button>
                 </div>
                 }
             </div>
