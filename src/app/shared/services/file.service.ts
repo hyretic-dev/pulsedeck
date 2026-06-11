@@ -57,6 +57,7 @@ export class FileService {
     recentFiles = signal<FileMetadata[]>([]);
     folderList = signal<FolderMetadata[]>([]);
     folders = signal<string[]>([]);
+    agFiles = signal<Map<string, FileMetadata[]>>(new Map());
     loading = signal(false);
     currentFolder = signal('/');
     currentFolderId = signal<string | null>(null);
@@ -214,6 +215,28 @@ export class FileService {
         }
 
         this.loading.set(false);
+    }
+
+    /**
+     * Fetch files for a specific working group
+     */
+    async fetchFilesByAg(agId: string): Promise<void> {
+        const { data, error } = await this.supabase.client
+            .from('files')
+            .select(FILE_SELECT)
+            .eq('working_group_id', agId)
+            .order('name', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching AG files:', error);
+            return;
+        }
+
+        this.agFiles.update(map => {
+            const newMap = new Map(map);
+            newMap.set(agId, data as FileMetadata[]);
+            return newMap;
+        });
     }
 
     /**

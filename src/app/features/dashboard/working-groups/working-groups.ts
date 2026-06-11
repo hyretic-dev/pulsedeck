@@ -10,6 +10,7 @@ import {
   AG_ROLE_LABELS,
 } from '../../../shared/services/permissions.service';
 import { OrganizationService } from '../../../shared/services/organization.service';
+import { FileService } from '../../../shared/services/file.service';
 
 // PrimeNG Imports
 import { TableModule } from 'primeng/table';
@@ -76,6 +77,7 @@ export class WorkingGroupsComponent implements OnInit {
   public auth = inject(AuthService);
   public permissions = inject(PermissionsService);
   private orgService = inject(OrganizationService);
+  public fileService = inject(FileService);
 
   groups = this.workingGroupsService.workingGroups;
   loading = this.workingGroupsService.loading;
@@ -126,6 +128,9 @@ export class WorkingGroupsComponent implements OnInit {
   // Toggle expand/collapse for a group
   toggleExpand(groupId: string) {
     this.expandedGroups[groupId] = !this.expandedGroups[groupId];
+    if (this.expandedGroups[groupId]) {
+      this.fileService.fetchFilesByAg(groupId);
+    }
   }
 
   // Helper to get events for a specific AG

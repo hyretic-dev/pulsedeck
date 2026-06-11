@@ -203,6 +203,26 @@
                 </div>
                 }
 
+                <!-- Associated Files -->
+                @if (fileService.agFiles().get(group.id!) && fileService.agFiles().get(group.id!)!.length > 0) {
+                <div>
+                    <div class="text-[10px] uppercase text-[var(--color-text-muted)] font-semibold mb-1">Dateien</div>
+                    <div class="space-y-1">
+                        @for (file of fileService.agFiles().get(group.id!); track file.id) {
+                        <div class="flex items-center justify-between text-xs bg-[var(--color-surface)]/50 rounded px-2 py-1.5">
+                            <div class="flex items-center gap-2 overflow-hidden">
+                                <i class="pi pi-file text-[var(--color-text-muted)] text-[10px]"></i>
+                                <span class="text-[var(--color-text)] truncate" [title]="file.name">{{file.name}}</span>
+                            </div>
+                            <div class="flex gap-2 text-[var(--color-text-muted)] ml-2 whitespace-nowrap">
+                                <span>{{ (file.size_bytes || 0) / 1024 / 1024 | number:'1.2-2' }} MB</span>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+
                 <!-- Join Actions -->
                 <div class="pt-2 border-t border-[var(--color-border)]">
                     @if (auth.isLoggedIn()) {
