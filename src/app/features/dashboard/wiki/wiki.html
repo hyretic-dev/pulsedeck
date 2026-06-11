@@ -76,9 +76,15 @@
                     @for (doc of getDocsByCategoryId(cat.id); track doc.id) {
                     <button (click)="selectArticle(doc)"
                         [class]="selectedArticle()?.id === doc.id ? 'bg-gray-700/50 text-[var(--color-text)]' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-raised)] hover:text-gray-200'"
-                        class="w-full text-left px-4 py-2 text-xs border-l-2 border-l-transparent transition-colors truncate flex items-center gap-2">
-                        <i class="pi pi-file text-[10px]"></i>
-                        <span class="truncate">{{doc.title}}</span>
+                        class="w-full text-left px-4 py-2 text-xs border-l-2 border-l-transparent transition-colors truncate flex items-center justify-between gap-2">
+                        <span class="flex items-center gap-2 truncate">
+                            <i class="pi text-[10px]" [ngClass]="{
+                                'pi-file': doc.status === 'Published' || !doc.status,
+                                'pi-file text-yellow-500': doc.status === 'Draft',
+                                'pi-eye text-teal': doc.status === 'Review'
+                            }"></i>
+                            <span class="truncate">{{doc.title}}</span>
+                        </span>
                     </button>
                     } @empty {
                     <div class="px-4 py-2 text-xs text-[var(--color-text-muted)] italic">Keine Artikel</div>
@@ -146,9 +152,15 @@
                                 @for (doc of getDocsByCategoryId(agCat.id); track doc.id) {
                                 <button (click)="selectArticle(doc)"
                                     [class]="selectedArticle()?.id === doc.id ? 'bg-gray-700/50 text-[var(--color-text)]' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-raised)] hover:text-gray-200'"
-                                    class="w-full text-left px-6 py-1.5 text-xs border-l-2 border-l-transparent transition-colors truncate flex items-center gap-2">
-                                    <i class="pi pi-file text-[10px]"></i>
-                                    <span class="truncate">{{doc.title}}</span>
+                                    class="w-full text-left px-6 py-1.5 text-xs border-l-2 border-l-transparent transition-colors truncate flex items-center justify-between gap-2">
+                                    <span class="flex items-center gap-2 truncate">
+                                        <i class="pi text-[10px]" [ngClass]="{
+                                            'pi-file': doc.status === 'Published' || !doc.status,
+                                            'pi-file text-yellow-500': doc.status === 'Draft',
+                                            'pi-eye text-teal': doc.status === 'Review'
+                                        }"></i>
+                                        <span class="truncate">{{doc.title}}</span>
+                                    </span>
                                 </button>
                                 } @empty {
                                 <div class="px-6 py-1.5 text-[10px] text-[var(--color-text-muted)] italic">Keine Artikel</div>

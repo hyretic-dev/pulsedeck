@@ -285,6 +285,8 @@ export class CalendarComponent implements OnInit, OnDestroy {
   }
 
   async saveEvent() {
+    if (this.saving()) return;
+    
     if (!this.currentEvent.title) {
       this.messageService.add({
         severity: 'warn',

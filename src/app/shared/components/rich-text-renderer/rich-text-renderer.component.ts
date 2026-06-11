@@ -1,6 +1,7 @@
 import { Component, Input, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import DOMPurify from 'dompurify';
 
 @Component({
     selector: 'app-rich-text-renderer',
@@ -144,6 +145,10 @@ export class RichTextRendererComponent {
     set content(value: string) {
         // Replace &nbsp; with normal space to fix wrapping issues
         const cleanContent = (value || '').replace(/&nbsp;/g, ' ');
-        this.safeContent = this.sanitizer.bypassSecurityTrustHtml(cleanContent);
+        // Use DOMPurify to sanitize HTML, preventing XSS but allowing safe Quill markup
+        const purifiedContent = DOMPurify.sanitize(cleanContent);
+        // We bypass Angular's sanitizer here ONLY because DOMPurify has already securely sanitized it.
+        // Angular's built-in sanitizer strips style attributes used by Quill.
+        this.safeContent = this.sanitizer.bypassSecurityTrustHtml(purifiedContent);
     }
 }

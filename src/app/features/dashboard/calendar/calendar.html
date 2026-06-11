@@ -201,7 +201,7 @@
 <!-- Event Dialog -->
 <p-dialog [header]="editMode() ? 'Termin bearbeiten' : 'Neuer Termin'" [(visible)]="dialogVisible" [modal]="true"
     [draggable]="false" [resizable]="false" maskStyleClass="backdrop-blur-sm bg-black/50"
-    [style]="{width: '600px', maxWidth: '95vw'}" [closable]="!saving()">
+    [style]="{width: '600px', maxWidth: '95vw'}" [contentStyle]="{'max-height': 'calc(100vh - 150px)', 'overflow-y': 'auto'}" [closable]="!saving()">
 
     <!-- Success state after create -->
     @if (showCreateAnother()) {
@@ -416,7 +416,7 @@
 <!-- Participants Dialog -->
 <p-dialog [header]="'Teilnehmer: ' + selectedEventForParticipants()?.title" [visible]="participantsDialogVisible()"
     (visibleChange)="participantsDialogVisible.set($event)" [modal]="true" [draggable]="false" [resizable]="false"
-    maskStyleClass="backdrop-blur-sm bg-black/50" [style]="{width: '400px', maxWidth: '95vw'}">
+    maskStyleClass="backdrop-blur-sm bg-black/50" [style]="{width: '400px', maxWidth: '95vw'}" [contentStyle]="{'max-height': 'calc(100vh - 150px)', 'overflow-y': 'auto'}">
 
     <div class="space-y-2">
         @for (reg of participants(); track reg.id) {
@@ -454,7 +454,7 @@
 <!-- Helper Slots Dialog -->
 <p-dialog [header]="'Schichten: ' + currentEvent.title" [visible]="manageSlotsDialogVisible()"
     (visibleChange)="manageSlotsDialogVisible.set($event)" [modal]="true" [draggable]="false" [resizable]="false"
-    maskStyleClass="backdrop-blur-sm bg-black/50" [style]="{width: '500px', maxWidth: '95vw'}">
+    maskStyleClass="backdrop-blur-sm bg-black/50" [style]="{width: '500px', maxWidth: '95vw'}" [contentStyle]="{'max-height': 'calc(100vh - 150px)', 'overflow-y': 'auto'}">
 
     <div class="space-y-6">
         <!-- Admin: Create Slot -->
