@@ -397,8 +397,10 @@
         </div>
         }
     </div>
+    }
 
     <ng-template pTemplate="footer">
+        @if (!showCreateAnother()) {
         <p-button label="Abbrechen"
             severity="secondary"
             [text]="true"
@@ -409,8 +411,8 @@
             icon="pi pi-check"
             (click)="saveEvent()"
             [loading]="saving()" />
+        }
     </ng-template>
-    }
 </p-dialog>
 
 <!-- Participants Dialog -->
