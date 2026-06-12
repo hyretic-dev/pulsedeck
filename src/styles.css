@@ -605,6 +605,18 @@ body {
         padding: 0.125rem 0.5rem !important;
         font-size: 0.7rem !important;
     }
+
+    .p-toast {
+        width: 100% !important;
+        max-width: calc(100vw - 1rem) !important;
+        left: 0.5rem !important;
+        right: 0.5rem !important;
+    }
+
+    .p-popover {
+        max-width: calc(100vw - 10px) !important;
+        margin: 5px !important;
+    }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {

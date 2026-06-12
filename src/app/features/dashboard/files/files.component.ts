@@ -19,7 +19,9 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { TagModule } from 'primeng/tag';
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { MenuModule } from 'primeng/menu';
+import { PopoverModule } from 'primeng/popover';
+import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
 
 // Services
 import {
@@ -56,6 +58,8 @@ interface BreadcrumbItem {
         ConfirmDialogModule,
         TooltipModule,
         TagModule,
+        MenuModule,
+        PopoverModule,
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './files.component.html',
@@ -81,10 +85,15 @@ export class FilesComponent implements OnInit {
     uploading = signal(false);
     createFolderDialogVisible = signal(false);
     moveFileDialogVisible = signal(false);
+    editFileDialogVisible = signal(false);
+    updating = signal(false);
 
     // Upload
     selectedFile = signal<File | null>(null);
     isDragging = signal(false);
+
+    // State
+    currentOverlayTitle = signal<string>('');
 
     // Search
     searchQuery = signal('');
@@ -103,6 +112,13 @@ export class FilesComponent implements OnInit {
     moveFileTarget: FileMetadata | null = null;
     moveTargetFolderId: string | null = null;
     allFolders = signal<FolderMetadata[]>([]);
+
+    // Edit file
+    editFileTarget: FileMetadata | null = null;
+    editName = '';
+    editVisibility: FileVisibility = 'member';
+    editDescription = '';
+    editWorkingGroupId: string | null = null;
 
     visibilityOptions = [
         { label: 'Alle Mitglieder', value: 'member' },
@@ -432,6 +448,85 @@ export class FilesComponent implements OnInit {
         }
     }
 
+    // --- Edit File ---
+
+    buildFileMenuItems(file: FileMetadata): MenuItem[] {
+        const items: MenuItem[] = [];
+
+        if (this.canManage()) {
+            if (!file.is_indexed && (file.mime_type === 'application/pdf' || file.mime_type?.startsWith('text/'))) {
+                items.push({
+                    label: 'KI-Indexierung',
+                    icon: 'pi pi-sync',
+                    command: () => this.triggerIndexing(file)
+                });
+            }
+        }
+
+        if (this.canEdit(file)) {
+            items.push({
+                label: 'Bearbeiten',
+                icon: 'pi pi-pencil',
+                command: () => this.openEditDialog(file)
+            });
+        }
+
+        if (this.canDelete(file)) {
+            items.push({
+                label: 'Löschen',
+                icon: 'pi pi-trash',
+                styleClass: '!text-red-400',
+                command: () => this.confirmDelete(file)
+            });
+        }
+
+        return items;
+    }
+
+    openEditDialog(file: FileMetadata): void {
+        this.editFileTarget = file;
+        this.editName = file.name;
+        this.editVisibility = file.visibility;
+        this.editDescription = file.description || '';
+        this.editWorkingGroupId = file.working_group_id || null;
+        this.editFileDialogVisible.set(true);
+    }
+
+    async updateFile(): Promise<void> {
+        if (!this.editFileTarget?.id) return;
+        
+        const name = this.editName.trim();
+        if (!name) return;
+
+        this.updating.set(true);
+        try {
+            await this.fileService.updateFile(this.editFileTarget.id, {
+                name,
+                visibility: this.editVisibility,
+                description: this.editDescription || undefined,
+                working_group_id: this.editVisibility === 'ag-only' ? this.editWorkingGroupId || undefined : undefined
+            });
+
+            this.msg.add({
+                severity: 'success',
+                summary: 'Gespeichert',
+                detail: `Die Datei wurde aktualisiert.`,
+            });
+
+            this.editFileDialogVisible.set(false);
+            this.editFileTarget = null;
+            await this.refreshCurrentView();
+        } catch (e) {
+            this.msg.add({
+                severity: 'error',
+                summary: 'Fehler',
+                detail: (e as Error).message,
+            });
+        } finally {
+            this.updating.set(false);
+        }
+    }
+
     // --- Download ---
 
     async downloadFile(
@@ -508,6 +603,13 @@ export class FilesComponent implements OnInit {
         });
     }
 
+    showTitleOverlay(event: Event, overlay: any, title: string): void {
+        if (window.innerWidth <= 768) {
+            this.currentOverlayTitle.set(title);
+            overlay.toggle(event);
+        }
+    }
+
     // --- Search ---
 
     async onSearch(): Promise<void> {
@@ -534,6 +636,12 @@ export class FilesComponent implements OnInit {
     }
 
     // --- Helpers ---
+
+    canEdit(file: FileMetadata): boolean {
+        const member = this.auth.currentMember();
+        if (!member) return false;
+        return file.uploaded_by === member.id || this.canManage();
+    }
 
     canDelete(file: FileMetadata): boolean {
         const member = this.auth.currentMember();

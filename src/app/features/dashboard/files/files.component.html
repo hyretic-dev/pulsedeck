@@ -3,20 +3,20 @@
 
 <div class="p-2 md:p-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
             <h1 class="text-xl md:text-3xl font-bold text-[var(--color-text)]">Dateien</h1>
             <p class="text-[var(--color-text-muted)] text-sm hidden md:block">
                 Dokumente hochladen, organisieren und verwalten
             </p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
             <!-- Search -->
-            <div class="relative">
+            <div class="relative w-full sm:w-auto order-last sm:order-first">
                 <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] text-sm"></i>
                 <input type="text" pInputText [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
                     (keyup.enter)="onSearch()" placeholder="Suchen..."
-                    class="pl-9 pr-8 py-2 w-48 md:w-64 text-sm bg-[var(--color-surface-raised)] border-[var(--color-border)]" />
+                    class="pl-9 pr-8 py-2 w-full sm:w-48 md:w-64 text-sm bg-[var(--color-surface-raised)] border-[var(--color-border)]" />
                 @if (searchQuery()) {
                 <button (click)="clearSearch()"
                     class="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
@@ -24,31 +24,37 @@
                 </button>
                 }
             </div>
-            <!-- View Toggle -->
-            <div class="flex border border-[var(--color-border)] rounded-lg overflow-hidden">
-                <button (click)="displayMode.set('list')"
-                    class="w-8 h-8 flex items-center justify-center transition-colors"
-                    [class.bg-linke/20]="displayMode() === 'list'"
-                    [class.text-linke]="displayMode() === 'list'"
-                    [class.text-[var(--color-text-muted)]]="displayMode() !== 'list'"
-                    pTooltip="Listenansicht">
-                    <i class="pi pi-list text-xs"></i>
-                </button>
-                <button (click)="displayMode.set('grid')"
-                    class="w-8 h-8 flex items-center justify-center transition-colors border-l border-[var(--color-border)]"
-                    [class.bg-linke/20]="displayMode() === 'grid'"
-                    [class.text-linke]="displayMode() === 'grid'"
-                    [class.text-[var(--color-text-muted)]]="displayMode() !== 'grid'"
-                    pTooltip="Kachelansicht">
-                    <i class="pi pi-th-large text-xs"></i>
-                </button>
+            <!-- Actions -->
+            <div class="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
+                <!-- View Toggle -->
+                <div class="flex border border-[var(--color-border)] rounded-lg overflow-hidden shrink-0">
+                    <button (click)="displayMode.set('list')"
+                        class="w-8 h-8 flex items-center justify-center transition-colors"
+                        [class.bg-linke/20]="displayMode() === 'list'"
+                        [class.text-linke]="displayMode() === 'list'"
+                        [class.text-[var(--color-text-muted)]]="displayMode() !== 'list'"
+                        pTooltip="Listenansicht">
+                        <i class="pi pi-list text-xs"></i>
+                    </button>
+                    <button (click)="displayMode.set('grid')"
+                        class="w-8 h-8 flex items-center justify-center transition-colors border-l border-[var(--color-border)]"
+                        [class.bg-linke/20]="displayMode() === 'grid'"
+                        [class.text-linke]="displayMode() === 'grid'"
+                        [class.text-[var(--color-text-muted)]]="displayMode() !== 'grid'"
+                        pTooltip="Kachelansicht">
+                        <i class="pi pi-th-large text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-2 shrink-0">
+                    @if (canManage()) {
+                    <p-button label="Ordner" icon="pi pi-folder-plus" severity="secondary" [outlined]="true" size="small"
+                        (click)="openCreateFolderDialog()" />
+                    }
+                    <p-button label="Hochladen" icon="pi pi-upload" severity="danger" [raised]="true" size="small"
+                        (click)="openUploadDialog()" />
+                </div>
             </div>
-            @if (canManage()) {
-            <p-button label="Ordner" icon="pi pi-folder-plus" severity="secondary" [outlined]="true" size="small"
-                (click)="openCreateFolderDialog()" />
-            }
-            <p-button label="Hochladen" icon="pi pi-upload" severity="danger" [raised]="true" size="small"
-                (click)="openUploadDialog()" />
         </div>
     </div>
 
@@ -205,7 +211,7 @@
         @if (displayMode() === 'list') {
         <div class="bg-[var(--color-surface-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
             <!-- Table Header -->
-            <div class="hidden md:grid grid-cols-[1fr_80px_90px_120px_auto] gap-2 px-4 py-2 border-b border-[var(--color-border)] text-[10px] uppercase font-semibold text-[var(--color-text-muted)] tracking-wider">
+            <div class="hidden md:grid grid-cols-[1fr_80px_90px_120px_120px] gap-2 px-4 py-2 border-b border-[var(--color-border)] text-[10px] uppercase font-semibold text-[var(--color-text-muted)] tracking-wider">
                 <span>Name</span>
                 <span>Größe</span>
                 <span>Datum</span>
@@ -262,7 +268,7 @@
     <!-- Files in Folder -->
     @if (displayMode() === 'list') {
     <div class="bg-[var(--color-surface-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
-        <div class="hidden md:grid grid-cols-[1fr_80px_90px_120px_auto] gap-2 px-4 py-2 border-b border-[var(--color-border)] text-[10px] uppercase font-semibold text-[var(--color-text-muted)] tracking-wider">
+        <div class="hidden md:grid grid-cols-[1fr_80px_90px_120px_120px] gap-2 px-4 py-2 border-b border-[var(--color-border)] text-[10px] uppercase font-semibold text-[var(--color-text-muted)] tracking-wider">
             <span>Name</span>
             <span>Größe</span>
             <span>Datum</span>
@@ -300,21 +306,19 @@
 <!-- ===== FILE ROW TEMPLATE (List View) ===== -->
 <ng-template #fileRow let-file>
     <div
-        class="grid grid-cols-[1fr_auto] md:grid-cols-[1fr_80px_90px_120px_auto] gap-2 items-center px-4 py-2.5 border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface-raised)]/50 transition-colors group">
+        class="grid grid-cols-[1fr_auto] md:grid-cols-[1fr_80px_90px_120px_120px] gap-2 items-center px-4 py-2.5 border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface-raised)]/50 transition-colors group">
         <!-- Name -->
         <div class="flex items-center gap-2.5 min-w-0">
             <i class="pi {{ fileService.getFileIcon(file.mime_type) }} text-sm text-[var(--color-text-muted)] flex-shrink-0"></i>
             <div class="min-w-0">
-                <span class="text-sm text-[var(--color-text)] font-medium truncate block" [pTooltip]="file.name">
+                <span tabindex="0" class="text-sm text-[var(--color-text)] font-medium truncate block focus:outline-none cursor-pointer md:cursor-default" 
+                    [pTooltip]="file.name" tooltipEvent="hover" (click)="showTitleOverlay($event, titleOverlay, file.name)">
                     {{ file.name }}
                 </span>
                 @if (file.description) {
                 <span class="text-[10px] text-[var(--color-text-muted)] truncate block">{{ file.description }}</span>
                 }
             </div>
-            @if (file.is_pinned) {
-            <i class="pi pi-bookmark-fill text-amber-400 text-[10px] flex-shrink-0"></i>
-            }
         </div>
         <!-- Size -->
         <span class="hidden md:block text-xs text-[var(--color-text-muted)]">
@@ -341,30 +345,24 @@
                 <i class="pi pi-download text-xs"></i>
             </button>
             @if (canManage()) {
-            @if (!file.is_indexed && (file.mime_type === 'application/pdf' || file.mime_type?.startsWith('text/'))) {
-            <button (click)="triggerIndexing(file)" pTooltip="KI-Index"
-                class="w-7 h-7 rounded-md flex items-center justify-center text-[var(--color-text-muted)] hover:text-teal hover:bg-teal/10 transition-colors opacity-0 group-hover:opacity-100">
-                <i class="pi pi-sync text-xs"></i>
-            </button>
-            }
             <button (click)="togglePin(file)" [pTooltip]="file.is_pinned ? 'Lösen' : 'Anpinnen'"
-                class="w-7 h-7 rounded-md flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+                class="w-7 h-7 rounded-md flex items-center justify-center transition-colors"
                 [class.text-amber-400]="file.is_pinned"
-                [class.opacity-100]="file.is_pinned"
                 [class.text-[var(--color-text-muted)]]="!file.is_pinned">
                 <i class="pi text-xs" [class.pi-bookmark-fill]="file.is_pinned"
                     [class.pi-bookmark]="!file.is_pinned"></i>
             </button>
             <button (click)="openMoveDialog(file)" pTooltip="Verschieben"
-                class="w-7 h-7 rounded-md flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-raised)] transition-colors opacity-0 group-hover:opacity-100">
+                class="w-7 h-7 rounded-md flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-raised)] transition-colors">
                 <i class="pi pi-arrow-right-arrow-left text-xs"></i>
             </button>
             }
-            @if (canDelete(file)) {
-            <button (click)="confirmDelete(file)" pTooltip="Löschen"
-                class="w-7 h-7 rounded-md flex items-center justify-center text-[var(--color-text-muted)] hover:text-red-400 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100">
-                <i class="pi pi-trash text-xs"></i>
+            @if (canEdit(file) || canDelete(file) || (canManage() && !file.is_indexed && (file.mime_type === 'application/pdf' || file.mime_type?.startsWith('text/')))) {
+            <button (click)="fileRowMenu.toggle($event); $event.stopPropagation()"
+                class="w-7 h-7 rounded-md flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-raised)] transition-colors">
+                <i class="pi pi-ellipsis-v text-xs"></i>
             </button>
+            <p-menu #fileRowMenu [model]="buildFileMenuItems(file)" [popup]="true" appendTo="body" />
             }
         </div>
     </div>
@@ -380,16 +378,14 @@
                 <i class="pi {{ fileService.getFileIcon(file.mime_type) }} text-sm text-[var(--color-text-muted)]"></i>
             </div>
             <div class="flex-1 min-w-0">
-                <h3 class="font-medium text-[var(--color-text)] truncate text-xs" [pTooltip]="file.name">
+                <h3 tabindex="0" class="font-medium text-[var(--color-text)] truncate text-xs focus:outline-none cursor-pointer md:cursor-default" 
+                    [pTooltip]="file.name" tooltipEvent="hover" (click)="showTitleOverlay($event, titleOverlay, file.name)">
                     {{ file.name }}
                 </h3>
                 <p class="text-[10px] text-[var(--color-text-muted)]">
                     {{ fileService.formatFileSize(file.size_bytes) }}
                 </p>
             </div>
-            @if (file.is_pinned) {
-            <i class="pi pi-bookmark-fill text-amber-400 text-[10px] flex-shrink-0"></i>
-            }
         </div>
 
         <!-- Meta -->
@@ -415,11 +411,12 @@
                     [class.pi-bookmark]="!file.is_pinned"></i>
             </button>
             }
-            @if (canDelete(file)) {
-            <button (click)="confirmDelete(file)"
-                class="w-6 h-6 rounded-md flex items-center justify-center text-[var(--color-text-muted)] hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
-                <i class="pi pi-trash text-[10px]"></i>
+            @if (canEdit(file) || canDelete(file) || (canManage() && !file.is_indexed && (file.mime_type === 'application/pdf' || file.mime_type?.startsWith('text/')))) {
+            <button (click)="fileCardMenu.toggle($event); $event.stopPropagation()"
+                class="w-6 h-6 rounded-md flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-raised)] transition-colors flex-shrink-0">
+                <i class="pi pi-ellipsis-v text-xs"></i>
             </button>
+            <p-menu #fileCardMenu [model]="buildFileMenuItems(file)" [popup]="true" appendTo="body" />
             }
         </div>
     </div>
@@ -563,3 +560,57 @@
         </div>
     </ng-template>
 </p-dialog>
+
+<!-- ===== EDIT FILE DIALOG ===== -->
+<p-dialog header="Datei bearbeiten" [(visible)]="editFileDialogVisible" [modal]="true" [draggable]="false"
+    [resizable]="false" maskStyleClass="backdrop-blur-sm bg-black/50" [style]="{width: '480px', maxWidth: '95vw'}"
+    [closable]="!updating()">
+
+    <div class="space-y-5">
+        <!-- Name -->
+        <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Dateiname</label>
+            <input type="text" pInputText [(ngModel)]="editName" class="w-full" (keyup.enter)="updateFile()" />
+        </div>
+
+        <!-- Visibility -->
+        <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Sichtbarkeit</label>
+            <p-select [options]="visibilityOptions" [(ngModel)]="editVisibility" optionLabel="label"
+                optionValue="value" styleClass="w-full" appendTo="body" />
+        </div>
+
+        <!-- Working Group -->
+        @if (editVisibility === 'ag-only') {
+        <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Arbeitsgruppe</label>
+            <p-select [options]="workingGroups()" [(ngModel)]="editWorkingGroupId" optionLabel="name" optionValue="id"
+                placeholder="AG auswählen..." styleClass="w-full" appendTo="body" />
+        </div>
+        }
+
+        <!-- Description -->
+        <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Beschreibung</label>
+            <textarea pTextarea [(ngModel)]="editDescription" rows="2" placeholder="Kurze Beschreibung..."
+                class="w-full"></textarea>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2">
+            <p-button label="Abbrechen" severity="secondary" [outlined]="true" size="small"
+                (click)="editFileDialogVisible.set(false)" [disabled]="updating()" />
+            <p-button label="Speichern" icon="pi pi-check" severity="danger" size="small"
+                (click)="updateFile()" [loading]="updating()"
+                [disabled]="!editName.trim() || updating()" />
+        </div>
+    </ng-template>
+</p-dialog>
+
+<!-- Mobile Title Popover -->
+<p-popover #titleOverlay>
+    <div class="p-2 text-sm max-w-[80vw] break-words rounded-md">
+        {{ currentOverlayTitle() }}
+    </div>
+</p-popover>
