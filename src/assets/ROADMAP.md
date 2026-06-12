@@ -61,7 +61,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 
 ## ✅ Abgeschlossen (Patch Notes)
 
-### v0.0.99 – 4. Februar 2026 (Unified Public Page)
+### v0.0.99 - 4. Februar 2026 (Unified Public Page)
 
 **🎨 Public Page & Branding**
 - [x] **Öffentliche Startseite:** "Öffentliches Wissen" (Wiki) jetzt übersichtlich in der Sidebar
@@ -75,7 +75,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 - [x] **Dark Mode:** Code-Blöcke und Tabellen jetzt perfekt im Dark Mode integriert
 - [x] **Security:** Verbesserte HTML-Verarbeitung für sichere Darstellung von formatiertem Text
 
-### v0.0.98 – 2. Februar 2026 (UX Polish)
+### v0.0.98 - 2. Februar 2026 (UX Polish)
 
 **🎨 Design & UX**
 - [x] **Organisations-Seite:** Komplettes Redesign der öffentlichen Startseite (Dark Mode, Branding)
@@ -83,7 +83,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 - [x] **Barrierefreiheit:** Kontrast der Skill-Chips im Profil verbessert
 - [x] **Layout:** Sticky Footer und verbesserte Abstände im Login-Bereich
 
-### v0.0.97 – 1. Februar 2026 (Viral Loop)
+### v0.0.97 - 1. Februar 2026 (Viral Loop)
 
 **🚀 Wachstum & Viralität**
 - [x] **Gast-Organisationen:** Lade befreundete Vereine/Clubs zu deinen Events ein
@@ -94,15 +94,15 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 
 **🔐 Passwortloser Login**
 - [x] **Magic Link Login:** Einladungslinks loggen User direkt ein (kein Passwort nötig)
-- [x] **Optionales Passwort:** Nutzer können im Profil ein Passwort setzen – wenn sie wollen
-- [x] **Login-Auswahl:** Passwort oder Magic Link – der Nutzer entscheidet
+- [x] **Optionales Passwort:** Nutzer können im Profil ein Passwort setzen - wenn sie wollen
+- [x] **Login-Auswahl:** Passwort oder Magic Link - der Nutzer entscheidet
 - [x] **Link kopieren:** Admins können Login-Links für WhatsApp/SMS etc. kopieren
 
 **📱 Messenger-First Features**
 - [x] **WhatsApp Share:** Formatierter Event-Text mit Slot-Status zum Teilen in Messenger-Gruppen
 - [x] **Kalender-Export:** Nach Schicht-Eintragung: iCal-Download und Google Calendar Integration
 
-### v0.0.94 – 21. Januar 2026 (Interactive Feed)
+### v0.0.94 - 21. Januar 2026 (Interactive Feed)
 
 **📊 Umfragen & Interaktion**
 - [x] **Feed-Umfragen:** Erstellen von Umfragen mit mehreren Antwortmöglichkeiten
@@ -110,7 +110,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 - [x] **Feed-Integration:** Nahtlose Einbindung in den bestehenden News-Feed
 - [x] **Vote-Management:** Ändern der eigenen Stimme jederzeit möglich
 
-### v0.0.95 – 21. Januar 2026 (Invite Flow Fixes)
+### v0.0.95 - 21. Januar 2026 (Invite Flow Fixes)
 
 **📧 Einladungs-System**
 - [x] **Smart Invites:** Automatische Passwort-Reset-Einladung, falls Nutzerkonto bereits existiert (statt Fehler)
@@ -118,7 +118,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 - [x] **Auto-Link:** Mitglieder werden erst nach erfolgreicher E-Mail-Bestätigung mit ihrem Profil verknüpft (Phantom-Login Fix)
 - [x] **Zuverlässigkeit:** Edge Functions für Einladungen stabiler gemacht und aktualisiert
 
-### v0.0.93 – 19. Januar 2026 (Growth Update)
+### v0.0.93 - 19. Januar 2026 (Growth Update)
 
 **🚀 Wachstum & Viralität**
 - [x] **Social Proof:** Teilnehmer-Bilder direkt in der Terminübersicht sichtbar ("Max und 3 weitere...")
@@ -126,7 +126,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 - [x] **Public Event Pages:** Schicke Landingpages für Events, die auch ohne Login funktionieren (für WhatsApp-Einladungen)
 - [x] **Performance:** Intelligentes Nachladen von Teilnehmerdaten
 
-### v0.0.92 – 19. Januar 2026 (Audit & Mobile UX)
+### v0.0.92 - 19. Januar 2026 (Audit & Mobile UX)
 
 **🛡️ Sicherheit & Audit**
 - [x] **System Audit Logs:** Lückenlose Protokollierung aller Änderungen für Super-Admins
@@ -138,7 +138,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 - [x] **Responsive Footer:** Optimiertes Design für Mobile (Platz freigegeben, Badge integriert)
 - [x] **Feedback Integration:** Bessere Erreichbarkeit über Footer-Buttons auf Mobilgeräten
 
-### v0.0.91 – 19. Januar 2026 (Security & UX Update)
+### v0.0.91 - 19. Januar 2026 (Security & UX Update)
 
 **🔒 Kalender & Sicherheit**
 - [x] **iCal Security:** Personalisierte Token für sichere Kalender-Abos (`?token=...`)
@@ -148,7 +148,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 
 ---
 
-### v0.0.90 Alpha – 19. Januar 2026
+### v0.0.90 Alpha - 19. Januar 2026
 
 **🐛 Bugfixes & Stabilisierung**
 - [x] **Ansprechpartner:** Korrekte Trennung nach Organisation (Datenbank & Anzeige)
@@ -168,7 +168,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 
 ---
 
-### v0.0.70 – 18. Januar 2026
+### v0.0.70 - 18. Januar 2026
 
 **🏷️ Skill-Tagging & Admin-Bereich**
 - [x] Skills-Datenbank (`skills`, `member_skills` Tabellen)
@@ -182,7 +182,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 
 ---
 
-### v0.0.60 – 18. Januar 2026
+### v0.0.60 - 18. Januar 2026
 
 **🔐 Multi-Org Auth System**
 - [x] Globaler Email-Lookup über alle Organisationen
@@ -193,7 +193,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 
 ---
 
-### v0.0.50 – 17. Januar 2026
+### v0.0.50 - 17. Januar 2026
 
 **📊 Dashboard-Statistiken**
 - [x] StatisticsService für Echtzeit-Zähler
@@ -204,7 +204,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 
 ---
 
-### v0.0.40 – 17. Januar 2026
+### v0.0.40 - 17. Januar 2026
 
 **📁 Dateiverwaltung**
 - [x] files Tabelle mit RLS-Policies
@@ -214,7 +214,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 
 ---
 
-### v0.0.31 – 17. Januar 2026
+### v0.0.31 - 17. Januar 2026
 
 **📤 iCal-Export**
 - [x] Edge Function für .ics-Generierung
@@ -222,7 +222,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 
 ---
 
-### v0.0.30 – 17. Januar 2026
+### v0.0.30 - 17. Januar 2026
 
 **📅 Termin-Anmeldung**
 - [x] event_registrations mit RLS
@@ -230,7 +230,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 
 ---
 
-### v0.0.20 – 17. Januar 2026
+### v0.0.20 - 17. Januar 2026
 
 **🔐 Berechtigungssystem**
 - [x] Globale + AG-spezifische Rollen
@@ -238,7 +238,7 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 
 ---
 
-### v0.0.10 – 14. Januar 2026
+### v0.0.10 - 14. Januar 2026
 
 **🎉 Erster Alpha-Release**
 - [x] Dashboard, Mitglieder, AGs, Kalender, Wiki, Feed, Kontakte

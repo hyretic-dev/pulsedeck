@@ -31,7 +31,7 @@ function generateNewsletterHtml(
   <td style="padding: 12px 0; border-bottom: 1px solid #eee;">
     <a href="${itemUrl}" style="color: ${color}; text-decoration: none; font-weight: 600; font-size: 16px;">${item.title}</a>
     <br>
-    <small style="color: #666;">${date} – ${author}</small>
+    <small style="color: #666;">${date} - ${author}</small>
     ${item.content ? `<p style="margin: 8px 0 0; color: #333; line-height: 1.5;">${stripHtml(item.content).slice(0, 150)}...</p>` : ''}
   </td>
 </tr>`;

@@ -155,7 +155,7 @@ import { AuthService } from '../../shared/services/auth.service';
                         <p class="text-[var(--color-text-muted)] leading-relaxed">
                             Eine Zusammenführung dieser Daten mit anderen Datenquellen wird nicht vorgenommen. 
                             Die Erfassung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Der Websitebetreiber hat ein berechtigtes 
-                            Interesse an der technisch fehlerfreien Darstellung und der Optimierung seiner Website – hierzu müssen die Server-Log-Files erfasst werden.
+                            Interesse an der technisch fehlerfreien Darstellung und der Optimierung seiner Website - hierzu müssen die Server-Log-Files erfasst werden.
                         </p>
 
                         <h3 class="text-xl font-medium text-[var(--color-text)] mt-6 mb-3">Registrierung auf dieser Website</h3>

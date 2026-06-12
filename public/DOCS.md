@@ -10,7 +10,7 @@ Willkommen in der offiziellen Dokumentation von PulseDeck. Dieses Handbuch begle
 PulseDeck verzichtet auf komplizierte Passwort-Regeln und setzt auf **Passwortlosen Login (Magic Link)**.
 1.  Gib deine E-Mail-Adresse ein.
 2.  Du erhältst sofort einen Link per E-Mail.
-3.  Klicke den Link – du bist eingeloggt.
+3.  Klicke den Link - du bist eingeloggt.
 
 **Optionales Passwort:**
 Wenn du dich klassisch anmelden möchtest, kannst du in deinem **Profil** (`Avatar > Mein Profil`) ein Passwort festlegen. Du hast dann beim Login die Wahl zwischen Magic Link und Passwort.

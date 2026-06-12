@@ -263,7 +263,7 @@ export class EventSlotService {
     formatTimeRange(slot: EventSlot): string {
         if (!slot.start_time && !slot.end_time) return '';
         if (slot.start_time && slot.end_time) {
-            return `${slot.start_time} – ${slot.end_time}`;
+            return `${slot.start_time} - ${slot.end_time}`;
         }
         return slot.start_time || slot.end_time || '';
     }

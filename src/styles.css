@@ -845,7 +845,7 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
-/* QUILL EDITOR – TAILWIND PREFLIGHT RESTORE                                   */
+/* QUILL EDITOR - TAILWIND PREFLIGHT RESTORE                                   */
 /* Tailwind Preflight entfernt Browser-Defaults (list-style, margin, etc.).    */
 /* Diese werden hier gezielt für den Quill-Editierbereich wiederhergestellt.   */
 /* Kein !important, kein globales Tag-Reset.                                   */
@@ -870,11 +870,25 @@ body {
 }
 
 /* Quill Indent-Klassen für verschachtelte Listen */
-.ql-editor li.ql-indent-1 { padding-left: 1.5em; }
-.ql-editor li.ql-indent-2 { padding-left: 3em; }
-.ql-editor li.ql-indent-3 { padding-left: 4.5em; }
-.ql-editor li.ql-indent-4 { padding-left: 6em; }
-.ql-editor li.ql-indent-5 { padding-left: 7.5em; }
+.ql-editor li.ql-indent-1 {
+    padding-left: 1.5em;
+}
+
+.ql-editor li.ql-indent-2 {
+    padding-left: 3em;
+}
+
+.ql-editor li.ql-indent-3 {
+    padding-left: 4.5em;
+}
+
+.ql-editor li.ql-indent-4 {
+    padding-left: 6em;
+}
+
+.ql-editor li.ql-indent-5 {
+    padding-left: 7.5em;
+}
 
 /* Überschriften */
 .ql-editor h1 {
@@ -1081,6 +1095,7 @@ section {
 
 /* Mobile Tablist & Feed Optimizations */
 @media (max-width: 768px) {
+
     .p-tablist-nav-button,
     .p-tablist-prev-button,
     .p-tablist-next-button,

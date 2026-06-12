@@ -10,7 +10,7 @@ Willkommen in der offiziellen Dokumentation von PulseDeck. Dieses Handbuch begle
 PulseDeck verzichtet auf komplizierte Passwort-Regeln und setzt auf passwortlosen Login per E-Mail (Magic Link).
 1. Rufe die Login-Seite auf. Trage deine E-Mail-Adresse in das Textfeld "E-Mail Adresse" ein und klicke auf den roten Button "Weiter" (mit dem Pfeil-Icon).
 2. Du erhältst sofort einen Link per E-Mail.
-3. Klicke auf den Link in der E-Mail – du bist eingeloggt.
+3. Klicke auf den Link in der E-Mail - du bist eingeloggt.
 
 **Optionales Passwort:**
 Wenn du dich klassisch anmelden möchtest, kannst du in deinem Profil ein Passwort festlegen. Du hast dann beim Login die Wahl zwischen Magic Link und Passwort. Klicke dazu links unten in der Navigation auf "Profil bearbeiten" (Stift-Icon). Scrolle zum Bereich "Passwort (optional)", klicke auf "Passwort setzen", gib dein neues Passwort ein und bestätige es mit "Passwort speichern".
