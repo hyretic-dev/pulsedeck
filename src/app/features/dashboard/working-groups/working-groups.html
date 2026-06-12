@@ -81,9 +81,7 @@
                         </div>
                         <div
                             class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-muted)] mt-0.5">
-                            <span class="flex items-center gap-1"
-                                [class.line-through]="getMissingContactCount(group.id!) > 0"
-                                [class.opacity-60]="getMissingContactCount(group.id!) > 0">
+                            <span class="flex items-center gap-1">
                                 <i [ngClass]="getIconForType(group.contact_type)" class="text-[10px]"></i>
                                 {{group.contact_type}}
                                 @if (getMissingContactCount(group.id!) > 0) {

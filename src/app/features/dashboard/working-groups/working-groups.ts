@@ -580,7 +580,7 @@ export class WorkingGroupsComponent implements OnInit {
           this.workingGroupsService as any
         )
           .supabase.from('members')
-          .select('id, contact_channels')
+          .select('id, contact_channels, email')
           .in(
             'id',
             members.map(m => m.member_id)
@@ -592,11 +592,13 @@ export class WorkingGroupsComponent implements OnInit {
 
         let missing = 0;
         for (const fm of fullMembers) {
-          const channels =
-            fm.contact_channels || {};
+          const channels = fm.contact_channels || {};
           const key = group.contact_type;
-          if (!channels[key]) {
-            missing++;
+          
+          if (key === 'Email') {
+            if (!fm.email && !channels[key]) missing++;
+          } else {
+            if (!channels[key]) missing++;
           }
         }
 
