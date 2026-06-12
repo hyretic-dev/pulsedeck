@@ -827,6 +827,56 @@ export class CalendarComponent implements OnInit, OnDestroy {
     return items;
   }
 
+  /**
+   * Build desktop overflow menu items for a given event.
+   */
+  buildDesktopMenuItems(
+    event: CalendarEvent
+  ): MenuItem[] {
+    const items: MenuItem[] = [
+      {
+        label: 'Link teilen',
+        icon: 'pi pi-share-alt',
+        command: () => this.copyEventLink(event),
+      },
+      {
+        label: 'Für WhatsApp kopieren',
+        icon: 'pi pi-whatsapp',
+        command: () => this.copyWhatsAppText(event),
+      },
+      {
+        label: 'In den Kalender',
+        icon: 'pi pi-calendar-plus',
+        command: () => this.downloadEventIcal(event),
+      },
+    ];
+
+    if (this.canCreateEvent()) {
+      items.push(
+        {
+          label: 'Gast-Org einladen',
+          icon: 'pi pi-building',
+          command: () =>
+            this.openGuestInvite(event),
+        },
+        { separator: true },
+        {
+          label: 'Bearbeiten',
+          icon: 'pi pi-pencil',
+          command: () => this.editEvent(event),
+        },
+        {
+          label: 'Löschen',
+          icon: 'pi pi-trash',
+          styleClass: 'text-red-400',
+          command: () => this.confirmDelete(event),
+        }
+      );
+    }
+
+    return items;
+  }
+
   async openManageSlots(event: CalendarEvent): Promise<void> {
     this.currentEvent = JSON.parse(JSON.stringify(event)); // Deep copy
     this.manageSlotsDialogVisible.set(true);

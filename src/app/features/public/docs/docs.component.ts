@@ -53,7 +53,7 @@ interface TocItem {
                      </p>
                  </div>
                  <div>
-                      <p-tag value="Wiki v0.0.98" severity="info" styleClass="!px-3 !py-1" />
+                      <p-tag value="Wiki v0.1.2" severity="info" styleClass="!px-3 !py-1" />
                  </div>
              </div>
              

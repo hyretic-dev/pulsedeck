@@ -1,7 +1,7 @@
 # 🚀 PulseDeck Roadmap
 
-> **Letzte Aktualisierung:** 11. Juni 2026  
-> **Aktuelle Version:** v0.1.1
+> **Letzte Aktualisierung:** 12. Juni 2026  
+> **Aktuelle Version:** v0.1.2
 
 ---
 
@@ -61,6 +61,20 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 ---
 
 ## ✅ Abgeschlossen (Patch Notes)
+
+### v0.1.2 - 12. Juni 2026 (UI/UX Polish)
+
+**📅 Kalender & Termine (UI)**
+- [x] **Einheitliche Buttons:** Desktop-Buttons (Anmelden, Teilnehmer, Schichten) haben nun eine feste Breite und sind zentriert, um ein "Springen" der UI beim Hover/Klick zu verhindern.
+- [x] **Badge-Positionierung:** Event-Typ-Badges (Allg. / AG) befinden sich nun direkt neben dem Titel für eine intuitivere Zuordnung.
+- [x] **Aufgeräumte Metadaten:** Uhrzeit und Ort werden als saubere "Pills" (Badges) dargestellt. Das störende leere Orts-Icon wurde entfernt, was auch Zeilenumbrüche in der Beschreibung repariert.
+
+**👥 Mitgliederverwaltung**
+- [x] **Aktionen-Menü:** Bearbeiten- und Löschen-Buttons wurden in ein Drei-Punkte-Menü (`...`) ausgelagert. Das schützt vor versehentlichen Klicks (insb. Löschen) beim Scrollen.
+- [x] **Kompakte Skills:** Die Fähigkeiten in der Desktop-Tabelle wurden auf 3 Tags begrenzt. Weitere Skills werden sauber als "+X" Badge gruppiert und per Tooltip aufgedeckt.
+- [x] **Bugfix:** Ein Problem mit fälschlicherweise als "fehlend" markierten E-Mails in der Kontaktvalidierung der Arbeitsgruppen wurde behoben.
+
+---
 
 ### v0.1.1 - 11. Juni 2026 (RAG Chatbot & Dateimanagement Redesign)
 

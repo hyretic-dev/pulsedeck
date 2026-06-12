@@ -187,20 +187,10 @@
                 }
 
                 @if (auth.isAdmin()) {
-                <div class="flex flex-wrap gap-2 pt-2 border-t border-[var(--color-border)]">
-                    @if (member.email) {
-                    <p-button [icon]="member.user_id ? 'pi pi-key' : 'pi pi-envelope'"
-                        [label]="member.user_id ? 'Reset' : 'Einladen'" [severity]="member.user_id ? 'warn' : 'success'"
-                        size="small" (click)="inviteMember(member); $event.stopPropagation()"
-                        [loading]="invitingMemberId === member.id"></p-button>
-                    <p-button icon="pi pi-copy" severity="secondary" [outlined]="true" size="small"
-                        (click)="copyMagicLink(member); $event.stopPropagation()"
-                        [loading]="copyingMemberId === member.id" pTooltip="Link kopieren"></p-button>
-                    }
-                    <p-button icon="pi pi-pencil" severity="secondary" size="small"
-                        (click)="editMember(member); $event.stopPropagation()"></p-button>
-                    <p-button icon="pi pi-trash" severity="danger" size="small"
-                        (click)="confirmDelete(member); $event.stopPropagation()"></p-button>
+                <div class="flex justify-end pt-2 border-t border-[var(--color-border)]">
+                    <p-button label="Aktionen" icon="pi pi-ellipsis-v" severity="secondary" [outlined]="true" size="small"
+                        (click)="mobileRowMenu.toggle($event); $event.stopPropagation()"></p-button>
+                    <p-menu #mobileRowMenu [model]="buildRowMenuItems(member)" [popup]="true" appendTo="body" />
                 </div>
                 }
             </div>
@@ -291,10 +281,15 @@
                     </td>
                     <td class="text-[var(--color-text)] text-sm text-left">{{ member.role }}</td>
                     <td class="text-left">
-                        <div class="flex flex-wrap gap-1">
-                            @for (skill of getMemberSkills(member.id); track skill.id) {
+                        <div class="flex flex-wrap gap-1 items-center">
+                            @for (skill of getMemberSkills(member.id).slice(0, 3); track skill.id) {
                             <p-tag [value]="skill.name" severity="secondary"
                                 styleClass="!text-[10px] !px-1.5 !py-0.5" />
+                            }
+                            @if (getMemberSkills(member.id).length > 3) {
+                            <p-tag [value]="'+' + (getMemberSkills(member.id).length - 3)" severity="secondary"
+                                styleClass="!text-[10px] !px-1.5 !py-0.5 cursor-help bg-[var(--color-surface-overlay)] border border-[var(--color-border)] hover:bg-[var(--color-border)]"
+                                [pTooltip]="getExcessSkillsTooltip(member.id)" tooltipPosition="top" />
                             }
                         </div>
                     </td>
@@ -305,20 +300,11 @@
                     <td class="text-[var(--color-text-muted)] text-sm text-right">{{ member.join_date }}</td>
                     @if (auth.isAdmin()) {
                     <td>
-                        <div class="flex justify-end gap-0.5">
-                            @if (member.email) {
-                            <p-button [icon]="member.user_id ? 'pi pi-key' : 'pi pi-envelope'" [text]="true"
-                                [rounded]="true" [severity]="member.user_id ? 'warn' : 'success'"
-                                [pTooltip]="member.user_id ? 'Passwort zurücksetzen' : 'Einladung senden'"
-                                (click)="inviteMember(member)" [loading]="invitingMemberId === member.id"></p-button>
-                            <p-button icon="pi pi-copy" [text]="true" [rounded]="true" severity="secondary"
-                                pTooltip="Login-Link kopieren (WhatsApp etc.)" (click)="copyMagicLink(member)"
-                                [loading]="copyingMemberId === member.id"></p-button>
-                            }
-                            <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary"
-                                (click)="editMember(member)"></p-button>
-                            <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger"
-                                (click)="confirmDelete(member)"></p-button>
+                        <div class="flex justify-end">
+                            <button (click)="rowMenu.toggle($event)" class="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors">
+                                <i class="pi pi-ellipsis-v text-sm"></i>
+                            </button>
+                            <p-menu #rowMenu [model]="buildRowMenuItems(member)" [popup]="true" appendTo="body" />
                         </div>
                     </td>
                     }

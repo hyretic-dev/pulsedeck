@@ -1,7 +1,7 @@
 # 🚀 PulseDeck Roadmap
 
-> **Letzte Aktualisierung:** 6. Mai 2026  
-> **Aktuelle Version:** v0.1.0
+> **Letzte Aktualisierung:** 12. Juni 2026  
+> **Aktuelle Version:** v0.1.2
 
 ---
 
@@ -61,6 +61,42 @@ Diese Roadmap zeigt dir, welche Features geplant sind, woran gerade gearbeitet w
 ---
 
 ## ✅ Abgeschlossen (Patch Notes)
+
+### v0.1.2 - 12. Juni 2026 (UI/UX Polish)
+
+**📅 Kalender & Termine (UI)**
+- [x] **Einheitliche Buttons:** Desktop-Buttons (Anmelden, Teilnehmer, Schichten) haben nun eine feste Breite und sind zentriert, um ein "Springen" der UI beim Hover/Klick zu verhindern.
+- [x] **Badge-Positionierung:** Event-Typ-Badges (Allg. / AG) befinden sich nun direkt neben dem Titel für eine intuitivere Zuordnung.
+- [x] **Aufgeräumte Metadaten:** Uhrzeit und Ort werden als saubere "Pills" (Badges) dargestellt. Das störende leere Orts-Icon wurde entfernt, was auch Zeilenumbrüche in der Beschreibung repariert.
+
+**👥 Mitgliederverwaltung**
+- [x] **Aktionen-Menü:** Bearbeiten- und Löschen-Buttons wurden in ein Drei-Punkte-Menü (`...`) ausgelagert. Das schützt vor versehentlichen Klicks (insb. Löschen) beim Scrollen.
+- [x] **Kompakte Skills:** Die Fähigkeiten in der Desktop-Tabelle wurden auf 3 Tags begrenzt. Weitere Skills werden sauber als "+X" Badge gruppiert und per Tooltip aufgedeckt.
+- [x] **Bugfix:** Ein Problem mit fälschlicherweise als "fehlend" markierten E-Mails in der Kontaktvalidierung der Arbeitsgruppen wurde behoben.
+
+---
+
+### v0.1.1 - 11. Juni 2026 (RAG Chatbot & Dateimanagement Redesign)
+
+**🤖 KI & Chatbot (RAG)**
+- [x] **Dokumenten-RAG:** Der PulseDeck AI Agent kann nun auf hochgeladene Textdateien (.txt, .md) und PDF-Dokumente der Organisation zugreifen.
+- [x] **Smart Ingestion:** Automatischer Parse- und Embedding-Prozess im Hintergrund nach dem Upload einer Datei.
+- [x] **Größenbeschränkung:** Dokumente über 10 MB werden aus Performance-Gründen übersprungen, um Edge-Function-Limits einzuhalten (mit entsprechendem Hinweis).
+- [x] **Manuelle KI-Synchronisation:** Bestehende oder fehlgeschlagene Dateien können über einen Sync-Button manuell neu für die KI indiziert werden.
+
+**📁 Optimiertes Dateimanagement**
+- [x] **Default-Listenansicht:** Dateien werden standardmäßig in einer übersichtlichen, sortier- und filterbaren Tabelle mit allen Metadaten (Größe, Uploader, Datum) angezeigt.
+- [x] **View-Mode-Toggle:** Schneller Wechsel zwischen Listenansicht und kompakter Kachelansicht (Grid) im Header.
+- [x] **New Drag & Drop Upload:** Komplett neuer, moderner Upload-Dialog mit intuitiver Drag & Drop-Zone, Dateivorschau und sauberem Layout.
+- [x] **Platzsparende Ordner:** Ordner werden nun als kompakte Chips dargestellt, um Platz zu sparen.
+- [x] **Inline-Aktionen:** Direkte Buttons für Download, Anpinnen, Verschieben und Löschen (in der Listenansicht bei Hover sichtbar).
+- [x] **Angepinnte Downloads:** Eine fixe Sektion ganz oben zeigt die wichtigsten, vom Vorstand angepinnten Dokumente für schnellen Zugriff.
+
+**👥 Arbeitsgruppen (AGs) Integration**
+- [x] **Klickbare AG-Dateien:** Dokumente in der Detailansicht von Arbeitsgruppen sind nun interaktiv und können direkt per Klick heruntergeladen werden.
+- [x] **Nur Angepinntes anzeigen:** Um die Übersichtlichkeit zu wahren, werden in den AG-Details nur noch die gezielt angepinnten Dokumente der Gruppe angezeigt.
+
+---
 
 ### v0.1.0 - 6. Mai 2026 (Gruppen & Termine Power-Update)
 

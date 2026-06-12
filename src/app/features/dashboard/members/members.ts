@@ -20,6 +20,8 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { TooltipModule } from 'primeng/tooltip';
 import { CheckboxModule } from 'primeng/checkbox';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 
 import { MembersService } from '../../../shared/services/members.service';
 import { Member, Permission, AppRole } from '../../../shared/models/member.model';
@@ -55,7 +57,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
     InputIconModule,
     TooltipModule,
     CheckboxModule,
-    MultiSelectModule
+    MultiSelectModule,
+    MenuModule
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './members.html',
@@ -445,6 +448,43 @@ export class MembersComponent implements OnInit {
     const skillIds = this.memberSkillsMap()[memberId] || [];
     const allSkills = this.skillService.skills();
     return allSkills.filter(s => skillIds.includes(s.id));
+  }
+
+  getExcessSkillsTooltip(memberId: string | undefined): string {
+    const skills = this.getMemberSkills(memberId);
+    if (skills.length <= 3) return '';
+    return skills.slice(3).map(s => s.name).join(', ');
+  }
+
+  buildRowMenuItems(member: Member): MenuItem[] {
+    const items: MenuItem[] = [];
+    if (member.email) {
+      items.push({
+        label: member.user_id ? 'Passwort-Reset senden' : 'Einladung senden',
+        icon: member.user_id ? 'pi pi-key' : 'pi pi-envelope',
+        command: () => this.inviteMember(member)
+      });
+      items.push({
+        label: 'Login-Link kopieren',
+        icon: 'pi pi-copy',
+        command: () => this.copyMagicLink(member)
+      });
+      items.push({ separator: true });
+    }
+    
+    items.push({
+      label: 'Bearbeiten',
+      icon: 'pi pi-pencil',
+      command: () => this.editMember(member)
+    });
+    items.push({
+      label: 'Löschen',
+      icon: 'pi pi-trash',
+      styleClass: 'text-red-400',
+      command: () => this.confirmDelete(member)
+    });
+    
+    return items;
   }
 
   async inviteMember(member: Member) {
