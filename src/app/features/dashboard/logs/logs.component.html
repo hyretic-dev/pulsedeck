@@ -11,6 +11,10 @@
                 <i class="pi pi-chart-line mr-2"></i>
                 Analytics
             </p-tab>
+            <p-tab value="online-users">
+                <i class="pi pi-users mr-2"></i>
+                Online Users
+            </p-tab>
             <p-tab value="logs">
                 <i class="pi pi-list mr-2"></i>
                 System Logs
@@ -22,6 +26,50 @@
             <p-tabpanel value="analytics">
                 <div class="py-4">
                     <app-metrics [global]="true"></app-metrics>
+                </div>
+            </p-tabpanel>
+
+            <!-- ONLINE USERS TAB -->
+            <p-tabpanel value="online-users">
+                <div class="py-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <p-select [options]="organizations()" [(ngModel)]="selectedOrgId" (ngModelChange)="fetchOnlineUsers($event)" optionLabel="name" optionValue="id" placeholder="Select Organization"></p-select>
+                        <p-button icon="pi pi-refresh" (onClick)="fetchOnlineUsers(selectedOrgId())" [loading]="loadingOnline()" severity="secondary" label="Refresh"></p-button>
+                    </div>
+
+                    <div class="card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                        <p-table [value]="onlineUsers()" [loading]="loadingOnline()">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Active Page</th>
+                                    <th>Last Seen</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-user>
+                                <tr>
+                                    <td class="font-medium">{{ user.name }}</td>
+                                    <td>
+                                        @if (selectedOrgId() && user.org_roles[selectedOrgId()!]) {
+                                            <p-tag [value]="user.org_roles[selectedOrgId()!]" severity="info"></p-tag>
+                                        } @else {
+                                            <span class="text-gray-400">-</span>
+                                        }
+                                    </td>
+                                    <td><code class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{{ user.current_path }}</code></td>
+                                    <td class="text-gray-500">{{ user.last_seen_at | date:'HH:mm:ss' }}</td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td colspan="4" class="text-center p-8 text-gray-500">
+                                        No active users found in the last 5 minutes.
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
                 </div>
             </p-tabpanel>
 

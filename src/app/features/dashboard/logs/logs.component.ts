@@ -8,11 +8,13 @@ import { ButtonModule } from 'primeng/button';
 import { TabsModule } from 'primeng/tabs';
 import { MetricsComponent } from '../settings/metrics.component';
 import { DatePipe, JsonPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
 
 @Component({
     selector: 'app-logs',
     standalone: true,
-    imports: [CommonModule, TableModule, TagModule, ButtonModule, DatePipe, JsonPipe, TabsModule, MetricsComponent],
+    imports: [CommonModule, TableModule, TagModule, ButtonModule, DatePipe, JsonPipe, TabsModule, MetricsComponent, FormsModule, SelectModule],
     templateUrl: './logs.component.html'
 })
 export class LogsComponent {
@@ -21,7 +23,13 @@ export class LogsComponent {
 
     logs = signal<any[]>([]);
     loading = signal(true);
-    activeTab = signal('analytics');
+    activeTab = signal('online-users');
+
+    // Online Users State
+    organizations = signal<{id: string, name: string}[]>([]);
+    selectedOrgId = signal<string | null>(null);
+    onlineUsers = signal<any[]>([]);
+    loadingOnline = signal(false);
 
     // Hardcoded Super Admin ID (Julien)
     private readonly SUPER_ADMIN_ID = '2d8af6a7-507c-4834-aff9-3b00d1ad9c7c';
@@ -37,7 +45,49 @@ export class LogsComponent {
             this.router.navigate(['/']);
             return;
         }
+        this.fetchOrganizations();
         this.fetchLogs();
+    }
+
+    async fetchOrganizations() {
+        const { data, error } = await this.supabase.client
+            .from('organizations')
+            .select('id, name')
+            .order('name');
+            
+        if (!error && data) {
+            this.organizations.set(data);
+            if (data.length > 0) {
+                this.selectedOrgId.set(data[0].id);
+                this.fetchOnlineUsers(data[0].id);
+            }
+        }
+    }
+
+    async fetchOnlineUsers(orgId: string | null) {
+        if (!orgId) return;
+        this.selectedOrgId.set(orgId);
+        this.loadingOnline.set(true);
+
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+
+        // Fetch all active sessions recently and filter in memory by org
+        // (PostgREST JSONB key existence is tricky, and active sessions count is small)
+        const { data, error } = await this.supabase.client
+            .from('active_sessions')
+            .select('*')
+            .gte('last_seen_at', fiveMinutesAgo)
+            .order('last_seen_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching online users:', error);
+            this.onlineUsers.set([]);
+        } else if (data) {
+            const filtered = data.filter(s => s.org_roles && s.org_roles[orgId] !== undefined);
+            this.onlineUsers.set(filtered);
+        }
+        
+        this.loadingOnline.set(false);
     }
 
     async fetchLogs() {
