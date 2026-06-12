@@ -42,5 +42,25 @@ export const organizationGuard: CanActivateFn = async (route) => {
         return false;
     }
 
+    const orgId = orgService.currentOrgId();
+    if (!orgId) {
+        return false;
+    }
+
+    // Direct database check for membership to prevent race conditions
+    // and enforce strict access control
+    const { data, error } = await supabase.client
+        .from('members')
+        .select('id')
+        .eq('organization_id', orgId)
+        .eq('user_id', session.user.id)
+        .single();
+
+    if (error || !data) {
+        console.warn('Zugriff verweigert: Kein Mitglied dieser Organisation');
+        router.navigate(['/organisationen']);
+        return false;
+    }
+
     return true;
 };

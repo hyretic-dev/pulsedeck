@@ -6,7 +6,8 @@ export type Permission =
     | 'feed:approve'   // Approve/publish feed posts
     | 'wiki:edit'      // Edit wiki articles
     | 'events:create'  // Create general events
-    | 'contacts:edit'; // Edit contact persons
+    | 'contacts:edit'  // Edit contact persons
+    | 'view_issue_tracker'; // View issue tracker
 
 /**
  * App-wide roles (hierarchy: public < member < committee < admin)
@@ -17,6 +18,18 @@ export type AppRole = 'public' | 'member' | 'committee' | 'admin';
  * Member status
  */
 export type MemberStatus = 'Active' | 'Inactive' | 'Pending';
+
+export interface OrganizationRole {
+    id: string;
+    organization_id: string;
+    name: string;
+    description: string | null;
+    permissions: Permission[];
+    is_system_admin: boolean;
+    is_default: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
 
 /**
  * Member interface matching Supabase table structure
@@ -31,8 +44,12 @@ export interface Member {
     join_date: string;
     avatar_url?: string;
     user_id?: string;
+    // DEPRECATED: app_role and permissions will be removed
     app_role?: AppRole;
     permissions?: Permission[];
+    // NEW: RBAC properties
+    role_id?: string;
+    org_role?: OrganizationRole; // populated via join
     street?: string;
     zip_code?: string;
     city?: string;

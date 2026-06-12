@@ -12,6 +12,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
     'wiki:edit': 'Wiki bearbeiten',
     'events:create': 'Termine erstellen',
     'contacts:edit': 'Kontakte bearbeiten',
+    'view_issue_tracker': 'Issue-Tracker anzeigen',
 };
 
 /**
@@ -32,6 +33,7 @@ export const ALL_PERMISSIONS: Permission[] = [
     'wiki:edit',
     'events:create',
     'contacts:edit',
+    'view_issue_tracker',
 ];
 
 @Injectable({

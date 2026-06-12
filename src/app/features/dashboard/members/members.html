@@ -120,7 +120,7 @@
                         @if(member.user_id) {
                         <i class="pi pi-link text-green-500 text-[10px]"></i>
                         }
-                        @if(member.app_role === 'admin') {
+                        @if(member.org_role?.is_system_admin || member.app_role === 'admin') {
                         <i class="pi pi-verified text-linke text-[10px]"></i>
                         }
                     </div>
@@ -271,7 +271,7 @@
                                     @if(member.user_id) {
                                     <i class="pi pi-link text-green-500 text-xs" pTooltip="Login verbunden"></i>
                                     }
-                                    @if(member.app_role === 'admin') {
+                                    @if(member.org_role?.is_system_admin || member.app_role === 'admin') {
                                     <i class="pi pi-verified text-linke text-xs" pTooltip="Administrator"></i>
                                     }
                                 </div>
@@ -414,47 +414,12 @@
                 <label class="block text-sm font-medium text-[var(--color-text)] mb-1">
                     System-Rolle
                 </label>
-                <p-select [(ngModel)]="currentMember.app_role" [options]="appRoleOptions" optionLabel="label"
-                    optionValue="value" styleClass="w-full" />
+                <p-select [(ngModel)]="currentMember.role_id" [options]="roles()" optionLabel="name"
+                    optionValue="id" styleClass="w-full" />
                 <p class="text-xs text-[var(--color-text-muted)] mt-1">
-                    @switch (currentMember.app_role) {
-                    @case ('admin') { Vollzugriff auf alle Funktionen }
-                    @case ('committee') { Vorstandsmitglied - erhöhte Rechte }
-                    @default { Normales Vereinsmitglied }
-                    }
+                    {{ getSelectedRoleDescription() || 'Wähle eine Rolle aus.' }}
                 </p>
             </div>
-
-            <!-- Permissions (only if not admin/committee) -->
-            @if (currentMember.app_role === 'member') {
-            <div>
-                <label class="block text-sm font-medium text-[var(--color-text)] mb-2">
-                    Zusätzliche Berechtigungen
-                </label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    @for (perm of allPermissions; track perm) {
-                    <div
-                        class="flex items-center gap-2 p-2 rounded-lg bg-[var(--color-surface-raised)] border border-[var(--color-border)] hover:border-linke/30 transition-colors">
-                        <p-checkbox [binary]="true" [inputId]="'perm_' + perm" [ngModel]="hasPermission(perm)"
-                            (ngModelChange)="togglePermission(perm, $event)">
-                        </p-checkbox>
-                        <label [for]="'perm_' + perm" class="text-sm text-[var(--color-text)] cursor-pointer flex-1">
-                            {{ permissionLabels[perm] }}
-                        </label>
-                    </div>
-                    }
-                </div>
-                <p class="text-xs text-[var(--color-text-muted)] mt-2">
-                    Vorstand und Admins haben automatisch alle Berechtigungen.
-                </p>
-            </div>
-            } @else {
-            <div class="p-3 rounded-lg bg-teal/10 border border-teal/30 text-sm text-[var(--color-text)]">
-                <i class="pi pi-info-circle text-teal mr-2"></i>
-                {{ currentMember.app_role === 'admin' ? 'Administratoren' : 'Vorstandsmitglieder' }} haben
-                automatisch alle Berechtigungen.
-            </div>
-            }
 
             <!-- User ID (Advanced) -->
             <div class="border-t border-[var(--color-border)] pt-3">

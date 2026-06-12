@@ -30,6 +30,10 @@
                 <i class="pi pi-building mr-2"></i>
                 Organisation
             </p-tab>
+            <p-tab value="roles">
+                <i class="pi pi-users mr-2"></i>
+                Rollen & Rechte
+            </p-tab>
 
         </p-tablist>
 
@@ -351,6 +355,84 @@
                 </div>
             </p-tabpanel>
 
+            <!-- ROLES TAB -->
+            <p-tabpanel value="roles">
+                <div class="py-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-lg font-semibold text-[var(--color-text)]">
+                                Rollen & Rechte
+                            </h2>
+                            <p class="text-sm text-[var(--color-text-muted)]">
+                                Definiere die Rechte für die Mitglieder deiner Organisation.
+                            </p>
+                        </div>
+                        <p-button label="Neue Rolle" icon="pi pi-plus" (onClick)="openNewRole()"></p-button>
+                    </div>
+
+                    <p-table [value]="roles()" [paginator]="false" styleClass="p-datatable-sm">
+                        <ng-template #header>
+                            <tr>
+                                <th>Name</th>
+                                <th>Beschreibung</th>
+                                <th>Berechtigungen</th>
+                                <th>System</th>
+                                <th class="w-32">Aktionen</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template #body let-role>
+                            <tr>
+                                <td>
+                                    <span class="font-medium">{{ role.name }}</span>
+                                    @if (role.is_default) {
+                                        <p-tag value="Standard" severity="info" class="ml-2"></p-tag>
+                                    }
+                                </td>
+                                <td class="text-sm text-[var(--color-text-muted)]">{{ role.description || '-' }}</td>
+                                <td>
+                                    @if (role.is_system_admin) {
+                                        <p-tag value="Alle Rechte (System Admin)" severity="danger"></p-tag>
+                                    } @else {
+                                        <div class="flex flex-wrap gap-1">
+                                            @for (p of role.permissions; track p) {
+                                                <p-tag [value]="getPermissionLabel(p)" severity="secondary"></p-tag>
+                                            }
+                                            @if (!role.permissions?.length) {
+                                                <span class="text-sm text-[var(--color-text-muted)]">- Keine -</span>
+                                            }
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (role.is_system_admin) {
+                                        <i class="pi pi-check-circle text-green-500"></i>
+                                    } @else {
+                                        <i class="pi pi-times-circle text-[var(--color-text-muted)]"></i>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="flex gap-1">
+                                        <p-button icon="pi pi-pencil" [text]="true" severity="secondary"
+                                            (onClick)="openEditRole(role)" pTooltip="Bearbeiten"></p-button>
+                                        @if (!role.is_system_admin) {
+                                            <p-button icon="pi pi-trash" [text]="true" severity="danger"
+                                                (onClick)="confirmDeleteRole(role)" pTooltip="Löschen"></p-button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <ng-template #emptymessage>
+                            <tr>
+                                <td colspan="5" class="text-center py-8 text-[var(--color-text-muted)]">
+                                    Noch keine Rollen angelegt.
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+            </p-tabpanel>
+
 
         </p-tabpanels>
     </p-tabs>
@@ -440,4 +522,56 @@
             <p-button label="Senden" icon="pi pi-send" (onClick)="sendTestEmail()" [raised]="true"></p-button>
         </div>
     </ng-template>
+</p-dialog>
+
+<!-- Role Edit Dialog -->
+<p-dialog [(visible)]="roleDialogVisible" [modal]="true" [style]="{ width: '500px' }"
+    [header]="editingRole()?.id ? 'Rolle bearbeiten' : 'Neue Rolle'">
+    @if (editingRole()) {
+    <div class="space-y-4 pt-2">
+        <!-- Name -->
+        <div>
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-2">
+                Rollen-Name *
+            </label>
+            <input type="text" pInputText [(ngModel)]="editingRole()!.name" class="w-full"
+                [disabled]="!!editingRole()!.is_system_admin"
+                placeholder="z.B. Moderator" />
+        </div>
+
+        <!-- Description -->
+        <div>
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-2">
+                Beschreibung
+            </label>
+            <textarea pInputTextarea [(ngModel)]="editingRole()!.description" rows="2" class="w-full"
+                placeholder="Kurze Erklärung..."></textarea>
+        </div>
+
+        <!-- Permissions -->
+        @if (!editingRole()!.is_system_admin) {
+        <div>
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-2">
+                Berechtigungen
+            </label>
+            <p-multiSelect [options]="permissionOptions" [(ngModel)]="editingRole()!.permissions"
+                optionLabel="label" optionValue="value" [filter]="false"
+                defaultLabel="Keine Rechte ausgewählt" styleClass="w-full" display="chip">
+            </p-multiSelect>
+        </div>
+        } @else {
+        <div class="p-3 bg-red-500/10 text-red-500 rounded-lg border border-red-500/20 text-sm">
+            Diese Rolle hat als System-Admin automatisch <strong>alle</strong> Rechte in der Organisation.
+        </div>
+        }
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2 pt-4">
+            <p-button label="Abbrechen" [text]="true" severity="secondary"
+                (onClick)="roleDialogVisible.set(false)"></p-button>
+            <p-button label="Speichern" icon="pi pi-check" [loading]="loading()" (onClick)="saveRole()"></p-button>
+        </div>
+    </ng-template>
+    }
 </p-dialog>

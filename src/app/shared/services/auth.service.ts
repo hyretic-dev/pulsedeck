@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { SupabaseService } from './supabase';
 import { OrganizationService } from './organization.service';
-import { Member, AppRole } from '../models/member.model';
+import { Member, AppRole, Permission } from '../models/member.model';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -61,7 +61,10 @@ export class AuthService {
     isLoggedIn = computed(() => !!this.user());
 
     /** Is system administrator (in current org) */
-    isAdmin = computed(() => this.userRole() === 'admin');
+    isAdmin = computed(() => {
+        const m = this.currentMember();
+        return m?.org_role?.is_system_admin || this.userRole() === 'admin';
+    });
 
     /** Is committee (Vorstand) or higher (in current org) */
     isCommittee = computed(() =>
@@ -164,7 +167,8 @@ export class AuthService {
                 name,
                 app_role,
                 organization_id,
-                organization:organizations!inner(id, name, slug)
+                organization:organizations!inner(id, name, slug),
+                org_role:organization_roles(*)
             `)
             .eq('user_id', userId);
 
@@ -224,7 +228,7 @@ export class AuthService {
         // Load full member profile for this org
         const { data, error } = await this.supabase.client
             .from('members')
-            .select('*')
+            .select('*, org_role:organization_roles(*)')
             .eq('user_id', userId)
             .eq('organization_id', organizationId)
             .single();
@@ -293,6 +297,21 @@ export class AuthService {
      */
     getMembershipForOrg(orgId: string): UserMembership | undefined {
         return this.userMemberships().find(m => m.organizationId === orgId);
+    }
+
+    /**
+     * Prüft, ob das aktuelle Mitglied eine spezifische Permission besitzt.
+     */
+    hasPermission(permission: Permission): boolean {
+        const member = this.currentMember();
+        if (!member) return false;
+
+        // Echte System-Admins (Owner oder Admin-Rolle) haben alle Rechte
+        if (member.org_role?.is_system_admin || member.app_role === 'admin' || member.app_role === 'committee') {
+            return true;
+        }
+
+        return member.org_role?.permissions?.includes(permission) || member.permissions?.includes(permission) || false;
     }
 
     // Auth Proxies

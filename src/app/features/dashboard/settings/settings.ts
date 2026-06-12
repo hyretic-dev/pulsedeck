@@ -20,6 +20,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { FieldsetModule } from 'primeng/fieldset';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TooltipModule } from 'primeng/tooltip';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 // Services
 import { AuthService } from '../../../shared/services/auth.service';
@@ -27,6 +28,9 @@ import { OrganizationService, Organization } from '../../../shared/services/orga
 import { SkillService, Skill, SkillCategory } from '../../../shared/services/skill.service';
 import { FeedService, NewsletterConfig } from '../../../shared/services/feed.service';
 import { SupabaseService } from '../../../shared/services/supabase';
+import { RolesService } from '../../../shared/services/roles.service';
+import { PermissionsService, PERMISSION_LABELS, ALL_PERMISSIONS } from '../../../shared/services/permissions.service';
+import { OrganizationRole, Permission } from '../../../shared/models/member.model';
 
 @Component({
     selector: 'app-settings',
@@ -50,6 +54,7 @@ import { SupabaseService } from '../../../shared/services/supabase';
         FieldsetModule,
         CheckboxModule,
         TooltipModule,
+        MultiSelectModule,
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './settings.html',
@@ -62,6 +67,7 @@ export class SettingsComponent implements OnInit {
     private readonly supabase = inject(SupabaseService);
     private readonly messageService = inject(MessageService);
     private readonly confirmationService = inject(ConfirmationService);
+    readonly rolesService = inject(RolesService);
 
     loading = signal(false);
     activeTab = signal<string>('skills');
@@ -100,6 +106,18 @@ export class SettingsComponent implements OnInit {
     ];
 
     // =========================================================================
+    // ROLES
+    // =========================================================================
+    roles = this.rolesService.roles;
+    roleDialogVisible = signal(false);
+    editingRole = signal<Partial<OrganizationRole> | null>(null);
+
+    permissionOptions = ALL_PERMISSIONS.map(p => ({
+        label: PERMISSION_LABELS[p],
+        value: p
+    }));
+
+    // =========================================================================
     // NEWSLETTER CONFIG
     // =========================================================================
     newsletterConfig = signal<NewsletterConfig | null>(null);
@@ -132,6 +150,7 @@ export class SettingsComponent implements OnInit {
                 this.skillService.loadSkills(orgId),
                 this.loadNewsletterConfig(),
                 this.loadOrgSettings(),
+                this.rolesService.loadRoles(orgId),
             ]);
         }
 
@@ -395,5 +414,78 @@ export class SettingsComponent implements OnInit {
                 });
             }
         }
+    }
+
+    // =========================================================================
+    // ROLES METHODS
+    // =========================================================================
+
+    openNewRole(): void {
+        this.editingRole.set({
+            name: '',
+            description: '',
+            permissions: [],
+            is_system_admin: false,
+            is_default: false,
+        });
+        this.roleDialogVisible.set(true);
+    }
+
+    openEditRole(role: OrganizationRole): void {
+        this.editingRole.set({ ...role });
+        this.roleDialogVisible.set(true);
+    }
+
+    async saveRole(): Promise<void> {
+        const role = this.editingRole();
+        if (!role?.name) {
+            this.messageService.add({ severity: 'error', summary: 'Name wird benötigt' });
+            return;
+        }
+
+        const orgId = this.org.currentOrganization()?.id;
+        if (!orgId) return;
+
+        this.loading.set(true);
+        role.organization_id = orgId;
+
+        const { success, error } = await this.rolesService.saveRole(role);
+        if (success) {
+            await this.rolesService.loadRoles(orgId);
+            this.messageService.add({ severity: 'success', summary: 'Rolle gespeichert' });
+            this.roleDialogVisible.set(false);
+        } else {
+            this.messageService.add({ severity: 'error', summary: 'Fehler', detail: error });
+        }
+        this.loading.set(false);
+    }
+
+    confirmDeleteRole(role: OrganizationRole): void {
+        if (role.is_system_admin) {
+            this.messageService.add({ severity: 'warn', summary: 'System-Rolle kann nicht gelöscht werden' });
+            return;
+        }
+
+        this.confirmationService.confirm({
+            message: `Rolle "${role.name}" wirklich löschen? Alle zugewiesenen Mitglieder verlieren diese Rechte!`,
+            header: 'Rolle löschen',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Löschen',
+            rejectLabel: 'Abbrechen',
+            acceptButtonStyleClass: 'p-button-danger',
+            accept: async () => {
+                const { success, error } = await this.rolesService.deleteRole(role.id!);
+                if (success) {
+                    await this.rolesService.loadRoles(role.organization_id);
+                    this.messageService.add({ severity: 'success', summary: 'Rolle gelöscht' });
+                } else {
+                    this.messageService.add({ severity: 'error', summary: 'Fehler', detail: error });
+                }
+            }
+        });
+    }
+
+    getPermissionLabel(key: string): string {
+        return PERMISSION_LABELS[key as Permission] || key;
     }
 }

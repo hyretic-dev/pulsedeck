@@ -5,12 +5,6 @@ import { issueTrackerGuard } from './shared/guards/issue-tracker.guard';
 import { organizationGuard } from './shared/guards/organization.guard';
 
 export const routes: Routes = [
-    // Dev Access
-    {
-        path: 'dev-access',
-        loadComponent: () => import('./features/auth/dev-access.component').then(m => m.DevAccessComponent)
-    },
-
     // Public Landing
     {
         path: '',

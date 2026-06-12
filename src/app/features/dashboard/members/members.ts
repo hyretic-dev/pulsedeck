@@ -33,6 +33,7 @@ import {
 } from '../../../shared/services/permissions.service';
 import { SkillService, Skill } from '../../../shared/services/skill.service';
 import { OrganizationService } from '../../../shared/services/organization.service';
+import { RolesService } from '../../../shared/services/roles.service';
 import { MultiSelectModule } from 'primeng/multiselect';
 
 @Component({
@@ -74,6 +75,9 @@ export class MembersComponent implements OnInit {
   public permissionsService = inject(PermissionsService);
   public skillService = inject(SkillService);
   private orgService = inject(OrganizationService);
+  private rolesService = inject(RolesService);
+
+  roles = this.rolesService.roles;
 
   members = this.membersService.members;
   loading = this.membersService.loading;
@@ -185,12 +189,6 @@ export class MembersComponent implements OnInit {
     { label: 'Ausstehend', value: 'Pending' },
   ];
 
-  appRoleOptions = [
-    { label: 'Mitglied', value: 'member' },
-    { label: 'Vorstand', value: 'committee' },
-    { label: 'Administrator', value: 'admin' },
-  ];
-
   allPermissions = ALL_PERMISSIONS;
   permissionLabels = PERMISSION_LABELS;
 
@@ -208,6 +206,7 @@ export class MembersComponent implements OnInit {
       const org = this.orgService.currentOrganization();
       if (org?.id) {
         this.membersService.fetchMembers();
+        this.rolesService.loadRoles(org.id);
       }
     });
 
@@ -259,7 +258,8 @@ export class MembersComponent implements OnInit {
       email: '',
       join_date: new Date().toLocaleDateString('de-DE'),
       avatar_url: '',
-      app_role: 'member',
+      role_id: this.roles().find(r => r.is_default)?.id || '',
+      app_role: 'member', // Fallback for backward compatibility
       permissions: [],
       user_id: '',
       street: '',
@@ -300,14 +300,10 @@ export class MembersComponent implements OnInit {
     this.currentMember.permissions = Array.from(perms);
   }
 
-  getAppRoleLabel(role: string): string {
-    const labels: Record<string, string> = {
-      public: 'Öffentlich',
-      member: 'Mitglied',
-      committee: 'Vorstand',
-      admin: 'Administrator'
-    };
-    return labels[role] || role;
+  getSelectedRoleDescription(): string {
+    if (!this.currentMember.role_id) return '';
+    const role = this.roles().find(r => r.id === this.currentMember.role_id);
+    return role?.description || 'Keine Beschreibung verfügbar.';
   }
 
   async saveMember() {
