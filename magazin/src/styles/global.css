@@ -1,0 +1,96 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-linke: #FF0000;
+  --color-linke-light: #FF5050;
+  --color-linke-dark: #6F003C;
+  --color-linke-darker: #1A000F;
+
+  --color-teal: #00B19C;
+  --color-teal-dark: #004B5B;
+
+  /* Theme-aware semantic colors mapped to native CSS variables */
+  --color-bg: var(--color-bg-var);
+  --color-surface: var(--color-surface-var);
+  --color-surface-raised: var(--color-surface-raised-var);
+  --color-text: var(--color-text-var);
+  --color-text-muted: var(--color-text-muted-var);
+  --color-border: var(--color-border-var);
+
+  --font-atkinson: "Atkinson", sans-serif;
+}
+
+@layer base {
+  /* ═══════════════════════════════════════════════════════════════════════════ */
+  /* LIGHT MODE (Default fallback)                                               */
+  /* ═══════════════════════════════════════════════════════════════════════════ */
+  :root {
+    --color-bg-var: #F3F4F6;
+    --color-surface-var: #FFFFFF;
+    --color-surface-raised-var: #FFFFFF;
+    --color-text-var: #111827;
+    --color-text-muted-var: #4B5563;
+    --color-border-var: #D1D5DB;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════ */
+  /* DARK MODE (Active with class 'dark' on html)                                */
+  /* ═══════════════════════════════════════════════════════════════════════════ */
+  :root.dark {
+    --color-bg-var: #050505;
+    --color-surface-var: #0F0F0F;
+    --color-surface-raised-var: #141414;
+    --color-text-var: #FFFFFF;
+    --color-text-muted-var: #9CA3AF;
+    --color-border-var: #262626;
+  }
+
+  body {
+    @apply bg-bg text-text antialiased;
+    font-family: var(--font-atkinson);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  ::selection {
+    @apply bg-linke text-white;
+  }
+
+  /* Utility for Markdown / Prose Content */
+  .prose p {
+    @apply mb-4 leading-relaxed;
+  }
+  .prose h1, .prose h2, .prose h3, .prose h4 {
+    @apply font-bold mt-8 mb-4 text-text;
+  }
+  .prose h1 { @apply text-4xl; }
+  .prose h2 { @apply text-3xl; }
+  .prose h3 { @apply text-2xl; }
+  .prose a {
+    @apply text-linke hover:text-linke-light transition-colors;
+  }
+  .prose img {
+    @apply rounded-xl max-w-full h-auto;
+  }
+}
+
+/* Animations from Pulsedeck */
+@layer utilities {
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+}

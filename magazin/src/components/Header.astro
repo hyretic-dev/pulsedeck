@@ -1,0 +1,43 @@
+---
+import { SITE_TITLE } from '../consts';
+import HeaderLink from './HeaderLink.astro';
+---
+
+<header class="sticky top-0 z-50 w-full backdrop-blur-md flex-none transition-colors duration-500 bg-surface/90 border-b border-border">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<nav class="flex items-center justify-between h-16">
+			
+			<!-- Logo -->
+			<div class="flex-shrink-0 flex items-center gap-3">
+				<div class="w-8 h-8 rounded-lg bg-linke flex items-center justify-center shadow-lg shadow-linke/30">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+				</div>
+				<a href="/" class="font-bold text-xl tracking-tight text-text hover:text-linke transition-colors">
+					{SITE_TITLE}
+				</a>
+			</div>
+			
+			<!-- Desktop Menu -->
+			<div class="hidden md:flex space-x-8 items-center h-full pt-1">
+				<HeaderLink href="/">Startseite</HeaderLink>
+				<HeaderLink href="/blog">Magazin</HeaderLink>
+				<HeaderLink href="/about">Über uns</HeaderLink>
+				
+				<!-- Call to Action Button -->
+				<a href="/" class="ml-4 px-4 py-2 rounded-lg bg-linke text-white font-medium hover:bg-linke-light transition-all shadow-md shadow-linke/20 hover:shadow-linke/40 active:scale-95 border-b-0">
+					Zum Portal
+				</a>
+			</div>
+			
+			<!-- Mobile Menu Button -->
+			<div class="md:hidden flex items-center">
+				<button type="button" class="text-text-muted hover:text-text p-2 transition-colors">
+					<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+					</svg>
+				</button>
+			</div>
+
+		</nav>
+	</div>
+</header>

@@ -1,0 +1,101 @@
+---
+// Import the global.css file here so that it is included on
+// all pages through the use of the <BaseHead /> component.
+import '../styles/global.css';
+import type { ImageMetadata } from 'astro';
+import FallbackImage from '../assets/blog-placeholder-1.jpg';
+import { SITE_TITLE } from '../consts';
+import { Font } from 'astro:assets';
+
+interface Props {
+	title: string;
+	description: string;
+	image?: ImageMetadata | string;
+	type?: 'website' | 'article';
+	pubDate?: Date;
+	updatedDate?: Date;
+	seoKeywords?: string[];
+}
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+const { 
+	title, 
+	description, 
+	image = FallbackImage, 
+	type = 'website',
+	pubDate,
+	updatedDate,
+	seoKeywords 
+} = Astro.props;
+
+const resolvedImage = typeof image === 'string' ? image : image.src;
+---
+
+<!-- Global Metadata -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" href="/favicon.ico" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+<link
+	rel="alternate"
+	type="application/rss+xml"
+	title={SITE_TITLE}
+	href={new URL('rss.xml', Astro.site)}
+/>
+<meta name="generator" content={Astro.generator} />
+
+<Font cssVariable="--font-atkinson" preload />
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+{seoKeywords && seoKeywords.length > 0 && (
+	<meta name="keywords" content={seoKeywords.join(', ')} />
+)}
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={Astro.url} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={new URL(resolvedImage, Astro.url)} />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={new URL(resolvedImage, Astro.url)} />
+
+<!-- Schema.org JSON-LD -->
+{type === 'article' && (
+	<script type="application/ld+json" set:html={JSON.stringify({
+		"@context": "https://schema.org",
+		"@type": "Article",
+		"headline": title,
+		"description": description,
+		"image": new URL(resolvedImage, Astro.url).toString(),
+		"datePublished": pubDate ? pubDate.toISOString() : undefined,
+		"dateModified": updatedDate ? updatedDate.toISOString() : pubDate ? pubDate.toISOString() : undefined,
+		"keywords": seoKeywords ? seoKeywords.join(", ") : undefined,
+		"author": {
+			"@type": "Organization",
+			"name": SITE_TITLE,
+			"url": Astro.site ? Astro.site.toString() : "https://pulsedeck.de"
+		},
+		"publisher": {
+			"@type": "Organization",
+			"name": SITE_TITLE,
+			"logo": {
+				"@type": "ImageObject",
+				"url": Astro.site ? new URL('/favicon.svg', Astro.site).toString() : "https://pulsedeck.de/favicon.svg"
+			}
+		}
+	})} />
+)}
