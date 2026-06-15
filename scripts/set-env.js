@@ -7,8 +7,13 @@ const path = require('path');
 
 const envDir = path.join(__dirname, '../src/environments');
 
-const supabaseUrl = process.env.SUPABASE_URL || 'MISSING_SUPABASE_URL';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'MISSING_SUPABASE_ANON_KEY';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.log('⚠️  Keine SUPABASE_URL oder SUPABASE_ANON_KEY gefunden. Überspringe set-env.js und verwende bestehende environment.ts');
+  process.exit(0);
+}
 
 const prodEnvContent = `/**
  * Production environment configuration
@@ -48,3 +53,5 @@ fs.writeFileSync(path.join(envDir, 'environment.prod.ts'), prodEnvContent);
 console.log('✅ Environment files generated successfully');
 console.log(`   SUPABASE_URL: ${supabaseUrl.substring(0, 30)}...`);
 console.log(`   SUPABASE_ANON_KEY: ${supabaseAnonKey.substring(0, 20)}...`);
+
+

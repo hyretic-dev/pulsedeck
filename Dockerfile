@@ -1,5 +1,5 @@
 # Stage 1: Build the Angular application
-FROM node:22-alpine AS build
+FROM node:22-alpine AS build-angular
 
 WORKDIR /app
 
@@ -29,15 +29,25 @@ RUN node scripts/set-env.js
 # Build the application for production
 RUN npm run build -- --configuration=production
 
-# Stage 2: Serve with Nginx
+# Stage 2: Build the Astro application
+FROM node:22-alpine AS build-astro
+WORKDIR /app
+COPY magazin/package*.json ./
+RUN npm ci
+COPY magazin/ .
+RUN npm run build
+
+# Stage 3: Serve with Nginx
 FROM nginx:alpine AS production
 
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy built assets from build stage
-# Angular 21 outputs to dist/<project-name>/browser
-COPY --from=build /app/dist/dashboard/browser /usr/share/nginx/html
+# Copy built assets from build stages
+# Angular outputs to dist/dashboard/browser
+COPY --from=build-angular /app/dist/dashboard/browser /usr/share/nginx/html
+# Astro outputs to dist, copy to /magazin subdirectory
+COPY --from=build-astro /app/dist /usr/share/nginx/html/magazin
 
 # Expose port 80
 EXPOSE 80

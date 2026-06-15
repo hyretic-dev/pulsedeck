@@ -4,9 +4,12 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:docker": "docker build -t pulsedeck-local . && docker run -p 8080:80 pulsedeck-local",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "generate-sitemap": "node scripts/generate-sitemap.js",
+    "setup:env": "node -e \"const fs=require('fs'); if(!fs.existsSync('src/environments/environment.ts')) fs.copyFileSync('src/environments/environment.example.ts', 'src/environments/environment.ts'); console.log('Environment setup complete.');\""
   },
   "prettier": {
     "printWidth": 100,
@@ -23,6 +26,7 @@
   "private": true,
   "packageManager": "npm@11.6.2",
   "dependencies": {
+    "@ai-sdk/mistral": "^0.0.40",
     "@angular/animations": "^21.0.6",
     "@angular/common": "^21.0.0",
     "@angular/compiler": "^21.0.0",
@@ -30,12 +34,22 @@
     "@angular/forms": "^21.0.0",
     "@angular/platform-browser": "^21.0.0",
     "@angular/router": "^21.0.0",
+    "@angular/service-worker": "^21.0.0",
+    "@capacitor/android": "^8.0.1",
+    "@capacitor/cli": "^8.0.1",
+    "@capacitor/core": "^8.0.1",
     "@primeng/themes": "^21.0.2",
     "@supabase/supabase-js": "^2.89.0",
+    "@types/dompurify": "^3.0.5",
+    "ai": "^3.4.15",
+    "dompurify": "^3.4.9",
+    "marked": "^17.0.1",
     "primeicons": "^7.0.0",
     "primeng": "^21.0.2",
+    "quill": "^2.0.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "xlsx": "^0.18.5",
     "zone.js": "^0.16.0"
   },
   "devDependencies": {
@@ -43,9 +57,11 @@
     "@angular/cli": "^21.0.4",
     "@angular/compiler-cli": "^21.0.0",
     "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/typography": "^0.5.19",
     "autoprefixer": "^10.4.23",
     "jsdom": "^27.1.0",
     "postcss": "^8.5.6",
+    "supabase": "^2.105.0",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
