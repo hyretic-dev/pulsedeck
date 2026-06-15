@@ -2,8 +2,15 @@
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
 
+import Callout from '../../components/mdx/Callout.astro';
+import VisualBreak from '../../components/mdx/VisualBreak.astro';
+import Mermaid from '../../components/mdx/Mermaid.astro';
+
 export async function getStaticPaths() {
-	const posts = await getCollection('blog');
+	const posts = await getCollection('blog', ({ data }) => {
+		// optionally filter out drafts in production
+		return import.meta.env.PROD ? data.draft !== true : true;
+	});
 	return posts.map((post) => ({
 		params: { slug: post.id },
 		props: post,
@@ -12,9 +19,15 @@ export async function getStaticPaths() {
 type Props = CollectionEntry<'blog'>;
 
 const post = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+
+const components = {
+	Callout,
+	VisualBreak,
+	Mermaid
+};
 ---
 
-<BlogPost {...post.data}>
-	<Content />
+<BlogPost {...post.data} headings={headings} slug={post.id}>
+	<Content components={components} />
 </BlogPost>

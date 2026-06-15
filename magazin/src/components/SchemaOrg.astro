@@ -1,0 +1,93 @@
+---
+import { SITE_TITLE } from '../consts';
+
+interface Props {
+	title: string;
+	description: string;
+	pubDate: Date;
+	updatedDate?: Date;
+	last_modified?: Date;
+	image?: string;
+	author?: { name: string; url?: string };
+	tags?: string[];
+	faq?: { question: string; answer: string }[];
+}
+
+const { 
+	title, 
+	description, 
+	pubDate, 
+	updatedDate, 
+	last_modified,
+	image, 
+	author, 
+	tags = [], 
+	faq = []
+} = Astro.props;
+
+// Date formatting for Schema
+const datePublished = pubDate.toISOString();
+const dateModified = (last_modified || updatedDate || pubDate).toISOString();
+
+const resolvedImageUrl = image ? new URL(image, Astro.url).toString() : new URL('/favicon.svg', Astro.site || Astro.url).toString();
+
+// Base BlogPosting Schema
+const schema: any = {
+	"@context": "https://schema.org",
+	"@type": "BlogPosting",
+	"headline": title,
+	"description": description,
+	"image": resolvedImageUrl,
+	"datePublished": datePublished,
+	"dateModified": dateModified,
+	"author": author ? {
+		"@type": "Person",
+		"name": author.name,
+		"url": author.url
+	} : {
+		"@type": "Organization",
+		"name": SITE_TITLE,
+		"url": Astro.site ? Astro.site.toString() : "https://pulsedeck.de"
+	},
+	"publisher": {
+		"@type": "Organization",
+		"name": SITE_TITLE,
+		"logo": {
+			"@type": "ImageObject",
+			"url": Astro.site ? new URL('/favicon.svg', Astro.site).toString() : "https://pulsedeck.de/favicon.svg"
+		}
+	}
+};
+
+if (tags.length > 0) {
+	schema["keywords"] = tags.join(", ");
+}
+
+// Speakable property for Voice Search (assuming standard selectors)
+schema["speakable"] = {
+	"@type": "SpeakableSpecification",
+	"cssSelector": [".prose h1", ".prose h2", ".prose p:first-of-type"]
+};
+
+// FAQ Schema if provided
+let faqSchema = null;
+if (faq.length > 0) {
+	faqSchema = {
+		"@context": "https://schema.org",
+		"@type": "FAQPage",
+		"mainEntity": faq.map(item => ({
+			"@type": "Question",
+			"name": item.question,
+			"acceptedAnswer": {
+				"@type": "Answer",
+				"text": item.answer
+			}
+		}))
+	};
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
+{faqSchema && (
+	<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+)}

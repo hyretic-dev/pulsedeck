@@ -1,124 +1,325 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import { getEntry } from 'astro:content';
+import type { MarkdownHeading } from 'astro';
+
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import SchemaOrg from '../components/SchemaOrg.astro';
+import RelatedPosts from '../components/RelatedPosts.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+type Props = CollectionEntry<'blog'>['data'] & {
+	headings?: MarkdownHeading[];
+	slug?: string;
+};
 
-const { title, description, pubDate, updatedDate, heroImage, type, seoKeywords, leadMagnetUrl, ctaText } = Astro.props;
+const { 
+	title, 
+	description, 
+	seo_title,
+	seo_description,
+	pubDate, 
+	updatedDate, 
+	last_modified,
+	heroImage, 
+	type, 
+	seoKeywords, 
+	leadMagnetUrl, 
+	ctaText,
+	category,
+	author,
+	tags,
+	draft,
+	canonical_url,
+	summary,
+	related_posts,
+	faq,
+	headings,
+	slug
+} = Astro.props;
+
+// Fetch author data if provided
+let authorEntry;
+if (author) {
+	authorEntry = await getEntry('authors', author);
+}
+
+const resolvedImage = heroImage ? heroImage.src : undefined;
 ---
 
 <html lang="de" class="dark">
 	<head>
 		<BaseHead 
-            title={title} 
-            description={description} 
-            type="article"
-            pubDate={pubDate}
-            updatedDate={updatedDate}
-            seoKeywords={seoKeywords}
-            image={heroImage} 
-        />
+			title={title} 
+			description={description} 
+			seo_title={seo_title}
+			seo_description={seo_description}
+			type="article"
+			pubDate={pubDate}
+			updatedDate={updatedDate}
+			last_modified={last_modified}
+			seoKeywords={seoKeywords}
+			image={heroImage}
+			author={authorEntry?.data?.name}
+			canonical_url={canonical_url}
+			draft={draft}
+		/>
+		<SchemaOrg 
+			title={title}
+			description={description}
+			pubDate={pubDate}
+			updatedDate={updatedDate}
+			last_modified={last_modified}
+			image={resolvedImage}
+			author={authorEntry ? { name: authorEntry.data.name, url: authorEntry.data.twitter || authorEntry.data.linkedin } : undefined}
+			tags={tags}
+			faq={faq}
+		/>
 	</head>
 
 	<body class="flex flex-col min-h-screen">
 		<Header />
 		
 		<main class="flex-grow py-12 lg:py-20 relative">
-            <!-- Background Decoration -->
-            <div class="absolute top-0 right-0 w-[500px] h-[500px] opacity-10 pointer-events-none overflow-hidden">
-                <div class="absolute -top-20 -right-20 w-96 h-96 bg-linke rounded-full mix-blend-screen filter blur-3xl"></div>
-            </div>
+			<!-- Background Decoration -->
+			<div class="absolute top-0 right-0 w-[500px] h-[500px] opacity-10 pointer-events-none overflow-hidden">
+				<div class="absolute -top-20 -right-20 w-96 h-96 bg-linke rounded-full mix-blend-screen filter blur-3xl"></div>
+			</div>
 
 			<article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 				
-                <!-- Article Header -->
-                <header class="text-center mb-12 animate-fade-in-up">
-                    <div class="text-sm font-medium text-linke mb-4 uppercase tracking-wider">
-                        {type === 'template' ? 'Vorlagen & Downloads' : type === 'guide' ? 'Ratgeber & Compliance' : 'Magazin'}
-                    </div>
-                    <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-text mb-6 max-w-4xl mx-auto">
-                        {title}
-                    </h1>
-					<div class="flex items-center justify-center gap-4 text-text-muted">
-                        <div class="flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                            <FormattedDate date={pubDate} />
-                        </div>
+				<!-- Breadcrumbs -->
+				<nav class="flex text-sm text-text-muted mb-8 justify-center animate-fade-in-up" aria-label="Breadcrumb">
+					<ol class="inline-flex items-center space-x-1 md:space-x-3">
+						<li class="inline-flex items-center">
+							<a href="/magazin" class="hover:text-linke transition-colors">Magazin</a>
+						</li>
+						{category && (
+						<li>
+							<div class="flex items-center">
+								<span class="mx-2">/</span>
+								<span class="text-text">{category}</span>
+							</div>
+						</li>
+						)}
+					</ol>
+				</nav>
+
+				<!-- Article Header -->
+				<header class="text-center mb-12 animate-fade-in-up" style="animation-delay: 50ms;">
+					<h1 class="text-4xl md:text-5xl font-bold tracking-tight text-text mb-6 max-w-4xl mx-auto">
+						{title}
+					</h1>
+					<div class="flex items-center justify-center gap-4 text-text-muted flex-wrap">
+						<div class="flex items-center gap-2">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+							<FormattedDate date={pubDate} />
+						</div>
 						{
-							updatedDate && (
+							(updatedDate || last_modified) && (
 								<div class="flex items-center gap-2 italic text-sm">
-									<span>(Update: <FormattedDate date={updatedDate} />)</span>
+									<span>(Update: <FormattedDate date={updatedDate || last_modified!} />)</span>
 								</div>
 							)
 						}
 					</div>
 				</header>
 
-                <!-- Hero Image -->
-                {heroImage && (
-                    <div class="w-full aspect-[2/1] md:aspect-[21/9] rounded-2xl overflow-hidden mb-16 shadow-2xl border border-border animate-fade-in-up" style="animation-delay: 100ms;">
-                        <Image width={1020} height={510} src={heroImage} alt={title} class="w-full h-full object-cover" />
-                    </div>
-                )}
+				<!-- Hero Image -->
+				{heroImage && (
+					<div class="w-full aspect-[2/1] md:aspect-[21/9] rounded-2xl overflow-hidden mb-16 shadow-2xl border border-border animate-fade-in-up" style="animation-delay: 100ms;">
+						<Image width={1020} height={510} src={heroImage} alt={title} class="w-full h-full object-cover" />
+					</div>
+				)}
 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                    
-                    <!-- Main Content -->
-                    <div class:list={[
-                        "prose prose-invert lg:prose-xl max-w-none animate-fade-in-up",
-                        type === 'template' ? 'lg:col-span-8' : 'lg:col-span-12 max-w-4xl mx-auto'
-                    ]} style="animation-delay: 200ms;">
-                        <slot />
+				<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+					
+					<!-- Main Content -->
+					<div class:list={[
+						"lg:prose-xl max-w-none animate-fade-in-up",
+						type === 'template' ? 'lg:col-span-8' : 'lg:col-span-12 max-w-4xl mx-auto w-full'
+					]} style="animation-delay: 200ms;">
+						
+						<!-- AEO Key Takeaways -->
+						{summary && (
+							<div class="bg-linke/5 p-6 rounded-xl border border-linke/20 mb-10 shadow-sm not-prose">
+								<h2 class="text-xl font-bold mb-4 mt-0 text-text flex items-center gap-2">
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-linke"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+									Key Takeaways
+								</h2>
+								<ul class="list-disc pl-5 m-0 space-y-2 text-text-muted">
+									{summary.split('.').filter(s => s.trim().length > 0).map(s => <li class="pl-1">{s.trim()}.</li>)}
+								</ul>
+							</div>
+						)}
 
-                        <!-- Funnel 2: Guide / Pain-Point (Rendered at the bottom of the article) -->
-                        {type === 'guide' && (
-                            <div class="mt-16 p-8 rounded-2xl bg-surface-raised border border-linke/30 shadow-lg shadow-linke/5 relative overflow-hidden not-prose">
-                                <div class="absolute top-0 left-0 w-2 h-full bg-linke"></div>
-                                <h3 class="text-2xl font-bold text-text mb-4 mt-0">DSGVO-Strafen im Verein vermeiden</h3>
-                                <p class="text-text-muted mb-6 leading-relaxed">
-                                    {ctaText || "Machen Sie sich nicht privat haftbar. Lokale Listen und WhatsApp-Gruppen verstoßen oft gegen geltendes Recht. Mit Pulsedeck digitalisieren Sie Ihren Verein 100% rechts- und DSGVO-konform (Hosted in Germany/EU)."}
-                                </p>
-                                <a href="/" class="inline-block px-6 py-3 rounded-lg bg-linke text-white font-medium hover:bg-linke-light transition-all shadow-md active:scale-95 no-underline">
-                                    Jetzt rechtssicher digitalisieren
-                                </a>
-                            </div>
-                        )}
-                    </div>
+						<!-- Table of Contents -->
+						{headings && headings.filter(h => h.depth <= 3).length > 0 && (
+							<div class="bg-surface p-6 rounded-xl border border-border mb-10 not-prose">
+								<h2 class="text-lg font-bold mb-4 mt-0 text-text">Inhaltsverzeichnis</h2>
+								<ul class="space-y-2 m-0 list-none pl-0">
+									{headings.filter(h => h.depth <= 3).map(h => (
+										<li class={h.depth === 3 ? "ml-4" : ""}>
+											<a href={`#${h.slug}`} class="text-linke hover:underline text-sm transition-colors">{h.text}</a>
+										</li>
+									))}
+								</ul>
+							</div>
+						)}
 
-                    <!-- Funnel 1: Template / Programmatic SEO (Rendered as Sticky Sidebar) -->
-                    {type === 'template' && (
-                        <div class="lg:col-span-4 animate-fade-in-up" style="animation-delay: 300ms;">
-                            <div class="sticky top-24 p-6 rounded-2xl bg-surface-raised border border-border shadow-xl">
-                                <div class="flex items-center gap-3 mb-4 text-linke">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
-                                    <h3 class="font-bold text-lg text-text m-0">Ihr kostenloser Download</h3>
-                                </div>
-                                <p class="text-sm text-text-muted mb-6">
-                                    Laden Sie sich die Vorlage kostenfrei herunter.
-                                </p>
-                                <a href={leadMagnetUrl || "#"} class="block w-full text-center px-4 py-3 rounded-lg bg-surface border border-border text-text font-medium hover:bg-surface-raised hover:border-linke transition-all mb-8 shadow-sm">
-                                    &#8595; Datei herunterladen
-                                </a>
+						<div class="prose prose-invert max-w-none prose-a:text-linke prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl">
+							<slot />
+						</div>
 
-                                <div class="h-px w-full bg-border mb-8"></div>
+						<!-- FAQ Accordion -->
+						{faq && faq.length > 0 && (
+							<div class="mt-16 not-prose">
+								<h2 class="text-3xl font-bold mb-8 text-text">Häufig gestellte Fragen (FAQ)</h2>
+								<div class="space-y-4">
+									{faq.map((item) => (
+										<details class="group bg-surface rounded-xl border border-border overflow-hidden" name="faq-accordion">
+											<summary class="flex cursor-pointer items-center justify-between p-5 font-medium text-text hover:bg-surface-raised transition-colors">
+												<span class="pr-4">{item.question}</span>
+												<span class="shrink-0 transition duration-300 group-open:-rotate-180 text-linke">
+													<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+												</span>
+											</summary>
+											<div class="p-5 pt-0 text-text-muted bg-surface text-base border-t border-border">
+												<div class="pt-4">{item.answer}</div>
+											</div>
+										</details>
+									))}
+								</div>
+							</div>
+						)}
 
-                                <h4 class="font-bold text-text mb-3">Warnung vor Excel & Word</h4>
-                                <p class="text-sm text-text-muted mb-6">
-                                    {ctaText || "Lokale Dateien sind fehleranfällig, schwer aktuell zu halten und verstoßen beim Teilen via WhatsApp oder Mail oft gegen den Datenschutz."}
-                                </p>
-                                <a href="/" class="block w-full text-center px-4 py-3 rounded-lg bg-linke text-white font-medium hover:bg-linke-light transition-all shadow-md hover:shadow-linke/30 active:scale-95">
-                                    Besser mit Pulsedeck
-                                </a>
-                            </div>
-                        </div>
-                    )}
-                </div>
+						<!-- Author Box -->
+						{authorEntry && (
+							<div class="mt-16 bg-surface p-8 rounded-2xl border border-border flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6 not-prose shadow-sm">
+								{authorEntry.data.avatar ? (
+									<Image src={authorEntry.data.avatar} alt={authorEntry.data.name} width={80} height={80} class="rounded-full shrink-0 shadow-md border-2 border-surface-raised" />
+								) : (
+									<div class="w-20 h-20 rounded-full bg-gradient-to-br from-linke to-linke-light flex items-center justify-center text-white font-bold text-3xl shrink-0 shadow-md">
+										{authorEntry.data.name.charAt(0)}
+									</div>
+								)}
+								<div class="flex-grow">
+									<h3 class="text-xl font-bold text-text m-0 mb-2">{authorEntry.data.name}</h3>
+									<p class="text-base text-text-muted m-0 mb-4">{authorEntry.data.bio}</p>
+									<div class="flex gap-4 justify-center sm:justify-start">
+										{authorEntry.data.twitter && (
+											<a href={authorEntry.data.twitter} target="_blank" rel="noopener noreferrer" class="text-text-muted hover:text-linke transition-colors" aria-label="Twitter">
+												<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+											</a>
+										)}
+										{authorEntry.data.linkedin && (
+											<a href={authorEntry.data.linkedin} target="_blank" rel="noopener noreferrer" class="text-text-muted hover:text-linke transition-colors" aria-label="LinkedIn">
+												<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+											</a>
+										)}
+									</div>
+								</div>
+							</div>
+						)}
+
+						<!-- Newsletter Integration (End of post) -->
+						<div class="mt-16 p-8 bg-surface-raised border border-border rounded-2xl text-center not-prose shadow-lg relative overflow-hidden">
+							<div class="absolute inset-0 bg-linke/5 pointer-events-none"></div>
+							<div class="relative z-10">
+								<h3 class="text-2xl font-bold mb-4 text-text">Keinen Artikel mehr verpassen!</h3>
+								<p class="text-text-muted mb-8 max-w-lg mx-auto">Abonnieren Sie unseren Newsletter für die neuesten Tipps & Vorlagen rund um das Vereinsmanagement.</p>
+								<form class="flex flex-col sm:flex-row max-w-md mx-auto gap-3">
+									<input type="email" placeholder="Ihre E-Mail Adresse" class="flex-grow px-4 py-3 rounded-lg bg-surface border border-border text-text focus:outline-none focus:border-linke focus:ring-1 focus:ring-linke transition-all" required />
+									<button type="submit" class="px-6 py-3 bg-linke text-white font-medium rounded-lg hover:bg-linke-light transition-all shadow-md active:scale-95 whitespace-nowrap">Abonnieren</button>
+								</form>
+							</div>
+						</div>
+
+						<!-- Related Posts -->
+						{slug && (
+							<div class="not-prose">
+								<RelatedPosts currentSlug={slug} tags={tags} category={category} relatedIds={related_posts} />
+							</div>
+						)}
+
+						<!-- Funnel 2: Guide / Pain-Point (Rendered at the bottom of the article) -->
+						{type === 'guide' && (
+							<div class="mt-16 p-8 rounded-2xl bg-surface-raised border border-linke/30 shadow-lg shadow-linke/5 relative overflow-hidden not-prose">
+								<div class="absolute top-0 left-0 w-2 h-full bg-linke"></div>
+								<h3 class="text-2xl font-bold text-text mb-4 mt-0">DSGVO-Strafen im Verein vermeiden</h3>
+								<p class="text-text-muted mb-6 leading-relaxed">
+									{ctaText || "Machen Sie sich nicht privat haftbar. Lokale Listen und WhatsApp-Gruppen verstoßen oft gegen geltendes Recht. Mit Pulsedeck digitalisieren Sie Ihren Verein 100% rechts- und DSGVO-konform (Hosted in Germany/EU)."}
+								</p>
+								<a href="/" class="inline-block px-6 py-3 rounded-lg bg-linke text-white font-medium hover:bg-linke-light transition-all shadow-md active:scale-95 no-underline">
+									Jetzt rechtssicher digitalisieren
+								</a>
+							</div>
+						)}
+					</div>
+
+					<!-- Funnel 1: Template / Programmatic SEO (Rendered as Sticky Sidebar) -->
+					{type === 'template' && (
+						<aside class="lg:col-span-4 animate-fade-in-up" style="animation-delay: 300ms;">
+							<div class="sticky top-24 p-6 rounded-2xl bg-surface-raised border border-border shadow-xl">
+								<div class="flex items-center gap-3 mb-4 text-linke">
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
+									<h3 class="font-bold text-lg text-text m-0">Ihr kostenloser Download</h3>
+								</div>
+								<p class="text-sm text-text-muted mb-6">
+									Laden Sie sich die Vorlage kostenfrei herunter.
+								</p>
+								<a href={leadMagnetUrl || "#"} class="block w-full text-center px-4 py-3 rounded-lg bg-surface border border-border text-text font-medium hover:bg-surface-raised hover:border-linke transition-all mb-8 shadow-sm">
+									&#8595; Datei herunterladen
+								</a>
+
+								<div class="h-px w-full bg-border mb-8"></div>
+
+								<h4 class="font-bold text-text mb-3">Warnung vor Excel & Word</h4>
+								<p class="text-sm text-text-muted mb-6">
+									{ctaText || "Lokale Dateien sind fehleranfällig, schwer aktuell zu halten und verstoßen beim Teilen via WhatsApp oder Mail oft gegen den Datenschutz."}
+								</p>
+								<a href="/" class="block w-full text-center px-4 py-3 rounded-lg bg-linke text-white font-medium hover:bg-linke-light transition-all shadow-md hover:shadow-linke/30 active:scale-95">
+									Besser mit Pulsedeck
+								</a>
+							</div>
+						</aside>
+					)}
+				</div>
 			</article>
 		</main>
 		<Footer />
+		
+		<!-- Inline Newsletter Injector -->
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				const prose = document.querySelector('.prose');
+				if (!prose) return;
+				
+				const h2s = prose.querySelectorAll('h2');
+				if (h2s.length > 0) {
+					const firstH2 = h2s[0];
+					const inlineForm = document.createElement('div');
+					inlineForm.className = 'my-12 p-6 bg-linke/5 border-l-4 border-linke rounded-r-xl not-prose';
+					inlineForm.innerHTML = `
+						<div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+							<div>
+								<h4 class="text-lg font-bold text-text mb-1 mt-0">Kurze Unterbrechung: Bleiben Sie informiert!</h4>
+								<p class="text-sm text-text-muted m-0">Praxis-Tipps direkt in Ihr Postfach.</p>
+							</div>
+							<form class="flex w-full sm:w-auto gap-2">
+								<input type="email" placeholder="E-Mail..." class="flex-grow sm:w-48 px-3 py-2 rounded-lg bg-surface border border-border text-sm text-text focus:outline-none focus:border-linke" required />
+								<button type="submit" class="px-4 py-2 bg-surface text-text font-medium rounded-lg hover:bg-surface-raised border border-border transition-colors text-sm">Abo</button>
+							</form>
+						</div>
+					`;
+					
+					// Insert right before the first h2
+					firstH2.parentNode?.insertBefore(inlineForm, firstH2);
+				}
+			});
+		</script>
 	</body>
 </html>

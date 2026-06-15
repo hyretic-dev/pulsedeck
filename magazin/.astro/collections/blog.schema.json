@@ -8,6 +8,12 @@
     "description": {
       "type": "string"
     },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "string"
+    },
     "pubDate": {
       "type": "string",
       "format": "date-time"
@@ -15,6 +21,58 @@
     "updatedDate": {
       "type": "string",
       "format": "date-time"
+    },
+    "last_modified": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "author": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "tags": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "draft": {
+      "default": false,
+      "type": "boolean"
+    },
+    "canonical_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "related_posts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "faq": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "answer"
+        ]
+      }
     },
     "heroImage": {
       "type": "string"

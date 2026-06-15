@@ -4,9 +4,30 @@ import type { HTMLAttributes } from 'astro/types';
 type Props = HTMLAttributes<'a'>;
 
 const { href, class: className, ...props } = Astro.props;
-const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, '');
-const subpath = pathname.match(/[^\/]+/g);
-const isActive = href === pathname || href === '/' + (subpath?.[0] || '');
+
+// For comparison, normalize paths by stripping the base url
+const baseUrl = import.meta.env.BASE_URL; // e.g. "/magazin" or "/magazin/"
+
+// Safely normalize the current pathname
+let currentPath = Astro.url.pathname;
+if (baseUrl && currentPath.startsWith(baseUrl)) {
+    currentPath = currentPath.slice(baseUrl.length);
+}
+if (!currentPath.startsWith('/')) currentPath = '/' + currentPath;
+
+// Safely normalize the target href
+let targetPath = href?.toString() || '';
+if (baseUrl && targetPath.startsWith(baseUrl)) {
+    targetPath = targetPath.slice(baseUrl.length);
+}
+if (!targetPath.startsWith('/')) targetPath = '/' + targetPath;
+
+// Strip trailing slashes for exact match
+const currentPathNorm = currentPath.endsWith('/') && currentPath !== '/' ? currentPath.slice(0, -1) : currentPath;
+const targetPathNorm = targetPath.endsWith('/') && targetPath !== '/' ? targetPath.slice(0, -1) : targetPath;
+
+const subpath = currentPathNorm.match(/[^\/]+/g);
+const isActive = targetPathNorm === currentPathNorm || targetPathNorm === '/' + (subpath?.[0] || '');
 ---
 
 <a href={href} class:list={[

@@ -1,0 +1,25 @@
+---
+interface Props {
+  chart: string;
+}
+
+const { chart } = Astro.props;
+---
+
+<div class="mermaid-diagram my-8 flex justify-center w-full overflow-x-auto bg-surface p-4 rounded-xl border border-border">
+  <pre class="mermaid">{chart}</pre>
+</div>
+
+<script>
+  // Dynamically load mermaid only when needed
+  if (document.querySelector('.mermaid')) {
+    import('mermaid').then((mermaid) => {
+      mermaid.default.initialize({ 
+        startOnLoad: true,
+        theme: 'dark', // Because html has class="dark"
+        securityLevel: 'loose'
+      });
+      mermaid.default.run();
+    });
+  }
+</script>
