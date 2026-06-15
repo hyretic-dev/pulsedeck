@@ -1,6 +1,7 @@
 ---
 title: "Schichtplan für das Vereinsfest (Kostenlose Excel-Vorlage)"
 description: "Der Vorstand sucht ein Raster, um Helfer für den Getränkestand manuell einzutragen."
+category: 'Organisation'
 pubDate: "2026-06-13T10:00:00Z"
 type: "template"
 seoKeywords: ["Schichtplan Verein Excel", "Schichtplan Vorlage", "Helferplanung Vereinsfest"]

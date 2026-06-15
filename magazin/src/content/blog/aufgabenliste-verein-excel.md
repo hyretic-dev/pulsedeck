@@ -1,6 +1,7 @@
 ---
 title: "Aufgabenliste für Arbeitsgruppen & Komitees (Excel-Vorlage)"
 description: "Ein Projektleiter im Verein will delegieren und den Status tracken."
+category: 'Organisation'
 pubDate: "2026-06-13T10:20:00Z"
 type: "template"
 seoKeywords: ["Aufgabenliste Verein Excel", "To Do Liste Vorlage", "Projektplanung Verein"]

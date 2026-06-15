@@ -1,6 +1,7 @@
 ---
 title: "Wissenstransfer im Vorstand: Wenn der Kassenwart geht und Passwörter fehlen"
 description: "Wissen existiert nur in den Köpfen einzelner Personen. Beim Austritt steht der Verein still."
+category: 'Allgemein'
 pubDate: "2026-06-13T10:40:00Z"
 type: "guide"
 seoKeywords: ["Vorstandswechsel Verein Übergabe", "Vorstand Verein Rücktritt", "Wissensmanagement Verein"]

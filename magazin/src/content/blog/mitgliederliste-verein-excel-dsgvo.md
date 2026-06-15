@@ -1,6 +1,7 @@
 ---
 title: "Mitgliederliste DSGVO-konform führen (Excel-Vorlage)"
 description: "Der Kassenwart sucht eine fertige Tabelle für Adressen und Eintrittsdaten."
+category: 'Organisation'
 pubDate: "2026-06-13T10:15:00Z"
 type: "template"
 seoKeywords: ["Mitgliederliste Verein Excel DSGVO", "Vereinsverwaltung Excel", "Adressliste Vorlage"]

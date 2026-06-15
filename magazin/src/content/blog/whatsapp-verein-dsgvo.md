@@ -1,6 +1,7 @@
 ---
 title: "WhatsApp im Verein: Wann der Vorstand privat haftet"
 description: "Vereine nutzen WhatsApp aus Bequemlichkeit, ignorieren aber die illegale Weitergabe von Adressbüchern an Meta."
+category: 'Recht & DSGVO'
 pubDate: "2026-06-13T10:25:00Z"
 type: "guide"
 seoKeywords: ["WhatsApp Verein DSGVO", "Vorstand Haftung Datenschutz", "Verein WhatsApp Gruppe"]

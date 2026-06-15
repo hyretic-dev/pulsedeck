@@ -1,6 +1,7 @@
 ---
 title: "Das WhatsApp-Chaos: Warum Vereine an ineffizienter Kommunikation kaputtgehen"
 description: "Der Frust über Hunderte irrelevante Chat-Nachrichten und untergehende Informationen."
+category: 'Marketing & Kommunikation'
 pubDate: "2026-06-13T10:35:00Z"
 type: "guide"
 seoKeywords: ["Vereinskommunikation verbessern", "Kommunikation im Verein", "Alternativen zu WhatsApp Verein"]

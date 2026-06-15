@@ -2,116 +2,266 @@
 import { Image } from 'astro:assets';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
-import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import PostCard from '../components/PostCard.astro';
+import { SITE_TITLE } from '../consts';
 import { getCollection } from 'astro:content';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-).slice(0, 3);
+// Fetch all published posts
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// Latest Posts (Top 3)
+const latestPosts = allPosts.slice(0, 3);
+
+// Templates (Top 3)
+const templates = allPosts.filter(p => p.data.type === 'template').slice(0, 3);
+
+// Extract top categories (by count)
+const categoryCounts = allPosts.reduce((acc, post) => {
+    if (post.data.category) {
+        acc[post.data.category] = (acc[post.data.category] || 0) + 1;
+    }
+    return acc;
+}, {} as Record<string, number>);
+
+const topCategories = Object.entries(categoryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(entry => entry[0]);
+
+// Reading time estimator (for the small list view)
+const getReadingTime = (text: string | undefined) => {
+    const words = text ? text.split(/\s+/).length : 0;
+    const time = Math.ceil(words / 200);
+    return time > 0 ? time : 3;
+};
+
 ---
 
 <!doctype html>
 <html lang="de" class="dark">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<BaseHead title={`${SITE_TITLE} - Best Practices für Vereinsmanagement`} description="Expertenwissen, Vorlagen und Ratgeber für Vorstände und Vereinsmanager." />
+        <!-- JSON-LD CollectionPage -->
+        <script type="application/ld+json" set:html={JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": `${SITE_TITLE} - Best Practices für Vereinsmanagement`,
+            "description": "Expertenwissen, Vorlagen und Ratgeber für Vorstände und Vereinsmanager.",
+            "url": Astro.url.href
+        })} />
 	</head>
-	<body class="flex flex-col min-h-screen">
+	<body class="flex flex-col min-h-screen bg-surface selection:bg-linke/30">
 		<Header />
 		
 		<main class="flex-grow">
-			<!-- Hero Section -->
-			<section class="relative py-20 lg:py-32 overflow-hidden">
-				<!-- Pulsedeck Blob Animation Background -->
-				<div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] opacity-20 pointer-events-none">
-					<div class="absolute top-10 left-10 w-72 h-72 bg-linke rounded-full mix-blend-screen filter blur-3xl opacity-70 animate-blob"></div>
-					<div class="absolute top-0 right-10 w-72 h-72 bg-violet rounded-full mix-blend-screen filter blur-3xl opacity-70 animate-blob" style="animation-delay: 2s;"></div>
-					<div class="absolute -bottom-10 left-40 w-72 h-72 bg-teal rounded-full mix-blend-screen filter blur-3xl opacity-70 animate-blob" style="animation-delay: 4s;"></div>
+			<!-- Hero Section (Attention) -->
+			<section class="relative pt-24 pb-16 lg:pt-36 lg:pb-28 overflow-hidden border-b border-border bg-gradient-to-b from-surface to-surface-raised">
+				<div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 mix-blend-overlay"></div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-5xl opacity-30 pointer-events-none">
+					<div class="absolute top-0 right-10 w-[500px] h-[500px] bg-linke rounded-full mix-blend-screen filter blur-[100px] animate-blob"></div>
+					<div class="absolute bottom-0 left-10 w-[500px] h-[500px] bg-violet rounded-full mix-blend-screen filter blur-[100px] animate-blob" style="animation-delay: 2s;"></div>
 				</div>
 
 				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 animate-fade-in-up">
-					<div class="text-center max-w-3xl mx-auto">
-						<h1 class="text-5xl md:text-7xl font-bold tracking-tight text-text mb-6">
-							Willkommen im <span class="text-linke">Magazin</span>
-						</h1>
-						<p class="text-xl text-text-muted mb-10 leading-relaxed">
-							Entdecke spannende Einblicke, Tutorials und Updates rund um Pulsedeck und moderne Webentwicklung.
-						</p>
-						<div class="flex flex-col sm:flex-row justify-center gap-4">
-							<a href="/magazin/blog" class="px-8 py-3 rounded-lg bg-linke text-white font-medium hover:bg-linke-light transition-all shadow-lg shadow-linke/30 hover:shadow-linke/50 active:scale-95 text-lg">
-								Alle Beiträge lesen
-							</a>
-							<a href="/" class="px-8 py-3 rounded-lg bg-surface border border-border text-text font-medium hover:bg-surface-raised transition-all active:scale-95 text-lg">
-								Zum Portal wechseln
-							</a>
-						</div>
-					</div>
+                    <div class="grid lg:grid-cols-2 gap-16 items-center">
+                        <div class="text-left">
+                            <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-linke/10 border border-linke/20 text-linke text-base font-bold tracking-wide mb-8">
+                                <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-linke opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-linke"></span></span>
+                                WISSEN FÜR VORSTÄNDE
+                            </div>
+                            <h1 class="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-text mb-8 leading-[1.1]">
+                                Vereinswissen, das <span class="text-transparent bg-clip-text bg-gradient-to-r from-linke to-violet">wirkt.</span>
+                            </h1>
+                            <p class="text-2xl text-text-muted mb-12 leading-relaxed max-w-2xl">
+                                Lade kostenlose Excel-Vorlagen herunter, meistere die DSGVO und digitalisiere deinen Verein mit erprobten Strategien.
+                            </p>
+                            <div class="flex flex-col sm:flex-row items-start gap-5 mb-10">
+                                <a href="#templates" class="px-10 py-5 rounded-2xl bg-linke text-white font-bold hover:bg-linke-light transition-all shadow-xl shadow-linke/30 hover:shadow-linke/50 active:scale-95 text-xl flex items-center gap-3 group">
+                                    Vorlagen entdecken <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:translate-y-1"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                                </a>
+                            </div>
+                            
+                            <!-- Trust Indicator -->
+                            <div class="flex items-center gap-5">
+                                <div class="flex -space-x-4">
+                                    {[1,2,3,4].map((i) => (
+                                        <div class="w-14 h-14 rounded-full border-4 border-surface bg-surface-raised flex items-center justify-center overflow-hidden">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-text-muted"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div class="text-base font-medium text-text-muted">
+                                    Von <strong class="text-text text-lg">2.500+</strong> Vorständen gelesen
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hero Graphic (Mockup/Illustration) -->
+                        <div class="hidden lg:block relative">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-linke/20 to-violet/20 rounded-3xl transform rotate-3 scale-105 blur-xl"></div>
+                            <div class="relative bg-surface border border-border rounded-3xl shadow-2xl p-8 transform -rotate-2 hover:rotate-0 transition-transform duration-500">
+                                <div class="flex gap-3 mb-6">
+                                    <div class="w-4 h-4 rounded-full bg-red-500/80"></div>
+                                    <div class="w-4 h-4 rounded-full bg-yellow-500/80"></div>
+                                    <div class="w-4 h-4 rounded-full bg-green-500/80"></div>
+                                </div>
+                                <div class="space-y-5">
+                                    <div class="h-10 w-3/4 bg-surface-raised rounded-xl border border-border"></div>
+                                    <div class="h-5 w-full bg-surface-raised rounded-xl border border-border"></div>
+                                    <div class="h-5 w-5/6 bg-surface-raised rounded-xl border border-border"></div>
+                                    <div class="h-40 w-full bg-linke/10 border border-linke/20 rounded-2xl mt-8 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-linke/50"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+                                    </div>
+                                    <div class="flex gap-5 mt-6">
+                                        <div class="h-16 w-1/2 bg-surface-raised rounded-xl border border-border"></div>
+                                        <div class="h-16 w-1/2 bg-surface-raised rounded-xl border border-border"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 				</div>
 			</section>
+
+            <!-- Logo Band (Trust) -->
+            <section class="py-12 border-b border-border bg-surface overflow-hidden">
+                <div class="max-w-7xl mx-auto px-4 text-center">
+                    <p class="text-sm font-bold text-text-muted uppercase tracking-widest mb-8">Bewährte Strategien für Vereine jeder Größe</p>
+                    <div class="flex flex-wrap justify-center gap-10 md:gap-20 opacity-50 grayscale">
+                        <div class="flex items-center gap-3 font-black text-2xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> Turnverein 1880</div>
+                        <div class="flex items-center gap-3 font-black text-2xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Schützen-Verband</div>
+                        <div class="flex items-center gap-3 font-black text-2xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg> Musikverein e.V.</div>
+                        <div class="flex items-center gap-3 font-black text-2xl"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg> Förderverein Hub</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Templates Section (Desire) -->
+            {templates.length > 0 && (
+                <section id="templates" class="py-28 bg-surface-raised border-b border-border relative">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                            <div>
+                                <div class="text-base font-black text-linke mb-3 uppercase tracking-widest flex items-center gap-2.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Bestseller
+                                </div>
+                                <h2 class="text-5xl md:text-6xl font-black text-text">Kostenlose Vorlagen</h2>
+                                <p class="text-text-muted mt-4 text-xl md:text-2xl max-w-3xl leading-relaxed">Spare dir stundenlange Excel-Formatierung. Lade unsere praxisbewährten Vorlagen direkt herunter.</p>
+                            </div>
+                            <a href="/magazin/blog" class="px-8 py-3.5 rounded-xl bg-surface border-2 border-border text-text font-bold hover:bg-border transition-colors text-lg">
+                                Alle Vorlagen ansehen
+                            </a>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                            {templates.map((post) => (
+                                <PostCard post={post} />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
 			<!-- Latest Posts Section -->
-			<section class="py-16 bg-surface border-t border-border">
+			<section class="py-28 bg-surface">
 				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div class="flex justify-between items-end mb-10">
-						<div>
-							<h2 class="text-3xl font-bold text-text">Neueste Beiträge</h2>
-							<p class="text-text-muted mt-2">Frisch aus der Redaktion</p>
-						</div>
-						<a href="/magazin/blog" class="hidden sm:block text-linke hover:text-linke-light font-medium transition-colors">
-							Alle anzeigen &rarr;
-						</a>
+					<div class="text-center mb-20">
+						<h2 class="text-5xl md:text-6xl font-black text-text">Neueste Strategien</h2>
+						<p class="text-text-muted mt-6 text-xl md:text-2xl">Aktuelles Wissen für einen effizienten Vereinsalltag.</p>
 					</div>
-
-					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-						{
-							posts.map((post) => (
-								<a href={`/magazin/blog/${post.id}/`} class="group flex flex-col bg-surface-raised rounded-2xl border border-border overflow-hidden hover:border-linke/50 transition-all hover:shadow-xl hover:shadow-linke/5 hover:-translate-y-1">
-									<div class="relative aspect-video w-full overflow-hidden bg-surface">
-                                        {post.data.heroImage ? (
-                                            <Image width={720} height={360} src={post.data.heroImage} alt={post.data.title} class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                                        ) : (
-                                            <div class="w-full h-full bg-surface flex items-center justify-center text-border transition-transform duration-500 group-hover:scale-105">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
-                                            </div>
-                                        )}
-                                        <!-- Badge for Type -->
-                                        {post.data.type && (
-                                            <div class="absolute top-4 left-4">
-                                                <span class={`px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider backdrop-blur-md ${
-                                                    post.data.type === 'template' ? 'bg-linke/90 text-white shadow-lg' : 
-                                                    post.data.type === 'guide' ? 'bg-violet/90 text-white shadow-lg' : 
-                                                    'bg-surface/80 text-text border border-border'
-                                                }`}>
-                                                    {post.data.type === 'template' ? 'Vorlage' : post.data.type === 'guide' ? 'Ratgeber' : 'Artikel'}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-									<div class="p-6 flex flex-col flex-grow">
-                                        <div class="text-sm text-text-muted mb-3 flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                                            <FormattedDate date={post.data.pubDate} />
-                                        </div>
-										<h3 class="text-xl font-bold text-text group-hover:text-linke transition-colors mb-3 leading-snug">
-											{post.data.title}
-										</h3>
-										<p class="text-text-muted line-clamp-3 text-sm">
-											{post.data.description}
-										</p>
-									</div>
-								</a>
-							))
-						}
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                        {latestPosts.map((post) => (
+                            <PostCard post={post} />
+                        ))}
 					</div>
-					
-					<div class="mt-10 sm:hidden text-center">
-						<a href="/magazin/blog" class="inline-block text-linke hover:text-linke-light font-medium transition-colors">
-							Alle anzeigen &rarr;
-						</a>
-					</div>
+                    <div class="text-center mt-16">
+                        <a href="/magazin/blog" class="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-surface-raised border-2 border-border text-text font-bold hover:border-linke hover:text-linke transition-colors text-xl">
+                            Zum gesamten Archiv <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        </a>
+                    </div>
 				</div>
 			</section>
+
+            <!-- Bento Grid Categories -->
+            {topCategories.length >= 2 && (
+                <section class="py-28 bg-surface-raised border-y border-border">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-20">
+                            <h2 class="text-5xl md:text-6xl font-black text-text">Deep-Dive nach Thema</h2>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                            {topCategories.slice(0, 2).map((category, index) => {
+                                const categoryPosts = allPosts.filter(p => p.data.category === category).slice(0, 3);
+                                
+                                return (
+                                    <div class="flex flex-col gap-8">
+                                        <div class="flex justify-between items-center border-b-2 border-border pb-5">
+                                            <h3 class="text-3xl font-black text-text capitalize flex items-center gap-4">
+                                                <div class="w-12 h-12 rounded-xl bg-linke/10 text-linke flex items-center justify-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                                                </div>
+                                                {category}
+                                            </h3>
+                                            <a href={`/magazin/kategorie/${category.toLowerCase().replace(/\s+/g, '-')}/`} class="text-lg font-bold text-linke hover:text-linke-light transition-colors">
+                                                Alle ansehen &rarr;
+                                            </a>
+                                        </div>
+                                        <div class="flex-grow">
+                                            {categoryPosts[0] && (
+                                                <div class="mb-8">
+                                                    <PostCard post={categoryPosts[0]} />
+                                                </div>
+                                            )}
+                                            <div class="grid grid-cols-2 gap-6">
+                                                {categoryPosts.slice(1, 3).map(post => (
+                                                    <a href={`/magazin/blog/${post.id}/`} class="group block p-5 md:p-6 bg-surface rounded-2xl border-2 border-border hover:border-linke/50 transition-colors">
+                                                        <h4 class="font-bold text-text text-lg leading-snug group-hover:text-linke transition-colors mb-3 line-clamp-3">{post.data.title}</h4>
+                                                        <span class="text-sm font-medium text-text-muted flex items-center gap-1.5">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                                            {getReadingTime(post.body)} Min.
+                                                        </span>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            <!-- Lead Magnet / Newsletter (Action) -->
+            <section class="py-28 bg-surface relative overflow-hidden">
+                <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div class="bg-gradient-to-br from-surface-raised via-surface to-linke/5 border-2 border-border rounded-[2.5rem] p-10 md:p-20 text-center shadow-2xl relative overflow-hidden">
+                        <!-- Decorative bg -->
+                        <div class="absolute top-0 right-0 w-80 h-80 bg-linke/10 rounded-full filter blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+                        <div class="absolute bottom-0 left-0 w-80 h-80 bg-violet/10 rounded-full filter blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+                        
+                        <div class="relative z-10 max-w-3xl mx-auto">
+                            <div class="w-20 h-20 mx-auto bg-linke text-white rounded-3xl flex items-center justify-center mb-10 shadow-xl shadow-linke/20 transform -rotate-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                            </div>
+                            <h2 class="text-5xl md:text-6xl font-black text-text mb-8">Das ultimative Vereins-Starterkit</h2>
+                            <p class="text-2xl text-text-muted mb-12 leading-relaxed">
+                                Hol dir unsere 10 besten Excel-Vorlagen, DSGVO-Checklisten und Leitfäden direkt als gebündelten Download in dein Postfach. Kostenlos.
+                            </p>
+                            
+                            <form class="flex flex-col sm:flex-row gap-5 max-w-xl mx-auto">
+                                <input type="email" placeholder="deine@email.de" class="flex-grow px-8 py-5 rounded-2xl bg-surface border-2 border-border focus:outline-none focus:ring-4 focus:ring-linke/30 focus:border-linke text-text placeholder-text-muted text-lg" required />
+                                <button type="submit" class="px-10 py-5 rounded-2xl bg-linke text-white font-bold hover:bg-linke-light transition-all shadow-xl shadow-linke/20 hover:shadow-linke/40 active:scale-95 whitespace-nowrap text-lg">
+                                    Kit anfordern
+                                </button>
+                            </form>
+                            <p class="text-sm font-medium text-text-muted mt-6">Kein Spam. Jederzeit abmeldbar.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 		</main>
 		<Footer />
 	</body>

@@ -1,6 +1,7 @@
 ---
 title: "Dienstplan für den Wahlkampf-Infostand (Excel & PDF)"
 description: "Ein Kampagnenleiter will Schichten für Parteimitglieder am Samstag organisieren."
+category: 'Organisation'
 pubDate: "2026-06-13T10:10:00Z"
 type: "template"
 seoKeywords: ["Dienstplan Infostand Vorlage", "Wahlkampf Schichtplan", "Infostand Excel Vorlage"]

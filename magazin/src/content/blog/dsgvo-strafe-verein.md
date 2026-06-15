@@ -1,6 +1,7 @@
 ---
 title: "DSGVO-Strafen für Vereine: Die 3 teuersten Fehler bei der Mitgliederverwaltung"
 description: "Vorstände recherchieren nach Vorfällen, weil Mitgliederlisten unverschlüsselt auf privaten Laptops oder in privaten Clouds liegen."
+category: 'Recht & DSGVO'
 pubDate: "2026-06-13T10:30:00Z"
 type: "guide"
 seoKeywords: ["DSGVO Strafe Verein", "Datenschutz Verein Fehler", "DSGVO Bußgeld Verein"]

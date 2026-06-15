@@ -1,6 +1,7 @@
 ---
 title: "Protokoll der Jahreshauptversammlung (Word-Muster)"
 description: "Ein Schriftführer braucht eine Struktur, um Beschlüsse rechtssicher festzuhalten."
+category: 'Organisation'
 pubDate: "2026-06-13T10:05:00Z"
 type: "template"
 seoKeywords: ["Protokoll Jahreshauptversammlung Vorlage", "Protokoll Verein Word", "Schriftführer Vorlage"]

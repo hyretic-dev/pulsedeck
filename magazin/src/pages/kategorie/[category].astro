@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { Image } from 'astro:assets';
+import FormattedDate from '../../components/FormattedDate.astro';
+import { SITE_TITLE } from '../../consts';
+
+export async function getStaticPaths() {
+	const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+	const uniqueCategories = [...new Set(allPosts.map((post) => post.data.category).filter(Boolean))];
+
+	return uniqueCategories.map((category) => {
+		const filteredPosts = allPosts.filter((post) => post.data.category === category);
+        // Sort descending
+        filteredPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+		return {
+			params: { category: String(category).toLowerCase().replace(/\s+/g, '-') },
+			props: { category, posts: filteredPosts },
+		};
+	});
+}
+
+const { category } = Astro.params;
+const { posts } = Astro.props;
+---
+
+<!doctype html>
+<html lang="de" class="dark">
+	<head>
+		<BaseHead title={`Kategorie: ${category} | ${SITE_TITLE}`} description={`Alle Artikel aus der Kategorie ${category}.`} />
+	</head>
+	<body class="flex flex-col min-h-screen">
+		<Header />
+		
+		<main class="flex-grow py-12 lg:py-20 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 animate-fade-in-up">
+                <div class="text-center mb-16">
+                    <div class="text-sm font-medium text-linke mb-4 uppercase tracking-wider">Kategorie</div>
+                    <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-text mb-6">
+                        {category}
+                    </h1>
+                    <p class="text-xl text-text-muted">
+                        Wir haben {posts.length} Beiträge in dieser Kategorie gefunden.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {posts.map((post) => (
+                        <a href={`/magazin/blog/${post.id}/`} class="group flex flex-col bg-surface-raised rounded-2xl border border-border overflow-hidden hover:border-linke/50 transition-all hover:shadow-xl hover:shadow-linke/5 hover:-translate-y-1">
+                            <div class="relative aspect-video w-full overflow-hidden bg-surface">
+                                {post.data.heroImage ? (
+                                    <Image width={720} height={360} src={post.data.heroImage} alt={post.data.title} class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                ) : (
+                                    <div class="w-full h-full flex items-center justify-center text-border transition-transform duration-500 group-hover:scale-105">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+                                    </div>
+                                )}
+                            </div>
+                            <div class="p-6 flex flex-col flex-grow">
+                                <div class="text-sm text-text-muted mb-3 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                                    <FormattedDate date={post.data.pubDate} />
+                                </div>
+                                <h3 class="text-xl font-bold text-text group-hover:text-linke transition-colors mb-3 leading-snug">
+                                    {post.data.title}
+                                </h3>
+                                <p class="text-text-muted line-clamp-3 text-sm">
+                                    {post.data.summary || post.data.description}
+                                </p>
+                            </div>
+                        </a>
+                    ))}
+                </div>
+            </div>
+		</main>
+		<Footer />
+	</body>
+</html>

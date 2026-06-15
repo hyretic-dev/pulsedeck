@@ -1,6 +1,7 @@
 ---
 title: "Kostenlose Dienstplan Vorlage für die Freiwillige Feuerwehr (Excel & Word)"
 description: "Laden Sie sich unsere erprobte Excel-Vorlage für Feuerwehr-Dienstpläne herunter. Planen Sie Schichten effizienter."
+category: 'Organisation'
 pubDate: "2026-06-12T10:00:00Z"
 type: "template"
 seoKeywords: ["Dienstplan Feuerwehr", "Dienstplan Feuerwehr Excel", "Dienstplan Vorlage", "Schichtplan Feuerwehr kostenlos"]

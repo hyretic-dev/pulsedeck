@@ -1,6 +1,7 @@
 ---
 title: "Mitglieder aktivieren: Warum 80 % passiv bleiben (und wie Sie das ändern)"
 description: "Vorstände klagen über mangelnde Hilfsbereitschaft bei Festen und Turnieren."
+category: 'Mitglieder'
 pubDate: "2026-06-13T10:45:00Z"
 type: "guide"
 seoKeywords: ["Mitglieder im Verein motivieren", "Ehrenamtliche finden", "Mitgliederbindung Verein"]
