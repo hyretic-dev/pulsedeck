@@ -37,6 +37,7 @@ export class StatisticsService {
                 workingGroupsResult,
                 eventsResult,
                 upcomingEventsResult,
+                wikiResult,
                 filesResult,
                 feedResult,
                 newMembersResult,
@@ -55,6 +56,9 @@ export class StatisticsService {
                 this.countWithOrgAndFilter('events', orgId, q =>
                     q.gte('date', new Date().toISOString().split('T')[0])
                 ),
+
+                // Wiki articles
+                this.countWithOrg('wiki_docs', orgId),
 
                 // Files
                 this.countWithOrg('files', orgId),
@@ -83,7 +87,7 @@ export class StatisticsService {
                 totalWorkingGroups: workingGroupsResult,
                 totalEvents: eventsResult,
                 upcomingEvents: upcomingEventsResult,
-                totalWikiArticles: 0, // Wiki not yet implemented
+                totalWikiArticles: wikiResult,
                 totalFiles: filesResult,
                 totalFeedItems: feedResult,
                 activeMembers: activeCount,
