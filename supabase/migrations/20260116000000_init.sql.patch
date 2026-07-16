@@ -1,0 +1,33 @@
+--- supabase/migrations/20260116000000_init.sql
++++ supabase/migrations/20260116000000_init.sql
+@@ -145,15 +145,6 @@
+   updated_at TIMESTAMPTZ DEFAULT now()
+ );
+ 
+--- MIGRATION: Add columns
+-DO $$
+-BEGIN
+-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='events' AND column_name='allowed_roles') THEN
+-        ALTER TABLE events ADD COLUMN allowed_roles TEXT[] DEFAULT '{public,member,committee,admin}';
+-    END IF;
+-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='events' AND column_name='working_group_id') THEN
+-        ALTER TABLE events ADD COLUMN working_group_id UUID REFERENCES working_groups(id) ON DELETE SET NULL;
+-    END IF;
+-END $$;
+ 
+ ALTER TABLE events ENABLE ROW LEVEL SECURITY;
+@@ -318,4 +309,15 @@
+ 
+ -- Important: To test Admin rights, you must link your Supabase Auth UID to the 'Super Admin' member row!
+ -- Run: UPDATE members SET user_id = 'YOUR-AUTH-UID' WHERE email = 'admin@pulsedeck.de';
++
++-- MIGRATION: Add columns
++DO $$
++BEGIN
++    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='events' AND column_name='allowed_roles') THEN
++        ALTER TABLE events ADD COLUMN allowed_roles TEXT[] DEFAULT '{public,member,committee,admin}';
++    END IF;
++    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='events' AND column_name='working_group_id') THEN
++        ALTER TABLE events ADD COLUMN working_group_id UUID REFERENCES working_groups(id) ON DELETE SET NULL;
++    END IF;
++END $$;

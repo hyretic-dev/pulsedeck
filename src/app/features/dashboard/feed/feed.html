@@ -118,6 +118,9 @@
                                     <p-tag [value]="item.type === 'link' ? 'Link' :
                                         item.type === 'poll' ? 'Umfrage' : 'Artikel'"
                                         severity="info" styleClass="text-[10px] px-1.5 py-0.5"></p-tag>
+                                    @if (item.is_pinned) {
+                                    <p-tag value="Gepinnt" icon="pi pi-thumbtack" severity="warn" styleClass="text-[10px] px-1.5 py-0.5"></p-tag>
+                                    }
                                     @if (item.status === 'sent') {
                                     <span class="text-xs text-green-500 font-medium
                                         bg-green-500/10 px-2 py-0.5 rounded
@@ -242,6 +245,29 @@
                                 <app-rich-text-renderer [content]="item.content || ''"></app-rich-text-renderer>
                                 }
                             </div>
+                            
+                            <!-- Actions / Metadata -->
+                            <div class="mt-4 pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    @if (canApprove() || item.author_id === auth.currentMember()?.id) {
+                                    <span class="text-xs text-[var(--color-text-muted)] flex items-center gap-1" pTooltip="Gelesen von" tooltipPosition="top">
+                                        <i class="pi pi-eye"></i> {{ getReadCount(item) }}
+                                    </span>
+                                    }
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    @if (!hasRead(item)) {
+                                    <p-button size="small" [text]="true" label="Als gelesen markieren" icon="pi pi-check" (click)="markAsRead(item)"></p-button>
+                                    } @else {
+                                    <span class="text-xs text-green-500 flex items-center gap-1"><i class="pi pi-check-circle"></i> Gelesen</span>
+                                    }
+                                    
+                                    @if (canApprove()) {
+                                    <p-button size="small" [text]="true" [severity]="item.is_pinned ? 'warn' : 'secondary'" [icon]="item.is_pinned ? 'pi pi-thumbtack' : 'pi pi-thumbtack'" (click)="togglePin(item)" [pTooltip]="item.is_pinned ? 'Loslösen' : 'Anheften'"></p-button>
+                                    }
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                     }

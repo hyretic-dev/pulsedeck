@@ -321,6 +321,41 @@ export class FeedComponent {
         }
     }
 
+    async togglePin(item: FeedItem) {
+        if (!this.canApprove()) return;
+        const newStatus = !item.is_pinned;
+        try {
+            await this.feedService.togglePin(item.id!, newStatus);
+            this.messageService.add({ severity: 'success', summary: newStatus ? 'Angeheftet' : 'Losgelöst' });
+            this.loadData();
+        } catch (e: any) { this.messageService.add({ severity: 'error', detail: e.message }); }
+    }
+
+    hasRead(item: FeedItem): boolean {
+        const memberId = this.auth.currentMember()?.id;
+        if (!memberId || !item.feed_item_reads) return false;
+        return item.feed_item_reads.some(r => r.member_id === memberId);
+    }
+
+    getReadCount(item: FeedItem): number {
+        return item.feed_item_reads?.length || 0;
+    }
+
+    async markAsRead(item: FeedItem) {
+        if (this.hasRead(item)) return;
+        try {
+            await this.feedService.markAsRead(item.id!);
+            // Optimistic update
+            const memberId = this.auth.currentMember()?.id;
+            if (memberId) {
+                if (!item.feed_item_reads) item.feed_item_reads = [];
+                item.feed_item_reads.push({ member_id: memberId });
+            }
+        } catch (e: any) {
+            console.error('Fehler beim Lesebestätigen', e);
+        }
+    }
+
     async enableNotifications() {
         const granted = await this.notificationService.requestPermission();
         if (granted) {

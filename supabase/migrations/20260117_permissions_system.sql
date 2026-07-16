@@ -117,9 +117,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 6. Update calendar_events RLS to allow AG admins to manage their events
-DROP POLICY IF EXISTS "AG admins can manage AG events" ON calendar_events;
-CREATE POLICY "AG admins can manage AG events" ON calendar_events
+-- 6. Update events RLS to allow AG admins to manage their events
+DROP POLICY IF EXISTS "AG admins can manage AG events" ON events;
+CREATE POLICY "AG admins can manage AG events" ON events
     FOR ALL USING (
         -- System admin
         EXISTS (SELECT 1 FROM members WHERE user_id = auth.uid() AND app_role = 'admin')

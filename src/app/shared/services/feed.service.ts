@@ -33,6 +33,8 @@ export interface FeedItem {
     author_id?: string;
     sent_at?: string;
     working_group_id?: string;
+    is_pinned?: boolean;
+    feed_item_reads?: { member_id: string }[]; // joined read receipts
 
     // joined
     author?: { name: string };
@@ -51,8 +53,9 @@ export class FeedService {
 
         let query = this.supabase.client
             .from('feed_items')
-            .select('*, author:members(name), working_group:working_groups(name, category), poll_options(id, text, sort_order, poll_votes(member_id))')
+            .select('*, author:members(name), working_group:working_groups(name, category), poll_options(id, text, sort_order, poll_votes(member_id)), feed_item_reads(member_id)')
             .in('status', ['approved', 'sent'])
+            .order('is_pinned', { ascending: false })
             .order('created_at', { ascending: false });
 
         if (orgId) {
@@ -255,6 +258,29 @@ export class FeedService {
             .match({ option_id: optionId, member_id: memberId });
 
         if (error) throw new Error(error.message);
+    }
+
+    async togglePin(id: string, isPinned: boolean) {
+        const { error } = await this.supabase.client
+            .from('feed_items')
+            .update({ is_pinned: isPinned, updated_at: new Date().toISOString() })
+            .eq('id', id);
+
+        if (error) throw new Error(error.message);
+    }
+
+    async markAsRead(id: string) {
+        const memberId = this.auth.currentMember()?.id;
+        if (!memberId) return;
+
+        const { error } = await this.supabase.client
+            .from('feed_item_reads')
+            .insert({ feed_item_id: id, member_id: memberId });
+        
+        // Ignore unique constraint violation (already read)
+        if (error && error.code !== '23505') {
+            console.error('Error marking as read:', error);
+        }
     }
 }
 

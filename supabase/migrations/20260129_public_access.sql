@@ -12,8 +12,6 @@ CREATE POLICY "Public events are viewable by everyone" ON events
 FOR SELECT TO anon, authenticated
 USING (
     allowed_roles @> ARRAY['public']::text[] 
-    OR 
-    visibility = 'public' -- Backup if mixed usage
 );
 
 -- WIKI DOCS (table name is wiki_docs)
@@ -23,7 +21,7 @@ ALTER TABLE wiki_docs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public wiki docs are viewable by everyone" ON wiki_docs;
 CREATE POLICY "Public wiki docs are viewable by everyone" ON wiki_docs
 FOR SELECT TO anon, authenticated
-USING (visibility = 'public');
+USING (is_public = true);
 
 -- FEED ITEMS
 ALTER TABLE feed_items ENABLE ROW LEVEL SECURITY;
@@ -31,4 +29,4 @@ ALTER TABLE feed_items ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public feed items are viewable by everyone" ON feed_items;
 CREATE POLICY "Public feed items are viewable by everyone" ON feed_items
 FOR SELECT TO anon, authenticated
-USING (visibility = 'public' AND status IN ('approved', 'sent'));
+USING (is_public = true AND status IN ('approved', 'sent'));
