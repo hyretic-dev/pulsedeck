@@ -342,11 +342,17 @@ import { RichTextRendererComponent } from '../../../shared/components/rich-text-
             <footer class="mt-auto border-t border-[var(--color-border)] py-6 bg-[var(--color-surface-card)] relative z-10 transition-colors">
                 <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
                     
-                    <!-- Powered By -->
-                    <a routerLink="/" class="group flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
-                        <span class="text-xs font-medium text-[var(--color-text-muted)]">Powered by</span>
-                        <span class="font-bold text-sm text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">PulseDeck</span>
-                    </a>
+                    <!-- Powered By / Viral Loop -->
+                    <div class="flex flex-col sm:flex-row items-center gap-3 bg-[var(--color-surface-raised)] px-4 py-2.5 rounded-xl border border-[var(--color-border)] shadow-sm">
+                        <div class="flex items-center gap-2 text-xs text-[var(--color-text)]">
+                            <i class="pi pi-shield text-linke"></i>
+                            <span>Datensicher organisiert mit <strong>PulseDeck</strong></span>
+                        </div>
+                        <a routerLink="/" class="text-xs font-semibold text-linke hover:underline whitespace-nowrap flex items-center gap-1 border-l border-[var(--color-border)] pl-3 ml-1">
+                            <span>Eigenen Verein digitalisieren</span>
+                            <i class="pi pi-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
 
                     <!-- Legal & Theme -->
                     <div class="flex flex-wrap justify-center items-center gap-6 text-xs text-[var(--color-text-muted)]">

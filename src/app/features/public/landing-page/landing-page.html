@@ -138,23 +138,18 @@
                                         </div>
                                     </a>
 
-                                    <a routerLink="/" fragment="ai-assistant" (click)="closeMenu()"
-                                        class="flex gap-4 group/item hover:bg-[var(--color-surface-raised)] -m-3 p-3 rounded-xl transition-colors cursor-pointer items-start relative overflow-hidden">
+                                    <a routerLink="/" fragment="wiki" (click)="closeMenu()"
+                                        class="flex gap-4 group/item hover:bg-[var(--color-surface-raised)] -m-3 p-3 rounded-xl transition-colors cursor-pointer items-start">
                                         <div
-                                            class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet/20 to-pink-500/20 flex items-center justify-center text-violet group-hover/item:scale-110 transition-transform shrink-0">
+                                            class="w-10 h-10 rounded-lg bg-violet/10 flex items-center justify-center text-violet group-hover/item:scale-110 transition-transform shrink-0">
                                             <i class="pi pi-sparkles"></i>
                                         </div>
                                         <div>
-                                            <div
-                                                class="font-bold text-sm text-[var(--color-text)] flex items-center gap-2">
-                                                KI-Assistent
-                                                <span
-                                                    class="text-[9px] font-bold bg-violet text-white px-1.5 py-0.5 rounded animate-pulse">
-                                                    NEU
-                                                </span>
+                                            <div class="font-bold text-sm text-[var(--color-text)]">
+                                                KI-Assistenz (Optional)
                                             </div>
                                             <p class="text-xs text-[var(--color-text-muted)] mt-0.5 leading-snug">
-                                                Datensichere Antworten aus dem Wiki.</p>
+                                                Integrierte Suchhilfe für euer Wiki.</p>
                                         </div>
                                     </a>
                                 </div>
@@ -215,7 +210,7 @@
                                     <div class="text-xs text-[var(--color-text-muted)] flex items-center gap-2">
                                         <span
                                             class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                        Alle Features sind in der Alpha kostenlos verfügbar.
+                                        Voller Funktionsumfang im Early Access kostenlos.
                                     </div>
                                     <a routerLink="/registrieren"
                                         class="text-xs font-bold text-linke hover:underline flex items-center gap-1">
@@ -278,14 +273,14 @@
             <!-- Alpha/Value Proposition (Simplified) -->
             <p class="text-sm text-[var(--color-text-muted)] mb-10 animate-fade-in-up animation-delay-300">
                 <span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse mr-2"></span>
-                Exklusive Alpha-Phase: Jetzt kostenlos testen.
+                Voller Funktionsumfang im Early Access kostenlos.
             </p>
 
             <!-- Primary CTA Only -->
             <div class="flex justify-center mb-20 animate-fade-in-up animation-delay-500">
                 <a routerLink="/registrieren" (click)="trackCTA('hero_signup')"
                     class="btn-primary-enhanced px-8 py-4 bg-linke hover:bg-linke-light text-white rounded-full font-bold text-lg transition-all shadow-xl shadow-linke/20 hover:shadow-linke/30 hover:-translate-y-1 hover:scale-105 flex items-center gap-3 animate-pulse-glow">
-                    Jetzt Alpha-Tester werden
+                    Early Access sichern
                     <i class="pi pi-arrow-right"></i>
                 </a>
             </div>
@@ -319,7 +314,7 @@
                         ⚽</div>
                 </div>
                 <span class="text-sm text-[var(--color-text-muted)]">
-                    <strong class="text-[var(--color-text)]">Erste Organisationen</strong> testen bereits die Alpha
+                    <strong class="text-[var(--color-text)]">Erste Organisationen</strong> nutzen PulseDeck bereits produktiv
                 </span>
             </div>
         </div>
@@ -679,110 +674,6 @@
         </div>
     </section>
 
-    <!-- 3.5 AI Assistant Section -->
-    <section id="ai-assistant"
-        class="relative z-10 py-24 px-4 bg-[var(--color-surface-raised)] scroll-mt-28 overflow-hidden">
-        <!-- Subtle Glow Background -->
-        <div
-            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-tr from-violet/5 to-pink-500/5 rounded-full blur-[100px] pointer-events-none">
-        </div>
-
-        <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center relative z-10">
-            <!-- Text Content -->
-            <div class="space-y-8">
-                <div
-                    class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-violet/10 text-violet text-xs font-bold uppercase tracking-wider">
-                    <i class="pi pi-sparkles"></i> KI-Assistent <span
-                        class="bg-violet text-white px-1.5 py-0.5 rounded text-[9px] ml-1 animate-pulse">NEU</span>
-                </div>
-                <h2 class="text-3xl md:text-4xl font-bold">Frag dein Vereinsgedächtnis.</h2>
-                <p class="text-lg text-[var(--color-text-muted)] leading-relaxed">
-                    Kein langes Suchen mehr in Ordnern und Chats. Frag einfach die PulseDeck-KI. Sie durchsucht euer
-                    Wiki und eure Dokumente und liefert dir in Sekunden die passende Antwort.
-                </p>
-
-                <!-- Data Sovereignty Badge -->
-                <div
-                    class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 flex gap-4 items-start shadow-sm">
-                    <div
-                        class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
-                        <i class="pi pi-shield text-lg"></i>
-                    </div>
-                    <div>
-                        <div class="font-bold text-sm">Maximale Datensouveränität</div>
-                        <p class="text-xs text-[var(--color-text-muted)] mt-1">
-                            Powered by <strong>Mistral AI</strong> (europäisches Modell). Eure Daten bleiben eure Daten
-                            und trainieren keine öffentlichen Modelle. Sicher und DSGVO-konform in der EU gehostet.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chat Mockup -->
-            <div
-                class="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[400px]">
-                <!-- Header -->
-                <div
-                    class="px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 rounded-full bg-gradient-to-br from-violet to-pink-500 flex items-center justify-center text-white">
-                        <i class="pi pi-sparkles text-xs"></i>
-                    </div>
-                    <div class="font-bold text-sm">PulseDeck KI</div>
-                </div>
-
-                <!-- Chat Area -->
-                <div class="flex-1 p-4 space-y-4 overflow-y-auto bg-[var(--color-bg)]/50">
-                    <!-- User Message -->
-                    <div class="flex justify-end">
-                        <div class="bg-linke text-white text-sm px-4 py-2 rounded-2xl rounded-tr-sm max-w-[80%]">
-                            Gibt es ein Protokoll zur letzten Vorstandssitzung?
-                        </div>
-                    </div>
-                    <!-- AI Typing Indicator (Animation) -->
-                    <div class="flex justify-start animate-fade-in animation-delay-1000">
-                        <div
-                            class="bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-text)] text-sm px-4 py-3 rounded-2xl rounded-tl-sm max-w-[85%] flex items-center gap-2">
-                            <span class="w-2 h-2 bg-violet/50 rounded-full animate-bounce"></span>
-                            <span class="w-2 h-2 bg-violet/50 rounded-full animate-bounce"
-                                style="animation-delay: 0.2s"></span>
-                            <span class="w-2 h-2 bg-violet/50 rounded-full animate-bounce"
-                                style="animation-delay: 0.4s"></span>
-                        </div>
-                    </div>
-                    <!-- AI Response -->
-                    <div class="flex justify-start animate-fade-in animation-delay-2000 opacity-0"
-                        style="animation-fill-mode: forwards;">
-                        <div
-                            class="bg-[var(--color-surface-raised)] border border-violet/30 shadow-[0_0_15px_rgba(139,92,246,0.1)] text-[var(--color-text)] text-sm px-4 py-3 rounded-2xl rounded-tl-sm max-w-[85%] space-y-2 relative overflow-hidden">
-                            <div
-                                class="absolute inset-0 bg-gradient-to-r from-violet/5 to-transparent pointer-events-none">
-                            </div>
-                            <p class="relative z-10">Ja, ich habe das Protokoll gefunden. Es wurde am 12. Oktober von
-                                Sarah im Ordner <strong>Vorstand</strong> abgelegt.</p>
-                            <p class="relative z-10 text-xs text-[var(--color-text-muted)] mt-2">
-                                Wichtigster Beschluss: Das Sommerfest findet am 15. Juli statt.
-                            </p>
-                            <a href="#"
-                                class="relative z-10 inline-flex items-center gap-1 text-xs text-linke hover:underline mt-2 font-medium">
-                                <i class="pi pi-file-pdf"></i> Protokoll_Vorstand_Okt.pdf öffnen
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Input Area -->
-                <div class="p-3 border-t border-[var(--color-border)] bg-[var(--color-surface-raised)]">
-                    <div
-                        class="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-full px-4 py-2 flex items-center justify-between text-sm text-[var(--color-text-muted)]">
-                        <span>Frag etwas...</span>
-                        <i class="pi pi-send opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- 4. Events Section -->
     <section id="events" class="relative z-10 py-24 px-4 bg-[var(--color-surface)] scroll-mt-28">
         <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
@@ -983,6 +874,13 @@
                         <span><strong>Durchsuchbar:</strong> Finde das Protokoll von 2023 sofort.</span>
                     </li>
                 </ul>
+                <div class="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text-muted)] mt-4 flex items-start gap-3">
+                    <i class="pi pi-sparkles text-violet mt-0.5"></i>
+                    <div>
+                        <strong class="text-[var(--color-text)]">Optional: Smarte Assistenz</strong>
+                        <p class="text-xs mt-0.5">Auf Wunsch beantwortet unser integrierter, europäischer KI-Assistent (Mistral AI) vereinsinterne Fragen direkt aus dem Wiki – 100% datensicher in der EU und ohne externes Modell-Training.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -1121,19 +1019,18 @@
         </div>
     </section>
 
-    <!-- Alpha-Vorteil Section -->
+    <!-- Early Access Section -->
     <section class="relative z-10 py-24 px-4 bg-[var(--color-surface)]">
         <div class="max-w-5xl mx-auto">
             <div class="text-center mb-12">
                 <div
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-linke/10 text-linke text-sm font-bold mb-4">
                     <i class="pi pi-star-fill text-xs"></i>
-                    Alpha-Vorteil
+                    Early Access
                 </div>
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Du formst das Produkt mit</h2>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Early Access: Dein Feedback entscheidet.</h2>
                 <p class="text-lg text-[var(--color-text-muted)] max-w-2xl mx-auto">
-                    Keine verstaubte Software von 2010. PulseDeck wird gerade gebaut -
-                    und dein Feedback fließt direkt ein.
+                    Keine verstaubte Software von 2010. PulseDeck wird nah an der Praxis von Organisationen weiterentwickelt – und deine Anforderungen fließen direkt ein.
                 </p>
             </div>
 
@@ -1171,8 +1068,7 @@
                         </div>
                     </div>
                     <p class="text-[var(--color-text-muted)] italic">
-                        "Ehrenamtliche verdienen Werkzeuge, die so modern sind wie die Probleme,
-                        die sie lösen wollen. Nicht noch mehr Excel-Listen."
+                        "Ehrenamtliche und Vorstände verdienen Werkzeuge, die verbindlich, rechtssicher und modern sind. Nicht noch mehr Excel-Listen."
                     </p>
                 </div>
 
@@ -1190,8 +1086,7 @@
                         </div>
                     </div>
                     <p class="text-[var(--color-text-muted)] italic">
-                        "Sichere dir jetzt deinen Zugang und erhalte lebenslang Gründer-Status, wenn wir live gehen.
-                        Plus: Direkter Draht zum Entwickler."
+                        "Sichere dir jetzt euren Zugang im Early Access und erhalte dauerhafte Sonderkonditionen. Plus: Direkter Draht zur Produktentwicklung."
                     </p>
                 </div>
             </div>
@@ -1201,21 +1096,20 @@
                 <a routerLink="/registrieren"
                     class="inline-flex items-center gap-2 px-6 py-3 bg-linke/10 hover:bg-linke text-linke hover:text-white rounded-lg font-medium transition-all">
                     <i class="pi pi-arrow-right"></i>
-                    Jetzt Alpha-Tester werden
+                    Early Access sichern
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- Testimonial Placeholder (Alpha-Tester) -->
+    <!-- Testimonials Section -->
     <section class="relative z-10 py-20 px-4 bg-[var(--color-surface-raised)] border-y border-[var(--color-border)]">
         <div class="max-w-4xl mx-auto text-center">
-            <div class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-4">Was unsere
-                Alpha-Tester sagen</div>
+            <div class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-4">Was unsere Nutzer sagen</div>
             <h3 class="text-2xl md:text-3xl font-bold mb-8">Erfahrungen aus der Praxis</h3>
 
             <div class="grid md:grid-cols-2 gap-6">
-                <!-- Testimonial Placeholder 1 -->
+                <!-- Testimonial 1 -->
                 <div
                     class="testimonial-card p-6 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] text-left hover:border-linke/30">
                     <div class="flex items-center gap-3 mb-4">
@@ -1231,7 +1125,7 @@
                     </p>
                 </div>
 
-                <!-- Testimonial Placeholder 2 -->
+                <!-- Testimonial 2 -->
                 <div
                     class="testimonial-card p-6 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] text-left hover:border-teal/30">
                     <div class="flex items-center gap-3 mb-4">
@@ -1250,7 +1144,7 @@
 
             <p class="mt-8 text-sm text-[var(--color-text-muted)]">
                 <i class="pi pi-info-circle mr-1"></i>
-                Werde Teil der Alpha und dein Feedback erscheint hier.
+                Startet eure Digitalisierung und euer Feedback formt die Plattform weiter.
             </p>
         </div>
     </section>
@@ -1474,13 +1368,13 @@
                 Bereit für echte Mobilisierung?
             </h2>
             <p class="text-lg text-[var(--color-text-muted)] mb-8">
-                PulseDeck ist aktuell <strong>komplett kostenlos</strong> - perfekt zum Ausprobieren.<br>
-                Für die Alpha-Phase: Direkter Draht zum Entwickler & dein Feedback formt das Produkt.
+                PulseDeck ist im Early Access aktuell <strong>kostenlos</strong>. Später garantieren wir faire, transparente Staffelpreise für gemeinnützige Organisationen.<br>
+                Wer jetzt einsteigt, sichert sich dauerhaft Sonderkonditionen und einen direkten Draht zum Entwickler-Team.
             </p>
             <a routerLink="/registrieren"
                 class="inline-flex items-center gap-2 px-10 py-5 bg-linke hover:bg-linke-light text-white rounded-xl font-bold text-xl transition-all shadow-xl shadow-linke/20 hover:shadow-linke/30 hover:-translate-y-1">
                 <i class="pi pi-star-fill"></i>
-                Jetzt kostenlos Alpha-Tester werden
+                Kostenlos starten
             </a>
             <p class="mt-4 text-sm text-[var(--color-text-muted)]">100% DSGVO-konform • Made in EU • In 2 Minuten
                 eingerichtet</p>
