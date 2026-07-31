@@ -34,12 +34,6 @@ import DOMPurify from 'dompurify';
     
     /* Standard text wrapping for readability */
     .rich-text-content p, 
-    .rich-text-content h1, 
-    .rich-text-content h2, 
-    .rich-text-content h3, 
-    .rich-text-content h4, 
-    .rich-text-content h5, 
-    .rich-text-content h6, 
     .rich-text-content li,
     .rich-text-content span,
     .rich-text-content div {
@@ -48,6 +42,25 @@ import DOMPurify from 'dompurify';
         word-break: normal;
         hyphens: auto; /* Optional: adds hyphens for cleaner breaks */
         max-width: 100%;
+    }
+
+    /* Überschriften nehmen zwingend immer die volle Breite ein und lösen Floats auf */
+    .rich-text-content h1, 
+    .rich-text-content h2, 
+    .rich-text-content h3, 
+    .rich-text-content h4, 
+    .rich-text-content h5, 
+    .rich-text-content h6 {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        clear: both !important;
+        float: none !important;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: normal;
+        hyphens: auto;
+        flex-basis: 100%;
     }
 
     /* Exceptions for long technical strings */
