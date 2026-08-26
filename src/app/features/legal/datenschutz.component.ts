@@ -100,7 +100,7 @@ import { AuthService } from '../../shared/services/auth.service';
                             <p class="text-[var(--color-text-muted)]">
                                 Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:<br><br>
                                 <strong class="text-[var(--color-text)]">PulseDeck</strong><br>
-                                hyretic<br>
+                                Julien Lieske<br>
                                 c/o Autorenglück #62015<br>
                                 Albert-Einstein-Str. 47<br>
                                 02977 Hoyerswerda<br><br>
