@@ -49,13 +49,18 @@ und leitet die Domain auf `frontend`), `NODE_ENV=production`, Pflichtwerte ohne 
 Wissensbasis, sonst 503), `CORS_ORIGINS` (native Apps), `MAINTENANCE_TOKEN`, `MAX_UPLOAD_MB`, `APP_TIMEZONE`, Rate-Limit-Werte
 (Standardwerte siehe `.env.example`). `JWT_ISSUER`/`JWT_AUDIENCE` haben Standardwerte (`pulsedeck`/`pulsedeck-web`).
 
-Keine Secrets als Build-Argumente. Die Werte nie in den Chat oder ins Repo.
+**Jede Variable auf „Runtime only“ stellen** (kein Build-Time-Häkchen). Coolify reicht Variablen sonst als Build-Argumente an den Docker-Build
+weiter (im Deploy-Log: „Added N ARG declarations“); Geheimnisse stünden dann im Image-Verlauf. Die Werte nie in den Chat oder ins Repo.
 
 ## 3. Erstes Deployment
 
 *Deploy* auslösen. Der Backend-Entrypoint führt die Migrationen mit der Migrations-Rolle aus, bevor der Server startet (schlägt das fehl,
 startet nichts). Erwartung: `postgres`, `backend`, `frontend` **healthy**; `https://<domain>/health` liefert `healthy`, die
 OpenAPI-Oberfläche (`/api/docs`) ist von außen 404.
+
+**Fehlerbild „backend unhealthy“ schon Sekunden nach dem Start:** die Konfiguration ist unvollständig oder ungültig, das Backend bricht mit einer
+lesbaren Meldung ab. Häufig: `SMTP_USER` gesetzt, aber `SMTP_PASSWORD` leer (die Meldung nennt es), `SECRETS_ENCRYPTION_KEY` nicht 32 Bytes,
+`APP_BASE_URL` ohne `https://`. Meldung in Coolify unter *Logs* des Dienstes `backend` ablesen.
 
 ## 4. Daten übernehmen (nur in eine leere Datenbank, einmalig)
 
