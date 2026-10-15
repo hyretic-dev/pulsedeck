@@ -73,10 +73,9 @@ import { AuthService } from '../../shared/services/auth.service';
                                 von Art. 6 Abs. 1 lit. a DSGVO; die Einwilligung ist jederzeit widerrufbar.
                             </p>
                             <p class="text-[var(--color-text-muted)] mt-4 text-sm">
-                                Wir setzen folgenden Hoster ein:<br>
-                                <strong>Supabase Inc.</strong> (als Backend-Provider)<br>
-                                970 Toa Payoh North #07-04, Singapore 318992<br>
-                                (Serverstandort: EU/Frankfurt, sofern nicht anders konfiguriert)
+                                Die Anwendung wird vom Betreiber dieser Instanz selbst betrieben (siehe Impressum); die Daten liegen
+                                in einer PostgreSQL-Datenbank und einem Dateispeicher auf den Servern des Betreibers. Angaben zum eingesetzten
+                                Rechenzentrum bzw. Hosting-Dienstleister und zum Serverstandort ergänzt der Betreiber hier.
                             </p>
                         </div>
                     </section>

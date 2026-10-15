@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { SupabaseService } from './supabase';
+
+import { ApiService } from '../../core/api.service';
 
 /**
  * Skill categories
@@ -27,7 +28,7 @@ export interface Skill {
     providedIn: 'root',
 })
 export class SkillService {
-    private readonly supabase = inject(SupabaseService);
+    private readonly api = inject(ApiService);
 
     /** All skills for current organization */
     skills = signal<Skill[]>([]);
@@ -40,22 +41,11 @@ export class SkillService {
      */
     async loadSkills(organizationId: string): Promise<void> {
         this.loading.set(true);
-
-        const { data, error } = await this.supabase.client
-            .from('skills')
-            .select('*')
-            .eq('organization_id', organizationId)
-            .order('category')
-            .order('sort_order')
-            .order('name');
-
-        if (error) {
+        try {
+            this.skills.set(await this.api.get<Skill[]>(`/orgs/${organizationId}/skills`));
+        } catch (error) {
             console.error('Error loading skills:', error);
-            this.loading.set(false);
-            return;
         }
-
-        this.skills.set((data as Skill[]) || []);
         this.loading.set(false);
     }
 
@@ -66,122 +56,75 @@ export class SkillService {
         return this.skills().filter((s) => s.category === category);
     }
 
+    private orgId(): string | undefined {
+        return this.skills()[0]?.organization_id;
+    }
+
     /**
      * Load skills assigned to a specific member
      */
-    async getMemberSkillIds(memberId: string): Promise<string[]> {
-        const { data, error } = await this.supabase.client
-            .from('member_skills')
-            .select('skill_id')
-            .eq('member_id', memberId);
-
-        if (error) {
+    async getMemberSkillIds(memberId: string, organizationId = this.orgId()): Promise<string[]> {
+        if (!organizationId) return [];
+        try {
+            return await this.api.get<string[]>(`/orgs/${organizationId}/members/${memberId}/skills`);
+        } catch (error) {
             console.error('Error loading member skills:', error);
             return [];
         }
-
-        return (data || []).map((ms) => ms.skill_id);
     }
 
     /**
      * Update skills for a member (replaces all existing)
      */
-    async updateMemberSkills(
-        memberId: string,
-        skillIds: string[]
-    ): Promise<boolean> {
-        // Delete existing skills
-        const { error: deleteError } = await this.supabase.client
-            .from('member_skills')
-            .delete()
-            .eq('member_id', memberId);
-
-        if (deleteError) {
-            console.error('Error deleting member skills:', deleteError);
+    async updateMemberSkills(memberId: string, skillIds: string[], organizationId = this.orgId()): Promise<boolean> {
+        if (!organizationId) return false;
+        try {
+            await this.api.put(`/orgs/${organizationId}/members/${memberId}/skills`, { skill_ids: skillIds });
+            return true;
+        } catch (error) {
+            console.error('Error updating member skills:', error);
             return false;
         }
-
-        // Insert new skills
-        if (skillIds.length > 0) {
-            const inserts = skillIds.map((skillId) => ({
-                member_id: memberId,
-                skill_id: skillId,
-            }));
-
-            const { error: insertError } = await this.supabase.client
-                .from('member_skills')
-                .insert(inserts);
-
-            if (insertError) {
-                console.error('Error inserting member skills:', insertError);
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**
      * Add a single skill to a member
      */
-    async addSkillToMember(
-        memberId: string,
-        skillId: string
-    ): Promise<boolean> {
-        const { error } = await this.supabase.client
-            .from('member_skills')
-            .upsert({ member_id: memberId, skill_id: skillId });
-
-        if (error) {
+    async addSkillToMember(memberId: string, skillId: string, organizationId = this.orgId()): Promise<boolean> {
+        if (!organizationId) return false;
+        try {
+            await this.api.put(`/orgs/${organizationId}/members/${memberId}/skills/${skillId}`);
+            return true;
+        } catch (error) {
             console.error('Error adding skill:', error);
             return false;
         }
-        return true;
     }
 
     /**
      * Remove a skill from a member
      */
-    async removeSkillFromMember(
-        memberId: string,
-        skillId: string
-    ): Promise<boolean> {
-        const { error } = await this.supabase.client
-            .from('member_skills')
-            .delete()
-            .eq('member_id', memberId)
-            .eq('skill_id', skillId);
-
-        if (error) {
+    async removeSkillFromMember(memberId: string, skillId: string, organizationId = this.orgId()): Promise<boolean> {
+        if (!organizationId) return false;
+        try {
+            await this.api.delete(`/orgs/${organizationId}/members/${memberId}/skills/${skillId}`);
+            return true;
+        } catch (error) {
             console.error('Error removing skill:', error);
             return false;
         }
-        return true;
     }
 
     /**
      * Load all member skills for an organization (bulk load for filtering)
      */
     async getAllMemberSkills(organizationId: string): Promise<Record<string, string[]>> {
-        const { data, error } = await this.supabase.client
-            .from('member_skills')
-            .select('member_id, skill_id, member:members!inner(organization_id)')
-            .eq('member.organization_id', organizationId);
-
-        if (error) {
+        try {
+            return await this.api.get<Record<string, string[]>>(`/orgs/${organizationId}/member-skills`);
+        } catch (error) {
             console.error('Error loading all member skills:', error);
             return {};
         }
-
-        const map: Record<string, string[]> = {};
-        if (data) {
-            data.forEach((row: any) => {
-                const mid = row.member_id;
-                if (!map[mid]) map[mid] = [];
-                map[mid].push(row.skill_id);
-            });
-        }
-        return map;
     }
 
     // =========================================================================
@@ -191,73 +134,55 @@ export class SkillService {
     /**
      * Create a new skill (admin only)
      */
-    async createSkill(
-        organizationId: string,
-        skill: Partial<Skill>
-    ): Promise<Skill | null> {
-        const { data, error } = await this.supabase.client
-            .from('skills')
-            .insert({
-                organization_id: organizationId,
+    async createSkill(organizationId: string, skill: Partial<Skill>): Promise<Skill | null> {
+        try {
+            const neu = await this.api.post<Skill>(`/orgs/${organizationId}/skills`, {
                 name: skill.name,
                 category: skill.category || 'ability',
                 icon: skill.icon,
                 description: skill.description,
                 sort_order: skill.sort_order || 0,
-            })
-            .select()
-            .single();
-
-        if (error) {
+            });
+            await this.loadSkills(organizationId);
+            return neu;
+        } catch (error) {
             console.error('Error creating skill:', error);
             return null;
         }
-
-        // Refresh skills list
-        await this.loadSkills(organizationId);
-        return data as Skill;
     }
 
     /**
      * Update a skill (admin only)
      */
-    async updateSkill(
-        skillId: string,
-        updates: Partial<Skill>
-    ): Promise<boolean> {
-        const { error } = await this.supabase.client
-            .from('skills')
-            .update({
+    async updateSkill(skillId: string, updates: Partial<Skill>, organizationId = this.orgId()): Promise<boolean> {
+        if (!organizationId) return false;
+        try {
+            await this.api.patch(`/orgs/${organizationId}/skills/${skillId}`, {
                 name: updates.name,
                 category: updates.category,
                 icon: updates.icon,
                 description: updates.description,
                 sort_order: updates.sort_order,
-                updated_at: new Date().toISOString(),
-            })
-            .eq('id', skillId);
-
-        if (error) {
+            });
+            return true;
+        } catch (error) {
             console.error('Error updating skill:', error);
             return false;
         }
-        return true;
     }
 
     /**
      * Delete a skill (admin only)
      */
-    async deleteSkill(skillId: string): Promise<boolean> {
-        const { error } = await this.supabase.client
-            .from('skills')
-            .delete()
-            .eq('id', skillId);
-
-        if (error) {
+    async deleteSkill(skillId: string, organizationId = this.orgId()): Promise<boolean> {
+        if (!organizationId) return false;
+        try {
+            await this.api.delete(`/orgs/${organizationId}/skills/${skillId}`);
+            return true;
+        } catch (error) {
             console.error('Error deleting skill:', error);
             return false;
         }
-        return true;
     }
 
     // =========================================================================
@@ -265,7 +190,7 @@ export class SkillService {
     // =========================================================================
 
     /**
-     * Find members with specific skills
+     * Find members with specific skills (Vorstand und Administratoren)
      */
     async findMembersBySkills(
         organizationId: string,
@@ -278,20 +203,12 @@ export class SkillService {
             matching_skills: number;
         }>
     > {
-        const { data, error } = await this.supabase.client.rpc(
-            'get_members_by_skills',
-            {
-                org_uuid: organizationId,
-                skill_ids: skillIds,
-            }
-        );
-
-        if (error) {
+        try {
+            return await this.api.post(`/orgs/${organizationId}/skills/match`, { skill_ids: skillIds });
+        } catch (error) {
             console.error('Error finding members by skills:', error);
             return [];
         }
-
-        return data || [];
     }
 
     /**

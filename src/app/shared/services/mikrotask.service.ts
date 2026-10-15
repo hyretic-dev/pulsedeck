@@ -1,9 +1,10 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { FeedService, FeedItem } from './feed.service';
 
 import { SmartMatchingService } from './smart-matching.service';
 import { NotificationService } from './notification.service';
 import { AuthService } from './auth.service';
+import { OrganizationService } from './organization.service';
 
 export interface Mikrotask {
   id: string;
@@ -24,6 +25,7 @@ export class MikrotaskService {
   private smartMatchingService = inject(SmartMatchingService);
   private notificationService = inject(NotificationService);
   private auth = inject(AuthService);
+  private org = inject(OrganizationService);
 
   private _polls = signal<FeedItem[]>([]);
   
@@ -63,7 +65,11 @@ export class MikrotaskService {
   });
 
   constructor() {
-    this.refresh();
+    // Erst laden, wenn eine Organisation ausgewählt ist (Beiträge gehören immer zu einer Organisation)
+    effect(() => {
+      if (this.org.currentOrgId()) void this.refresh();
+      else this._polls.set([]);
+    });
   }
 
   async refresh() {

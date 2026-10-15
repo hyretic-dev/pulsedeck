@@ -1,0 +1,141 @@
+name: pulsedeck
+
+# Basis-Stack (dev/local). Produktiv-Overrides: docker-compose.prod.yml.
+# Alle Secrets kommen aus der .env-Datei (nie Build-Args).
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pulsedeck
+      POSTGRES_USER: pulsedeck_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_MIGRATIONS_PASSWORD: ${POSTGRES_MIGRATIONS_PASSWORD:?}
+      POSTGRES_RUNTIME_PASSWORD: ${POSTGRES_RUNTIME_PASSWORD:?}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/10-roles.sh:/docker-entrypoint-initdb.d/10-roles.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulsedeck_admin -d pulsedeck"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - internal
+
+  backend:
+    build:
+      context: ./backend
+      additional_contexts:
+        docs: ./public
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      TZ: Europe/Berlin
+      JWT_SECRET: ${JWT_SECRET:?}
+      JWT_ISSUER: ${JWT_ISSUER:?}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:?}
+      APP_BASE_URL: ${APP_BASE_URL:?}
+      DATABASE_URL: postgres://pulsedeck_runtime:${POSTGRES_RUNTIME_PASSWORD:?}@postgres:5432/pulsedeck
+      MIGRATIONS_DATABASE_URL: postgres://pulsedeck_migrations:${POSTGRES_MIGRATIONS_PASSWORD:?}@postgres:5432/pulsedeck
+      # O4: log (nur dev), smtp oder resend; in der Produktion ist log gesperrt.
+      MAIL_TRANSPORT: ${MAIL_TRANSPORT:-log}
+      MAIL_FROM: ${MAIL_FROM:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_SECURE: ${SMTP_SECURE:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      MAINTENANCE_TOKEN: ${MAINTENANCE_TOKEN:-}
+      PG_POOL_MAX: ${PG_POOL_MAX:-10}
+      # Mindest-Antwortdauer der Mail-Endpunkte in ms (Schutz vor Enumeration über die Antwortzeit)
+      AUTH_MIN_RESPONSE_MS: ${AUTH_MIN_RESPONSE_MS:-}
+      RATE_LIMIT_LOGIN_MAX: ${RATE_LIMIT_LOGIN_MAX:-5}
+      RATE_LIMIT_LOGIN_WINDOW_MINUTES: ${RATE_LIMIT_LOGIN_WINDOW_MINUTES:-15}
+      RATE_LIMIT_MAIL_MAX: ${RATE_LIMIT_MAIL_MAX:-3}
+      RATE_LIMIT_MAIL_WINDOW_MINUTES: ${RATE_LIMIT_MAIL_WINDOW_MINUTES:-60}
+      # Geheimnisse in der DB (Newsletter-SMTP-Passwort): AES-256-Schlüssel, 32 Bytes Base64/Hex. In der Produktion Pflicht.
+      SECRETS_ENCRYPTION_KEY: ${SECRETS_ENCRYPTION_KEY:-}
+      # Hintergrundarbeit (Mail-Outbox, Push, Newsletter-Zeitplan, Wartung) in diesem Prozess
+      JOBS_ENABLED: ${JOBS_ENABLED:-}
+      JOBS_TICK_SECONDS: ${JOBS_TICK_SECONDS:-}
+      APP_TIMEZONE: ${APP_TIMEZONE:-}
+      # Eigene SMTP-Server der Organisationen in privaten Netzen erlauben (Standard: verboten)
+      SMTP_ALLOW_PRIVATE_HOSTS: ${SMTP_ALLOW_PRIVATE_HOSTS:-}
+      # Web-Push (leer = deaktiviert); Schlüssel erzeugen: npx web-push generate-vapid-keys
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+      # Dateispeicher (Volume files-data) und Upload-Grenze je Datei in MB
+      FILES_DIR: /data/files
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-}
+      # KI (Chat, Wissensbasis); leer = KI-Funktionen antworten mit 503
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+      DOCS_FILE: /app/DOCS.md
+      REALTIME_ENABLED: ${REALTIME_ENABLED:-}
+      # Ursprünge nativer Apps (Capacitor), die die API aufrufen dürfen, kommagetrennt; leer = nur gleicher Ursprung
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+    volumes:
+      - files-data:/data/files
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - internal
+      # O10: ausgehender Zugriff für Mail (Resend/SMTP), Mistral, Web-Push. Nur das Backend hat Egress.
+      - egress
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      # true = schreibgeschützte Abnahme (schreibende API-Aufrufe → 503, Login bleibt möglich), siehe docs/betrieb/migration.md
+      READ_ONLY: ${READ_ONLY:-false}
+    healthcheck:
+      # nginx liefert /health statisch (kein DB-Bezug); belegt, dass der Proxy Anfragen annimmt.
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    networks:
+      - internal
+      - edge
+
+  # Lokaler Test-SMTP-Server (nur Entwicklung): docker compose --profile dev-mail up -d
+  # und MAIL_TRANSPORT=smtp, SMTP_HOST=mailpit, SMTP_PORT=1025, MAIL_FROM=PulseDeck <noreply@pulsedeck.local>.
+  # Weboberfläche nur intern; Abruf z. B. per `docker compose exec backend wget -qO- http://mailpit:8025/api/v1/messages`.
+  mailpit:
+    image: axllent/mailpit:latest
+    profiles: ["dev-mail"]
+    restart: unless-stopped
+    networks:
+      - internal
+volumes:
+  postgres-data:
+  # Dateien der Organisationen (Uploads); in die Datensicherung aufnehmen
+  files-data:
+
+networks:
+  # Kein öffentlicher Port für Postgres/Backend; nur frontend veröffentlicht.
+  internal:
+    internal: true
+  # Edge-Netzwerk nur für Port-Publishing (internal-Netzwerke haben keinen Gateway).
+  edge: {}
+  # Egress nur für das Backend (O10). Postgres bleibt ausschließlich im internal-Netz.
+  egress: {}

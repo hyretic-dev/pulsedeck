@@ -128,10 +128,12 @@ export class FeedComponent {
         this.wgService.fetchWorkingGroups();
         this.loadFeed();
         if (this.auth.isMember()) this.loadMyItems();
-        if (this.auth.isAdmin()) {
+        if (this.auth.hasPermission('feed:approve')) {
             this.loadReviewItems();
-            this.loadNewsletterConfig();
             this.loadSentItems();
+        }
+        if (this.auth.isAdmin()) {
+            this.loadNewsletterConfig();
         }
     }
 
@@ -173,7 +175,7 @@ export class FeedComponent {
     async saveConfig() {
         if (!this.newsletterConfig()) return;
         try {
-            await this.feedService.updateNewsletterConfig(this.newsletterConfig()!);
+            this.newsletterConfig.set(await this.feedService.updateNewsletterConfig(this.newsletterConfig()!));
             this.messageService.add({ severity: 'success', summary: 'Einstellungen gespeichert' });
         } catch (e: any) { this.messageService.add({ severity: 'error', detail: e.message }); }
     }

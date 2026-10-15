@@ -1,5 +1,5 @@
 /**
- * Calendar event interface matching Supabase table structure
+ * Calendar event interface (API-Antwort des Backends)
  * 
  * Event type is derived from working_group_id:
  * - AG event: working_group_id is set

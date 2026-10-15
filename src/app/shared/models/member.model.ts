@@ -32,7 +32,7 @@ export interface OrganizationRole {
 }
 
 /**
- * Member interface matching Supabase table structure
+ * Member interface (API-Antwort `GET /orgs/:orgId/members/me`)
  */
 export interface Member {
     id?: string;
@@ -61,6 +61,8 @@ export interface Member {
     contact_channels?: Record<string, string>;
     created_at?: string;
     updated_at?: string;
+    /** Serverseitig aufgelöste Rechte der Mitgliedschaft (Anzeige; durchgesetzt wird im Backend). */
+    access?: { isOwner: boolean; isAdmin: boolean; permissions: Permission[] };
 }
 
 /**

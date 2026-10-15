@@ -326,7 +326,7 @@ export class InviteGuestOrgDialogComponent implements OnInit {
     }
 
     async removeGuest(guest: EventGuestOrganization): Promise<void> {
-        await this.guestService.removeInvitation(guest.id);
+        await this.guestService.removeInvitation(guest.id, this.eventId);
         await this.loadExistingGuests();
     }
 

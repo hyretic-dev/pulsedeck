@@ -8,7 +8,8 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 // Services
 import { OrganizationService, Organization } from '../../shared/services/organization.service';
-import { SupabaseService } from '../../shared/services/supabase';
+import { AuthService } from '../../shared/services/auth.service';
+import { SessionService } from '../../core/session.service';
 
 @Component({
     selector: 'app-select-organization',
@@ -96,7 +97,8 @@ import { SupabaseService } from '../../shared/services/supabase';
 })
 export class SelectOrganizationComponent {
     private orgService = inject(OrganizationService);
-    private supabase = inject(SupabaseService);
+    private session = inject(SessionService);
+    private auth = inject(AuthService);
     private router = inject(Router);
 
     organizations = signal<Organization[]>([]);
@@ -106,22 +108,21 @@ export class SelectOrganizationComponent {
     constructor() {
         // React to session changes
         effect(() => {
-            const user = this.supabase.user();
-
-            if (user && !this.loaded) {
-                this.loaded = true;
-                this.loadOrganizations(user.id);
-            } else if (!user && this.supabase.session() !== undefined) {
-                // Session loaded but no user
+            if (this.session.istAngemeldet()) {
+                if (!this.loaded) {
+                    this.loaded = true;
+                    this.loadOrganizations();
+                }
+            } else {
                 this.router.navigate(['/login']);
             }
         });
     }
 
-    async loadOrganizations(userId: string): Promise<void> {
+    async loadOrganizations(): Promise<void> {
         this.loading.set(true);
 
-        const orgs = await this.orgService.getMyOrganizations(userId);
+        const orgs = await this.orgService.getMyOrganizations();
         this.organizations.set(orgs);
 
         // Auto-redirect to last organization if available
@@ -146,7 +147,6 @@ export class SelectOrganizationComponent {
     }
 
     async logout(): Promise<void> {
-        await this.supabase.signOut();
-        this.router.navigate(['/']);
+        await this.auth.signOut();
     }
 }

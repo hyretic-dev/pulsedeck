@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { SupabaseService } from './supabase';
+import { ApiService } from '../../core/api.service';
+import { OrganizationService } from './organization.service';
 
 export interface EventSlot {
     id: string;
@@ -32,6 +33,8 @@ export interface SlotSignup {
         name: string;
         avatar_url?: string;
     };
+    /** Nur bei „meine Anmeldungen“: Slot mit Termin */
+    slot?: { id: string; title: string; start_time?: string; end_time?: string; event: { id: string; title: string; date: string; start_time: string } };
 }
 
 export interface CreateSlotData {
@@ -50,7 +53,8 @@ export interface CreateSlotData {
     providedIn: 'root',
 })
 export class EventSlotService {
-    private readonly supabase = inject(SupabaseService);
+    private readonly api = inject(ApiService);
+    private readonly org = inject(OrganizationService);
 
     /** Slots for current event */
     slots = signal<EventSlot[]>([]);
@@ -58,54 +62,27 @@ export class EventSlotService {
     /** Loading state */
     loading = signal(false);
 
+    private orgId(organizationId?: string): string {
+        const id = organizationId ?? this.org.currentOrgId();
+        if (!id) throw new Error('Keine Organisation ausgewählt');
+        return id;
+    }
+
     // =========================================================================
     // SLOT MANAGEMENT (Admin)
     // =========================================================================
 
     /**
-     * Load all slots for an event with signup counts
+     * Load all slots for an event with confirmed signups and counts (der Server zählt und markiert die eigene Anmeldung)
      */
-    async loadSlots(eventId: string, memberId?: string): Promise<void> {
+    async loadSlots(eventId: string, _memberId?: string): Promise<void> {
         this.loading.set(true);
-
-        const { data, error } = await this.supabase.client
-            .from('event_slots')
-            .select(`
-                *,
-                signups:event_slot_signups(
-                    id,
-                    member_id,
-                    status,
-                    note,
-                    signed_up_at,
-                    member:members(id, name, avatar_url)
-                )
-            `)
-            .eq('event_id', eventId)
-            .order('sort_order', { ascending: true });
-
-        if (error) {
+        try {
+            this.slots.set(await this.api.get<EventSlot[]>(`/orgs/${this.orgId()}/events/${eventId}/slots`));
+        } catch (error) {
             console.error('Error loading slots:', error);
             this.slots.set([]);
-        } else {
-            // Calculate signup counts and check if current member is signed up
-            const slotsWithCounts = (data || []).map((slot) => {
-                const confirmedSignups = slot.signups?.filter(
-                    (s: SlotSignup) => s.status === 'confirmed'
-                ) || [];
-
-                return {
-                    ...slot,
-                    signup_count: confirmedSignups.length,
-                    signups: confirmedSignups,
-                    is_signed_up: memberId
-                        ? confirmedSignups.some((s: SlotSignup) => s.member_id === memberId)
-                        : false,
-                };
-            });
-            this.slots.set(slotsWithCounts);
         }
-
         this.loading.set(false);
     }
 
@@ -113,58 +90,52 @@ export class EventSlotService {
      * Create a new slot for an event
      */
     async createSlot(data: CreateSlotData): Promise<EventSlot | null> {
-        const { data: slot, error } = await this.supabase.client
-            .from('event_slots')
-            .insert(data)
-            .select()
-            .single();
-
-        if (error) {
+        try {
+            return await this.api.post<EventSlot>(`/orgs/${this.orgId(data.organization_id)}/events/${data.event_id}/slots`, {
+                title: data.title,
+                start_time: data.start_time || undefined,
+                end_time: data.end_time || undefined,
+                max_helpers: data.max_helpers,
+                required_skills: data.required_skills,
+                sort_order: data.sort_order,
+            });
+        } catch (error) {
             console.error('Error creating slot:', error);
             return null;
         }
-
-        return slot as EventSlot;
     }
 
     /**
      * Update a slot
      */
-    async updateSlot(
-        slotId: string,
-        updates: Partial<EventSlot>
-    ): Promise<boolean> {
-        const { error } = await this.supabase.client
-            .from('event_slots')
-            .update({
-                ...updates,
-                updated_at: new Date().toISOString(),
-            })
-            .eq('id', slotId);
-
-        if (error) {
+    async updateSlot(slotId: string, updates: Partial<EventSlot>): Promise<boolean> {
+        try {
+            await this.api.patch(`/orgs/${this.orgId()}/slots/${slotId}`, {
+                title: updates.title,
+                start_time: updates.start_time || undefined,
+                end_time: updates.end_time || undefined,
+                max_helpers: updates.max_helpers,
+                required_skills: updates.required_skills,
+                sort_order: updates.sort_order,
+            });
+            return true;
+        } catch (error) {
             console.error('Error updating slot:', error);
             return false;
         }
-
-        return true;
     }
 
     /**
      * Delete a slot
      */
     async deleteSlot(slotId: string): Promise<boolean> {
-        const { error } = await this.supabase.client
-            .from('event_slots')
-            .delete()
-            .eq('id', slotId);
-
-        if (error) {
+        try {
+            await this.api.delete(`/orgs/${this.orgId()}/slots/${slotId}`);
+            return true;
+        } catch (error) {
             console.error('Error deleting slot:', error);
             return false;
         }
-
-        return true;
     }
 
     // =========================================================================
@@ -172,71 +143,42 @@ export class EventSlotService {
     // =========================================================================
 
     /**
-     * Sign up for a slot
+     * Sign up the current member for a slot (409 slot_full, wenn der Platz inzwischen vergeben ist)
      */
-    async signUp(slotId: string, memberId: string, organizationId: string, note?: string): Promise<boolean> {
-        const { error } = await this.supabase.client
-            .from('event_slot_signups')
-            .insert({
-                slot_id: slotId,
-                member_id: memberId,
-                organization_id: organizationId,
-                status: 'confirmed',
-                note,
-            });
-
-        if (error) {
+    async signUp(slotId: string, _memberId: string, organizationId: string, note?: string): Promise<boolean> {
+        try {
+            await this.api.put(`/orgs/${this.orgId(organizationId)}/slots/${slotId}/signup`, note ? { note } : {});
+            return true;
+        } catch (error) {
             console.error('Error signing up for slot:', error);
             return false;
         }
-
-        return true;
     }
 
     /**
      * Cancel signup for a slot
      */
-    async cancelSignup(slotId: string, memberId: string): Promise<boolean> {
-        const { error } = await this.supabase.client
-            .from('event_slot_signups')
-            .delete()
-            .eq('slot_id', slotId)
-            .eq('member_id', memberId);
-
-        if (error) {
+    async cancelSignup(slotId: string, _memberId: string): Promise<boolean> {
+        try {
+            await this.api.delete(`/orgs/${this.orgId()}/slots/${slotId}/signup`);
+            return true;
+        } catch (error) {
             console.error('Error cancelling signup:', error);
             return false;
         }
-
-        return true;
     }
 
     /**
-     * Get all signups for a member across all events
+     * Get all confirmed slot signups of the current member (with slot and event)
      */
-    async getMemberSignups(memberId: string): Promise<SlotSignup[]> {
-        const { data, error } = await this.supabase.client
-            .from('event_slot_signups')
-            .select(`
-                *,
-                slot:event_slots(
-                    id,
-                    title,
-                    start_time,
-                    end_time,
-                    event:events(id, title, start)
-                )
-            `)
-            .eq('member_id', memberId)
-            .eq('status', 'confirmed')
-            .order('signed_up_at', { ascending: false });
-
-        if (error) {
+    async getMemberSignups(_memberId?: string): Promise<SlotSignup[]> {
+        try {
+            const zeilen = await this.api.get<{ slot: SlotSignup['slot'] }[]>(`/orgs/${this.orgId()}/slots/signups/mine`);
+            return zeilen.map((z) => ({ id: z.slot?.id ?? '', slot_id: z.slot?.id ?? '', member_id: _memberId ?? '', status: 'confirmed' as const, signed_up_at: '', slot: z.slot }));
+        } catch (error) {
             console.error('Error loading member signups:', error);
             return [];
         }
-
-        return data || [];
     }
 
     // =========================================================================

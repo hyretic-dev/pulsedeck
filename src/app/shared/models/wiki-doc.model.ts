@@ -10,7 +10,7 @@ export interface WikiCategory {
 }
 
 /**
- * Wiki document interface matching Supabase table structure
+ * Wiki document interface (API-Antwort des Backends)
  */
 export interface WikiDoc {
     id?: string;

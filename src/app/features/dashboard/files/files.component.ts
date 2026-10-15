@@ -404,20 +404,7 @@ export class FilesComponent implements OnInit {
         this.moveFileTarget = file;
         this.moveTargetFolderId = null;
 
-        const orgId = this.fileService['org'].currentOrgId();
-        if (!orgId) return;
-
-        const { data } = await this.fileService[
-            'supabase'
-        ].client
-            .from('folders')
-            .select('*')
-            .eq('organization_id', orgId)
-            .order('name', { ascending: true });
-
-        this.allFolders.set(
-            (data as FolderMetadata[]) || []
-        );
+        this.allFolders.set(await this.fileService.fetchAllFolders());
         this.moveFileDialogVisible.set(true);
     }
 

@@ -1,0 +1,2 @@
+export const MEMBERSHIP_REPOSITORY = Symbol('MEMBERSHIP_REPOSITORY');
+export const MEMBER_LINKER = Symbol('MEMBER_LINKER');

@@ -7,7 +7,7 @@
 /bazel-out
 
 # Node
-/node_modules
+node_modules/
 npm-debug.log
 yarn-error.log
 
@@ -38,12 +38,24 @@ testem.log
 /typings
 __screenshots__/
 
-supabase/.temp
 
 # System files
 .DS_Store
 Thumbs.db
 
-# Environment Variables
-src/environments/environment.ts
-src/environments/environment.prod.ts
+# Environment: environment.ts/environment.prod.ts enthalten keine Secrets (nur die API-Basis) und sind versioniert;
+# die für den Mobile-Build erzeugte Datei nicht
+src/environments/environment.capacitor.ts
+
+# Lokale Compose-Betriebswerte (Secrets) — .env.example ist die Vorlage
+.env
+backend/dist
+
+# Abzüge der Produktionsdaten (Personendaten, Passwort-Hashes): nie einchecken
+backups/
+
+# Archive im Repo-Root (z. B. ein Storage-Export mit Kundendateien): nie einchecken
+/*.zip
+
+# Lokale MCP-Konfiguration (Zugänge zu Produktionssystemen): nie einchecken
+.mcp.json

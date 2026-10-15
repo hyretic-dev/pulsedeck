@@ -1,0 +1,13 @@
+{
+  "name": "pulsedeck-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser-Smoke gegen einen laufenden Compose-Stack (nicht Teil von npm test)",
+  "scripts": {
+    "install-browser": "playwright install chromium",
+    "smoke": "node browser-smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.49.1"
+  }
+}

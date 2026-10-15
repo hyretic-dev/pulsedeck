@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { SupabaseService } from './supabase';
-import { AuthService } from './auth.service';
+import { ApiService } from '../../core/api.service';
+import { pick } from '../../core/pick';
 import { OrganizationService } from './organization.service';
 
 export type FeedItemStatus = 'draft' | 'review' | 'approved' | 'sent';
@@ -41,251 +41,106 @@ export interface FeedItem {
     working_group?: { name: string; category?: string };
 }
 
+const FEED_FELDER = ['title', 'content', 'url', 'type', 'status', 'is_public', 'working_group_id', 'poll_config', 'options'] as const;
+const NEWSLETTER_FELDER = [
+    'frequency', 'day_of_week', 'time_of_day', 'active', 'logo_url', 'footer_text', 'primary_color',
+    'smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from', 'smtp_secure',
+] as const;
+
 @Injectable({ providedIn: 'root' })
 export class FeedService {
-    private supabase = inject(SupabaseService);
-    private auth = inject(AuthService);
+    private api = inject(ApiService);
     private org = inject(OrganizationService);
 
-    /** Get published items for everyone */
-    async getFeedItems() {
+    private pfad(rest = ''): string {
         const orgId = this.org.currentOrgId();
+        if (!orgId) throw new Error('Keine Organisation ausgewählt');
+        return `/orgs/${orgId}/feed${rest}`;
+    }
 
-        let query = this.supabase.client
-            .from('feed_items')
-            .select('*, author:members(name), working_group:working_groups(name, category), poll_options(id, text, sort_order, poll_votes(member_id)), feed_item_reads(member_id)')
-            .in('status', ['approved', 'sent'])
-            .order('is_pinned', { ascending: false })
-            .order('created_at', { ascending: false });
-
-        if (orgId) {
-            query = query.eq('organization_id', orgId);
-        }
-
-        const { data, error } = await query;
-
-        if (error) throw new Error(error.message);
-        return data as FeedItem[];
+    /** Get published items (freigegeben oder versendet) for all members */
+    async getFeedItems() {
+        return this.api.get<FeedItem[]>(this.pfad());
     }
 
     /** Get items created by current user */
     async getMyItems() {
-        const memberId = this.auth.currentMember()?.id;
-        if (!memberId) return [];
-
-        const { data, error } = await this.supabase.client
-            .from('feed_items')
-            .select('*, author:members(name), working_group:working_groups(name, category), poll_options(id, text, sort_order, poll_votes(member_id))')
-            .eq('author_id', memberId)
-            .order('created_at', { ascending: false });
-
-        if (error) throw new Error(error.message);
-        return data as FeedItem[];
+        return this.api.get<FeedItem[]>(this.pfad('/mine'));
     }
 
-    /** Get items waiting for review (Admins only) */
+    /** Get items waiting for review (Freigeber) */
     async getReviewItems() {
-        const orgId = this.org.currentOrgId();
-
-        let query = this.supabase.client
-            .from('feed_items')
-            .select('*, author:members(name), working_group:working_groups(name, category), poll_options(id, text, sort_order, poll_votes(member_id))')
-            .eq('status', 'review')
-            .order('created_at', { ascending: false });
-
-        if (orgId) {
-            query = query.eq('organization_id', orgId);
-        }
-
-        const { data, error } = await query;
-        if (error) throw new Error(error.message);
-        return data as FeedItem[];
+        return this.api.get<FeedItem[]>(this.pfad('/review'));
     }
 
     /** Get un-sent approved items (for newsletter generation) */
     async getNewsletterQueue() {
-        const orgId = this.org.currentOrgId();
-
-        let query = this.supabase.client
-            .from('feed_items')
-            .select('*, author:members(name), working_group:working_groups(name, category), poll_options(id, text, sort_order, poll_votes(member_id))')
-            .eq('status', 'approved')
-            .order('created_at', { ascending: false });
-
-        if (orgId) {
-            query = query.eq('organization_id', orgId);
-        }
-
-        const { data, error } = await query;
-        if (error) throw new Error(error.message);
-        return data as FeedItem[];
+        return this.api.get<FeedItem[]>(this.pfad('/newsletter-queue'));
     }
 
     /** Get already sent items (History) */
     async getSentItems() {
-        const orgId = this.org.currentOrgId();
-
-        let query = this.supabase.client
-            .from('feed_items')
-            .select('*, author:members(name), working_group:working_groups(name, category)')
-            .eq('status', 'sent')
-            .order('sent_at', { ascending: false });
-
-        if (orgId) {
-            query = query.eq('organization_id', orgId);
-        }
-
-        const { data, error } = await query;
-        if (error) throw new Error(error.message);
-        return data as FeedItem[];
+        return this.api.get<FeedItem[]>(this.pfad('/sent'));
     }
 
+    /** Autor und Organisation bestimmt der Server; Umfrageoptionen gehen als `options` mit. */
     async createItem(item: Partial<FeedItem> & { options?: string[] }) {
-        const memberId = this.auth.currentMember()?.id;
-        const orgId = this.org.currentOrgId();
-        if (!memberId) throw new Error('Not member');
-
-        // Remove joined fields and temp options
-        const { author, poll_options, options, working_group, ...cleanItem } = item as any;
-
-        const { data: newItem, error } = await this.supabase.client
-            .from('feed_items')
-            .insert({
-                ...cleanItem,
-                author_id: memberId,
-                organization_id: orgId
-            })
-            .select()
-            .single();
-
-        if (error) throw new Error(error.message);
-
-        // Create options if needed
-        if (item.type === 'poll' && options?.length) {
-            const optionsPayload = options.map((text: string, index: number) => ({
-                feed_item_id: newItem.id,
-                text,
-                sort_order: index
-            }));
-
-            const { error: optError } = await this.supabase.client
-                .from('poll_options')
-                .insert(optionsPayload);
-
-            if (optError) console.error('Error creating options', optError);
-        }
-
-        return newItem;
+        return this.api.post<FeedItem>(this.pfad(), pick(item, FEED_FELDER, ['url', 'working_group_id']));
     }
 
     async updateItem(id: string, updates: Partial<FeedItem>) {
-        const { author, poll_options, working_group, ...cleanUpdates } = updates as any;
-
-        const { data, error } = await this.supabase.client
-            .from('feed_items')
-            .update({ ...cleanUpdates, updated_at: new Date().toISOString() })
-            .eq('id', id)
-            .select();
-
-        if (error) throw new Error(error.message);
-        return data;
+        return this.api.patch<FeedItem>(this.pfad(`/${id}`), pick(updates, FEED_FELDER.filter((f) => f !== 'type' && f !== 'options'), ['url', 'working_group_id']));
     }
 
     async deleteItem(id: string) {
-        const { error } = await this.supabase.client
-            .from('feed_items')
-            .delete()
-            .eq('id', id);
-        if (error) throw new Error(error.message);
+        await this.api.delete(this.pfad(`/${id}`));
     }
 
-    // Newsletter Config
+    // Newsletter Config (Administratoren; das SMTP-Passwort wird nur geschrieben, nie geliefert)
     async getNewsletterConfig() {
-        const { data, error } = await this.supabase.client
-            .from('newsletter_config')
-            .select('*')
-            .single();
-        if (error) throw new Error(error.message);
-        return data as NewsletterConfig;
+        const orgId = this.org.currentOrgId();
+        return this.api.get<NewsletterConfig>(`/orgs/${orgId}/newsletter/config`);
     }
 
     async updateNewsletterConfig(config: Partial<NewsletterConfig>) {
-        const { data, error } = await this.supabase.client
-            .from('newsletter_config')
-            .update(config)
-            .eq('id', 1)
-            .select()
-            .single();
-        if (error) throw new Error(error.message);
-        return data;
+        const orgId = this.org.currentOrgId();
+        const body = pick(config, NEWSLETTER_FELDER) as Record<string, unknown>;
+        if (!body['smtp_pass']) delete body['smtp_pass']; // leer = unverändert
+        return this.api.patch<NewsletterConfig>(`/orgs/${orgId}/newsletter/config`, body);
     }
 
     async triggerNewsletter() {
-        // Force trigger (manual send)
-        const { data, error } = await this.supabase.client.functions.invoke('send-newsletter', {
-            body: { force: true }
-        });
-        if (error) throw new Error(error.message);
-        return data;
+        return this.api.post<{ sent: boolean; message: string; items: number; recipients: number }>(`/orgs/${this.org.currentOrgId()}/newsletter/send`);
     }
 
     async sendTestEmail(email: string) {
-        const { data, error } = await this.supabase.client.functions.invoke('send-newsletter', {
-            body: { test_email: email }
-        });
-        if (error) throw new Error(error.message);
-        return data;
+        return this.api.post<{ message: string }>(`/orgs/${this.org.currentOrgId()}/newsletter/test`, { email });
     }
 
+    /** Stimme abgeben; bei Einzelauswahl ersetzt sie die bisherige Stimme der Umfrage (der Server entscheidet). */
     async vote(optionId: string) {
-        const memberId = this.auth.currentMember()?.id;
-        if (!memberId) throw new Error('Not member');
-
-        const { error } = await this.supabase.client
-            .from('poll_votes')
-            .insert({ option_id: optionId, member_id: memberId });
-
-        if (error) throw new Error(error.message);
+        await this.api.put(this.pfad(`/options/${optionId}/vote`));
     }
 
     async unvote(optionId: string) {
-        const memberId = this.auth.currentMember()?.id;
-        if (!memberId) throw new Error('Not member');
-
-        const { error } = await this.supabase.client
-            .from('poll_votes')
-            .delete()
-            .match({ option_id: optionId, member_id: memberId });
-
-        if (error) throw new Error(error.message);
+        await this.api.delete(this.pfad(`/options/${optionId}/vote`));
     }
 
     async togglePin(id: string, isPinned: boolean) {
-        const { error } = await this.supabase.client
-            .from('feed_items')
-            .update({ is_pinned: isPinned, updated_at: new Date().toISOString() })
-            .eq('id', id);
-
-        if (error) throw new Error(error.message);
+        await this.api.patch(this.pfad(`/${id}/pin`), { is_pinned: isPinned });
     }
 
     async markAsRead(id: string) {
-        const memberId = this.auth.currentMember()?.id;
-        if (!memberId) return;
-
-        const { error } = await this.supabase.client
-            .from('feed_item_reads')
-            .insert({ feed_item_id: id, member_id: memberId });
-        
-        // Ignore unique constraint violation (already read)
-        if (error && error.code !== '23505') {
+        try {
+            await this.api.put(this.pfad(`/${id}/read`));
+        } catch (error) {
             console.error('Error marking as read:', error);
         }
     }
 }
 
 export interface NewsletterConfig {
-    id: number;
+    organization_id?: string;
     frequency: 'weekly' | 'monthly' | 'manual';
     day_of_week: number;
     time_of_day: string;
@@ -295,7 +150,10 @@ export interface NewsletterConfig {
     smtp_host?: string;
     smtp_port?: number;
     smtp_user?: string;
+    /** Nur schreibbar; leer lassen, um das gespeicherte Passwort zu behalten. */
     smtp_pass?: string;
+    /** Ob ein SMTP-Passwort hinterlegt ist (das Passwort selbst wird nie geliefert). */
+    smtp_pass_set?: boolean;
     smtp_from?: string;
     smtp_secure?: boolean;
     // Email Design

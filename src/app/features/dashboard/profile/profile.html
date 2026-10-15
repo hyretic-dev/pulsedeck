@@ -231,6 +231,17 @@
                             </span>
                         </div>
 
+                        @if (hasPassword()) {
+                        <div>
+                            <label for="oldPassword" class="block text-sm font-medium text-[var(--color-text)] mb-1">
+                                Aktuelles Passwort
+                            </label>
+                            <p-password id="oldPassword" [(ngModel)]="oldPassword" name="oldPassword"
+                                [toggleMask]="true" [feedback]="false" styleClass="w-full" inputStyleClass="w-full">
+                            </p-password>
+                        </div>
+                        }
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="newPassword"
@@ -267,7 +278,7 @@
                                 (click)="cancelPasswordChange()">
                             </p-button>
                             <p-button label="Passwort speichern" icon="pi pi-check" [loading]="savingPassword()"
-                                [disabled]="!newPassword || !confirmNewPassword" (click)="savePassword()">
+                                [disabled]="!newPassword || !confirmNewPassword || (hasPassword() && !oldPassword)" (click)="savePassword()">
                             </p-button>
                         </div>
                     </div>

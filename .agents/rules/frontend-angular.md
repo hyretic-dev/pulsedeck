@@ -1,5 +1,5 @@
 ---
-description: Angular-Frontend-Konventionen (Angular 21, TypeScript 5.9, RxJS 7.8, PrimeNG 21, Tailwind 3, Jest)
+description: Angular-Frontend-Konventionen (Angular 21, TypeScript 5.9, RxJS 7.8, PrimeNG 21, Tailwind 3, Vitest)
 globs: src/**/*.ts,src/**/*.html,src/**/*.css
 alwaysApply: false
 ---
@@ -19,7 +19,7 @@ alwaysApply: false
 
 Die App läuft aktuell mit `provideZoneChangeDetection()` (Zone.js). Ziel ist die Migration auf zoneless.
 
-- **Neuer Code muss bereits zoneless-kompatibel sein:** Async-Ergebnisse (Supabase-Calls, Timer, Promises) müssen in Signals landen — ein Plain-Field-Assignment nach `await` aktualisiert die View in zoneless nicht.
+- **Neuer Code muss bereits zoneless-kompatibel sein:** Async-Ergebnisse (API-Aufrufe, Timer, Promises) müssen in Signals landen — ein Plain-Field-Assignment nach `await` aktualisiert die View in zoneless nicht.
 - Die eigentliche Migration (Austausch des Providers in `app.config.ts`, Entfernen von `zone.js`) ist ein **separater Task** und wird nicht beiläufig durchgeführt.
 
 ## UI-Komponenten
@@ -30,7 +30,7 @@ Die App läuft aktuell mit `provideZoneChangeDetection()` (Zone.js). Ziel ist di
 
 ## Datenzugriff — Clean Architecture
 
-- Komponenten greifen **niemals** direkt auf `SupabaseService` zu.
+- Komponenten greifen **niemals** direkt auf `ApiService` zu.
 - Neuer Code: Komponenten injizieren **UseCases** oder **Application-Services** (siehe Rule `architecture`).
 - Bestehender Code: Feature-Services aus `shared/services/` werden bei Bedarf opportunistisch umgebaut (siehe Rule `architecture`, Abschnitt Opportunistisches Refactoring).
 - Ergebnisse von async Operationen landen **immer** in Signals.
@@ -52,7 +52,7 @@ Die App läuft aktuell mit `provideZoneChangeDetection()` (Zone.js). Ziel ist di
 - Jede Komponente / jeder Service hat eine `*.spec.ts` daneben.
 - TDD gemäß Rule `general`.
 - Tests prüfen Verhalten (gerendertes DOM, Outputs, Service-Verträge), nicht Interna.
-- Repository-Ports in Tests mocken — nicht den echten SupabaseService.
+- Repository-Ports in Tests mocken — nicht den echten ApiService.
 
 ## Qualitätstore (vor jedem Abschluss)
 

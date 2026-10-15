@@ -28,9 +28,9 @@ Wir ersetzen das Chaos aus WhatsApp-Gruppen, Excel-Listen und verlorenen E-Mails
 
 PulseDeck setzt auf moderne, robuste Technologien:
 
-*   **Frontend:** [Angular 18](https://angular.io) (Standalone Components, Signals)
+*   **Frontend:** [Angular 21](https://angular.dev) (Standalone Components, Signals)
 *   **UI Library:** [PrimeNG](https://primeng.org) + [Tailwind CSS](https://tailwindcss.com) (für Utility-Styling)
-*   **Backend / DB:** [Supabase](https://supabase.com) (PostgreSQL, Auth, Edge Functions)
+*   **Backend / DB:** [NestJS](https://nestjs.com) (REST-API, Auth, Jobs, Echtzeit per SSE) + [PostgreSQL 17](https://www.postgresql.org) mit pgvector; Dateien im Volume. Alles selbst gehostet (Docker Compose).
 *   **Mobile:** [Capacitor](https://capacitorjs.com) (Native Android/iOS Apps)
 *   **Deploy:** Docker / Coolify
 
@@ -49,8 +49,8 @@ PulseDeck setzt auf moderne, robuste Technologien:
 ## 🔧 Installation & Entwicklung
 
 ### Voraussetzungen
-*   Node.js (v20+)
-*   Docker (optional, für lokales Supabase)
+*   Node.js (v22)
+*   Docker (PostgreSQL und Backend; Compose-Stack siehe `docs/betrieb/selfhosting.md`)
 
 ### Setup
 
@@ -65,13 +65,24 @@ PulseDeck setzt auf moderne, robuste Technologien:
     npm install
     ```
 
-3.  **Environment konfigurieren:**
-    Erstelle eine `.env` Datei oder passe `src/environments/environment.ts` an mit deinen Supabase-Credentials.
+3.  **Backend und Datenbank starten:**
+    ```bash
+    cp .env.example .env   # Secrets eintragen (Hinweise in der Datei)
+    docker compose up -d --build
+    # Oberfläche und API unter http://localhost:8080 (nginx proxyt /api/ an das Backend)
+    ```
 
-4.  **Starten:**
+4.  **Frontend im Entwicklungsmodus (optional):**
     ```bash
     npm start
-    # Öffnet http://localhost:4200
+    # Öffnet http://localhost:4200; die API-Basis ist /api/v1 (Proxy auf das Backend per proxy.conf, siehe angular.json)
+    ```
+
+5.  **Tests:**
+    ```bash
+    npm test -- --watch=false                       # Frontend
+    cd backend && npx tsc --noEmit && npm test      # Backend, braucht PostgreSQL auf Port 5433 (backend/scripts/test-db-setup.mjs)
+    bash scripts/smoke-compose.sh                   # Compose-Stack Ende-zu-Ende
     ```
 
 ### Android Build (Capacitor)
@@ -86,11 +97,7 @@ npx cap open android
 
 ## 🤖 AI / RAG Aktualisieren
 
-Um die Wissensbasis (RAG) des PulseDeck AI Agents mit der aktuellen `DOCS.md` zu synchronisieren, klicke auf folgenden Link:
-
-[RAG aktualisieren (Supabase Edge Function)](https://dniozpfdldgtvpaehuux.supabase.co/functions/v1/ingest-docs)
-
-*Dieser Link liest die `DOCS.md` von der produktiven Seite ein, erstellt neue Embeddings und überschreibt die globalen Wissensdaten in der Datenbank.*
+Die Wissensbasis (RAG) des PulseDeck AI Agents wird vom Backend selbst gepflegt: Der nächtliche Job liest die mitgelieferte `DOCS.md` (`DOCS_FILE`) und die Stammdaten der Organisationen ein und erzeugt nur für geänderte Inhalte neue Embeddings (Mistral, `MISTRAL_API_KEY`). Hochgeladene Dateien werden beim Upload im Hintergrund indiziert (`POST /api/v1/orgs/:orgId/files/:fileId/index` löst es manuell aus).
 
 ---
 

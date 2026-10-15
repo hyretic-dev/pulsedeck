@@ -1,6 +1,5 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { SupabaseService } from './supabase';
-import { environment } from '../../../environments/environment';
+import { ApiService } from '../../core/api.service';
 import { OrganizationService } from './organization.service';
 
 export interface ChatMessage {
@@ -14,7 +13,7 @@ export interface ChatMessage {
     providedIn: 'root'
 })
 export class ChatbotService {
-    private supabaseService = inject(SupabaseService);
+    private api = inject(ApiService);
     private org = inject(OrganizationService);
 
     isOpen = signal(false);
@@ -33,52 +32,18 @@ export class ChatbotService {
     }
 
     async loadHistory() {
+        const orgId = this.org.currentOrgId();
+        if (!orgId) return;
         this.isLoading.set(true);
         try {
-            // Holt die neueste Session
-            const { data: sessionDataRaw, error: sessionError } = await this.supabaseService.client
-                .from('chat_sessions')
-                .select('id')
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-            const sessionData = sessionDataRaw as any;
-
-            if (sessionError) {
-                // Keine Session vorhanden, starte mit Begrüßung
-                this.messages.set([
-                    {
-                        id: crypto.randomUUID(),
-                        role: 'assistant',
-                        content: 'Hallo! Ich bin dein PulseDeck Onboarding-Assistent. Wie kann ich dir helfen?'
-                    }
-                ]);
-                return;
-            }
-
-            this.sessionId.set(sessionData.id);
-
-            // Lade Nachrichten der Session
-            const { data: messagesDataRaw, error: messagesError } = await this.supabaseService.client
-                .from('chat_messages')
-                .select('*')
-                .eq('session_id', sessionData.id)
-                .order('created_at', { ascending: true });
-            const messagesData = messagesDataRaw as any;
-
-            if (!messagesError && messagesData) {
-                this.messages.set(messagesData as ChatMessage[]);
-            }
-
-            if (this.messages().length === 0) {
-                this.messages.set([
-                    {
-                        id: crypto.randomUUID(),
-                        role: 'assistant',
-                        content: 'Hallo! Ich bin dein PulseDeck Onboarding-Assistent. Wie kann ich dir helfen?'
-                    }
-                ]);
-            }
+            // Neueste Sitzung des Nutzers in dieser Organisation samt Verlauf
+            const verlauf = await this.api.get<{ session_id: string | null; messages: ChatMessage[] }>(`/orgs/${orgId}/chat/history`);
+            this.sessionId.set(verlauf.session_id);
+            this.messages.set(
+                verlauf.messages.length > 0
+                    ? verlauf.messages
+                    : [{ id: crypto.randomUUID(), role: 'assistant', content: 'Hallo! Ich bin dein PulseDeck Onboarding-Assistent. Wie kann ich dir helfen?' }]
+            );
         } catch (error) {
             console.error('Fehler beim Laden des Chatverlaufs:', error);
         } finally {
@@ -98,30 +63,21 @@ export class ChatbotService {
         this.messages.update(msgs => [...msgs, userMsg]);
         this.isLoading.set(true);
 
-        const currentMessages = this.messages().map(m => ({
+        // Der Server nimmt höchstens 40 Nachrichten zu je 4000 Zeichen an
+        const currentMessages = this.messages().slice(-40).map(m => ({
             role: m.role,
-            content: m.content
+            content: m.content.slice(0, 4000)
         }));
 
         try {
-            const { data: { session } } = await this.supabaseService.client.auth.getSession();
-            if (!session) throw new Error('Nicht authentifiziert');
+            const orgId = this.org.currentOrgId();
+            if (!orgId) throw new Error('Keine Organisation ausgewählt');
 
-            const response = await fetch(`${environment.supabase.url}/functions/v1/chatbot`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`,
-                    'apikey': environment.supabase.anonKey,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    messages: currentMessages,
-                    session_id: this.sessionId(),
-                    organization_id: this.org.currentOrgId()
-                })
+            // Nur Nutzer-/Assistententexte; Rollen wie „system“ nimmt der Server nicht an
+            const response = await this.api.stream('POST', `/orgs/${orgId}/chat`, {
+                messages: currentMessages.filter((m) => m.role === 'user' || m.role === 'assistant'),
+                ...(this.sessionId() ? { session_id: this.sessionId() } : {}),
             });
-
-            if (!response.ok) throw new Error('Netzwerkfehler bei der Edge Function');
 
             const returnedSessionId = response.headers.get('x-chat-session-id');
             if (returnedSessionId && !this.sessionId()) {
@@ -137,33 +93,35 @@ export class ChatbotService {
             const assistantMsgId = crypto.randomUUID();
             this.messages.update(msgs => [...msgs, { id: assistantMsgId, role: 'assistant', content: '' }]);
 
+            let puffer = '';
+            const anhaengen = (text: string) =>
+                this.messages.update((msgs) => {
+                    const neu = [...msgs];
+                    const letzte = neu[neu.length - 1];
+                    if (letzte.role === 'assistant') neu[neu.length - 1] = { ...letzte, content: letzte.content + text };
+                    return neu;
+                });
+            const verarbeite = (zeile: string) => {
+                // Datenstrom-Format: 0:"Text" = Textteil, 3:"Fehler" = Fehlermeldung des Servers
+                if (zeile.startsWith('0:') || zeile.startsWith('3:')) {
+                    try {
+                        anhaengen(JSON.parse(zeile.substring(2)));
+                    } catch {
+                        // unvollständige Zeile ignorieren
+                    }
+                }
+            };
             while (reader && !done) {
                 const { value, done: readerDone } = await reader.read();
                 done = readerDone;
                 if (value) {
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split('\n');
-
-                    lines.map((line: string) => {
-                        if (line.startsWith('0:')) {
-                            try {
-                                // Extract the JSON string part: 0:"Hello" -> "Hello"
-                                const textChunk = JSON.parse(line.substring(2));
-                                this.messages.update(msgs => {
-                                    const newMsgs = [...msgs];
-                                    const lastMsg = newMsgs[newMsgs.length - 1];
-                                    if (lastMsg.role === 'assistant') {
-                                        lastMsg.content += textChunk;
-                                    }
-                                    return newMsgs;
-                                });
-                            } catch (e) {
-                                // Ignore parse errors for partial lines
-                            }
-                        }
-                    });
+                    puffer += decoder.decode(value, { stream: true });
+                    const zeilen = puffer.split('\n');
+                    puffer = zeilen.pop() ?? ''; // letzte, evtl. unvollständige Zeile abwarten
+                    zeilen.forEach(verarbeite);
                 }
             }
+            if (puffer) verarbeite(puffer);
         } catch (error) {
             console.error('Fehler beim Senden der Nachricht:', error);
             this.messages.update(msgs => [

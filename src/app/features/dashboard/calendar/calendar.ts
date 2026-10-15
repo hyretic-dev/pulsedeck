@@ -25,7 +25,6 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import {
   InviteGuestOrgDialogComponent
 } from '../../../shared/components/invite-guest-org-dialog.component';
-import { RealtimeChannel } from '@supabase/supabase-js';
 import { EventsService } from '../../../shared/services/events.service';
 import {
   CalendarEvent, getEventType,
@@ -41,7 +40,7 @@ import {
   RegistrationStatus
 } from '../../../shared/services/event-registration.service';
 import { EventSlotService, EventSlot, CreateSlotData } from '../../../shared/services/event-slot.service';
-import { SupabaseService } from '../../../shared/services/supabase';
+import { RealtimeService } from '../../../core/realtime.service';
 import { SkillService, Skill } from '../../../shared/services/skill.service';
 import { OrganizationService } from '../../../shared/services/organization.service';
 import { AnalyticsService } from '../../../shared/services/analytics.service';
@@ -80,7 +79,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
   private onboardingService = inject(OnboardingService);
-  private supabase = inject(SupabaseService);
+  private realtime = inject(RealtimeService);
   public auth = inject(AuthService);
   public permissions = inject(PermissionsService);
   readonly registrationService = inject(EventRegistrationService);
@@ -120,7 +119,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
   showCreateAnother = signal(false);
 
   // Realtime
-  private subscription: RealtimeChannel | null = null;
+  private subscription: (() => void) | null = null;
 
   visibilityOptions = [
     { label: 'Öffentlich (Alle)', value: 'public' },
@@ -192,32 +191,22 @@ export class CalendarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.();
   }
 
   private setupRealtimeSubscription() {
-    this.subscription = this.supabase.client.channel('public:event_registrations')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'event_registrations' },
-        (payload) => {
-          this.handleRealtimeUpdate(payload);
-        }
-      )
-      .subscribe();
+    const orgId = this.auth.currentOrgId();
+    if (!orgId) return;
+    // Meldung „Anmeldungen zu Termin <id> geändert“: eigene Zusagen, Teilnehmerblasen und offene Teilnehmerliste neu laden
+    this.subscription = this.realtime.abonnieren(orgId, ['event_registrations'], (ereignis) => {
+      if (ereignis.id) void this.handleRealtimeUpdate(ereignis.id);
+      else void this.registrationService.fetchMyRegistrations();
+    });
   }
 
-  private async handleRealtimeUpdate(payload: any) {
-    const eventId = payload.new?.event_id || payload.old?.event_id;
-    if (!eventId) return;
-
-    // 1. Refresh global registrations if it concerns me
-    if ((payload.new?.member_id === this.auth.currentMember()?.id) ||
-      (payload.old?.member_id === this.auth.currentMember()?.id)) {
-      this.registrationService.fetchMyRegistrations();
-    }
+  private async handleRealtimeUpdate(eventId: string) {
+    // 1. Eigene Anmeldungen aktualisieren
+    this.registrationService.fetchMyRegistrations();
 
     // 2. Refresh social proof for this event
     const summaryMap = await this.registrationService.getRegistrationsSummary([eventId]);
@@ -356,15 +345,8 @@ export class CalendarComponent implements OnInit, OnDestroy {
             this.currentEvent as CalendarEvent
           );
 
-        // Generate recurring events if applicable
-        if (
-          this.isRecurring() &&
-          this.currentEvent.recurrence_interval &&
-          created?.id
-        ) {
-          await this.eventsService.addRecurringEvents(
-            created as CalendarEvent
-          );
+        // Folgetermine einer Serie legt der Server beim Anlegen an
+        if (this.isRecurring() && created?.id) {
           await this.eventsService.fetchEvents();
         }
 

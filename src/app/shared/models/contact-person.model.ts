@@ -1,5 +1,5 @@
 /**
- * Contact person interface matching Supabase table structure
+ * Contact person interface (API-Antwort des Backends)
  */
 export interface ContactPerson {
     id?: string;

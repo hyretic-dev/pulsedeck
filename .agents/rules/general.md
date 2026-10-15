@@ -23,7 +23,7 @@ Ergänzend:
 - Bugfix = zuerst Regressionstest, der den Bug reproduziert — gleicher Stopp-Ablauf.
 - Meldet der User, dass der Test **nicht** fehlschlägt (falsch-grün): Test überarbeiten, erneut stoppen — nicht zur Implementierung übergehen.
 - Vom Stopp-Ablauf ausgenommen sind ausschließlich Änderungen ohne Verhaltensbezug (Doku, Kommentare, reine Formatierung). Im Zweifel gilt: Verhaltensänderung → TDD-Ablauf. Die Einstufung wird in der Antwort deklariert.
-- Test-Runner: **Jest**. Testdateien: `*.spec.ts` neben der getesteten Datei.
+- Test-Runner: **Vitest** (Frontend via Angular Unit-Test-Builder, Backend eigenständig; Entscheidung 2026-10-13, siehe `docs/migration/02-entscheidungen-offene-fragen.md` O6). Testdateien: `*.spec.ts` neben der getesteten Datei.
 - Tests prüfen Verhalten über die öffentliche API — keine privaten Methoden, keine Implementierungsdetails, keine Tests, die bei reinem Refactoring brechen.
 
 ## Keine Duplikate
@@ -36,7 +36,7 @@ Ergänzend:
 ## Typsicherheit
 
 - Kein `any`, kein `as`-Cast als Workaround, keine `!`-Non-Null-Assertion ohne dokumentierten Grund.
-- Supabase-Antworten immer über typisierte Interfaces in `shared/models/` oder Feature-lokale Models.
+- API-Antworten immer über typisierte Interfaces in `shared/models/` oder Feature-lokale Models.
 - Kein `Record<string, unknown>` oder untypisierte Objekte durchreichen.
 - Typed Reactive Forms (`FormGroup<{…}>`); keine untypisierten `FormControl`s.
 - Enums/Union-Types für fachliche Zustände statt Magic Strings.

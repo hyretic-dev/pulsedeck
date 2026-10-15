@@ -1,14 +1,27 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, effect } from '@angular/core';
 import { SwPush } from '@angular/service-worker';
-import { SupabaseService } from './supabase';
+
+import { ApiService } from '../../core/api.service';
 import { AuthService } from './auth.service';
 
+/** base64url eines Schlüssels (zum Vergleich mit dem öffentlichen VAPID-Schlüssel des Servers) */
+function alsBase64Url(puffer: ArrayBuffer | null | undefined): string {
+    if (!puffer) return '';
+    let text = '';
+    new Uint8Array(puffer).forEach((b) => (text += String.fromCharCode(b)));
+    return btoa(text).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/**
+ * Web-Push: Der öffentliche VAPID-Schlüssel kommt vom Server (`GET /push/config`), das Abonnement wird je Organisation
+ * (Mitglied) beim Server gespeichert. Wechselt der Server-Schlüssel, wird das alte Browser-Abonnement ersetzt.
+ */
 @Injectable({
     providedIn: 'root'
 })
 export class NotificationService {
     private swPush = inject(SwPush);
-    private supabase = inject(SupabaseService);
+    private api = inject(ApiService);
     private auth = inject(AuthService);
 
     // Signals for UI state
@@ -16,7 +29,8 @@ export class NotificationService {
     public isSupported = signal<boolean>(false);
     public isSubscribed = signal<boolean>(false);
 
-    private readonly VAPID_PUBLIC_KEY = 'BO19JVr7-jl1y39KHtprGelr3EtWnZAJRHexWD4N_TBBZkw9GAPIBmuIgjhq3trSl1H8qS2NOAWLCjNZNv8L4xs'; 
+    private serverSchluessel: string | null | undefined;
+    private letztesAbo: PushSubscription | null = null;
 
     constructor() {
         this.checkSupport();
@@ -25,14 +39,19 @@ export class NotificationService {
         // Listen to subscription changes
         this.swPush.subscription.subscribe((sub: PushSubscription | null) => {
             this.isSubscribed.set(!!sub);
-            if (sub) {
-                this.saveSubscriptionToServer(sub);
-            }
+            this.letztesAbo = sub;
+            if (sub) void this.saveSubscriptionToServer(sub);
+        });
+
+        // Beim Wechsel der Organisation/Anmeldung das vorhandene Abonnement für das aktuelle Mitglied registrieren
+        effect(() => {
+            const memberId = this.auth.currentMember()?.id;
+            if (memberId && this.letztesAbo) void this.saveSubscriptionToServer(this.letztesAbo);
         });
     }
 
     private checkSupport() {
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
+        if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof window !== 'undefined' && 'PushManager' in window) {
             this.isSupported.set(true);
         }
     }
@@ -40,6 +59,18 @@ export class NotificationService {
     private checkPermission() {
         if (!this.isSupported()) return;
         this.permissionStatus.set(Notification.permission);
+    }
+
+    private async holeServerSchluessel(): Promise<string | null> {
+        if (this.serverSchluessel === undefined) {
+            try {
+                const config = await this.api.get<{ enabled: boolean; publicKey: string | null }>('/push/config', undefined, { auth: false });
+                this.serverSchluessel = config.enabled ? config.publicKey : null;
+            } catch {
+                return null;
+            }
+        }
+        return this.serverSchluessel;
     }
 
     /**
@@ -68,40 +99,45 @@ export class NotificationService {
      */
     async subscribeToPush() {
         if (!this.isSupported()) return;
-        
+        const schluessel = await this.holeServerSchluessel();
+        if (!schluessel) return; // Push ist auf dem Server nicht eingerichtet
+
         try {
-            const sub = await this.swPush.requestSubscription({
-                serverPublicKey: this.VAPID_PUBLIC_KEY
-            });
+            let sub: PushSubscription;
+            try {
+                sub = await this.swPush.requestSubscription({ serverPublicKey: schluessel });
+            } catch {
+                // Ein Abonnement mit anderem Schlüssel (nach Schlüsselwechsel) blockiert das neue: ersetzen
+                await this.swPush.unsubscribe();
+                sub = await this.swPush.requestSubscription({ serverPublicKey: schluessel });
+            }
+            if (alsBase64Url(sub.options?.applicationServerKey) && alsBase64Url(sub.options.applicationServerKey) !== schluessel) {
+                await this.swPush.unsubscribe();
+                sub = await this.swPush.requestSubscription({ serverPublicKey: schluessel });
+            }
             await this.saveSubscriptionToServer(sub);
-            console.log('Push Subscription successful');
         } catch (err) {
             console.error('Could not subscribe to push', err);
         }
     }
 
     /**
-     * Save subscription to Supabase
+     * Abonnement beim Server für das aktuelle Mitglied speichern
      */
     private async saveSubscriptionToServer(sub: PushSubscription) {
-        const memberId = this.auth.currentMember()?.id;
-        if (!memberId) return;
+        const orgId = this.auth.currentOrgId();
+        if (!orgId || !this.auth.currentMember()?.id) return;
 
         const subJson = sub.toJSON();
         if (!subJson.endpoint || !subJson.keys) return;
 
-        const { error } = await this.supabase.client
-            .from('push_subscriptions')
-            .upsert({
-                member_id: memberId,
+        try {
+            await this.api.put(`/orgs/${orgId}/push/subscription`, {
                 endpoint: subJson.endpoint,
-                p256dh: subJson.keys?.['p256dh'],
-                auth: subJson.keys?.['auth']
-            }, { onConflict: 'endpoint' });
-
-        if (error) {
-            console.error('Error saving push subscription to Supabase:', error);
+                keys: { p256dh: subJson.keys['p256dh'], auth: subJson.keys['auth'] },
+            });
+        } catch (error) {
+            console.error('Error saving push subscription:', error);
         }
     }
 }
-

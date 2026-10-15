@@ -1,0 +1,20 @@
+# Produktiv-Overrides (docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d).
+#
+# NODE_ENV=production lehnt MAIL_TRANSPORT=log bei der Start-Validierung ab.
+# Die Mail-Konfiguration (O4) ist hier Pflicht: MAIL_TRANSPORT=smtp (+ SMTP_HOST, MAIL_FROM, ...)
+# oder MAIL_TRANSPORT=resend (+ RESEND_API_KEY, MAIL_FROM) in der .env setzen.
+
+services:
+  backend:
+    environment:
+      NODE_ENV: production
+      MAIL_TRANSPORT: ${MAIL_TRANSPORT:?smtp oder resend setzen (O4); log ist in der Produktion gesperrt}
+      SECRETS_ENCRYPTION_KEY: ${SECRETS_ENCRYPTION_KEY:?32 Bytes Base64 setzen (openssl rand -base64 32)}
+    restart: always
+
+  postgres:
+    restart: always
+
+  frontend:
+    restart: always
+

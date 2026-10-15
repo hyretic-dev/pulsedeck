@@ -421,16 +421,18 @@
                 </p>
             </div>
 
-            <!-- User ID (Advanced) -->
+            <!-- Kontoverknüpfung: nur Anzeige. Das Backend verknüpft über die bestätigte E-Mail-Adresse, nie über eine eingegebene ID -->
             <div class="border-t border-[var(--color-border)] pt-3">
-                <label class="block text-sm font-medium text-[var(--color-text)] mb-1">
-                    Verknüpfte Login-ID
-                    <span class="text-[var(--color-text-muted)] font-normal">(Optional)</span>
-                </label>
-                <input pInputText [(ngModel)]="currentMember.user_id" class="w-full font-mono text-xs"
-                    placeholder="UUID des Auth-Accounts" />
+                <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Login-Konto</label>
+                <p class="text-sm text-[var(--color-text)]">
+                    @if (currentMember.user_id) {
+                        Mit einem Konto verknüpft.
+                    } @else {
+                        Noch kein Konto verknüpft.
+                    }
+                </p>
                 <p class="text-xs text-[var(--color-text-muted)] mt-1">
-                    Wird automatisch beim Einladen gesetzt.
+                    Die Verknüpfung entsteht automatisch, sobald sich jemand mit der bestätigten E-Mail-Adresse dieses Mitglieds anmeldet (oder per Einladung).
                 </p>
             </div>
 

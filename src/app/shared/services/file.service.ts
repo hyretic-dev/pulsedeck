@@ -1,6 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { SupabaseService } from './supabase';
-import { AuthService } from './auth.service';
+import { ApiService } from '../../core/api.service';
 import { OrganizationService } from './organization.service';
 
 export type FileVisibility =
@@ -39,182 +38,76 @@ export interface FolderMetadata {
     file_count?: number;
 }
 
-const STORAGE_BUCKET = 'files';
-
-const FILE_SELECT = `
-    *,
-    uploader:members!uploaded_by(name),
-    working_group:working_groups(name)
-`;
-
 @Injectable({ providedIn: 'root' })
 export class FileService {
-    private supabase = inject(SupabaseService);
-    private auth = inject(AuthService);
+    private api = inject(ApiService);
     private org = inject(OrganizationService);
 
     files = signal<FileMetadata[]>([]);
     pinnedFiles = signal<FileMetadata[]>([]);
     recentFiles = signal<FileMetadata[]>([]);
     folderList = signal<FolderMetadata[]>([]);
-    folders = signal<string[]>([]);
     agFiles = signal<Map<string, FileMetadata[]>>(new Map());
     loading = signal(false);
     currentFolder = signal('/');
     currentFolderId = signal<string | null>(null);
 
+    private orgId(): string | undefined {
+        return this.org.currentOrgId();
+    }
+
+    private async liste(query: Record<string, string | number | boolean | undefined>): Promise<FileMetadata[]> {
+        const orgId = this.orgId();
+        if (!orgId) return [];
+        return this.api.get<FileMetadata[]>(`/orgs/${orgId}/files`, query);
+    }
+
     /**
      * Fetch pinned files for the organization
      */
     async fetchPinnedFiles(): Promise<void> {
-        const orgId = this.org.currentOrgId();
-        if (!orgId) return;
-
-        const { data, error } = await this.supabase.client
-            .from('files')
-            .select(FILE_SELECT)
-            .eq('organization_id', orgId)
-            .eq('is_pinned', true)
-            .order('name', { ascending: true });
-
-        if (error) {
+        try {
+            this.pinnedFiles.set(await this.liste({ pinned: true }));
+        } catch (error) {
             console.error('Error fetching pinned files:', error);
-            return;
         }
-        this.pinnedFiles.set(data as FileMetadata[]);
     }
 
     /**
      * Fetch recently uploaded files
      */
     async fetchRecentFiles(limit = 8): Promise<void> {
-        const orgId = this.org.currentOrgId();
-        if (!orgId) return;
-
-        const { data, error } = await this.supabase.client
-            .from('files')
-            .select(FILE_SELECT)
-            .eq('organization_id', orgId)
-            .order('created_at', { ascending: false })
-            .limit(limit);
-
-        if (error) {
+        try {
+            this.recentFiles.set(await this.liste({ sort: 'recent', limit }));
+        } catch (error) {
             console.error('Error fetching recent files:', error);
-            return;
         }
-        this.recentFiles.set(data as FileMetadata[]);
     }
 
     /**
-     * Fetch folders for a given parent (null = root)
+     * Fetch folders for a given parent (null = root); `file_count` zählt nur Dateien, die der Nutzer sehen darf
      */
-    async fetchFolderList(
-        parentId: string | null = null
-    ): Promise<void> {
-        const orgId = this.org.currentOrgId();
+    async fetchFolderList(parentId: string | null = null): Promise<void> {
+        const orgId = this.orgId();
         if (!orgId) return;
-
-        let query = this.supabase.client
-            .from('folders')
-            .select('*')
-            .eq('organization_id', orgId)
-            .order('name', { ascending: true });
-
-        if (parentId) {
-            query = query.eq('parent_id', parentId);
-        } else {
-            query = query.is('parent_id', null);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
+        try {
+            this.folderList.set(await this.api.get<FolderMetadata[]>(`/orgs/${orgId}/folders`, { parent_id: parentId ?? 'root' }));
+        } catch (error) {
             console.error('Error fetching folders:', error);
-            return;
         }
-
-        // Count files per folder
-        const foldersWithCount: FolderMetadata[] = [];
-        for (const folder of (data || [])) {
-            const { count } = await this.supabase.client
-                .from('files')
-                .select('id', { count: 'exact', head: true })
-                .eq('folder_id', folder.id);
-
-            foldersWithCount.push({
-                ...folder,
-                file_count: count ?? 0,
-            } as FolderMetadata);
-        }
-
-        this.folderList.set(foldersWithCount);
-    }
-
-    /**
-     * Fetch files in a specific folder
-     */
-    async fetchFiles(folder: string = '/'): Promise<void> {
-        this.loading.set(true);
-        this.currentFolder.set(folder);
-
-        const orgId = this.org.currentOrgId();
-
-        let query = this.supabase.client
-            .from('files')
-            .select(FILE_SELECT)
-            .eq('folder', folder)
-            .order('name', { ascending: true });
-
-        if (orgId) {
-            query = query.eq('organization_id', orgId);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-            console.error('Error fetching files:', error);
-        } else {
-            this.files.set(data as FileMetadata[]);
-        }
-
-        this.loading.set(false);
     }
 
     /**
      * Fetch files by folder_id (UUID-based)
      */
-    async fetchFilesByFolderId(
-        folderId: string | null
-    ): Promise<void> {
+    async fetchFilesByFolderId(folderId: string | null): Promise<void> {
         this.loading.set(true);
         this.currentFolderId.set(folderId);
-
-        const orgId = this.org.currentOrgId();
-        if (!orgId) {
-            this.loading.set(false);
-            return;
-        }
-
-        let query = this.supabase.client
-            .from('files')
-            .select(FILE_SELECT)
-            .eq('organization_id', orgId)
-            .order('name', { ascending: true });
-
-        if (folderId) {
-            query = query.eq('folder_id', folderId);
-        } else {
-            query = query.is('folder_id', null);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
+        try {
+            this.files.set(await this.liste({ folder_id: folderId ?? 'root', sort: 'name' }));
+        } catch (error) {
             console.error('Error fetching files:', error);
-        } else {
-            this.files.set(data as FileMetadata[]);
         }
-
         this.loading.set(false);
     }
 
@@ -222,79 +115,27 @@ export class FileService {
      * Fetch pinned files for a specific working group
      */
     async fetchFilesByAg(agId: string): Promise<void> {
-        const { data, error } = await this.supabase.client
-            .from('files')
-            .select(FILE_SELECT)
-            .eq('working_group_id', agId)
-            .eq('is_pinned', true)
-            .order('name', { ascending: true });
-
-        if (error) {
+        try {
+            const dateien = await this.liste({ working_group_id: agId, pinned: true });
+            this.agFiles.update((map) => new Map(map).set(agId, dateien));
+        } catch (error) {
             console.error('Error fetching AG files:', error);
-            return;
         }
-
-        this.agFiles.update(map => {
-            const newMap = new Map(map);
-            newMap.set(agId, data as FileMetadata[]);
-            return newMap;
-        });
-    }
-
-    /**
-     * Fetch all unique folders (legacy)
-     */
-    async fetchFolders(): Promise<void> {
-        const orgId = this.org.currentOrgId();
-        let query = this.supabase.client
-            .from('files')
-            .select('folder');
-
-        if (orgId) {
-            query = query.eq('organization_id', orgId);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-            console.error('Error fetching folders:', error);
-            return;
-        }
-
-        const uniqueFolders = [
-            ...new Set(data?.map(f => f.folder) || []),
-        ];
-        this.folders.set(uniqueFolders.sort());
     }
 
     /**
      * Search files by name
      */
     async searchFiles(query: string): Promise<FileMetadata[]> {
-        const orgId = this.org.currentOrgId();
-        let q = this.supabase.client
-            .from('files')
-            .select(FILE_SELECT)
-            .ilike('name', `%${query}%`)
-            .order('name', { ascending: true })
-            .limit(50);
-
-        if (orgId) {
-            q = q.eq('organization_id', orgId);
-        }
-
-        const { data, error } = await q;
-
-        if (error) throw new Error(error.message);
-        return data as FileMetadata[];
+        return this.liste({ q: query, sort: 'name', limit: 50 });
     }
 
     /**
-     * Upload a file
+     * Upload a file (multipart). Speicherort, Organisation und Uploader bestimmt der Server.
      */
     async uploadFile(
         file: File,
-        folder: string = '/',
+        _folder: string = '/',
         options: {
             visibility?: FileVisibility;
             description?: string;
@@ -302,244 +143,111 @@ export class FileService {
             folderId?: string;
         } = {}
     ): Promise<FileMetadata> {
-        const memberId = this.auth.currentMember()?.id;
-        if (!memberId) throw new Error('Nicht eingeloggt');
-
-        const timestamp = Date.now();
-        const safeName = file.name
-            .replace(/[^a-zA-Z0-9.-]/g, '_');
-        const prefix = folder === '/' ? '' : folder;
-        const storagePath = `${prefix}/${timestamp}_${safeName}`;
-
-        const { error: uploadError } = await this.supabase.client
-            .storage
-            .from(STORAGE_BUCKET)
-            .upload(storagePath, file, {
-                cacheControl: '3600',
-                upsert: false,
-            });
-
-        if (uploadError) throw new Error(uploadError.message);
-
-        const orgId = this.org.currentOrgId();
-
-        const metadata: Record<string, unknown> = {
-            name: file.name,
-            original_name: file.name,
-            storage_path: storagePath,
-            mime_type: file.type,
-            size_bytes: file.size,
-            folder,
-            folder_id: options.folderId || null,
-            description: options.description,
-            uploaded_by: memberId,
-            working_group_id: options.workingGroupId,
-            visibility: options.visibility || 'member',
-            ...(orgId && { organization_id: orgId }),
-        };
-
-        const { data, error } = await this.supabase.client
-            .from('files')
-            .insert(metadata)
-            .select()
-            .single();
-
-        if (error) {
-            await this.supabase.client.storage
-                .from(STORAGE_BUCKET).remove([storagePath]);
-            throw new Error(error.message);
-        }
-
-        return data as FileMetadata;
+        const orgId = this.orgId();
+        if (!orgId) throw new Error('Nicht eingeloggt');
+        const form = new FormData();
+        form.append('visibility', options.visibility || 'member');
+        if (options.description) form.append('description', options.description);
+        if (options.workingGroupId) form.append('working_group_id', options.workingGroupId);
+        if (options.folderId) form.append('folder_id', options.folderId);
+        form.append('file', file, file.name); // Datei zuletzt, damit der Server die Felder vor dem Inhalt kennt
+        return this.api.post<FileMetadata>(`/orgs/${orgId}/files`, form);
     }
 
     /**
-     * Trigger RAG ingestion for a specific file
+     * Request RAG ingestion for a specific file (läuft im Hintergrund)
      */
     async triggerFileIngestion(fileId: string): Promise<{ success: boolean; message?: string }> {
         try {
-            const { data, error } = await this.supabase.client.functions.invoke('ingest-file', {
-                body: { file_id: fileId }
-            });
-            
-            if (error) {
-                console.error("Ingestion error:", error);
-                return { success: false, message: "Konnte Datei nicht für KI indizieren." };
-            }
-            
-            return data as { success: boolean; message?: string };
-        } catch (e: any) {
-            console.error("Ingestion trigger failed:", e);
-            return { success: false, message: e.message };
+            return await this.api.post<{ success: boolean; message?: string }>(`/orgs/${this.orgId()}/files/${fileId}/index`);
+        } catch (e) {
+            console.error('Ingestion trigger failed:', e);
+            return { success: false, message: (e as Error).message };
         }
     }
 
     /**
      * Toggle pin status of a file
      */
-    async togglePin(
-        fileId: string,
-        pinned: boolean
-    ): Promise<void> {
-        const { error } = await this.supabase.client
-            .from('files')
-            .update({ is_pinned: pinned })
-            .eq('id', fileId);
-
-        if (error) throw new Error(error.message);
+    async togglePin(fileId: string, pinned: boolean): Promise<void> {
+        await this.api.patch(`/orgs/${this.orgId()}/files/${fileId}`, { is_pinned: pinned });
     }
 
     /**
      * Move a file to a different folder
      */
-    async moveFile(
-        fileId: string,
-        folderId: string | null
-    ): Promise<void> {
-        const { error } = await this.supabase.client
-            .from('files')
-            .update({ folder_id: folderId })
-            .eq('id', fileId);
-
-        if (error) throw new Error(error.message);
+    async moveFile(fileId: string, folderId: string | null): Promise<void> {
+        await this.api.patch(`/orgs/${this.orgId()}/files/${fileId}`, { folder_id: folderId });
     }
 
     /**
      * Create a persistent folder
      */
-    async createPersistentFolder(
-        name: string,
-        parentId: string | null = null
-    ): Promise<FolderMetadata> {
-        const orgId = this.org.currentOrgId();
-        const memberId = this.auth.currentMember()?.id;
-
-        if (!orgId || !memberId) {
-            throw new Error('Nicht eingeloggt');
-        }
-
-        const { data, error } = await this.supabase.client
-            .from('folders')
-            .insert({
-                name,
-                parent_id: parentId,
-                organization_id: orgId,
-                created_by: memberId,
-            })
-            .select()
-            .single();
-
-        if (error) throw new Error(error.message);
-        return data as FolderMetadata;
+    async createPersistentFolder(name: string, parentId: string | null = null): Promise<FolderMetadata> {
+        const orgId = this.orgId();
+        if (!orgId) throw new Error('Nicht eingeloggt');
+        return this.api.post<FolderMetadata>(`/orgs/${orgId}/folders`, { name, parent_id: parentId });
     }
 
     /**
-     * Delete a folder
+     * Alle Ordner der Organisation (für den Verschieben-Dialog), ebenenweise geladen
+     */
+    async fetchAllFolders(): Promise<FolderMetadata[]> {
+        const orgId = this.orgId();
+        if (!orgId) return [];
+        const alle: FolderMetadata[] = [];
+        let ebene: (string | null)[] = [null];
+        for (let tiefe = 0; ebene.length > 0 && tiefe < 10; tiefe += 1) {
+            const kinder = (await Promise.all(ebene.map((p) => this.api.get<FolderMetadata[]>(`/orgs/${orgId}/folders`, { parent_id: p ?? 'root' })))).flat();
+            alle.push(...kinder);
+            ebene = kinder.map((k) => k.id);
+        }
+        return alle.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    /**
+     * Delete a folder (Administratoren)
      */
     async deleteFolder(folderId: string): Promise<void> {
-        const { error } = await this.supabase.client
-            .from('folders')
-            .delete()
-            .eq('id', folderId);
-
-        if (error) throw new Error(error.message);
+        await this.api.delete(`/orgs/${this.orgId()}/folders/${folderId}`);
     }
 
     /**
-     * Get download URL for a file
-     */
-    getDownloadUrl(storagePath: string): string {
-        const { data } = this.supabase.client
-            .storage
-            .from(STORAGE_BUCKET)
-            .getPublicUrl(storagePath);
-
-        return data.publicUrl;
-    }
-
-    /**
-     * Get signed download URL (for private files)
-     */
-    async getSignedUrl(
-        storagePath: string,
-        expiresIn = 3600
-    ): Promise<string> {
-        const { data, error } = await this.supabase.client
-            .storage
-            .from(STORAGE_BUCKET)
-            .createSignedUrl(storagePath, expiresIn);
-
-        if (error) throw new Error(error.message);
-        return data.signedUrl;
-    }
-
-    /**
-     * Download a file
+     * Download a file: Inhalt mit Anmeldung laden und als Datei speichern
      */
     async downloadFile(file: FileMetadata): Promise<void> {
-        try {
-            const url = await this.getSignedUrl(
-                file.storage_path
-            );
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = file.original_name;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        } catch (e) {
-            console.error('Download error:', e);
-            throw e;
-        }
+        const blob = await this.api.blob(`/orgs/${this.orgId()}/files/${file.id}/content`);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.original_name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 10_000);
     }
 
     /**
-     * Update file metadata
+     * Update file metadata (Name, Beschreibung, Sichtbarkeit, Arbeitsgruppe)
      */
-    async updateFile(
-        id: string,
-        updates: Partial<FileMetadata>
-    ): Promise<void> {
-        const { error } = await this.supabase.client
-            .from('files')
-            .update({
-                ...updates,
-                updated_at: new Date().toISOString(),
-            })
-            .eq('id', id);
-
-        if (error) throw new Error(error.message);
+    async updateFile(id: string, updates: Partial<FileMetadata>): Promise<void> {
+        const { name, description, visibility, working_group_id, folder_id, is_pinned } = updates;
+        const body = { name, description, visibility, working_group_id, folder_id, is_pinned };
+        await this.api.patch(`/orgs/${this.orgId()}/files/${id}`, Object.fromEntries(Object.entries(body).filter(([, v]) => v !== undefined).map(([k, v]) => [k, v === '' && (k === 'working_group_id' || k === 'folder_id') ? null : v])));
     }
 
     /**
-     * Delete a file
+     * Delete a file (Inhalt und Metadaten)
      */
     async deleteFile(file: FileMetadata): Promise<void> {
-        const { error: storageError } = await this.supabase
-            .client.storage
-            .from(STORAGE_BUCKET)
-            .remove([file.storage_path]);
-
-        if (storageError) {
-            console.warn('Storage delete failed:', storageError);
-        }
-
-        const { error } = await this.supabase.client
-            .from('files')
-            .delete()
-            .eq('id', file.id);
-
-        if (error) throw new Error(error.message);
+        await this.api.delete(`/orgs/${this.orgId()}/files/${file.id}`);
     }
 
     /**
-     * Create a new folder (virtual - just by having files in it)
+     * Get all folders as paths is no longer needed; kept for API compatibility
      */
     createFolder(parentFolder: string, name: string): string {
-        return parentFolder === '/'
-            ? `/${name}`
-            : `${parentFolder}/${name}`;
+        return parentFolder === '/' ? `/${name}` : `${parentFolder}/${name}`;
     }
 
     /**

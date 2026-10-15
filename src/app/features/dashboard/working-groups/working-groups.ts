@@ -559,60 +559,16 @@ export class WorkingGroupsComponent implements OnInit {
   private async loadContactValidation(
     groups: WorkingGroup[]
   ): Promise<void> {
+    // Der Server zählt fehlende Kontaktkanäle (nur für Administratoren, Vorstand und AG-Leitung)
     const counts = new Map<string, number>();
-
-    try {
-      for (const group of groups) {
-        if (!group.id || !group.contact_type) {
-          continue;
-        }
-
-        const members = await this
-          .workingGroupsService
-          .getAgMembers(group.id);
-
-        if (members.length === 0) continue;
-
-        // For each member, check if they have
-        // the matching contact_channel filled
-        // We need full member data with channels
-        const { data: fullMembers, error } = await (
-          this.workingGroupsService as any
-        )
-          .supabase.from('members')
-          .select('id, contact_channels, email')
-          .in(
-            'id',
-            members.map(m => m.member_id)
-          );
-
-        // Column may not exist yet (migration
-        // not deployed) — skip silently
-        if (error || !fullMembers) continue;
-
-        let missing = 0;
-        for (const fm of fullMembers) {
-          const channels = fm.contact_channels || {};
-          const key = group.contact_type;
-          
-          if (key === 'Email') {
-            if (!fm.email && !channels[key]) missing++;
-          } else {
-            if (!channels[key]) missing++;
-          }
-        }
-
-        if (missing > 0) {
-          counts.set(group.id, missing);
-        }
+    for (const group of groups) {
+      if (group.id && (group.missing_contact_count ?? 0) > 0) {
+        counts.set(group.id, group.missing_contact_count!);
       }
-    } catch {
-      // Gracefully ignore — column may not
-      // exist until migration is deployed
     }
-
     this.missingContactCounts.set(counts);
   }
+
   /**
    * Build mobile overflow menu items for a group.
    */

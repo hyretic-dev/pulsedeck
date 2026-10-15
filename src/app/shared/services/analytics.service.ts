@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { SupabaseService } from './supabase';
+import { Injectable, inject } from '@angular/core';
+
+import { ApiService } from '../../core/api.service';
 
 export interface AnalyticsEvent {
     id: string;
@@ -15,33 +15,18 @@ export interface AnalyticsEvent {
     providedIn: 'root'
 })
 export class AnalyticsService {
-    private supabase: SupabaseClient;
-
-    constructor(private supabaseService: SupabaseService) {
-        this.supabase = this.supabaseService.client;
-    }
+    private api = inject(ApiService);
 
     /**
-     * Track a public or private event
+     * Track a public or private event. Die Organisation wird nur übernommen, wenn die angemeldete Person dort Mitglied ist.
      */
     async track(eventName: string, metaData: any = {}, organizationId?: string): Promise<void> {
         try {
-            // Auto-detect organization ID from URL if not provided
-            if (!organizationId) {
-                // pattern: /:slug/dashboard...
-                const path = window.location.pathname;
-                const matches = path.match(/^\/([^\/]+)\//);
-                if (matches && matches[1] && matches[1] !== 'auth' && matches[1] !== 'public') {
-                    // We would need to resolve slug to ID, which is hard here.
-                    // Better to rely on caller passing orgId or leaving it null for global events.
-                }
-            }
-
-            await this.supabase.from('analytics_events').insert({
+            await this.api.post('/analytics/events', {
                 event_name: eventName,
                 meta_data: metaData,
-                page_path: window.location.pathname,
-                organization_id: organizationId || null
+                page_path: window.location.pathname.slice(0, 300),
+                ...(organizationId ? { organization_id: organizationId } : {}),
             });
         } catch (e) {
             // Analytics should never break the app
@@ -50,59 +35,23 @@ export class AnalyticsService {
     }
 
     /**
-     * Get global aggregated stats (Super Admin only)
+     * Plattformweite Zahlen (nur Plattformadministration)
      */
     async getGlobalStats(): Promise<{ name: string, count: number }[]> {
-        const { data, error } = await this.supabase
-            .from('analytics_events')
-            .select('event_name');
-
-        if (error) throw error;
-
-        const counts: Record<string, number> = {};
-        data.forEach((row: any) => {
-            counts[row.event_name] = (counts[row.event_name] || 0) + 1;
-        });
-
-        return Object.entries(counts)
-            .map(([name, count]) => ({ name, count }))
-            .sort((a, b) => b.count - a.count);
+        return this.api.get('/platform/analytics/stats');
     }
 
     /**
-     * Get aggregated stats for an organization (Admin only)
+     * Zahlen einer Organisation (Administratoren)
      */
     async getStats(organizationId: string): Promise<{ name: string, count: number }[]> {
-        const { data, error } = await this.supabase
-            .from('analytics_events')
-            .select('event_name')
-            .eq('organization_id', organizationId); // We will count in JS for now or use rpc if data is large
-
-        if (error) throw error;
-
-        // Client-side aggregation (okay for small scale Alpha)
-        const counts: Record<string, number> = {};
-        data.forEach((row: any) => {
-            counts[row.event_name] = (counts[row.event_name] || 0) + 1;
-        });
-
-        return Object.entries(counts)
-            .map(([name, count]) => ({ name, count }))
-            .sort((a, b) => b.count - a.count);
+        return this.api.get(`/orgs/${organizationId}/analytics/stats`);
     }
 
     /**
      * Get recent events
      */
     async getRecentEvents(organizationId: string, limit = 50): Promise<AnalyticsEvent[]> {
-        const { data, error } = await this.supabase
-            .from('analytics_events')
-            .select('*')
-            .eq('organization_id', organizationId)
-            .order('created_at', { ascending: false })
-            .limit(limit);
-
-        if (error) throw error;
-        return data as AnalyticsEvent[];
+        return this.api.get(`/orgs/${organizationId}/analytics/events`, { limit });
     }
 }

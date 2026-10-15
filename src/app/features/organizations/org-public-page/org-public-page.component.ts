@@ -13,7 +13,7 @@ import { MessageModule } from 'primeng/message';
 import { DialogModule } from 'primeng/dialog';
 
 // Services
-import { SupabaseService } from '../../../shared/services/supabase';
+import { ApiService } from '../../../core/api.service';
 import { Organization } from '../../../shared/services/organization.service';
 import { AuthService, LoginCheckResult } from '../../../shared/services/auth.service';
 
@@ -440,7 +440,7 @@ import { RichTextRendererComponent } from '../../../shared/components/rich-text-
     `,
 })
 export class OrgPublicPageComponent implements OnInit {
-    private supabase = inject(SupabaseService);
+    private readonly api = inject(ApiService);
     private auth = inject(AuthService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
@@ -501,128 +501,37 @@ export class OrgPublicPageComponent implements OnInit {
         await this.loadOrganization(slug);
     }
 
-    private waitForAuthReady(): Promise<void> {
-        return new Promise((resolve) => {
-            if (this.supabase.authReady()) {
-                resolve();
-                return;
-            }
-            // Poll until ready (max 2 seconds)
-            let attempts = 0;
-            const interval = setInterval(() => {
-                attempts++;
-                if (this.supabase.authReady() || attempts > 20) {
-                    clearInterval(interval);
-                    resolve();
-                }
-            }, 100);
-        });
+    private async waitForAuthReady(): Promise<void> {
+        await this.auth.whenReady();
     }
 
     async loadOrganization(slug: string): Promise<void> {
         this.loading.set(true);
 
-        const { data: org } = await this.supabase.client
-            .from('organizations')
-            .select('*')
-            .eq('slug', slug)
-            .single();
+        try {
+            const org = await this.api.get<Organization>(`/public/organizations/${encodeURIComponent(slug)}`, undefined, { auth: false });
+            this.org.set(org);
 
-        if (!org) {
-            this.loading.set(false);
-            return;
+            // Alle öffentlichen Inhalte in einer Antwort (nur, was anonym sichtbar sein soll)
+            const uebersicht = await this.api.get<{
+                member_count: number;
+                events: PublicEvent[];
+                wiki_docs: Array<{ id: string; title: string; content: string; wiki_categories?: { name: string } }>;
+                feed_items: PublicFeedItem[];
+                working_groups: WorkingGroup[];
+                contacts: ContactPerson[];
+            }>(`/public/organizations/${encodeURIComponent(slug)}/overview`, undefined, { auth: false });
+            this.memberCount.set(uebersicht.member_count);
+            this.upcomingEvents.set(uebersicht.events);
+            this.wikiArticles.set(uebersicht.wiki_docs.map((d) => ({ id: d.id, title: d.title, content: d.content, category: d.wiki_categories?.name || 'Allgemein' })));
+            this.feedItems.set(uebersicht.feed_items);
+            this.workingGroups.set(uebersicht.working_groups);
+            this.contacts.set(uebersicht.contacts);
+        } catch {
+            // Organisation nicht gefunden: die Seite zeigt den Leerzustand
         }
 
-        this.org.set(org as Organization);
-
-        // Load all public data in parallel
-        await Promise.all([
-            this.loadMemberCount(org.id),
-            this.loadUpcomingEvents(org.id),
-            this.loadWikiArticles(org.id),
-            this.loadFeedItems(org.id),
-            this.loadWorkingGroups(org.id),
-            this.loadContacts(org.id),
-        ]);
-
         this.loading.set(false);
-    }
-
-    private async loadMemberCount(orgId: string): Promise<void> {
-        const { count } = await this.supabase.client
-            .from('members')
-            .select('*', { count: 'exact', head: true })
-            .eq('organization_id', orgId);
-
-        this.memberCount.set(count ?? 0);
-    }
-
-    private async loadUpcomingEvents(orgId: string): Promise<void> {
-        const today = new Date().toISOString().split('T')[0];
-
-        const { data } = await this.supabase.client
-            .from('events')
-            .select('id, title, date, start_time, end_time, location, description')
-            .eq('organization_id', orgId)
-            .gte('date', today)
-            .order('date', { ascending: true })
-            .limit(6);
-
-        this.upcomingEvents.set((data as PublicEvent[]) || []);
-    }
-
-    private async loadWikiArticles(orgId: string): Promise<void> {
-        const { data } = await this.supabase.client
-            .from('wiki_docs')
-            .select('id, title, content, wiki_categories!inner(name)')
-            .eq('organization_id', orgId)
-            .eq('status', 'Published')
-            .eq('allowed_roles', '{public}')
-            .is('working_group_id', null)
-            .order('title', { ascending: true })
-            .limit(6);
-
-        const articles = (data || []).map((d: any) => ({
-            id: d.id,
-            title: d.title,
-            content: d.content,
-            category: d.wiki_categories?.name || 'Allgemein'
-        }));
-        this.wikiArticles.set(articles);
-    }
-
-    private async loadFeedItems(orgId: string): Promise<void> {
-        const { data } = await this.supabase.client
-            .from('feed_items')
-            .select('id, title, content, created_at')
-            .eq('organization_id', orgId)
-            .eq('is_public', true)
-            .in('status', ['approved', 'sent'])
-            .order('created_at', { ascending: false })
-            .limit(50);
-
-        this.feedItems.set((data as PublicFeedItem[]) || []);
-    }
-
-    private async loadWorkingGroups(orgId: string): Promise<void> {
-        const { data } = await this.supabase.client
-            .from('working_groups')
-            .select('id, name, description')
-            .eq('organization_id', orgId)
-            .order('name', { ascending: true });
-
-        this.workingGroups.set((data as WorkingGroup[]) || []);
-    }
-
-    private async loadContacts(orgId: string): Promise<void> {
-        const { data } = await this.supabase.client
-            .from('contacts')
-            .select('id, name, role, email, phone, image_url')
-            .eq('organization_id', orgId)
-            .order('name', { ascending: true })
-            .limit(5);
-
-        this.contacts.set((data as ContactPerson[]) || []);
     }
 
     navigateToLogin() {

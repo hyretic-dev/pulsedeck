@@ -2,9 +2,10 @@ import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
-import { SupabaseService } from '../../../shared/services/supabase';
+import { ApiService } from '../../../core/api.service';
+import { RealtimeService } from '../../../core/realtime.service';
+import { OrganizationService } from '../../../shared/services/organization.service';
 import { DatePipe } from '@angular/common';
-import { RealtimeChannel } from '@supabase/supabase-js';
 
 @Component({
     selector: 'app-issue-tracker',
@@ -13,76 +14,34 @@ import { RealtimeChannel } from '@supabase/supabase-js';
     templateUrl: './issue-tracker.component.html',
 })
 export class IssueTrackerComponent implements OnInit, OnDestroy {
-    private supabase = inject(SupabaseService);
-    private realtimeChannel: RealtimeChannel | null = null;
+    private api = inject(ApiService);
+    private realtime = inject(RealtimeService);
+    private org = inject(OrganizationService);
+    private abmelden: (() => void) | null = null;
 
     feedbackList = signal<any[]>([]);
     loading = signal<boolean>(true);
 
     async ngOnInit() {
         await this.loadFeedback();
-        this.subscribeToRealtime();
+        const orgId = this.org.currentOrgId();
+        if (orgId) this.abmelden = this.realtime.abonnieren(orgId, ['feedback_submissions'], () => void this.loadFeedback());
     }
 
     ngOnDestroy() {
-        if (this.realtimeChannel) {
-            this.supabase.unsubscribe(this.realtimeChannel);
-        }
+        this.abmelden?.();
     }
 
+    /** Feedback der eigenen Organisation (Recht „Issue-Tracker anzeigen“) */
     private async loadFeedback() {
-        this.loading.set(true);
-        const { data, error } = await this.supabase.getFeedback();
-
-        if (error) {
+        const orgId = this.org.currentOrgId();
+        if (!orgId) return;
+        try {
+            this.feedbackList.set(await this.api.get<any[]>(`/orgs/${orgId}/feedback`));
+        } catch (error) {
             console.error('Error fetching feedback:', error);
-        } else {
-            this.feedbackList.set(data || []);
         }
         this.loading.set(false);
-    }
-
-    private subscribeToRealtime() {
-        this.realtimeChannel = this.supabase.subscribeToTable(
-            'feedback_submissions',
-            (payload: any) => {
-                console.log('Realtime update:', payload);
-                this.handleRealtimeUpdate(payload);
-            }
-        );
-    }
-
-    private handleRealtimeUpdate(payload: any) {
-        const currentList = this.feedbackList();
-        const eventType = payload.eventType;
-        const newRecord = payload.new;
-        const oldRecord = payload.old;
-
-        switch (eventType) {
-            case 'INSERT':
-                // Add new item at the beginning (sorted by created_at desc)
-                this.feedbackList.set([newRecord, ...currentList]);
-                break;
-
-            case 'UPDATE':
-                // Update existing item
-                const updateIndex = currentList.findIndex(
-                    item => item.id === newRecord.id
-                );
-                if (updateIndex !== -1) {
-                    const updated = [...currentList];
-                    updated[updateIndex] = newRecord;
-                    this.feedbackList.set(updated);
-                }
-                break;
-
-            case 'DELETE':
-                // Remove deleted item
-                this.feedbackList.set(
-                    currentList.filter(item => item.id !== oldRecord.id)
-                );
-                break;
-        }
     }
 
     getSeverity(status: string) {

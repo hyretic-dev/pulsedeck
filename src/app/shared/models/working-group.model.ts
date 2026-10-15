@@ -1,5 +1,5 @@
 /**
- * Working Group interface matching Supabase table structure
+ * Working Group (API-Antwort `GET /orgs/:orgId/working-groups`)
  */
 export interface WorkingGroup {
     id?: string;
@@ -17,4 +17,6 @@ export interface WorkingGroup {
     category?: string | null;
     created_at?: string;
     updated_at?: string;
+    /** Anzahl Mitglieder ohne den benötigten Kontaktkanal (nur für Admin, Vorstand und AG-Leitung). */
+    missing_contact_count?: number;
 }

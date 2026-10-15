@@ -1,0 +1,115 @@
+name: pulsedeck
+
+# Produktions-Compose für Coolify (Build Pack „Docker Compose“, Compose-Datei: /docker-compose.coolify.yml).
+# Unterschiede zu docker-compose.yml + docker-compose.prod.yml:
+#   - eine einzige Datei (Coolify nimmt genau eine),
+#   - keine veröffentlichten Ports und keine eigenen Netze: Coolify legt für die Ressource ein eigenes Netz an und leitet
+#     die Domain (Traefik) auf den Dienst `frontend`, Port 80. Postgres und Backend sind nicht von außen erreichbar,
+#   - NODE_ENV=production; MAIL_TRANSPORT, SECRETS_ENCRYPTION_KEY und alle Passwörter sind Pflicht (leer = der Start scheitert),
+#   - kein mailpit.
+# Alle Werte kommen aus den Umgebungsvariablen der Ressource in Coolify (nie als Build-Args, nie im Repo).
+# Anleitung: docs/betrieb/coolify.md. Die Datei ist lokal per Compose geprüft (scripts/smoke-compose.sh mit
+# SMOKE_COMPOSE_FILE), in Coolify selbst noch nicht ausgeführt.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pulsedeck
+      POSTGRES_USER: pulsedeck_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_MIGRATIONS_PASSWORD: ${POSTGRES_MIGRATIONS_PASSWORD:?}
+      POSTGRES_RUNTIME_PASSWORD: ${POSTGRES_RUNTIME_PASSWORD:?}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/10-roles.sh:/docker-entrypoint-initdb.d/10-roles.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulsedeck_admin -d pulsedeck"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build:
+      context: ./backend
+      additional_contexts:
+        docs: ./public
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      TZ: Europe/Berlin
+      JWT_SECRET: ${JWT_SECRET:?}
+      JWT_ISSUER: ${JWT_ISSUER:-pulsedeck}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-pulsedeck-web}
+      # Endgültige Adresse mit https, z. B. https://app.example.org – einzige erlaubte Basis für Links in Mails
+      APP_BASE_URL: ${APP_BASE_URL:?}
+      DATABASE_URL: postgres://pulsedeck_runtime:${POSTGRES_RUNTIME_PASSWORD:?}@postgres:5432/pulsedeck
+      MIGRATIONS_DATABASE_URL: postgres://pulsedeck_migrations:${POSTGRES_MIGRATIONS_PASSWORD:?}@postgres:5432/pulsedeck
+      MAIL_TRANSPORT: ${MAIL_TRANSPORT:?smtp oder resend setzen (O4); log ist in der Produktion gesperrt}
+      MAIL_FROM: ${MAIL_FROM:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_SECURE: ${SMTP_SECURE:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      MAINTENANCE_TOKEN: ${MAINTENANCE_TOKEN:-}
+      PG_POOL_MAX: ${PG_POOL_MAX:-10}
+      AUTH_MIN_RESPONSE_MS: ${AUTH_MIN_RESPONSE_MS:-}
+      RATE_LIMIT_LOGIN_MAX: ${RATE_LIMIT_LOGIN_MAX:-5}
+      RATE_LIMIT_LOGIN_WINDOW_MINUTES: ${RATE_LIMIT_LOGIN_WINDOW_MINUTES:-15}
+      RATE_LIMIT_MAIL_MAX: ${RATE_LIMIT_MAIL_MAX:-3}
+      RATE_LIMIT_MAIL_WINDOW_MINUTES: ${RATE_LIMIT_MAIL_WINDOW_MINUTES:-60}
+      SECRETS_ENCRYPTION_KEY: ${SECRETS_ENCRYPTION_KEY:?32 Bytes Base64 setzen (openssl rand -base64 32)}
+      JOBS_ENABLED: ${JOBS_ENABLED:-}
+      JOBS_TICK_SECONDS: ${JOBS_TICK_SECONDS:-}
+      APP_TIMEZONE: ${APP_TIMEZONE:-}
+      SMTP_ALLOW_PRIVATE_HOSTS: ${SMTP_ALLOW_PRIVATE_HOSTS:-}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+      FILES_DIR: /data/files
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+      DOCS_FILE: /app/DOCS.md
+      REALTIME_ENABLED: ${REALTIME_ENABLED:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+    volumes:
+      - files-data:/data/files
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    # Nur intern; die Domain wird in Coolify am Dienst `frontend` mit Port 80 gesetzt
+    expose:
+      - "80"
+    environment:
+      # true = schreibgeschützte Abnahme (schreibende API-Aufrufe → 503, Login bleibt möglich), docs/betrieb/migration.md
+      READ_ONLY: ${READ_ONLY:-false}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+
+volumes:
+  postgres-data:
+  # Dateien der Organisationen (Uploads): in die Datensicherung aufnehmen
+  files-data:

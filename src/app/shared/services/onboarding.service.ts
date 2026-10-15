@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { SupabaseService } from './supabase';
+import { ApiService } from '../../core/api.service';
+import { OrganizationService } from './organization.service';
 import { AuthService } from './auth.service';
 import { WorkingGroupsService } from './working-groups.service';
 import { NotificationService } from './notification.service';
@@ -25,7 +26,8 @@ export interface OnboardingStep {
     providedIn: 'root',
 })
 export class OnboardingService {
-    private supabase = inject(SupabaseService);
+    private api = inject(ApiService);
+    private org = inject(OrganizationService);
     private auth = inject(AuthService);
     private workingGroupsService = inject(WorkingGroupsService);
     private notificationService = inject(NotificationService);
@@ -138,53 +140,26 @@ export class OnboardingService {
     }
 
     /**
-     * Fetch completed steps from database
+     * Fetch completed steps from the server (und ob schon Aufgaben angelegt wurden)
      */
     async fetchProgress(): Promise<void> {
         const member = this.auth.currentMember();
-        if (!member?.id) {
+        const orgId = this.org.currentOrgId();
+        if (!member?.id || !orgId) {
             this._completedSteps.set(new Set());
             return;
         }
 
         this._loading.set(true);
-
-        const { data, error } = await this.supabase
-            .from('onboarding_progress')
-            .select('step_key')
-            .eq('member_id', member.id);
-
-        if (error) {
+        try {
+            const antwort = await this.api.get<{ completed_steps: string[]; has_tasks: boolean }>(`/orgs/${orgId}/onboarding`);
+            const schritte = new Set(antwort.completed_steps);
+            if (antwort.has_tasks) schritte.add('added_task');
+            this._completedSteps.set(schritte);
+        } catch (error) {
             console.error('Error fetching onboarding progress:', error);
-        } else if (data) {
-            this._completedSteps.set(
-                new Set(data.map((d: any) => d.step_key))
-            );
         }
-
-        // Also check for tasks to auto-complete 'added_task'
-        await this.checkTaskStep(member.id);
-
         this._loading.set(false);
-    }
-
-    /**
-     * Check if user has any tasks
-     */
-    private async checkTaskStep(memberId: string): Promise<void> {
-        const { count } = await this.supabase
-            .from('user_tasks')
-            .select('id', { count: 'exact', head: true })
-            .eq('member_id', memberId);
-
-        if (count && count > 0) {
-            this._completedSteps.update((s: Set<string>) => {
-                const newSet = new Set(s);
-                newSet.add('added_task');
-                return newSet;
-            });
-        }
-
     }
 
     /**
@@ -192,32 +167,20 @@ export class OnboardingService {
      */
     async completeStep(stepKey: string): Promise<void> {
         const member = this.auth.currentMember();
-        if (!member?.id) return;
+        const orgId = this.org.currentOrgId();
+        if (!member?.id || !orgId) return;
 
         // Already completed?
         if (this._completedSteps().has(stepKey)) return;
 
-        const { error } = await this.supabase
-            .from('onboarding_progress')
-            .upsert({
-                member_id: member.id,
-                step_key: stepKey,
-            }, { onConflict: 'member_id,step_key', ignoreDuplicates: true });
-
-        if (error) {
-            // Ignore duplicate key error (23505), treat as success
-            if (error.code !== '23505') {
-                console.error('Error completing onboarding step:', error);
-                return;
-            }
+        try {
+            await this.api.put(`/orgs/${orgId}/onboarding/steps/${stepKey}`);
+        } catch (error) {
+            console.error('Error completing onboarding step:', error);
+            return;
         }
 
-        this._completedSteps.update((s: Set<string>) => {
-            const newSet = new Set(s);
-            newSet.add(stepKey);
-            return newSet;
-        });
-
+        this._completedSteps.update((s: Set<string>) => new Set(s).add(stepKey));
     }
 
     /**

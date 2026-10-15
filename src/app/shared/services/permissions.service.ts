@@ -1,6 +1,6 @@
 import { Injectable, inject, computed, signal, effect } from '@angular/core';
 import { AuthService } from './auth.service';
-import { SupabaseService } from './supabase';
+import { ApiService } from '../../core/api.service';
 import { Permission, AgRole } from '../models/member.model';
 
 /**
@@ -41,7 +41,7 @@ export const ALL_PERMISSIONS: Permission[] = [
 })
 export class PermissionsService {
     private auth = inject(AuthService);
-    private supabase = inject(SupabaseService).client;
+    private api = inject(ApiService);
 
     /**
      * AG memberships with roles for the current user
@@ -66,15 +66,16 @@ export class PermissionsService {
      */
     permissions = computed<Permission[]>(() => {
         const member = this.auth.currentMember();
-        return (member?.permissions as Permission[]) || [];
+        return member?.access?.permissions ?? ((member?.permissions as Permission[]) || []);
     });
 
     constructor() {
         // Fetch AG roles when member changes
         effect(() => {
             const member = this.auth.currentMember();
-            if (member?.id) {
-                this.fetchAgRoles(member.id);
+            const orgId = this.auth.currentOrgId();
+            if (member?.id && orgId) {
+                this.fetchAgRoles(orgId);
             } else {
                 this.agRoles.set(new Map());
             }
@@ -164,96 +165,53 @@ export class PermissionsService {
     }
 
     /**
-     * Fetch AG roles for a member
+     * Fetch AG roles for the current member
      */
-    private async fetchAgRoles(memberId: string): Promise<void> {
-        const { data, error } = await this.supabase
-            .from('ag_memberships')
-            .select('working_group_id, role')
-            .eq('member_id', memberId);
-
-        if (error) {
+    private async fetchAgRoles(orgId: string): Promise<void> {
+        try {
+            const zeilen = await this.api.get<{ working_group_id: string; role: AgRole }[]>(`/orgs/${orgId}/working-groups/mine`);
+            this.agRoles.set(new Map(zeilen.map((m) => [m.working_group_id, m.role])));
+        } catch (error) {
             console.error('Error fetching AG roles:', error);
             this.agRoles.set(new Map());
-            return;
         }
-
-        const rolesMap = new Map<string, AgRole>();
-        data?.forEach(m => {
-            rolesMap.set(m.working_group_id, m.role as AgRole);
-        });
-
-        this.agRoles.set(rolesMap);
     }
 
     /**
      * Update a member's permissions (admin only)
      */
-    async updateMemberPermissions(
-        memberId: string,
-        permissions: Permission[]
-    ): Promise<void> {
-        const { error } = await this.supabase
-            .from('members')
-            .update({ permissions })
-            .eq('id', memberId);
-
-        if (error) {
-            throw new Error(`Fehler beim Aktualisieren: ${error.message}`);
+    async updateMemberPermissions(memberId: string, permissions: Permission[]): Promise<void> {
+        const orgId = this.auth.currentOrgId();
+        try {
+            await this.api.patch(`/orgs/${orgId}/members/${memberId}`, { permissions });
+        } catch (e) {
+            throw new Error(`Fehler beim Aktualisieren: ${(e as Error).message}`);
         }
     }
 
     /**
      * Update a member's AG role (AG admin or system admin only)
      */
-    async updateAgMemberRole(
-        membershipId: string,
-        role: AgRole
-    ): Promise<void> {
-        const { error } = await this.supabase
-            .from('ag_memberships')
-            .update({ role })
-            .eq('id', membershipId);
-
-        if (error) {
-            throw new Error(
-                `Fehler beim Aktualisieren der Rolle: ${error.message}`
-            );
+    async updateAgMemberRole(agId: string, memberId: string, role: AgRole): Promise<void> {
+        const orgId = this.auth.currentOrgId();
+        try {
+            await this.api.patch(`/orgs/${orgId}/working-groups/${agId}/members/${memberId}`, { role });
+        } catch (e) {
+            throw new Error(`Fehler beim Aktualisieren der Rolle: ${(e as Error).message}`);
         }
     }
 
     /**
      * Get all AG memberships with details for a specific AG
      */
-    async getAgMembers(
-        agId: string
-    ): Promise<
-        { id: string; member_id: string; member_name: string; role: AgRole }[]
-    > {
-        const { data, error } = await this.supabase
-            .from('ag_memberships')
-            .select(
-                `
-                id,
-                member_id,
-                role,
-                members(name)
-            `
-            )
-            .eq('working_group_id', agId);
-
-        if (error) {
+    async getAgMembers(agId: string): Promise<{ id: string; member_id: string; member_name: string; role: AgRole }[]> {
+        const orgId = this.auth.currentOrgId();
+        try {
+            const zeilen = await this.api.get<{ id: string; member_id: string; name: string; role: AgRole }[]>(`/orgs/${orgId}/working-groups/${agId}/members`);
+            return zeilen.map((m) => ({ id: m.id, member_id: m.member_id, member_name: m.name || 'Unbekannt', role: m.role }));
+        } catch (error) {
             console.error('Error fetching AG members:', error);
             return [];
         }
-
-        return (
-            data?.map(m => ({
-                id: m.id,
-                member_id: m.member_id,
-                member_name: (m.members as any)?.name || 'Unbekannt',
-                role: m.role as AgRole,
-            })) || []
-        );
     }
 }

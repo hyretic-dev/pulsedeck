@@ -1,7 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { SupabaseService } from '../../../shared/services/supabase';
+import { ApiService } from '../../../core/api.service';
+import { AuthService } from '../../../shared/services/auth.service';
+import { OrganizationService } from '../../../shared/services/organization.service';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
@@ -18,7 +20,9 @@ import { SelectModule } from 'primeng/select';
     templateUrl: './logs.component.html'
 })
 export class LogsComponent {
-    private supabase = inject(SupabaseService);
+    private api = inject(ApiService);
+    private auth = inject(AuthService);
+    private org = inject(OrganizationService);
     private router = inject(Router);
 
     logs = signal<any[]>([]);
@@ -31,36 +35,38 @@ export class LogsComponent {
     onlineUsers = signal<any[]>([]);
     loadingOnline = signal(false);
 
-    // Hardcoded Super Admin ID (Julien)
-    private readonly SUPER_ADMIN_ID = '2d8af6a7-507c-4834-aff9-3b00d1ad9c7c';
+    /** Plattformadministratoren sehen alle Organisationen; Organisationsadministratoren nur die eigene. */
+    platformModus = signal(false);
 
     constructor() {
-        this.checkAccess();
+        void this.checkAccess();
     }
 
-    checkAccess() {
-        const user = this.supabase.user() as any;
-        if (user?.id !== this.SUPER_ADMIN_ID) {
+    async checkAccess() {
+        await this.auth.whenReady();
+        const platform = this.auth.account()?.isPlatformAdmin === true;
+        if (!platform && !this.auth.isAdmin()) {
             // Quietly redirect unauthorized users
             this.router.navigate(['/']);
             return;
         }
-        this.fetchOrganizations();
+        this.platformModus.set(platform);
+        await this.fetchOrganizations();
         this.fetchLogs();
     }
 
     async fetchOrganizations() {
-        const { data, error } = await this.supabase.client
-            .from('organizations')
-            .select('id, name')
-            .order('name');
-            
-        if (!error && data) {
-            this.organizations.set(data);
-            if (data.length > 0) {
-                this.selectedOrgId.set(data[0].id);
-                this.fetchOnlineUsers(data[0].id);
+        try {
+            const orgs = this.platformModus()
+                ? await this.api.get<{ id: string; name: string }[]>('/platform/organizations')
+                : [{ id: this.org.currentOrgId() as string, name: this.org.currentOrganization()?.name ?? '' }];
+            this.organizations.set(orgs);
+            if (orgs.length > 0) {
+                this.selectedOrgId.set(orgs[0].id);
+                this.fetchOnlineUsers(orgs[0].id);
             }
+        } catch (error) {
+            console.error('Error fetching organizations:', error);
         }
     }
 
@@ -68,40 +74,30 @@ export class LogsComponent {
         if (!orgId) return;
         this.selectedOrgId.set(orgId);
         this.loadingOnline.set(true);
-
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-
-        // Fetch all active sessions recently and filter in memory by org
-        // (PostgREST JSONB key existence is tricky, and active sessions count is small)
-        const { data, error } = await this.supabase.client
-            .from('active_sessions')
-            .select('*')
-            .gte('last_seen_at', fiveMinutesAgo)
-            .order('last_seen_at', { ascending: false });
-
-        if (error) {
+        try {
+            // Online = in den letzten fünf Minuten gesehen; der Server liefert je Nutzer nur die Rolle in dieser Organisation
+            this.onlineUsers.set(
+                this.platformModus()
+                    ? await this.api.get<any[]>('/platform/online-users', { org_id: orgId })
+                    : await this.api.get<any[]>(`/orgs/${orgId}/presence`)
+            );
+        } catch (error) {
             console.error('Error fetching online users:', error);
             this.onlineUsers.set([]);
-        } else if (data) {
-            const filtered = data.filter(s => s.org_roles && s.org_roles[orgId] !== undefined);
-            this.onlineUsers.set(filtered);
         }
-        
         this.loadingOnline.set(false);
     }
 
     async fetchLogs() {
         this.loading.set(true);
-        const { data, error } = await this.supabase.client
-            .from('audit_logs')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(100) as any;
-
-        if (error) {
+        try {
+            this.logs.set(
+                this.platformModus()
+                    ? await this.api.get<any[]>('/platform/audit-logs', { limit: 100 })
+                    : await this.api.get<any[]>(`/orgs/${this.org.currentOrgId()}/audit-logs`, { limit: 100 })
+            );
+        } catch (error) {
             console.error('Error fetching logs:', error);
-        } else {
-            this.logs.set(data || []);
         }
         this.loading.set(false);
     }

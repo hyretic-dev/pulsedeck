@@ -1,16 +1,19 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+
+import { SessionService } from '../../core/session.service';
+import { AuthService } from '../services/auth.service';
 import { OrganizationService } from '../services/organization.service';
-import { SupabaseService } from '../services/supabase';
 
 /**
- * Guard that loads the organization by slug from the URL
- * and stores it in the OrganizationService.
- * Also checks if user is authenticated.
+ * Guard that loads the organization by slug from the URL, stores it in the OrganizationService and
+ * makes it the active organization of the signed-in member. Access control itself happens in the
+ * backend (every request checks the membership); this guard only provides the routing experience.
  */
-export const organizationGuard: CanActivateFn = async (route) => {
+export const organizationGuard: CanActivateFn = async (route, state) => {
     const orgService = inject(OrganizationService);
-    const supabase = inject(SupabaseService);
+    const auth = inject(AuthService);
+    const session = inject(SessionService);
     const router = inject(Router);
 
     // Get slug from route or parent route
@@ -24,18 +27,21 @@ export const organizationGuard: CanActivateFn = async (route) => {
         return false;
     }
 
-    // Check if user is authenticated (wait for session)
-    const { data: { session } } = await supabase.client.auth.getSession();
-
-    if (!session) {
+    if (!session.istAngemeldet()) {
         // Redirect to login, then back to intended destination
-        router.navigate(['/login']);
+        router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+        return false;
+    }
+
+    // Konto und Mitgliedschaften sind geladen, bevor entschieden wird
+    await auth.whenReady();
+    if (!session.istAngemeldet()) {
+        router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
         return false;
     }
 
     // Load organization
     const loaded = await orgService.loadBySlug(slug);
-
     if (!loaded) {
         // Organization not found - redirect to public page or home
         router.navigate(['/', slug]);
@@ -47,20 +53,14 @@ export const organizationGuard: CanActivateFn = async (route) => {
         return false;
     }
 
-    // Direct database check for membership to prevent race conditions
-    // and enforce strict access control
-    const { data, error } = await supabase.client
-        .from('members')
-        .select('id')
-        .eq('organization_id', orgId)
-        .eq('user_id', session.user.id)
-        .single();
-
-    if (error || !data) {
+    if (!auth.getMembershipForOrg(orgId)) {
         console.warn('Zugriff verweigert: Kein Mitglied dieser Organisation');
         router.navigate(['/organisationen']);
         return false;
     }
 
+    if (auth.currentOrgId() !== orgId || !auth.currentMember()) {
+        await auth.setActiveOrganization(orgId);
+    }
     return true;
 };

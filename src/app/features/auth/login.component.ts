@@ -7,7 +7,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
 import { AuthService, LoginCheckResult } from '../../shared/services/auth.service';
-import { SupabaseService } from '../../shared/services/supabase';
 
 type LoginStep = 'email' | 'password' | 'invitation-sent' | 'not-found';
 
@@ -181,7 +180,6 @@ type LoginStep = 'email' | 'password' | 'invitation-sent' | 'not-found';
 })
 export class LoginComponent {
   auth = inject(AuthService);
-  private supabase = inject(SupabaseService);
   router = inject(Router);
   route = inject(ActivatedRoute);
 
@@ -230,16 +228,20 @@ export class LoginComponent {
       const { error } = await this.auth.signIn(this.email, this.password);
 
       if (error) {
-        if (error.message.includes('Invalid login')) {
+        const code = (error as { code?: string }).code;
+        if (code === 'invalid_credentials') {
           this.error.set('Falsches Passwort.');
+        } else if (code === 'email_not_verified') {
+          this.error.set('Bitte bestätige zuerst deine E-Mail-Adresse über den Link in der Bestätigungs-Mail.');
         } else {
           this.error.set(error.message);
         }
         this.loading.set(false);
       } else {
-        // Successful login
+        // Successful login: eine bei der Registrierung vorgemerkte Organisation jetzt anlegen
+        const neueOrg = await this.auth.legeAusstehendeOrganisationAn();
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-        this.router.navigateByUrl(returnUrl || '/organisationen');
+        this.router.navigateByUrl(neueOrg ? `/${neueOrg}/dashboard` : returnUrl || '/organisationen');
       }
     } catch (e) {
       this.loading.set(false);
@@ -252,16 +254,9 @@ export class LoginComponent {
 
     this.loading.set(true);
     try {
-      const { error } = await this.supabase.client.auth.resetPasswordForEmail(this.email, {
-        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
-      });
-
+      await this.auth.requestPasswordReset(this.email);
       this.loading.set(false);
-      if (error) {
-        this.error.set(error.message);
-      } else {
-        this.step.set('invitation-sent');
-      }
+      this.step.set('invitation-sent');
     } catch (e: any) {
       this.loading.set(false);
       this.error.set(e.message || 'Fehler beim Zurücksetzen.');
@@ -285,20 +280,9 @@ export class LoginComponent {
     this.error.set('');
 
     try {
-      const { error } = await this.supabase.client.auth.signInWithOtp({
-        email: this.email.trim(),
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        }
-      });
-
+      await this.auth.requestMagicLink(this.email);
       this.loading.set(false);
-
-      if (error) {
-        this.error.set(error.message);
-      } else {
-        this.step.set('invitation-sent');
-      }
+      this.step.set('invitation-sent');
     } catch (e: any) {
       this.loading.set(false);
       this.error.set(e.message || 'Fehler beim Senden des Links.');

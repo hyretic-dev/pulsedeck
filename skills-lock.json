@@ -1,11 +1,11 @@
 {
   "version": 1,
   "skills": {
-    "supabase-postgres-best-practices": {
-      "source": "supabase/agent-skills",
+    "ponytail": {
+      "source": "DietrichGebert/ponytail",
       "sourceType": "github",
-      "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
-      "computedHash": "d606a1146be6d54fb9e73f718b5320b9acac5ff2ba2d7230a555df4b5a923b4a"
+      "skillPath": "skills/ponytail/SKILL.md",
+      "computedHash": "99f0589e5646b46da07b9419a5daa178004b3dd8930fec528918a51ab07f5efc"
     }
   }
 }

@@ -27,7 +27,6 @@ import { AuthService } from '../../../shared/services/auth.service';
 import { OrganizationService, Organization } from '../../../shared/services/organization.service';
 import { SkillService, Skill, SkillCategory } from '../../../shared/services/skill.service';
 import { FeedService, NewsletterConfig } from '../../../shared/services/feed.service';
-import { SupabaseService } from '../../../shared/services/supabase';
 import { RolesService } from '../../../shared/services/roles.service';
 import { PermissionsService, PERMISSION_LABELS, ALL_PERMISSIONS } from '../../../shared/services/permissions.service';
 import { OrganizationRole, Permission } from '../../../shared/models/member.model';
@@ -64,7 +63,6 @@ export class SettingsComponent implements OnInit {
     readonly org = inject(OrganizationService);
     readonly skillService = inject(SkillService);
     readonly feedService = inject(FeedService);
-    private readonly supabase = inject(SupabaseService);
     private readonly messageService = inject(MessageService);
     private readonly confirmationService = inject(ConfirmationService);
     readonly rolesService = inject(RolesService);
@@ -281,7 +279,7 @@ export class SettingsComponent implements OnInit {
         if (!this.newsletterConfig()) return;
 
         try {
-            await this.feedService.updateNewsletterConfig(this.newsletterConfig()!);
+            this.newsletterConfig.set(await this.feedService.updateNewsletterConfig(this.newsletterConfig()!));
             this.messageService.add({
                 severity: 'success',
                 summary: 'Newsletter-Einstellungen gespeichert',
@@ -318,15 +316,17 @@ export class SettingsComponent implements OnInit {
 
         const form = this.orgForm();
 
-        const { error } = await this.supabase.client
-            .from('organizations')
-            .update({
+        let error: Error | null = null;
+        try {
+            await this.org.update(orgId, {
                 name: form.name,
                 description: form.description,
                 primary_color: form.primary_color,
                 logo_url: form.logo_url,
-            })
-            .eq('id', orgId);
+            });
+        } catch (e) {
+            error = e as Error;
+        }
 
         if (error) {
             this.messageService.add({
@@ -474,7 +474,7 @@ export class SettingsComponent implements OnInit {
             rejectLabel: 'Abbrechen',
             acceptButtonStyleClass: 'p-button-danger',
             accept: async () => {
-                const { success, error } = await this.rolesService.deleteRole(role.id!);
+                const { success, error } = await this.rolesService.deleteRole(role.id!, role.organization_id);
                 if (success) {
                     await this.rolesService.loadRoles(role.organization_id);
                     this.messageService.add({ severity: 'success', summary: 'Rolle gelöscht' });

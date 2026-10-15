@@ -14,7 +14,6 @@ import { CardModule } from 'primeng/card';
 
 // Services
 import { OrganizationService } from '../../../shared/services/organization.service';
-import { SupabaseService } from '../../../shared/services/supabase';
 import { AuthService } from '../../../shared/services/auth.service';
 
 @Component({
@@ -128,7 +127,6 @@ import { AuthService } from '../../../shared/services/auth.service';
 })
 export class CreateOrganizationComponent {
     private readonly orgService = inject(OrganizationService);
-    private readonly supabase = inject(SupabaseService);
     private readonly router = inject(Router);
     private readonly messageService = inject(MessageService);
     private readonly authService = inject(AuthService);
@@ -182,8 +180,7 @@ export class CreateOrganizationComponent {
     async createOrganization(): Promise<void> {
         if (!this.name || !this.slug) return;
 
-        const userId = this.supabase.user()?.id;
-        if (!userId) {
+        if (!this.authService.isLoggedIn()) {
             this.messageService.add({
                 severity: 'error',
                 summary: 'Fehler',
@@ -195,7 +192,7 @@ export class CreateOrganizationComponent {
         this.loading.set(true);
 
         try {
-            const org = await this.orgService.create(this.name, this.slug, userId);
+            const org = await this.orgService.create(this.name, this.slug);
 
             // Refresh memberships to include the new organization
             await this.authService.refreshMember();

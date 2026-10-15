@@ -16,7 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
-import { SupabaseService } from '../../shared/services/supabase';
+import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { OrganizationService } from '../../shared/services/organization.service';
 import { ChatbotService } from '../../shared/services/chatbot.service';
@@ -51,7 +51,7 @@ export class SidebarRight implements OnInit, AfterViewChecked {
   @ViewChild('newTaskInput') newTaskInput!: ElementRef<HTMLInputElement>;
   @ViewChild('chatScrollContainer') chatScrollContainer!: ElementRef;
 
-  private supabase = inject(SupabaseService);
+  private api = inject(ApiService);
   private auth = inject(AuthService);
   private orgService = inject(OrganizationService);
   chatbotService = inject(ChatbotService);
@@ -59,7 +59,7 @@ export class SidebarRight implements OnInit, AfterViewChecked {
   upcomingEvents = signal<any[]>([]);
   upcomingBirthdays = signal<BirthdayMember[]>([]);
   tasks = signal<Task[]>([]);
-  isLoggedIn = computed(() => !!this.supabase.user());
+  isLoggedIn = computed(() => this.auth.isLoggedIn());
   private memberId = signal<string | null>(null);
 
   // Dynamic suggestions for the latest assistant message
@@ -133,14 +133,13 @@ export class SidebarRight implements OnInit, AfterViewChecked {
     if (!orgId) return;
 
     const today = new Date().toISOString().split('T')[0];
-    const { data } = await this.supabase
-      .from('events')
-      .select('*')
-      .eq('organization_id', orgId)
-      .gte('date', today)
-      .order('date', { ascending: true })
-      .order('start_time', { ascending: true })
-      .limit(20);
+    let data: any[] | null = null;
+    try {
+      // Der Server liefert nur Termine, die der Nutzer sehen darf (nach Datum und Uhrzeit sortiert)
+      data = (await this.api.get<any[]>(`/orgs/${orgId}/events`)).filter((e) => e.date >= today).slice(0, 20);
+    } catch {
+      data = null;
+    }
 
     if (data) {
       const now = new Date();
@@ -191,89 +190,28 @@ export class SidebarRight implements OnInit, AfterViewChecked {
     const orgId = this.orgService.currentOrgId();
     if (!orgId) return;
 
-    const { data } = await this.supabase
-      .from('members')
-      .select('id, name, avatar_url, birthday')
-      .eq('organization_id', orgId)
-      .not('birthday', 'is', null)
-      .eq('status', 'Active');
-
-    if (!data) {
-      this.upcomingBirthdays.set([]);
-      return;
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const birthdays = data
-      .map((member: any) => {
-        const birthdayInfo = this.parseBirthdayInfo(
-          member.birthday,
-          today
-        );
-        if (!birthdayInfo) return null;
-
-        return {
-          id: member.id,
-          name: member.name,
-          avatar_url: member.avatar_url,
-          birthday: member.birthday,
-          isToday: birthdayInfo.isToday,
-          daysUntil: birthdayInfo.daysUntil,
-          formattedDate: birthdayInfo.formattedDate,
-        } as BirthdayMember;
-      })
-      .filter((b): b is BirthdayMember => b !== null)
-      .filter(b => b.daysUntil <= 7)
-      .sort((a, b) => a.daysUntil - b.daysUntil);
-
-    this.upcomingBirthdays.set(birthdays.slice(0, 5));
-  }
-
-  private parseBirthdayInfo(
-    birthdayStr: string,
-    today: Date
-  ): { isToday: boolean; daysUntil: number; formattedDate: string } | null {
-    if (!birthdayStr) return null;
-
-    // Parse German date format (dd.mm.yyyy or dd.mm.yy)
-    const parts = birthdayStr.split('.');
-    if (parts.length < 2) return null;
-
-    const day = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1;
-
-    if (isNaN(day) || isNaN(month)) return null;
-
-    // Create this year's birthday
-    const thisYearBirthday = new Date(
-      today.getFullYear(),
-      month,
-      day
-    );
-    thisYearBirthday.setHours(0, 0, 0, 0);
-
-    // If birthday already passed this year, use next year
-    let targetBirthday = thisYearBirthday;
-    if (thisYearBirthday < today) {
-      targetBirthday = new Date(
-        today.getFullYear() + 1,
-        month,
-        day
+    try {
+      // Der Server liefert nur Geburtstage der nächsten sieben Tage, ohne Geburtsjahr
+      const liste = await this.api.get<Array<{ id: string; name: string; avatar_url?: string; birthday: string; days_until: number }>>(`/orgs/${orgId}/birthdays`);
+      const heute = new Date();
+      this.upcomingBirthdays.set(
+        liste.map((b) => {
+          const [tag, monat] = b.birthday.split('.').map((x) => parseInt(x, 10));
+          const ziel = new Date(heute.getFullYear(), monat - 1, tag);
+          return {
+            id: b.id,
+            name: b.name,
+            avatar_url: b.avatar_url,
+            birthday: b.birthday,
+            isToday: b.days_until === 0,
+            daysUntil: b.days_until,
+            formattedDate: ziel.toLocaleDateString('de-DE', { day: '2-digit', month: 'short' }),
+          } as BirthdayMember;
+        })
       );
+    } catch {
+      this.upcomingBirthdays.set([]);
     }
-
-    const diffTime = targetBirthday.getTime() - today.getTime();
-    const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const isToday = daysUntil === 0;
-
-    const formattedDate = targetBirthday.toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: 'short',
-    });
-
-    return { isToday, daysUntil, formattedDate };
   }
 
   getBirthdayLabel(birthday: BirthdayMember): string {
@@ -283,31 +221,28 @@ export class SidebarRight implements OnInit, AfterViewChecked {
   }
 
   private async fetchTasks() {
-    const memId = this.memberId();
-    if (!memId) return;
-
-    const { data } = await this.supabase
-      .from('user_tasks')
-      .select('id, title, done')
-      .eq('member_id', memId)
-      .order('created_at', { ascending: false });
-
-    if (data) {
-      this.tasks.set(data as Task[]);
+    const orgId = this.orgService.currentOrgId();
+    if (!orgId || !this.memberId()) return;
+    try {
+      this.tasks.set(await this.api.get<Task[]>(`/orgs/${orgId}/tasks`));
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
     }
   }
 
   async toggleTask(task: Task) {
+    const orgId = this.orgService.currentOrgId();
     const newDone = !task.done;
 
     this.tasks.update(tasks =>
       tasks.map(t => (t.id === task.id ? { ...t, done: newDone } : t))
     );
 
-    await this.supabase
-      .from('user_tasks')
-      .update({ done: newDone, updated_at: new Date().toISOString() })
-      .eq('id', task.id);
+    try {
+      await this.api.patch(`/orgs/${orgId}/tasks/${task.id}`, { done: newDone });
+    } catch {
+      this.tasks.update(tasks => tasks.map(t => (t.id === task.id ? { ...t, done: task.done } : t)));
+    }
   }
 
   openAddInput() {
@@ -322,20 +257,17 @@ export class SidebarRight implements OnInit, AfterViewChecked {
   }
 
   async submitTask() {
-    const memId = this.memberId();
+    const orgId = this.orgService.currentOrgId();
     const title = this.newTaskTitle().trim();
-    if (!memId || !title) return;
+    if (!orgId || !this.memberId() || !title) return;
 
     this.addingTask.set(true);
 
-    const { data } = await this.supabase
-      .from('user_tasks')
-      .insert({ member_id: memId, title, done: false })
-      .select('id, title, done')
-      .single();
-
-    if (data) {
-      this.tasks.update(tasks => [data as Task, ...tasks]);
+    try {
+      const neu = await this.api.post<Task>(`/orgs/${orgId}/tasks`, { title });
+      this.tasks.update(tasks => [neu, ...tasks]);
+    } catch (error) {
+      console.error('Error creating task:', error);
     }
 
     this.addingTask.set(false);
@@ -353,8 +285,13 @@ export class SidebarRight implements OnInit, AfterViewChecked {
   }
 
   async deleteTask(task: Task) {
+    const orgId = this.orgService.currentOrgId();
     this.tasks.update(tasks => tasks.filter(t => t.id !== task.id));
-    await this.supabase.from('user_tasks').delete().eq('id', task.id);
+    try {
+      await this.api.delete(`/orgs/${orgId}/tasks/${task.id}`);
+    } catch {
+      this.tasks.update(tasks => [task, ...tasks]);
+    }
   }
 
   getInitials(name: string): string {

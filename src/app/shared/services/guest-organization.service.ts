@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { SupabaseService } from './supabase';
+import { ApiService } from '../../core/api.service';
 import { OrganizationService } from './organization.service';
 
 /**
@@ -60,54 +60,44 @@ export interface CreateGuestInvitationDto {
  */
 @Injectable({ providedIn: 'root' })
 export class GuestOrganizationService {
-    private supabase = inject(SupabaseService);
+    private api = inject(ApiService);
     private orgService = inject(OrganizationService);
 
     loading = signal(false);
     error = signal<string | null>(null);
 
+    private orgId(): string {
+        const id = this.orgService.currentOrgId();
+        if (!id) throw new Error('Keine Organisation ausgewählt');
+        return id;
+    }
+
+    /** Antwort des Servers (Organisationsname flach) in die verschachtelte Form der Oberfläche bringen. */
+    private abbilden(z: Record<string, any>): EventGuestOrganization {
+        const { organization_name, organization_slug, organization_logo_url, ...rest } = z;
+        return {
+            ...rest,
+            guest_organization: rest['guest_organization_id'] ? { id: rest['guest_organization_id'], name: organization_name, slug: organization_slug, logo_url: organization_logo_url } : undefined,
+        } as EventGuestOrganization;
+    }
+
     /**
-     * Get all guest invitations for an event
+     * Get all guest invitations for an event (Verwaltende sehen alle, andere nur angenommene)
      */
     async getEventGuests(eventId: string): Promise<EventGuestOrganization[]> {
-        const { data, error } = await this.supabase.client
-            .from('event_guest_organizations')
-            .select(`
-                *,
-                guest_organization:guest_organization_id(id, name, slug, logo_url),
-                host_organization:host_organization_id(id, name, slug, logo_url),
-                event:event_id(id, title, date)
-            `)
-            .eq('event_id', eventId)
-            .order('invited_at', { ascending: false });
-
-        if (error) {
+        try {
+            return (await this.api.get<Record<string, any>[]>(`/orgs/${this.orgId()}/events/${eventId}/guests`)).map((z) => this.abbilden(z));
+        } catch (error) {
             console.error('Error loading event guests:', error);
             return [];
         }
-
-        return (data || []) as EventGuestOrganization[];
     }
 
     /**
      * Get accepted guest organizations for an event (for public display)
      */
     async getAcceptedGuests(eventId: string): Promise<EventGuestOrganization[]> {
-        const { data, error } = await this.supabase.client
-            .from('event_guest_organizations')
-            .select(`
-                *,
-                guest_organization:guest_organization_id(id, name, slug, logo_url)
-            `)
-            .eq('event_id', eventId)
-            .eq('status', 'accepted');
-
-        if (error) {
-            console.error('Error loading accepted guests:', error);
-            return [];
-        }
-
-        return (data || []) as EventGuestOrganization[];
+        return (await this.getEventGuests(eventId)).filter((g) => g.status === 'accepted');
     }
 
     /**
@@ -117,151 +107,83 @@ export class GuestOrganizationService {
     async getPendingInvitations(): Promise<EventGuestOrganization[]> {
         const orgId = this.orgService.currentOrgId();
         if (!orgId) return [];
-
-        const { data, error } = await this.supabase.client
-            .from('event_guest_organizations')
-            .select(`
-                *,
-                host_organization:host_organization_id(id, name, slug, logo_url),
-                event:event_id(id, title, date, location, description)
-            `)
-            .eq('guest_organization_id', orgId)
-            .eq('status', 'pending')
-            .order('invited_at', { ascending: false });
-
-        if (error) {
+        try {
+            return await this.api.get<EventGuestOrganization[]>(`/orgs/${orgId}/guest-invitations`);
+        } catch (error) {
+            // Nur Vorstand und Administratoren dürfen Einladungen sehen
             console.error('Error loading pending invitations:', error);
             return [];
         }
-
-        return (data || []) as EventGuestOrganization[];
     }
 
     /**
-     * Invite a guest organization to an event
+     * Invite a guest organization to an event (der Server sendet die Einladungsmail)
      */
     async inviteGuest(dto: CreateGuestInvitationDto): Promise<boolean> {
         this.loading.set(true);
         this.error.set(null);
-
-        const orgId = this.orgService.currentOrgId();
-        if (!orgId) {
-            this.error.set('Keine Organisation ausgewählt');
-            this.loading.set(false);
-            return false;
-        }
-
-        // Get current member ID for audit
-        const { data: member } = await this.supabase.client
-            .from('members')
-            .select('id')
-            .eq('organization_id', orgId)
-            .eq('user_id', (await this.supabase.client.auth.getUser()).data.user?.id)
-            .single();
-
-        const { error } = await this.supabase.client
-            .from('event_guest_organizations')
-            .insert({
-                event_id: dto.event_id,
-                host_organization_id: orgId,
+        try {
+            await this.api.post(`/orgs/${this.orgId()}/events/${dto.event_id}/guests`, {
                 guest_organization_id: dto.guest_organization_id,
                 guest_org_name: dto.guest_org_name,
                 guest_org_email: dto.guest_org_email,
                 guest_org_contact_name: dto.guest_org_contact_name,
-                invited_by: member?.id,
-                status: 'pending',
             });
-
-        this.loading.set(false);
-
-        if (error) {
-            if (error.code === '23505') {
-                this.error.set('Diese Organisation wurde bereits eingeladen');
-            } else {
-                this.error.set('Einladung konnte nicht gesendet werden');
-            }
-            console.error('Error inviting guest:', error);
+            return true;
+        } catch (e) {
+            const code = (e as { code?: string }).code;
+            this.error.set(code === 'guest_already_invited' ? 'Diese Organisation wurde bereits eingeladen' : 'Einladung konnte nicht gesendet werden');
+            console.error('Error inviting guest:', e);
             return false;
+        } finally {
+            this.loading.set(false);
         }
-
-        return true;
     }
 
     /**
      * Respond to an invitation (accept or decline)
      */
-    async respondToInvitation(
-        invitationId: string,
-        response: 'accepted' | 'declined'
-    ): Promise<boolean> {
+    async respondToInvitation(invitationId: string, response: 'accepted' | 'declined'): Promise<boolean> {
         this.loading.set(true);
         this.error.set(null);
-
-        const { error } = await this.supabase.client
-            .from('event_guest_organizations')
-            .update({
-                status: response,
-                responded_at: new Date().toISOString(),
-            })
-            .eq('id', invitationId);
-
-        this.loading.set(false);
-
-        if (error) {
+        try {
+            await this.api.patch(`/orgs/${this.orgId()}/guest-invitations/${invitationId}`, { status: response });
+            return true;
+        } catch (e) {
             this.error.set('Antwort konnte nicht gespeichert werden');
-            console.error('Error responding to invitation:', error);
+            console.error('Error responding to invitation:', e);
             return false;
+        } finally {
+            this.loading.set(false);
         }
-
-        return true;
     }
 
     /**
      * Remove a guest invitation
      */
-    async removeInvitation(invitationId: string): Promise<boolean> {
+    async removeInvitation(invitationId: string, eventId: string): Promise<boolean> {
         this.loading.set(true);
-
-        const { error } = await this.supabase.client
-            .from('event_guest_organizations')
-            .delete()
-            .eq('id', invitationId);
-
-        this.loading.set(false);
-
-        if (error) {
+        try {
+            await this.api.delete(`/orgs/${this.orgId()}/events/${eventId}/guests/${invitationId}`);
+            return true;
+        } catch (error) {
             console.error('Error removing invitation:', error);
             return false;
+        } finally {
+            this.loading.set(false);
         }
-
-        return true;
     }
 
     /**
-     * Search for organizations to invite (autocomplete)
+     * Search for organizations to invite (autocomplete; mindestens zwei Zeichen)
      */
-    async searchOrganizations(query: string): Promise<Array<{
-        id: string;
-        name: string;
-        slug: string;
-        logo_url?: string;
-    }>> {
+    async searchOrganizations(query: string): Promise<Array<{ id: string; name: string; slug: string; logo_url?: string }>> {
         if (!query || query.length < 2) return [];
-
-        const currentOrgId = this.orgService.currentOrgId();
-
-        const { data, error } = await this.supabase.client
-            .from('organizations')
-            .select('id, name, slug, logo_url')
-            .ilike('name', `%${query}%`)
-            .neq('id', currentOrgId || '')
-            .limit(10);
-
-        if (error) {
+        try {
+            return await this.api.get(`/orgs/${this.orgId()}/guest-organizations/search`, { q: query });
+        } catch (error) {
             console.error('Error searching organizations:', error);
             return [];
         }
-
-        return data || [];
     }
 }

@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { TextareaModule } from 'primeng/textarea';
-import { SupabaseService } from '../../../shared/services/supabase';
+import { ApiService } from '../../../core/api.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ThemeService } from '../../../shared/services/theme.service';
 import { OrganizationService } from '../../../shared/services/organization.service';
@@ -66,7 +66,7 @@ import { ToastModule } from 'primeng/toast';
   `]
 })
 export class FeedbackBadgeComponent {
-  private supabase = inject(SupabaseService);
+  private api = inject(ApiService);
   private auth = inject(AuthService);
   private messageService = inject(MessageService);
   private themeService = inject(ThemeService);
@@ -74,7 +74,7 @@ export class FeedbackBadgeComponent {
   private org = inject(OrganizationService);
 
   /** Only show feedback badge to logged-in users */
-  isLoggedIn = computed(() => !!this.supabase.user());
+  isLoggedIn = computed(() => this.auth.isLoggedIn());
   isDarkMode = this.themeService.isDark;
 
   visible = signal(false);
@@ -102,25 +102,23 @@ export class FeedbackBadgeComponent {
     }
 
     this.loading.set(true);
-    const userId = this.supabase.user()?.id;
 
-    const { error } = await this.supabase.insertFeedback(
-      this.type(),
-      this.description(),
-      userId
-    );
-
-    this.loading.set(false);
-
-    if (error) {
-      console.error('Feedback error:', error);
-      this.messageService.add({ key: 'feedback-toast', severity: 'error', summary: 'Fehler', detail: 'Feedback konnte nicht gesendet werden.' });
-    } else {
+    try {
+      // Die Organisation wird nur übernommen, wenn der Absender dort Mitglied ist (der Server prüft das)
+      await this.api.post('/feedback', {
+        type: this.type(),
+        description: this.description(),
+        ...(this.org.currentOrgId() ? { organization_id: this.org.currentOrgId() } : {}),
+      });
       this.messageService.add({ key: 'feedback-toast', severity: 'success', summary: 'Gesendet', detail: 'Vielen Dank für dein Feedback!' });
       this.visible.set(false);
       this.description.set('');
       this.type.set('suggestion');
+    } catch (error) {
+      console.error('Feedback error:', error);
+      this.messageService.add({ key: 'feedback-toast', severity: 'error', summary: 'Fehler', detail: 'Feedback konnte nicht gesendet werden.' });
     }
+    this.loading.set(false);
   }
 
   onMouseEnter() {

@@ -27,5 +27,10 @@ Thumbs.db
 coverage
 *.spec.ts
 
-# Supabase Edge Functions (run on Supabase, not in container)
-supabase
+
+# Secrets und Backend gehören nicht in den Frontend-Build-Kontext (sonst landen .env und
+# backend/node_modules im Builder-Layer; Backend baut aus ./backend mit eigenem Dockerfile)
+.env
+.env.*
+!.env.example
+backend

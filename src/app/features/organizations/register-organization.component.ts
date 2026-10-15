@@ -12,7 +12,8 @@ import { DividerModule } from 'primeng/divider';
 import { StepsModule } from 'primeng/steps';
 
 // Services
-import { SupabaseService } from '../../shared/services/supabase';
+import { AuthService } from '../../shared/services/auth.service';
+import { OrganizationService } from '../../shared/services/organization.service';
 
 @Component({
     selector: 'app-register-organization',
@@ -150,7 +151,8 @@ import { SupabaseService } from '../../shared/services/supabase';
     `,
 })
 export class RegisterOrganizationComponent {
-    private supabase = inject(SupabaseService);
+    private auth = inject(AuthService);
+    private orgService = inject(OrganizationService);
     private router = inject(Router);
 
     // Step state
@@ -211,13 +213,11 @@ export class RegisterOrganizationComponent {
             return;
         }
 
-        const { data } = await this.supabase.client
-            .from('organizations')
-            .select('id')
-            .eq('slug', this.slug)
-            .maybeSingle();
-
-        this.slugAvailable = !data;
+        try {
+            this.slugAvailable = await this.orgService.isSlugAvailable(this.slug);
+        } catch {
+            this.slugAvailable = null;
+        }
     }
 
     canSubmit(): boolean {
@@ -237,53 +237,16 @@ export class RegisterOrganizationComponent {
         this.error.set(null);
 
         try {
-            // 1. Create user account
-            const { data: authData, error: authError } =
-                await this.supabase.client.auth.signUp({
-                    email: this.email,
-                    password: this.password,
-                    options: {
-                        emailRedirectTo:
-                            `${window.location.origin}/auth/callback`,
-                    },
-                });
+            // 1. Konto anlegen: Die E-Mail-Adresse muss per Link bestätigt werden, bevor die Anmeldung möglich ist
+            const { error: authError } = await this.auth.signUp(this.email, this.password);
+            if (authError) throw new Error(authError.message);
 
-            if (authError) {
-                if (authError.message.includes('already registered')) {
-                    throw new Error(
-                        'Diese E-Mail ist bereits registriert.'
-                        + ' Bitte einloggen.'
-                    );
-                }
-                throw new Error(authError.message);
-            }
-
-            if (!authData.user) {
-                throw new Error(
-                    'Benutzer konnte nicht erstellt werden'
-                );
-            }
-
-            // 2. Check if session exists
-            // (no session = email confirmation required)
-            if (!authData.session) {
-                this.savePendingOrganization(authData.user.id);
-                this.error.set(
-                    'Bitte bestätige deine E-Mail-Adresse. '
-                    + 'Deine Organisation wird nach der '
-                    + 'Bestätigung automatisch erstellt.'
-                );
-                this.loading.set(false);
-                return;
-            }
-
-            // 3. Session exists → create org + member now
-            await this.createOrganizationAndMember(
-                authData.user.id
-            );
-
-            this.router.navigate(
-                ['/', this.slug, 'dashboard']
+            // 2. Organisation nach der Bestätigung automatisch anlegen (Auth-Callback bzw. erste Anmeldung)
+            this.savePendingOrganization();
+            this.error.set(
+                'Bitte bestätige deine E-Mail-Adresse. '
+                + 'Deine Organisation wird nach der '
+                + 'Bestätigung automatisch erstellt.'
             );
         } catch (e) {
             this.error.set((e as Error).message);
@@ -296,60 +259,15 @@ export class RegisterOrganizationComponent {
      * Store pending org data in localStorage for
      * creation after email confirmation.
      */
-    private savePendingOrganization(userId: string): void {
-        const pending = {
-            orgName: this.orgName.trim(),
-            slug: this.slug,
-            userName: this.userName.trim(),
-            email: this.email,
-            userId,
-        };
+    private savePendingOrganization(): void {
         localStorage.setItem(
             'pendingOrganization',
-            JSON.stringify(pending)
+            JSON.stringify({
+                orgName: this.orgName.trim(),
+                slug: this.slug,
+                userName: this.userName.trim(),
+                email: this.email.trim().toLowerCase(),
+            })
         );
-    }
-
-    /**
-     * Create the organization and admin member.
-     */
-    private async createOrganizationAndMember(
-        userId: string
-    ): Promise<void> {
-        const { data: orgData, error: orgError } =
-            await this.supabase.client
-                .from('organizations')
-                .insert({
-                    name: this.orgName.trim(),
-                    slug: this.slug,
-                    owner_id: userId,
-                })
-                .select()
-                .single();
-
-        if (orgError) {
-            throw new Error(orgError.message);
-        }
-
-        const { error: memberError } =
-            await this.supabase.client
-                .from('members')
-                .insert({
-                    name: this.userName.trim(),
-                    email: this.email,
-                    user_id: userId,
-                    organization_id: orgData.id,
-                    app_role: 'admin',
-                    role: 'Admin',
-                    status: 'Active',
-                    join_date: new Date()
-                        .toLocaleDateString('de-DE'),
-                });
-
-        if (memberError) {
-            console.error(
-                'Failed to create member:', memberError
-            );
-        }
     }
 }

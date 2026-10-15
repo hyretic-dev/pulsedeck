@@ -12,22 +12,22 @@ Jedes Feature lebt als eigenständige Einheit unter `src/app/features/<feature>/
 **Zwei Ziele:**
 
 1. **Feature-Isolation:** Kein Feature importiert interne Klassen eines anderen Features.
-2. **Backend-Austauschbarkeit:** Kein Feature-Code (Domain, Application, Components) kennt Supabase direkt. Die Datenschicht ist hinter Interfaces (Ports) abstrahiert, sodass Supabase jederzeit durch ein eigenes Backend ersetzt werden kann, ohne Feature-Code zu ändern.
+2. **Backend-Austauschbarkeit:** Kein Feature-Code (Domain, Application, Components) kennt die HTTP-API (`ApiService`) direkt. Die Datenschicht ist hinter Interfaces (Ports) abstrahiert, sodass das Backend (NestJS) ausgetauscht werden kann, ohne Feature-Code zu ändern.
 
 ## Schichten pro Feature
 
 | Schicht | Ordner | Enthält | Darf abhängen von |
 |---|---|---|---|
-| Domain | `domain/` | Interfaces (Models, Enums, Value Objects), Repository-**Ports** (Interfaces) | nichts (reines TypeScript, kein Framework, kein Supabase) |
+| Domain | `domain/` | Interfaces (Models, Enums, Value Objects), Repository-**Ports** (Interfaces) | nichts (reines TypeScript, kein Framework, keine HTTP-API) |
 | Application | `application/` | UseCases, Application-Services, DTOs | Domain |
-| Infrastructure | `infrastructure/` | Supabase-Repository-Implementierungen, HTTP-Adapter, Mapper | Domain, Application, `shared/services/supabase` |
+| Infrastructure | `infrastructure/` | API-Repository-Implementierungen, HTTP-Adapter, Mapper | Domain, Application, `core/api.service` |
 | Components | Feature-Root oder `components/` | Smart + Dumb Components | Domain, Application, `shared/` |
 
 **Abhängigkeitsregel: Abhängigkeiten zeigen immer nach innen.**
 
-- Domain kennt weder Angular noch Supabase noch andere Features. Reines TypeScript.
+- Domain kennt weder Angular noch die HTTP-API noch andere Features. Reines TypeScript.
 - Application kennt nur Domain und die eigenen Ports.
-- Nur Infrastructure kennt Supabase und die konkrete Datenbeschaffung.
+- Nur Infrastructure kennt die HTTP-API und die konkrete Datenbeschaffung.
 - Components injizieren UseCases oder Application-Services — nie Infrastructure direkt.
 
 ### Beispielstruktur (Soll-Zustand)
@@ -41,10 +41,10 @@ features/members/
 │   ├── get-members.usecase.ts   # Nutzt MemberRepository-Port
 │   └── invite-member.usecase.ts
 ├── infrastructure/
-│   └── supabase-member.repository.ts  # Implementiert MemberRepository
+│   └── api-member.repository.ts  # Implementiert MemberRepository
 ├── components/
 │   └── members.ts               # Smart Component, injiziert UseCase
-└── members.providers.ts         # DI-Bindings: Port → Supabase-Impl
+└── members.providers.ts         # DI-Bindings: Port → API-Impl
 ```
 
 ### DI-Binding: Port → Implementierung
@@ -55,10 +55,10 @@ Jedes Feature definiert seine Port-Bindings in einer `providers`-Datei oder dire
 // members.providers.ts
 import { Provider } from '@angular/core';
 import { MEMBER_REPOSITORY } from './domain/member.repository';
-import { SupabaseMemberRepository } from './infrastructure/supabase-member.repository';
+import { ApiMemberRepository } from './infrastructure/api-member.repository';
 
 export const MEMBERS_PROVIDERS: Provider[] = [
-  { provide: MEMBER_REPOSITORY, useClass: SupabaseMemberRepository }
+  { provide: MEMBER_REPOSITORY, useClass: ApiMemberRepository }
 ];
 ```
 
@@ -79,8 +79,8 @@ Bei einem Backend-Wechsel ändert sich nur diese Datei und die Infrastructure-Sc
     delete(id: string): Promise<void>;
   }
   ```
-- Methoden-Signaturen verwenden **Domain-Models**, nicht Supabase-Typen.
-- Supabase-spezifische Details (Tabellennamen, Spaltennamen, Realtime-Channels) existieren **ausschließlich** in der Infrastructure-Implementierung.
+- Methoden-Signaturen verwenden **Domain-Models**, nicht API-Typen.
+- Backend-spezifische Details (URLs, Feldnamen, Realtime-Streams) existieren **ausschließlich** in der Infrastructure-Implementierung.
 
 ## Feature-Grenzen
 
@@ -94,7 +94,7 @@ Bei einem Backend-Wechsel ändert sich nur diese Datei und die Infrastructure-Sc
 `src/app/shared/` enthält domänenübergreifende Infrastruktur:
 
 - `models/`: Gemeinsame Interfaces/Typen (nur was ≥2 Features tatsächlich braucht)
-- `services/`: Infrastruktur-Services (`SupabaseService`, `AuthService`)
+- `services/`: Infrastruktur-Services (`ApiService`, `AuthService`)
 - `guards/`: Route Guards
 - `utils/`: Zustandslose Hilfsfunktionen
 
@@ -102,13 +102,13 @@ Aufnahme-Kriterien (alle müssen erfüllt sein): domänenübergreifend, stabil, 
 
 Ein wachsendes `shared/` ist ein Architektur-Warnsignal, kein Sammelplatz.
 
-## SupabaseService — eingefroren
+## ApiService — eingefroren
 
-`SupabaseService` (`shared/services/supabase.ts`) ist die zentrale Infrastruktur-Schicht. Sie wird **nicht** beiläufig verändert — Änderungen nur nach expliziter Absprache.
+`ApiService` (`core/api.service.ts`) ist die zentrale Infrastruktur-Schicht. Sie wird **nicht** beiläufig verändert — Änderungen nur nach expliziter Absprache.
 
-- **Nur** Infrastructure-Klassen (Repository-Implementierungen) greifen auf `SupabaseService` zu.
-- Components und UseCases kennen `SupabaseService` **nicht**.
-- Neuer Datenzugriff = neues Repository-Interface (Port) + Supabase-Implementierung.
+- **Nur** Infrastructure-Klassen (Repository-Implementierungen) greifen auf `ApiService` zu.
+- Components und UseCases kennen `ApiService` **nicht**.
+- Neuer Datenzugriff = neues Repository-Interface (Port) + API-Implementierung.
 
 ## Opportunistisches Refactoring — Migration des Ist-Zustands
 
@@ -121,7 +121,7 @@ Analoges gilt für alle Architektur-Regeln: Sie definieren, wie neuer Code ausse
 ### Refactoring-Reihenfolge (wenn ein Feature angefasst wird)
 
 1. Domain-Models und Repository-Port (Interface) erstellen
-2. Supabase-Repository-Implementierung in `infrastructure/` erstellen
+2. API-Repository-Implementierung in `infrastructure/` erstellen
 3. UseCases in `application/` erstellen, die über den Port arbeiten
 4. DI-Bindings in `providers.ts` einrichten
 5. Komponenten auf UseCase-Injection umstellen
@@ -132,7 +132,7 @@ Analoges gilt für alle Architektur-Regeln: Sie definieren, wie neuer Code ausse
 
 1. Ordner: `src/app/features/<feature>/`
 2. Domain: Models + Repository-Port in `domain/`
-3. Infrastructure: Supabase-Repository in `infrastructure/`
+3. Infrastructure: API-Repository in `infrastructure/`
 4. Application: UseCase(s) in `application/`
 5. Providers: Port → Implementierung in `providers.ts`
 6. Komponente(n) — Standalone, Lazy-Loaded via `app.routes.ts`

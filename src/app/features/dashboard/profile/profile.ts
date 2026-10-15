@@ -21,7 +21,6 @@ import { MembersService } from '../../../shared/services/members.service';
 import { OrganizationService } from '../../../shared/services/organization.service';
 import { SkillService, Skill, SkillCategory } from '../../../shared/services/skill.service';
 import { NotificationService } from '../../../shared/services/notification.service';
-import { SupabaseService } from '../../../shared/services/supabase';
 import { TagModule } from 'primeng/tag';
 
 @Component({
@@ -54,7 +53,6 @@ export class ProfileComponent implements OnInit {
     readonly skillService = inject(SkillService);
     private readonly messageService = inject(MessageService);
     readonly notificationService = inject(NotificationService);
-    private readonly supabase = inject(SupabaseService);
 
     saving = signal(false);
     birthdayDate: Date | null = null;
@@ -88,6 +86,7 @@ export class ProfileComponent implements OnInit {
 
     // Password Management
     showPasswordFields = signal(false);
+    oldPassword = '';
     newPassword = '';
     confirmNewPassword = '';
     passwordError = signal<string | null>(null);
@@ -178,7 +177,12 @@ export class ProfileComponent implements OnInit {
             ),
         };
 
-        const success = await this.members.updateMember(member.id, updates);
+        let success = true;
+        try {
+            await this.members.updateOwnProfile(updates);
+        } catch {
+            success = false;
+        }
 
         if (success) {
             // Refresh auth state to update UI (e.g. isProfileComplete)
@@ -265,7 +269,8 @@ export class ProfileComponent implements OnInit {
 
         const success = await this.skillService.updateMemberSkills(
             memberId,
-            this.selectedSkillIds()
+            this.selectedSkillIds(),
+            this.auth.currentOrgId() ?? undefined
         );
 
         this.saving.set(false);
@@ -295,19 +300,8 @@ export class ProfileComponent implements OnInit {
      * Users who only used magic links won't have a password.
      */
     async checkHasPassword(): Promise<void> {
-        // Get current user's identities
-        const { data } = await this.supabase.client.auth.getUser();
-        const user = data?.user;
-        
-        if (!user) return;
-
-        // Check app_metadata for password indicator or check identities
-        // Supabase doesn't directly expose "has password", but we can check
-        // if the user has the 'email' provider with confirmed email
-        // A user with password will have encrypted_password in auth.users
-        // We'll assume if they logged in with email provider, they might have one
-        // For simplicity, we'll just show the option regardless
-        this.hasPassword.set(false); // Default to false, let users set one
+        await this.auth.whenReady();
+        this.hasPassword.set(this.auth.account()?.hasPassword ?? false);
     }
 
     /**
@@ -333,18 +327,13 @@ export class ProfileComponent implements OnInit {
         this.savingPassword.set(true);
 
         try {
-            const { error } = await this.supabase.client.auth.updateUser({
-                password: this.newPassword
-            });
-
-            if (error) {
-                this.passwordError.set(error.message);
-                this.savingPassword.set(false);
-                return;
-            }
+            if (this.hasPassword()) await this.auth.changePassword(this.oldPassword, this.newPassword);
+            else await this.auth.setPassword(this.newPassword);
+            await this.auth.whenReady();
 
             this.passwordSuccess.set('Passwort erfolgreich gesetzt!');
             this.hasPassword.set(true);
+            this.oldPassword = '';
             this.newPassword = '';
             this.confirmNewPassword = '';
 
@@ -372,6 +361,7 @@ export class ProfileComponent implements OnInit {
      */
     cancelPasswordChange(): void {
         this.showPasswordFields.set(false);
+        this.oldPassword = '';
         this.newPassword = '';
         this.confirmNewPassword = '';
         this.passwordError.set(null);

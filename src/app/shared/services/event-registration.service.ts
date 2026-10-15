@@ -1,6 +1,8 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
-import { SupabaseService } from './supabase';
+import { Injectable, inject, signal } from '@angular/core';
+
+import { ApiService } from '../../core/api.service';
 import { AuthService } from './auth.service';
+import { OrganizationService } from './organization.service';
 
 export type RegistrationStatus = 'confirmed' | 'maybe' | 'cancelled';
 
@@ -17,8 +19,9 @@ export interface EventRegistration {
 
 @Injectable({ providedIn: 'root' })
 export class EventRegistrationService {
-    private supabase = inject(SupabaseService);
+    private api = inject(ApiService);
     private auth = inject(AuthService);
+    private org = inject(OrganizationService);
 
     /** Current user's registrations (event_id -> status) */
     myRegistrations = signal<Map<string, RegistrationStatus>>(new Map());
@@ -26,122 +29,73 @@ export class EventRegistrationService {
     /** Loading state */
     loading = signal(false);
 
+    private orgId(): string {
+        const id = this.org.currentOrgId();
+        if (!id) throw new Error('Keine Organisation ausgewählt');
+        return id;
+    }
+
     /**
      * Fetch all registrations for the current user
      */
     async fetchMyRegistrations(): Promise<void> {
-        const memberId = this.auth.currentMember()?.id;
-        if (!memberId) {
+        if (!this.auth.currentMember()?.id) {
             this.myRegistrations.set(new Map());
             return;
         }
-
-        const { data, error } = await this.supabase.client
-            .from('event_registrations')
-            .select('event_id, status')
-            .eq('member_id', memberId);
-
-        if (error) {
+        try {
+            const zeilen = await this.api.get<{ event_id: string; status: RegistrationStatus }[]>(`/orgs/${this.orgId()}/events/registrations/mine`);
+            this.myRegistrations.set(new Map(zeilen.map((r) => [r.event_id, r.status])));
+        } catch (error) {
             console.error('Error fetching registrations:', error);
-            return;
         }
-
-        const map = new Map<string, RegistrationStatus>();
-        data?.forEach(r => map.set(r.event_id, r.status as RegistrationStatus));
-        this.myRegistrations.set(map);
     }
 
     /**
-     * Get registrations for a specific event
+     * Get registrations for a specific event (Zusagen und „vielleicht“ mit Mitglied)
      */
     async getEventRegistrations(eventId: string): Promise<EventRegistration[]> {
-        const { data, error } = await this.supabase.client
-            .from('event_registrations')
-            .select(`
-                *,
-                member:members(id, name, avatar_url)
-            `)
-            .eq('event_id', eventId)
-            .in('status', ['confirmed', 'maybe'])
-            .order('registered_at', { ascending: true });
-
-        if (error) throw new Error(error.message);
-        return data as EventRegistration[];
+        const zeilen = await this.api.get<{ member: { id: string; name: string; avatar_url?: string } }[]>(`/orgs/${this.orgId()}/events/${eventId}/registrations`);
+        return zeilen.map((z) => ({ event_id: eventId, member_id: z.member.id, status: 'confirmed' as RegistrationStatus, member: z.member }));
     }
 
     /**
      * Get count of confirmed registrations for an event
      */
     async getRegistrationCount(eventId: string): Promise<number> {
-        const { count, error } = await this.supabase.client
-            .from('event_registrations')
-            .select('*', { count: 'exact', head: true })
-            .eq('event_id', eventId)
-            .eq('status', 'confirmed');
-
-        if (error) throw new Error(error.message);
-        return count ?? 0;
+        const zusammenfassung = await this.getRegistrationsSummary([eventId]);
+        return zusammenfassung.get(eventId)?.count ?? 0;
     }
 
     /**
-     * Register current user for an event
+     * Register current user for an event (der Server prüft Sichtbarkeit und Teilnehmerlimit atomar)
      */
-    async register(
-        eventId: string,
-        status: RegistrationStatus = 'confirmed',
-        note?: string
-    ): Promise<void> {
-        const memberId = this.auth.currentMember()?.id;
-        if (!memberId) throw new Error('Nicht eingeloggt');
-
+    async register(eventId: string, status: RegistrationStatus = 'confirmed', note?: string): Promise<void> {
+        if (!this.auth.currentMember()?.id) throw new Error('Nicht eingeloggt');
         this.loading.set(true);
-
-        const { error } = await this.supabase.client
-            .from('event_registrations')
-            .upsert({
-                event_id: eventId,
-                member_id: memberId,
-                status,
-                note,
-                registered_at: new Date().toISOString(),
-            }, { onConflict: 'event_id,member_id' });
-
-        this.loading.set(false);
-
-        if (error) throw new Error(error.message);
-
-        // Update local state
-        this.myRegistrations.update(map => {
-            const newMap = new Map(map);
-            newMap.set(eventId, status);
-            return newMap;
-        });
+        try {
+            await this.api.put(`/orgs/${this.orgId()}/events/${eventId}/registration`, { status, ...(note ? { note } : {}) });
+        } finally {
+            this.loading.set(false);
+        }
+        this.myRegistrations.update((map) => new Map(map).set(eventId, status));
     }
 
     /**
      * Cancel registration for current user
      */
     async unregister(eventId: string): Promise<void> {
-        const memberId = this.auth.currentMember()?.id;
-        if (!memberId) throw new Error('Nicht eingeloggt');
-
+        if (!this.auth.currentMember()?.id) throw new Error('Nicht eingeloggt');
         this.loading.set(true);
-
-        const { error } = await this.supabase.client
-            .from('event_registrations')
-            .delete()
-            .eq('event_id', eventId)
-            .eq('member_id', memberId);
-
-        this.loading.set(false);
-
-        if (error) throw new Error(error.message);
-
-        // Update local state
-        this.myRegistrations.update(map => {
-            const newMap = new Map(map);
-            newMap.delete(eventId);
-            return newMap;
+        try {
+            await this.api.delete(`/orgs/${this.orgId()}/events/${eventId}/registration`);
+        } finally {
+            this.loading.set(false);
+        }
+        this.myRegistrations.update((map) => {
+            const neu = new Map(map);
+            neu.delete(eventId);
+            return neu;
         });
     }
 
@@ -163,42 +117,25 @@ export class EventRegistrationService {
         };
         return labels[status];
     }
+
     /**
      * Get confirmed registrations for multiple events (for list view bubbles)
      */
-    async getRegistrationsSummary(eventIds: string[]): Promise<Map<string, { count: number, avatars: { name: string, avatar_url?: string }[] }>> {
+    async getRegistrationsSummary(eventIds: string[]): Promise<Map<string, { count: number; avatars: { name: string; avatar_url?: string }[] }>> {
         if (!eventIds.length) return new Map();
-
-        const { data, error } = await this.supabase.client
-            .from('event_registrations')
-            .select(`
-                event_id,
-                member:members(name, avatar_url)
-            `)
-            .in('event_id', eventIds)
-            .eq('status', 'confirmed')
-            .order('registered_at', { ascending: true });
-
-        if (error) {
-            console.error('Error loading summaries:', error);
-            return new Map();
-        }
-
-        const map = new Map<string, { count: number, avatars: any[] }>();
-
-        // Initialize
-        eventIds.forEach(id => map.set(id, { count: 0, avatars: [] }));
-
-        data?.forEach((row: any) => {
-            const entry = map.get(row.event_id);
-            if (entry) {
-                entry.count++;
-                if (entry.avatars.length < 5) {
-                    entry.avatars.push(row.member);
-                }
+        const ergebnis = new Map<string, { count: number; avatars: { name: string; avatar_url?: string }[] }>();
+        eventIds.forEach((id) => ergebnis.set(id, { count: 0, avatars: [] }));
+        try {
+            for (let i = 0; i < eventIds.length; i += 500) {
+                const teil = await this.api.post<Record<string, { count: number; avatars: { name: string; avatar_url?: string }[] }>>(
+                    `/orgs/${this.orgId()}/events/registrations/summary`,
+                    { event_ids: eventIds.slice(i, i + 500) }
+                );
+                for (const [id, eintrag] of Object.entries(teil)) ergebnis.set(id, eintrag);
             }
-        });
-
-        return map;
+        } catch (error) {
+            console.error('Error loading summaries:', error);
+        }
+        return ergebnis;
     }
 }

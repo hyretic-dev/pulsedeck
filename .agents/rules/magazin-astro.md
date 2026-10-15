@@ -55,5 +55,5 @@ heroImage: "/blog/image.jpg"  # optional
 ## Isolation
 
 - Das Magazin ist ein eigenständiges Sub-Projekt mit eigenem `package.json`, eigenen Dependencies und eigenem Build.
-- **Keine** Angular-, Supabase- oder PrimeNG-Abhängigkeiten im Magazin.
+- **Keine** Angular-, ApiService- oder PrimeNG-Abhängigkeiten im Magazin.
 - Gemeinsame Konfiguration (z.B. Site-URL) über `magazin/src/consts.ts`.

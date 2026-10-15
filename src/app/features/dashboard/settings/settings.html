@@ -191,6 +191,7 @@
                                             <div>
                                                 <label class="text-sm text-[var(--color-text)]">Password</label>
                                                 <input pInputText type="password" [(ngModel)]="config.smtp_pass"
+                                                    [placeholder]="config.smtp_pass_set ? '•••••••• (gespeichert; leer lassen zum Beibehalten)' : ''"
                                                     class="w-full mt-1" autocomplete="new-password" />
                                             </div>
                                         </div>

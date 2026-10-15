@@ -2,7 +2,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { SupabaseService } from '../../shared/services/supabase';
 import { AuthService, UserMembership } from '../../shared/services/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -98,6 +97,15 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
                                 [loading]="saving()"
                                 (click)="setPassword()">
                             </p-button>
+                            @if (passwordMode() === 'invite') {
+                                <p-button
+                                    label="Später festlegen"
+                                    severity="secondary"
+                                    [text]="true"
+                                    styleClass="w-full"
+                                    (click)="skipPassword()">
+                                </p-button>
+                            }
                         </div>
                     </div>
                 }
@@ -148,7 +156,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     `,
 })
 export class AuthCallbackComponent implements OnInit {
-    private supabase = inject(SupabaseService);
     private auth = inject(AuthService);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
@@ -167,71 +174,52 @@ export class AuthCallbackComponent implements OnInit {
     passwordError = signal<string | null>(null);
     saving = signal(false);
 
+    /** reset = Passwort-Reset (Pflicht), invite = Einladung/Magic-Link ohne bisheriges Passwort (freiwillig) */
+    passwordMode = signal<'reset' | 'invite'>('invite');
+    private resetToken: string | null = null;
+
     async ngOnInit() {
-        // Check for hash fragment (Supabase returns tokens in hash)
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-        const type = hashParams.get('type');
+        // Der Token ist ein Zugangsdatum: sofort aus Adresszeile und Verlauf entfernen, bevor etwas anderes passiert
+        const params = this.route.snapshot.queryParams;
+        const type = params['type'] as string | undefined;
+        const token = params['token'] as string | undefined;
+        if (token) window.history.replaceState(window.history.state, '', window.location.pathname);
 
-        // Also check query params
-        let errorCode = this.route.snapshot.queryParams['error'];
-        let errorDescription = this.route.snapshot.queryParams['error_description'];
-
-        // If not in query params, check hash params
-        if (!errorCode) {
-            errorCode = hashParams.get('error');
-            errorDescription = hashParams.get('error_description');
-
-            // Decode error description if present
-            if (errorDescription) {
-                errorDescription = decodeURIComponent(
-                    errorDescription.replace(/\+/g, ' ')
-                );
-            }
-        }
-
-        if (errorCode) {
+        if (!type || !token || !['verify', 'magic', 'reset'].includes(type)) {
             this.processing.set(false);
-            this.error.set(errorDescription || 'Ein Fehler ist aufgetreten');
+            this.error.set('Kein gültiger Link. Bitte fordere einen neuen Link an.');
             return;
         }
 
-        if (accessToken && refreshToken) {
-            try {
-                this.statusMessage.set('Verifiziere Session...');
-
-                // Set the session
-                const { error } = await this.supabase.client.auth.setSession({
-                    access_token: accessToken,
-                    refresh_token: refreshToken
-                });
-
-                if (error) {
-                    this.processing.set(false);
-                    this.error.set(error.message);
-                    return;
-                }
-
-                // Check if this is a recovery (password reset) - show password form
-                // For invite/signup: Skip password, go directly to dashboard
-                if (type === 'recovery') {
-                    // User explicitly requested password reset
-                    this.processing.set(false);
-                    this.showPasswordForm.set(true);
-                } else {
-                    // Invite, signup, or regular sign-in
-                    // Passwordless flow: Go directly to dashboard
-                    await this.handleRedirect();
-                }
-            } catch (e) {
+        try {
+            if (type === 'reset') {
+                // Das neue Passwort wird beim Einlösen mitgesendet: erst abfragen
+                this.resetToken = token;
+                this.passwordMode.set('reset');
                 this.processing.set(false);
-                this.error.set((e as Error).message);
+                this.showPasswordForm.set(true);
+                return;
             }
-        } else {
+
+            this.statusMessage.set('Verifiziere Link...');
+            if (type === 'verify') await this.auth.verifyEmail(token);
+            else await this.auth.consumeMagicLink(token);
+            await this.auth.whenReady();
+
+            // Eingeladene Konten haben noch kein Passwort: freiwillig anbieten
+            if (this.auth.account()?.hasPassword === false) {
+                this.processing.set(false);
+                this.passwordMode.set('invite');
+                this.showPasswordForm.set(true);
+            } else {
+                await this.handleRedirect();
+            }
+        } catch (e) {
             this.processing.set(false);
             this.error.set(
-                'Kein gültiger Einladungslink. Bitte fordere einen neuen Link an.'
+                (e as { status?: number }).status === 401
+                    ? 'Der Link ist ungültig oder abgelaufen. Bitte fordere einen neuen Link an.'
+                    : (e as Error).message
             );
         }
     }
@@ -252,24 +240,29 @@ export class AuthCallbackComponent implements OnInit {
         this.saving.set(true);
 
         try {
-            const { error } = await this.supabase.client.auth.updateUser({
-                password: this.password
-            });
-
-            if (error) {
-                this.passwordError.set(error.message);
-                this.saving.set(false);
-                return;
+            if (this.passwordMode() === 'reset' && this.resetToken) {
+                await this.auth.resetPassword(this.resetToken, this.password);
+                this.resetToken = null;
+            } else {
+                await this.auth.setPassword(this.password);
             }
+            await this.auth.whenReady();
 
             this.showPasswordForm.set(false);
-
-            // Now handle redirect based on memberships
             await this.handleRedirect();
         } catch (e) {
-            this.passwordError.set((e as Error).message);
+            this.passwordError.set(
+                (e as { status?: number }).status === 401 && this.passwordMode() === 'reset'
+                    ? 'Der Link ist ungültig oder abgelaufen. Bitte fordere einen neuen Link an.'
+                    : (e as Error).message
+            );
             this.saving.set(false);
         }
+    }
+
+    async skipPassword() {
+        this.showPasswordForm.set(false);
+        await this.handleRedirect();
     }
 
     /**
@@ -280,21 +273,18 @@ export class AuthCallbackComponent implements OnInit {
     private async handleRedirect() {
         this.processing.set(true);
 
-        // Check for pending org from registration flow
-        const created = await this.createPendingOrganization();
-        if (created) {
+        // Bei der Registrierung vorgemerkte Organisation jetzt anlegen
+        this.statusMessage.set('Prüfe Organisation...');
+        const neueOrg = await this.auth.legeAusstehendeOrganisationAn();
+        if (neueOrg) {
+            this.processing.set(false);
+            this.success.set(true);
+            setTimeout(() => this.router.navigate(['/', neueOrg, 'dashboard']), 1500);
             return;
         }
 
         this.statusMessage.set('Lade Mitgliedschaften...');
-
-        // Wait for AuthService to load memberships
         await this.auth.refreshMember();
-
-        // Small delay to ensure signals are updated
-        await new Promise(resolve =>
-            setTimeout(resolve, 500)
-        );
 
         const userMemberships = this.auth.userMemberships();
 
@@ -311,110 +301,17 @@ export class AuthCallbackComponent implements OnInit {
         if (userMemberships.length === 1) {
             // Single org - redirect directly
             const org = userMemberships[0];
-            await this.auth.setActiveOrganization(
-                org.organizationId
-            );
+            await this.auth.setActiveOrganization(org.organizationId);
             this.processing.set(false);
             this.success.set(true);
             setTimeout(() => {
-                this.router.navigate([
-                    '/', org.organizationSlug, 'dashboard'
-                ]);
+                this.router.navigate(['/', org.organizationSlug, 'dashboard']);
             }, 1500);
         } else {
             // Multiple orgs - show selector
             this.memberships.set(userMemberships);
             this.processing.set(false);
             this.showOrgSelector.set(true);
-        }
-    }
-
-    /**
-     * If registration stored pending org data,
-     * create the organization and member now.
-     * Returns true if a pending org was processed.
-     */
-    private async createPendingOrganization():
-        Promise<boolean> {
-        const raw = localStorage.getItem(
-            'pendingOrganization'
-        );
-        if (!raw) {
-            return false;
-        }
-
-        try {
-            const pending = JSON.parse(raw);
-            this.statusMessage.set(
-                'Erstelle Organisation...'
-            );
-
-            const { data: { user: authUser } } =
-                await this.supabase.client.auth.getUser();
-
-            if (!authUser) {
-                return false;
-            }
-
-            // Create organization
-            const { data: orgData, error: orgError } =
-                await this.supabase.client
-                    .from('organizations')
-                    .insert({
-                        name: pending.orgName,
-                        slug: pending.slug,
-                        owner_id: authUser.id,
-                    })
-                    .select()
-                    .single();
-
-            if (orgError) {
-                console.error(
-                    'Pending org creation failed:',
-                    orgError
-                );
-                localStorage.removeItem(
-                    'pendingOrganization'
-                );
-                return false;
-            }
-
-            // Create admin member
-            await this.supabase.client
-                .from('members')
-                .insert({
-                    name: pending.userName,
-                    email: pending.email,
-                    user_id: authUser.id,
-                    organization_id: orgData.id,
-                    app_role: 'admin',
-                    role: 'Admin',
-                    status: 'Active',
-                    join_date: new Date()
-                        .toLocaleDateString('de-DE'),
-                });
-
-            // Clean up
-            localStorage.removeItem('pendingOrganization');
-
-            // Refresh memberships and redirect
-            await this.auth.refreshMember();
-
-            this.processing.set(false);
-            this.success.set(true);
-            setTimeout(() => {
-                this.router.navigate([
-                    '/', pending.slug, 'dashboard'
-                ]);
-            }, 1500);
-
-            return true;
-        } catch (e) {
-            console.error(
-                'Error processing pending org:', e
-            );
-            localStorage.removeItem('pendingOrganization');
-            return false;
         }
     }
 
