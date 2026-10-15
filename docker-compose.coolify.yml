@@ -5,7 +5,10 @@ name: pulsedeck
 #   - eine einzige Datei (Coolify nimmt genau eine),
 #   - keine veröffentlichten Ports und keine eigenen Netze: Coolify legt für die Ressource ein eigenes Netz an und leitet
 #     die Domain (Traefik) auf den Dienst `frontend`, Port 80. Postgres und Backend sind nicht von außen erreichbar,
-#   - NODE_ENV=production; MAIL_TRANSPORT, SECRETS_ENCRYPTION_KEY und alle Passwörter sind Pflicht (leer = der Start scheitert),
+#   - NODE_ENV=production; MAIL_TRANSPORT, SECRETS_ENCRYPTION_KEY, JWT_SECRET, APP_BASE_URL und alle Passwörter sind Pflicht. Die Pflichtprüfung
+#     passiert beim START der Dienste (Backend-Konfiguration, Rollenskript, Entrypoint) und nicht per `${VAR:?}` hier: Coolify baut
+#     mit einer Env-Datei ohne Laufzeitvariablen (damit Geheimnisse nicht als Build-Argumente im Image landen), und `docker compose build`
+#     bräche sonst schon beim Bauen ab,
 #   - kein mailpit.
 # Alle Werte kommen aus den Umgebungsvariablen der Ressource in Coolify (nie als Build-Args, nie im Repo).
 # Anleitung: docs/betrieb/coolify.md. Die Datei ist lokal per Compose geprüft (scripts/smoke-compose.sh mit
@@ -18,9 +21,9 @@ services:
     environment:
       POSTGRES_DB: pulsedeck
       POSTGRES_USER: pulsedeck_admin
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
-      POSTGRES_MIGRATIONS_PASSWORD: ${POSTGRES_MIGRATIONS_PASSWORD:?}
-      POSTGRES_RUNTIME_PASSWORD: ${POSTGRES_RUNTIME_PASSWORD:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      POSTGRES_MIGRATIONS_PASSWORD: ${POSTGRES_MIGRATIONS_PASSWORD:-}
+      POSTGRES_RUNTIME_PASSWORD: ${POSTGRES_RUNTIME_PASSWORD:-}
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./docker/postgres/10-roles.sh:/docker-entrypoint-initdb.d/10-roles.sh:ro
@@ -43,14 +46,14 @@ services:
       NODE_ENV: production
       PORT: 3000
       TZ: Europe/Berlin
-      JWT_SECRET: ${JWT_SECRET:?}
+      JWT_SECRET: ${JWT_SECRET:-}
       JWT_ISSUER: ${JWT_ISSUER:-pulsedeck}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-pulsedeck-web}
       # Endgültige Adresse mit https, z. B. https://app.example.org – einzige erlaubte Basis für Links in Mails
-      APP_BASE_URL: ${APP_BASE_URL:?}
-      DATABASE_URL: postgres://pulsedeck_runtime:${POSTGRES_RUNTIME_PASSWORD:?}@postgres:5432/pulsedeck
-      MIGRATIONS_DATABASE_URL: postgres://pulsedeck_migrations:${POSTGRES_MIGRATIONS_PASSWORD:?}@postgres:5432/pulsedeck
-      MAIL_TRANSPORT: ${MAIL_TRANSPORT:?smtp oder resend setzen (O4); log ist in der Produktion gesperrt}
+      APP_BASE_URL: ${APP_BASE_URL:-}
+      DATABASE_URL: postgres://pulsedeck_runtime:${POSTGRES_RUNTIME_PASSWORD:-}@postgres:5432/pulsedeck
+      MIGRATIONS_DATABASE_URL: postgres://pulsedeck_migrations:${POSTGRES_MIGRATIONS_PASSWORD:-}@postgres:5432/pulsedeck
+      MAIL_TRANSPORT: ${MAIL_TRANSPORT:-}
       MAIL_FROM: ${MAIL_FROM:-}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-}
@@ -65,7 +68,7 @@ services:
       RATE_LIMIT_LOGIN_WINDOW_MINUTES: ${RATE_LIMIT_LOGIN_WINDOW_MINUTES:-15}
       RATE_LIMIT_MAIL_MAX: ${RATE_LIMIT_MAIL_MAX:-3}
       RATE_LIMIT_MAIL_WINDOW_MINUTES: ${RATE_LIMIT_MAIL_WINDOW_MINUTES:-60}
-      SECRETS_ENCRYPTION_KEY: ${SECRETS_ENCRYPTION_KEY:?32 Bytes Base64 setzen (openssl rand -base64 32)}
+      SECRETS_ENCRYPTION_KEY: ${SECRETS_ENCRYPTION_KEY:-}
       JOBS_ENABLED: ${JOBS_ENABLED:-}
       JOBS_TICK_SECONDS: ${JOBS_TICK_SECONDS:-}
       APP_TIMEZONE: ${APP_TIMEZONE:-}

@@ -31,10 +31,13 @@ gueltig "Basis + Produktion (docker-compose.prod.yml)" -f docker-compose.yml -f 
 gueltig "Coolify (docker-compose.coolify.yml)" -f docker-compose.coolify.yml
 verlangt "Produktion verlangt SECRETS_ENCRYPTION_KEY" SECRETS_ENCRYPTION_KEY -f docker-compose.yml -f docker-compose.prod.yml
 verlangt "Produktion verlangt MAIL_TRANSPORT" MAIL_TRANSPORT -f docker-compose.yml -f docker-compose.prod.yml
-verlangt "Coolify verlangt SECRETS_ENCRYPTION_KEY" SECRETS_ENCRYPTION_KEY -f docker-compose.coolify.yml
-verlangt "Coolify verlangt MAIL_TRANSPORT" MAIL_TRANSPORT -f docker-compose.coolify.yml
-verlangt "Coolify verlangt APP_BASE_URL" APP_BASE_URL -f docker-compose.coolify.yml
-verlangt "Coolify verlangt JWT_SECRET" JWT_SECRET -f docker-compose.coolify.yml
+# Coolify baut mit einer Env-Datei ohne Laufzeitvariablen (Variablen sind „Runtime only“, damit Geheimnisse nicht als Build-Argumente im
+# Image landen): `docker compose build` muss ohne jeden Wert gelingen. Die Pflichtwerte prüfen die Dienste beim Start (unten).
+if docker compose --env-file /dev/null -f docker-compose.coolify.yml config -q >/dev/null 2>&1; then echo "ok     Coolify: baubar ohne Laufzeitvariablen"; else echo "FEHLER Coolify: Compose braucht beim Bauen Variablen (Pflichtprüfung ':?' gehört in die Dienste)"; FEHLER=1; fi
+# Dienste verweigern den Start bei fehlenden Datenbank-Passwörtern, bevor etwas passiert
+if out="$(DATABASE_URL='postgres://u:@h:5432/d' MIGRATIONS_DATABASE_URL='postgres://m:pw@h:5432/d' sh backend/docker-entrypoint.sh 2>&1)"; then echo "FEHLER Backend startet mit leerem Runtime-Passwort"; FEHLER=1; elif echo "$out" | grep -q "POSTGRES_RUNTIME_PASSWORD"; then echo "ok     Backend verweigert den Start ohne POSTGRES_RUNTIME_PASSWORD (mit Meldung)"; else echo "FEHLER Backend bricht ohne klare Meldung ab: $out"; FEHLER=1; fi
+if out="$(DATABASE_URL='postgres://u:pw@h:5432/d' MIGRATIONS_DATABASE_URL='postgres://m:@h:5432/d' sh backend/docker-entrypoint.sh 2>&1)"; then echo "FEHLER Backend startet mit leerem Migrations-Passwort"; FEHLER=1; elif echo "$out" | grep -q "POSTGRES_MIGRATIONS_PASSWORD"; then echo "ok     Backend verweigert den Start ohne POSTGRES_MIGRATIONS_PASSWORD (mit Meldung)"; else echo "FEHLER Backend bricht ohne klare Meldung ab: $out"; FEHLER=1; fi
+if out="$(POSTGRES_USER=x POSTGRES_DB=y POSTGRES_MIGRATIONS_PASSWORD= POSTGRES_RUNTIME_PASSWORD=pw bash docker/postgres/10-roles.sh 2>&1)"; then echo "FEHLER Rollenskript läuft mit leerem Passwort"; FEHLER=1; elif echo "$out" | grep -q "POSTGRES_MIGRATIONS_PASSWORD"; then echo "ok     Rollenskript verweigert leere Rollenpasswörter (mit Meldung)"; else echo "FEHLER Rollenskript bricht ohne klare Meldung ab: $out"; FEHLER=1; fi
 # Der Coolify-Stack veröffentlicht keine Host-Ports und hängt an keinem selbst definierten Netz
 PORTS="$(docker compose --env-file "$ENV_DATEI" -f docker-compose.coolify.yml config --format json 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(sum(1 for s in d['services'].values() if s.get('ports')) + len([n for n in d.get('networks', {}) if n != 'default']))")"
 if [ "$PORTS" = "0" ]; then echo "ok     Coolify: keine veröffentlichten Ports, keine eigenen Netze"; else echo "FEHLER Coolify veröffentlicht Ports oder definiert Netze"; FEHLER=1; fi

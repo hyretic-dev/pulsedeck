@@ -4,6 +4,10 @@
 # - pulsedeck_runtime: nur DML auf App-Tabellen (Grants kommen aus Migration 000004)
 set -e
 
+# Leere Rollenpasswörter nie zulassen (Pflichtprüfung für Compose-Varianten, die beim Bauen keine Variablen kennen)
+: "${POSTGRES_MIGRATIONS_PASSWORD:?POSTGRES_MIGRATIONS_PASSWORD fehlt}"
+: "${POSTGRES_RUNTIME_PASSWORD:?POSTGRES_RUNTIME_PASSWORD fehlt}"
+
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
   CREATE ROLE pulsedeck_migrations LOGIN PASSWORD '${POSTGRES_MIGRATIONS_PASSWORD}';
   CREATE ROLE pulsedeck_runtime LOGIN PASSWORD '${POSTGRES_RUNTIME_PASSWORD}';
