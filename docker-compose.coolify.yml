@@ -16,7 +16,9 @@ name: pulsedeck
 
 services:
   postgres:
-    image: pgvector/pgvector:pg17
+    # Eigenes Image mit eingebautem Rollen-Skript (kein Bind-Mount, siehe docker/postgres/Dockerfile)
+    build:
+      context: ./docker/postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: pulsedeck
@@ -25,8 +27,7 @@ services:
       POSTGRES_MIGRATIONS_PASSWORD: ${POSTGRES_MIGRATIONS_PASSWORD:-}
       POSTGRES_RUNTIME_PASSWORD: ${POSTGRES_RUNTIME_PASSWORD:-}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./docker/postgres/10-roles.sh:/docker-entrypoint-initdb.d/10-roles.sh:ro
+      - postgres-data-v2:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U pulsedeck_admin -d pulsedeck"]
       interval: 5s
@@ -113,6 +114,7 @@ services:
       start_period: 5s
 
 volumes:
-  postgres-data:
+  # „-v2“: das erste Volume wurde ohne die Datenbank-Rollen initialisiert (Init-Skript war nur als Bind-Mount eingehängt) und bleibt ungenutzt zurück
+  postgres-data-v2:
   # Dateien der Organisationen (Uploads): in die Datensicherung aufnehmen
   files-data:
