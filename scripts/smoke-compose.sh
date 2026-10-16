@@ -165,6 +165,7 @@ TOKEN_RO=$(feld "$(curl -s -X POST "$BASIS/api/v1/auth/login" -H "$J" -d "{\"ema
 AR="Authorization: Bearer $TOKEN_RO"
 pruefe "READ_ONLY: Login bleibt möglich (erreicht das Backend)" "ja" "$([ -n "$TOKEN_RO" ] && echo ja || echo nein)"
 pruefe "READ_ONLY: Falsches Passwort → 401 vom Backend, nicht 503" 401 "$(status -X POST "$BASIS/api/v1/auth/login" -H "$J" -d '{"email":"ro-probe@example.org","password":"falsch-falsch"}')"
+pruefe "READ_ONLY: Anmeldeseite (E-Mail-Prüfung vor dem Passwort) bleibt möglich" 200 "$(status -X POST "$BASIS/api/v1/auth/check-email" -H "$J" -d "{\"email\":\"$EMAIL\"}")"
 pruefe "READ_ONLY: Lesen funktioniert" 200 "$(status "$BASIS/api/v1/orgs/$OID/contacts" -H "$AR")"
 pruefe "READ_ONLY: Schreiben wird abgewiesen (503)" 503 "$(status -X POST "$BASIS/api/v1/orgs/$OID/contacts" -H "$J" -H "$AR" -d '{"name":"X","role":"r","description":"d","email":"x@example.org","location":"l"}')"
 pruefe "READ_ONLY: Antwort nennt read_only" "read_only" "$(feld "$(curl -s -X DELETE "$BASIS/api/v1/orgs/$OID/files/$FID" -H "$AR")" code)"

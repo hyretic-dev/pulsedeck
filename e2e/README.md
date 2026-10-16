@@ -16,3 +16,13 @@ E2E_BASE_URL=http://localhost:18095 E2E_COMPOSE="docker compose -p pulsedeck-e2e
 ```
 
 Exit-Code 0 nur ohne Auffälligkeiten. Erwartung: `AUTH_MIN_RESPONSE_MS=0` im Stack (kürzere Wartezeiten).
+
+## Schreibgeschützte Abnahme mit der Oberfläche
+
+`readonly-login.mjs` prüft gegen einen Stack mit `READ_ONLY=true`, dass die Anmeldung funktioniert (E-Mail-Prüfung, Passwort, Weiterleitung) und nur
+Hintergrund-Schreibzugriffe mit 503 abgewiesen werden. Das Konto muss vorher **Mitglied einer Organisation** sein (die Anmeldeseite prüft zuerst die E-Mail
+gegen die Mitglieder) und per API angelegt werden, weil Registrieren in dieser Betriebsart gesperrt ist:
+
+```bash
+E2E_BASE_URL=http://localhost:18099 E2E_EMAIL=… E2E_PASSWORD=… node readonly-login.mjs
+```

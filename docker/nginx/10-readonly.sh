@@ -9,7 +9,7 @@ if [ "${READ_ONLY:-false}" = "true" ]; then
 default_type application/json;
 set $schreibsperre 0;
 if ($request_method ~ ^(POST|PUT|PATCH|DELETE)$) { set $schreibsperre 1; }
-if ($uri ~ ^/api/v1/auth/(login|refresh|logout)$) { set $schreibsperre 0; }
+if ($uri ~ ^/api/v1/auth/(login|refresh|logout|check-email)$) { set $schreibsperre 0; }
 if ($schreibsperre = 1) { return 503 '{"code":"read_only","message":"Die Plattform ist vorübergehend schreibgeschützt (Abnahme nach der Migration)."}'; }
 CONF
   echo "READ_ONLY aktiv: schreibende API-Aufrufe werden mit 503 abgewiesen"
