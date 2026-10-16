@@ -336,6 +336,33 @@
                 }
             </div>
 
+            <!-- Meine Daten -->
+            <div>
+                <h3 class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
+                    Meine Daten
+                </h3>
+                <div
+                    class="flex items-center justify-between gap-4 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-card)]">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-[var(--color-surface-raised)] flex items-center justify-center border border-[var(--color-border)] shrink-0">
+                            <i class="pi pi-download text-[var(--color-text-muted)]"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-[var(--color-text)]">Datenexport</div>
+                            <div class="text-xs md:text-sm text-[var(--color-text-muted)] mt-1">
+                                Alle Daten zu deiner Person als Datei (JSON). Löschen von Mitgliedsdaten übernimmt der
+                                Vorstand deiner Organisation; die Löschung des Kontos kannst du per E-Mail an
+                                <a href="mailto:kontakt@pulsedeck.de" class="text-linke hover:underline">kontakt@pulsedeck.de</a>
+                                verlangen.
+                            </div>
+                        </div>
+                    </div>
+                    <p-button label="Herunterladen" icon="pi pi-download" size="small" [outlined]="true"
+                        severity="secondary" [loading]="exporting()" (click)="exportiereDaten()"></p-button>
+                </div>
+            </div>
+
             <!-- Actions -->
             <div class="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
                 <p-button label="Abbrechen" [text]="true" severity="secondary" routerLink="./"></p-button>

@@ -16,6 +16,7 @@ import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
 
 // Services
+import { ApiService } from '../../../core/api.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { MembersService } from '../../../shared/services/members.service';
 import { OrganizationService } from '../../../shared/services/organization.service';
@@ -48,6 +49,7 @@ import { TagModule } from 'primeng/tag';
 })
 export class ProfileComponent implements OnInit {
     readonly auth = inject(AuthService);
+    private readonly api = inject(ApiService);
     private readonly members = inject(MembersService);
     private readonly org = inject(OrganizationService);
     readonly skillService = inject(SkillService);
@@ -55,6 +57,7 @@ export class ProfileComponent implements OnInit {
     readonly notificationService = inject(NotificationService);
 
     saving = signal(false);
+    exporting = signal(false);
     birthdayDate: Date | null = null;
 
     // Form data for profile editing
@@ -302,6 +305,24 @@ export class ProfileComponent implements OnInit {
     async checkHasPassword(): Promise<void> {
         await this.auth.whenReady();
         this.hasPassword.set(this.auth.account()?.hasPassword ?? false);
+    }
+
+    /** Lädt alle Daten zur eigenen Person (Art. 15/20 DSGVO) und bietet sie als JSON-Datei an. */
+    async exportiereDaten(): Promise<void> {
+        this.exporting.set(true);
+        try {
+            const daten = await this.api.get<Record<string, unknown>>('/me/export');
+            const url = URL.createObjectURL(new Blob([JSON.stringify(daten, null, 2)], { type: 'application/json' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `pulsedeck-export-${new Date().toISOString().slice(0, 10)}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            this.messageService.add({ severity: 'error', summary: 'Fehler', detail: 'Der Datenexport ist fehlgeschlagen.' });
+        } finally {
+            this.exporting.set(false);
+        }
     }
 
     /**

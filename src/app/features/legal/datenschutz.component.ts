@@ -132,7 +132,9 @@ import { AuthService } from '../../shared/services/auth.service';
                         <p class="mt-3">
                             Rechtsgrundlage ist Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;b DSGVO (Nutzungsverhältnis). Die Daten speichern wir, solange das
                             Konto besteht. Die Löschung Ihres Kontos können Sie jederzeit per E-Mail an
-                            <a href="mailto:kontakt@pulsedeck.de" class="text-linke hover:underline">kontakt@pulsedeck.de</a> verlangen.
+                            <a href="mailto:kontakt@pulsedeck.de" class="text-linke hover:underline">kontakt@pulsedeck.de</a> verlangen;
+                            Mitgliedsdaten in einer Organisation löscht deren Vorstand. Eine Kopie aller Daten zu Ihrer Person können Sie
+                            jederzeit selbst in Ihrem Profil unter „Meine Daten“ herunterladen (Art.&nbsp;15 und 20 DSGVO).
                         </p>
                     </section>
 
@@ -192,8 +194,8 @@ import { AuthService } from '../../shared/services/auth.service';
                             durchsuchbar sind, wird ihr Text zur Berechnung von Suchvektoren ebenfalls an Mistral übermittelt.
                         </p>
                         <p class="mt-3">
-                            Ihre Gesprächsverläufe speichern wir in Ihrem Konto, solange es besteht; auf Wunsch löschen wir sie vorher
-                            (E-Mail an <a href="mailto:kontakt@pulsedeck.de" class="text-linke hover:underline">kontakt@pulsedeck.de</a>).
+                            Ihre Gesprächsverläufe speichern wir in Ihrem Konto, bis Sie sie im Chat über das Papierkorb-Symbol löschen
+                            oder Ihr Konto gelöscht wird.
                             Rechtsgrundlage ist Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;b DSGVO. Bitte geben Sie im Chat keine besonders sensiblen Daten
                             über andere Personen ein. KI-Antworten können fehlerhaft sein.
                         </p>

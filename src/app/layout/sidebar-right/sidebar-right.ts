@@ -326,17 +326,13 @@ export class SidebarRight implements OnInit, AfterViewChecked {
     this.chatbotService.sendMessage(reply);
   }
 
-  clearChat() {
-    this.chatbotService.sessionId.set(null);
-    this.chatbotService.messages.set([
-      {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content:
-          'Hallo! Ich bin dein PulseDeck Onboarding-Assistent. ' +
-          'Wie kann ich dir helfen?'
-      }
-    ]);
+  async clearChat() {
+    if (!confirm('Den gespeicherten Chat-Verlauf in dieser Organisation endgültig löschen?')) return;
+    try {
+      await this.chatbotService.clearHistory();
+    } catch (error) {
+      console.error('Chat-Verlauf konnte nicht gelöscht werden:', error);
+    }
   }
 
   parseMarkdown(content: string): string {

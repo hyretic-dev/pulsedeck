@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { erstelleFixture, type Fixture } from '../../test/fixture';
+import { frischesFenster } from '../../test/rate-window';
 
 const inTagen = (n: number): string => new Date(Date.now() + n * 86_400_000).toISOString().split('T')[0];
 
@@ -124,6 +125,7 @@ describe('Kalender-Abo und Sitemap (echtes PostgreSQL)', () => {
   });
 
   it('begrenzt die Abrufe je Absender', async () => {
+    await frischesFenster();
     const token = await tokenVon(ids.paulMitglied);
     for (let i = 0; i < 120; i += 1) await ical(`org=${ids.alpha}`);
 

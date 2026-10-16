@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { erstelleFixture, type Fixture } from '../../test/fixture';
+import { frischesFenster } from '../../test/rate-window';
 
 const tag = (versatz: number): string => {
   const d = new Date(Date.now() + versatz * 86_400_000);
@@ -113,6 +114,7 @@ describe('Aktivität (echtes PostgreSQL)', () => {
     });
 
     it('prüft Eingaben, verwirft übergroße Metadaten still und begrenzt die Rate je Absender', async () => {
+      await frischesFenster();
       for (const falsch of [{ event_name: 'mit Leerzeichen' }, { event_name: '' }, { event_name: 'x'.repeat(101) }, { event_name: 'ok', meta_data: 'text' }, { event_name: 'ok', organization_id: 'nein' }, { event_name: 'ok', id: 1 }]) {
         expect((await f.api('post', '/api/v1/analytics/events', null, falsch)).status, JSON.stringify(falsch)).toBe(400);
       }
@@ -138,6 +140,7 @@ describe('Aktivität (echtes PostgreSQL)', () => {
 
   describe('Feedback und Issue-Tracker', () => {
     it('nimmt Feedback anonym und angemeldet an, ordnet es nur geprüften Mitgliedern einer Organisation zu und begrenzt die Anzahl', async () => {
+      await frischesFenster(60 * 60 * 1000);
       await f.admin.query('DELETE FROM feedback_submissions');
       const senden = (konto: string | null, body: object) => f.api('post', '/api/v1/feedback', konto, body);
 

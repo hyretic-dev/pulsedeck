@@ -44,6 +44,8 @@ Datenübernahme betrafen.
 | E35 | `READ_ONLY=true` am Frontend-Container: schreibende API-Aufrufe → 503 `read_only`; Login, Refresh, Logout und `check-email` bleiben möglich. |
 | E36 | Native Apps: API-Adresse über `npm run build:mobile` (`PULSEDECK_API_URL`); das Backend erlaubt nur die in `CORS_ORIGINS` genannten Ursprünge (exakt, ohne Credentials). |
 | E39 | Produktivbetrieb auf Coolify mit `docker-compose.coolify.yml` (eine Datei, keine Host-Ports, keine eigenen Netze, keine Bind-Mounts). Anleitung: `docs/betrieb/coolify.md`. |
+| E40 | **Keine Selbstlöschung** (Betreiber 2026-10-17): Mitglieder entfernt der Vorstand der Organisation, Konten werden auf Anfrage gelöscht. Selbst bedienbar sind nur der Datenexport `GET /api/v1/me/export` (Art. 15/20; ohne Hashes, Tokens und Push-Schlüssel; jede Tabelle mit `member_id` muss in `account.service.ts` stehen, ein Test prüft das gegen das Schema) und das Löschen des eigenen KI-Chatverlaufs `DELETE /orgs/:orgId/chat/history`. |
+| E41 | **Sicherheits-Header am Reverse Proxy** (`nginx.conf`, erledigt O16): CSP `script-src 'self'` ohne Inline-Skripte (Build ohne `inlineCritical`, sonst blockiert die CSP das `onload` des Stylesheets), `style-src 'unsafe-inline'` für Angular/PrimeNG, `img-src https:` für Logos per URL, `connect-src 'self'`, `frame-ancestors 'self'`; dazu `Referrer-Policy` und `Permissions-Policy`. Browser-Smoke prüft: keine CSP-Verstöße in der Konsole. |
 | O2 | Sitzungen nur per Bearer-JWT: kurzlebiges Access-Token, serverseitig rotierbares und widerrufbares Refresh-Token. Keine Cookies, kein CSRF-Transport. |
 | O4 | Mail über `MAIL_TRANSPORT=smtp` oder `resend`; produktiv IONOS-SMTP (`mailer@pulsedeck.de`). |
 | O10 | Nur das Backend hat ausgehenden Netzzugang (Netz `egress`); PostgreSQL bleibt im internen Netz. |
@@ -97,7 +99,6 @@ Datenübernahme betrafen.
 | O12 | Datenschutzerklärung nach bestem Wissen erstellt (2026-10-17: Hetzner Nürnberg, IONOS, Mistral, Rollen Plattform/Organisation, Art. 9); **juristische Prüfung steht aus**, ebenso Verträge zur Auftragsverarbeitung mit Hetzner, IONOS, Mistral und den Organisationen sowie eine feste Löschfrist für Server-Logs. |
 | O14 | Native Apps auf einem echten Gerät prüfen (Ursprung, CORS, SSE im WebView). |
 | O15 | Abhängigkeitsfunde: `xlsx` 0.18.5 (Prototype Pollution beim Mitglieder-Import, gepflegte Version nur vom SheetJS-CDN), `@nestjs/swagger` → `js-yaml` (Fix erst mit Major 12). |
-| O16 | Content-Security-Policy am Reverse Proxy (Härtung der Sitzung im `localStorage`, E31). |
 | O17 | PDF-Verarbeitung (`pdf-parse`) läuft im Backend-Prozess; Isolierung wäre ein Ausbau. |
 | O19 | Release eines Backend-Images: `docker-release.yml` veröffentlicht nur das Frontend-Image. |
 | — | Betreiber-Bestätigung von D1–D8, E19 und E26; Egress-Allowlist (O10); globales Login-Limit je E-Mail hinter einem zusätzlichen Proxy (E14). |

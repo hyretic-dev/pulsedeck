@@ -241,4 +241,25 @@ describe('Chat (echtes PostgreSQL)', () => {
     const gespeichert = await f.admin.query("SELECT content FROM chat_messages WHERE session_id = $1 AND role = 'assistant'", [antwort.headers['x-chat-session-id']]);
     expect(gespeichert.rows).toEqual([{ content: 'Teil ' }]);
   });
+
+  it('löscht nur den eigenen Verlauf in dieser Organisation', async () => {
+    const sitzung = async (userId: string, orgId: string) => {
+      const { rows } = await f.admin.query('INSERT INTO chat_sessions (user_id, organization_id) VALUES ($1, $2) RETURNING id', [userId, orgId]);
+      await f.admin.query("INSERT INTO chat_messages (session_id, role, content) VALUES ($1, 'user', 'Hallo')", [rows[0].id]);
+      return rows[0].id as string;
+    };
+    const claraAlpha = await sitzung(ids.clara, ids.alpha);
+    const claraBeta = await sitzung(ids.clara, ids.beta);
+    const paulAlpha = await sitzung(ids.paul, ids.alpha);
+    const uebrig = async (...sitzungen: string[]) => (await f.admin.query('SELECT id FROM chat_sessions WHERE id = ANY($1)', [sitzungen])).rows.map((r) => r.id).sort();
+
+    expect((await f.api('delete', c(ids.alpha, '/history'))).status).toBe(401);
+    expect((await f.api('delete', c(ids.alpha, '/history'), ids.bernd)).status).toBe(403);
+    expect((await f.api('delete', c(ids.alpha, '/history'), ids.clara)).status).toBe(204);
+
+    expect(await uebrig(claraAlpha, claraBeta, paulAlpha)).toEqual([claraBeta, paulAlpha].sort());
+    expect((await f.admin.query('SELECT count(*)::int AS n FROM chat_messages WHERE session_id = $1', [claraAlpha])).rows[0].n).toBe(0);
+    expect((await f.api('get', c(ids.alpha, '/history'), ids.clara)).body).toEqual({ session_id: null, messages: [] });
+    expect((await f.api('delete', c(ids.alpha, '/history'), ids.clara)).status).toBe(204);
+  });
 });

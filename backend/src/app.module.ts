@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AccountModule } from './account/account.module';
 import { ActivityModule } from './activity/activity.module';
 import { AuthModule } from './auth/auth.module';
 import { CalendarModule } from './calendar/calendar.module';
@@ -24,6 +25,6 @@ import { WorkingGroupsModule } from './working-groups/working-groups.module';
 
 /** Wurzelmodul: Querschnitt, Authentifizierung, Mandantenkontext und die Fachmodule. */
 @Module({
-  imports: [PlatformModule, AuthModule, TenancyModule, OrganizationsModule, MembersModule, SkillsModule, WorkingGroupsModule, EventsModule, FeedModule, WikiModule, ContactsModule, NewsletterModule, JobsModule, PushModule, FilesModule, KnowledgeModule, ChatModule, ActivityModule, CalendarModule, SeoModule, RealtimeModule],
+  imports: [PlatformModule, AuthModule, AccountModule, TenancyModule, OrganizationsModule, MembersModule, SkillsModule, WorkingGroupsModule, EventsModule, FeedModule, WikiModule, ContactsModule, NewsletterModule, JobsModule, PushModule, FilesModule, KnowledgeModule, ChatModule, ActivityModule, CalendarModule, SeoModule, RealtimeModule],
 })
 export class AppModule {}

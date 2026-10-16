@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -146,6 +146,24 @@ await seite.locator('input[type=file]').setInputFiles(datei);
 await seite.waitForTimeout(400);
 await dialogKnopf('Hochladen').click();
 await sichtbar('Datei hochladen', 'e2e-datei.txt');
+
+aktuell = 'Datenexport';
+await seite.goto(`${BASIS}/${slug}/dashboard/profile`);
+await seite.waitForTimeout(1500);
+try {
+  const [download] = await Promise.all([
+    seite.waitForEvent('download', { timeout: 10000 }),
+    seite.locator('button:visible', { hasText: /^\s*Herunterladen\s*$/ }).first().click(),
+  ]);
+  const inhalt = JSON.parse(readFileSync(await download.path(), 'utf8'));
+  ergebnisse.push(inhalt.account?.email === email && !JSON.stringify(inhalt).includes('password_hash') ? 'ok     Datenexport im Profil' : 'FEHLER Datenexport: Inhalt unerwartet');
+} catch (e) {
+  ergebnisse.push(`FEHLER Datenexport: ${String(e).slice(0, 120)}`);
+}
+
+aktuell = 'Sicherheits-Header';
+const kopf = (await seite.request.get(`${BASIS}/`)).headers()['content-security-policy'] ?? '';
+ergebnisse.push(kopf.includes("script-src 'self'") ? 'ok     CSP gesetzt (Verstöße erscheinen als Konsolenfehler)' : 'FEHLER CSP fehlt');
 
 aktuell = 'Anmeldung';
 await seite.evaluate(() => localStorage.clear());

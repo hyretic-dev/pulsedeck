@@ -51,6 +51,14 @@ export class ChatbotService {
         }
     }
 
+    /** Löscht den gespeicherten Verlauf in dieser Organisation auf dem Server und beginnt ein neues Gespräch. */
+    async clearHistory(): Promise<void> {
+        const orgId = this.org.currentOrgId();
+        if (orgId) await this.api.delete(`/orgs/${orgId}/chat/history`);
+        this.sessionId.set(null);
+        this.messages.set([{ id: crypto.randomUUID(), role: 'assistant', content: 'Hallo! Ich bin dein PulseDeck Onboarding-Assistent. Wie kann ich dir helfen?' }]);
+    }
+
     async sendMessage(content: string) {
         if (!content.trim()) return;
 

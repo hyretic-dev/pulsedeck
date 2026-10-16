@@ -91,6 +91,9 @@ for pfad in /api/docs /api/docs-json /api/DOCS-json /api/Docs; do
   pruefe "extern gesperrt: $pfad" 404 "$(status "$BASIS$pfad")"
 done
 pruefe "SPA-Fallback" 200 "$(status "$BASIS/login")"
+CSP=$(curl -s -D - -o /dev/null "$BASIS/login" | tr -d '\r' | grep -i '^content-security-policy:')
+pruefe "CSP: Skripte nur vom eigenen Ursprung" 1 "$(echo "$CSP" | grep -c "script-src 'self';")"
+pruefe "CSP: keine Inline-Handler in index.html" 0 "$(curl -s "$BASIS/" | grep -c -E ' on[a-z]+=\"')"
 curl -s -o /dev/null "$BASIS/auth/callback?type=verify&token=smoke-geheimnis"
 sleep 1
 pruefe "kein Token im nginx-Log" 0 "$(compose logs frontend 2>/dev/null | grep -c smoke-geheimnis)"
@@ -147,6 +150,10 @@ rm -f "$DATEI"
 pruefe "Newsletter-Konfiguration ohne Passwortfeld" 0 "$(curl -s "$BASIS/api/v1/orgs/$OID/newsletter/config" -H "$A" | grep -c 'smtp_pass_encrypted')"
 pruefe "Push ohne VAPID-Schlüssel" "False" "$(python3 -c "import json,sys; print(json.loads(sys.argv[1])['enabled'])" "$(curl -s "$BASIS/api/v1/push/config")")"
 pruefe "Chat ohne KI-Schlüssel" 503 "$(status -X POST "$BASIS/api/v1/orgs/$OID/chat" -H "$J" -H "$A" -d '{"messages":[{"role":"user","content":"Hallo"}]}')"
+pruefe "Datenexport ohne Anmeldung" 401 "$(status "$BASIS/api/v1/me/export")"
+pruefe "Datenexport enthält das Konto" "$EMAIL" "$(python3 -c "import json,sys; print(json.loads(sys.argv[1])['account']['email'])" "$(curl -s "$BASIS/api/v1/me/export" -H "$A")")"
+pruefe "Datenexport ohne Passwort-Hash" 0 "$(curl -s "$BASIS/api/v1/me/export" -H "$A" | grep -c password_hash)"
+pruefe "Chat-Verlauf löschen" 204 "$(status -X DELETE "$BASIS/api/v1/orgs/$OID/chat/history" -H "$A")"
 pruefe "Analytics anonym" 204 "$(status -X POST "$BASIS/api/v1/analytics/events" -H "$J" -d '{"event_name":"smoke"}')"
 pruefe "Feedback anonym" 204 "$(status -X POST "$BASIS/api/v1/feedback" -H "$J" -d '{"type":"bug","description":"Smoke"}')"
 pruefe "Backend läuft nicht als root" "ja" "$([ "$(compose exec -T backend id -u | tr -d '\r')" != "0" ] && echo ja || echo nein)"

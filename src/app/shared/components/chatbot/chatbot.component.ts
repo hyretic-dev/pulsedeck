@@ -22,6 +22,15 @@ import { marked } from 'marked';
 })
 export class ChatbotComponent implements AfterViewChecked {
   chatbotService = inject(ChatbotService);
+
+  async verlaufLoeschen() {
+    if (!confirm('Den gespeicherten Chat-Verlauf in dieser Organisation endgültig löschen?')) return;
+    try {
+      await this.chatbotService.clearHistory();
+    } catch (error) {
+      console.error('Chat-Verlauf konnte nicht gelöscht werden:', error);
+    }
+  }
   
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef;
   

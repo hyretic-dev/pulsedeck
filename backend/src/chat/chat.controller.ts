@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 
@@ -28,6 +28,12 @@ export class ChatController {
   @Get('history')
   verlauf(@CurrentUserId() userId: string, @Param('orgId') orgId: string) {
     return this.chat.verlauf(userId, orgId);
+  }
+
+  @Delete('history')
+  @HttpCode(204)
+  verlaufLoeschen(@CurrentUserId() userId: string, @Param('orgId') orgId: string): Promise<void> {
+    return this.chat.verlaufLoeschen(userId, orgId);
   }
 
   /**

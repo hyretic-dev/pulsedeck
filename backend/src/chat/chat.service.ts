@@ -89,6 +89,11 @@ export class ChatService {
     return { session_id: sitzung[0].id, messages: rows };
   }
 
+  /** Löscht alle Chat-Sitzungen des Nutzers in der Organisation (Nachrichten per Kaskade). */
+  async verlaufLoeschen(userId: string, orgId: string): Promise<void> {
+    await this.pool.query('DELETE FROM chat_sessions WHERE user_id = $1 AND organization_id = $2', [userId, orgId]);
+  }
+
   /** Bestehende Sitzung des Nutzers oder eine neue; fremde Sitzungs-IDs gibt es nicht. */
   async sitzung(userId: string, orgId: string, sessionId?: string): Promise<string> {
     if (sessionId) {
