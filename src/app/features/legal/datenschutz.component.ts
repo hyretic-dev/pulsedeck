@@ -14,220 +14,278 @@ import { AuthService } from '../../shared/services/auth.service';
                     <i class="pi pi-arrow-left"></i>
                     Zurück zur Startseite
                 </a>
-                
+
                 <h1 class="text-4xl font-bold text-[var(--color-text)] mb-8">Datenschutzerklärung</h1>
-                
-                <div class="max-w-none space-y-12">
-                    
-                    <!-- 1. Überblick -->
-                    <section>
-                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">1. Datenschutz auf einen Blick</h2>
-                        
-                        <h3 class="text-xl font-medium text-[var(--color-text)] mt-6 mb-3">Allgemeine Hinweise</h3>
-                        <p class="text-[var(--color-text-muted)] leading-relaxed">
-                            Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, 
-                            wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können. 
-                            Ausführliche Informationen zum Thema Datenschutz entnehmen Sie unserer unter diesem Text aufgeführten Datenschutzerklärung.
-                        </p>
 
-                        <h3 class="text-xl font-medium text-[var(--color-text)] mt-6 mb-3">Datenerfassung auf dieser Website</h3>
-                        <div class="space-y-4 text-[var(--color-text-muted)]">
-                            <p>
-                                <strong class="text-[var(--color-text)]">Wer ist verantwortlich für die Datenerfassung auf dieser Website?</strong><br>
-                                Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten können Sie dem Abschnitt 
-                                "Hinweis zur verantwortlichen Stelle" in dieser Datenschutzerklärung entnehmen.
-                            </p>
-                            <p>
-                                <strong class="text-[var(--color-text)]">Wie erfassen wir Ihre Daten?</strong><br>
-                                Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen. Hierbei kann es sich z.B. um Daten handeln, 
-                                die Sie in ein Kontaktformular eingeben oder bei der Registrierung angeben.<br>
-                                Andere Daten werden automatisch oder nach Ihrer Einwilligung beim Besuch der Website durch unsere IT-Systeme erfasst. 
-                                Das sind vor allem technische Daten (z.B. Internetbrowser, Betriebssystem oder Uhrzeit des Seitenaufrufs). 
-                                Die Erfassung dieser Daten erfolgt automatisch, sobald Sie diese Website betreten.
-                            </p>
-                            <p>
-                                <strong class="text-[var(--color-text)]">Wofür nutzen wir Ihre Daten?</strong><br>
-                                Ein Teil der Daten wird erhoben, um eine fehlerfreie Bereitstellung der Website zu gewährleisten. 
-                                Andere Daten können zur Analyse Ihres Nutzerverhaltens verwendet werden. Die bei der Registrierung angegebenen Daten 
-                                dienen der Bereitstellung unseres Dienstes.
-                            </p>
-                        </div>
-                    </section>
+                <div class="max-w-none space-y-12 text-[var(--color-text-muted)] leading-relaxed">
 
-                    <!-- 2. Hosting -->
+                    <!-- 1. Verantwortlicher -->
                     <section>
-                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">2. Hosting</h2>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">1. Verantwortlicher</h2>
                         <div class="bg-[var(--color-surface-raised)] rounded-xl p-6 border border-[var(--color-border)]">
-                            <h3 class="text-lg font-medium text-[var(--color-text)] mb-3">Externes Hosting</h3>
-                            <p class="text-[var(--color-text-muted)] leading-relaxed mb-4">
-                                Diese Website wird extern gehostet. Die personenbezogenen Daten, die auf dieser Website erfasst werden, 
-                                werden auf den Servern des Hosters gespeichert. Hierbei kann es sich v.a. um IP-Adressen, Kontaktanfragen, 
-                                Meta- und Kommunikationsdaten, Vertragsdaten, Kontaktdaten, Namen, Websitezugriffe und sonstige Daten, 
-                                die über eine Website generiert werden, handeln.
-                            </p>
-                            <p class="text-[var(--color-text-muted)] leading-relaxed">
-                                Das externe Hosting erfolgt zum Zwecke der Vertragserfüllung gegenüber unseren potenziellen und bestehenden 
-                                Kunden (Art. 6 Abs. 1 lit. b DSGVO) und im Interesse einer sicheren, schnellen und effizienten Bereitstellung 
-                                unseres Online-Angebots durch einen professionellen Anbieter (Art. 6 Abs. 1 lit. f DSGVO). 
-                                Sofern eine entsprechende Einwilligung abgefragt wurde, erfolgt die Verarbeitung ausschließlich auf Grundlage 
-                                von Art. 6 Abs. 1 lit. a DSGVO; die Einwilligung ist jederzeit widerrufbar.
-                            </p>
-                            <p class="text-[var(--color-text-muted)] mt-4 text-sm">
-                                Die Anwendung wird vom Betreiber dieser Instanz selbst betrieben (siehe Impressum); die Daten liegen
-                                in einer PostgreSQL-Datenbank und einem Dateispeicher auf den Servern des Betreibers. Angaben zum eingesetzten
-                                Rechenzentrum bzw. Hosting-Dienstleister und zum Serverstandort ergänzt der Betreiber hier.
-                            </p>
-                        </div>
-                    </section>
-
-                    <!-- 3. Allgemeine Hinweise -->
-                    <section>
-                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">3. Allgemeine Hinweise und Pflichtinformationen</h2>
-                        
-                        <h3 class="text-xl font-medium text-[var(--color-text)] mt-6 mb-3">Datenschutz</h3>
-                        <p class="text-[var(--color-text-muted)] leading-relaxed">
-                            Die Betreiber dieser Seiten nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Wir behandeln Ihre personenbezogenen 
-                            Daten vertraulich und entsprechend den gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerklärung.<br>
-                            Wenn Sie diese Website benutzen, werden verschiedene personenbezogene Daten erhoben. 
-                            Personenbezogene Daten sind Daten, mit denen Sie persönlich identifiziert werden können. 
-                            Die vorliegende Datenschutzerklärung erläutert, welche Daten wir erheben und wofür wir sie nutzen. 
-                            Sie erläutert auch, wie und zu welchem Zweck das geschieht.
-                        </p>
-
-                        <h3 class="text-xl font-medium text-[var(--color-text)] mt-6 mb-3">Hinweis zur verantwortlichen Stelle</h3>
-                        <div class="bg-[var(--color-surface-raised)] rounded-xl p-6 border border-[var(--color-border)] mt-4">
-                            <p class="text-[var(--color-text-muted)]">
-                                Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:<br><br>
+                            <p>
                                 <strong class="text-[var(--color-text)]">PulseDeck</strong><br>
                                 Julien Lieske<br>
                                 c/o Autorenglück #62015<br>
                                 Albert-Einstein-Str. 47<br>
-                                02977 Hoyerswerda<br><br>
-                                <span class="text-sm italic">Behörden können meine ladungsfähige Anschrift unter oben genannter Adresse erfragen.</span><br><br>
-                                E-Mail: kontakt@pulsedeck.de
-                            </p>
-                            <p class="text-[var(--color-text-muted)] text-sm mt-4 italic">
-                                Verantwortliche Stelle ist die natürliche oder juristische Person, die allein oder gemeinsam mit anderen über 
-                                die Zwecke und Mittel der Verarbeitung von personenbezogenen Daten (z.B. Namen, E-Mail-Adressen o. Ä.) entscheidet.
+                                02977 Hoyerswerda<br>
+                                Deutschland<br><br>
+                                E-Mail: <a href="mailto:kontakt@pulsedeck.de" class="text-linke hover:underline">kontakt@pulsedeck.de</a>
                             </p>
                         </div>
-
-                        <h3 class="text-xl font-medium text-[var(--color-text)] mt-6 mb-3">Speicherdauer</h3>
-                        <p class="text-[var(--color-text-muted)] leading-relaxed">
-                            Soweit innerhalb dieser Datenschutzerklärung keine speziellere Speicherdauer genannt wurde, verbleiben Ihre personenbezogenen 
-                            Daten bei uns, bis der Zweck für die Datenverarbeitung entfällt. Wenn Sie ein berechtigtes Löschersuchen geltend machen 
-                            oder eine Einwilligung zur Datenverarbeitung widerrufen, werden Ihre Daten gelöscht, sofern wir keine anderen rechtlich 
-                            zulässigen Gründe für die Speicherung Ihrer personenbezogenen Daten haben (z.B. steuer- oder handelsrechtliche 
-                            Aufbewahrungsfristen); im letztgenannten Fall erfolgt die Löschung nach Fortfall dieser Gründe.
+                        <p class="mt-4">
+                            Ein Datenschutzbeauftragter ist nicht benannt, da die gesetzlichen Voraussetzungen dafür nicht vorliegen.
+                            Für alle Fragen zum Datenschutz erreichen Sie uns unter der oben genannten E-Mail-Adresse.
                         </p>
                     </section>
 
-                    <!-- 4. Datenerfassung -->
+                    <!-- 2. Rollen -->
                     <section>
-                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">4. Datenerfassung auf dieser Website</h2>
-                        
-                        <h3 class="text-xl font-medium text-[var(--color-text)] mt-6 mb-3">Cookies</h3>
-                        <p class="text-[var(--color-text-muted)] leading-relaxed">
-                            Unsere Internetseiten verwenden so genannte „Cookies". Cookies sind kleine Textdateien und richten auf Ihrem Endgerät keinen Schaden an. 
-                            Sie werden entweder vorübergehend für die Dauer einer Sitzung (Session-Cookies) oder dauerhaft (permanente Cookies) auf Ihrem Endgerät gespeichert. 
-                            Session-Cookies werden nach Ende Ihres Besuchs automatisch gelöscht. Permanente Cookies bleiben auf Ihrem Endgerät gespeichert, bis Sie diese 
-                            selbst löschen oder eine automatische Löschung durch Ihren Webbrowser erfolgt.<br><br>
-                            Technisch notwendige Cookies, die zur Durchführung des elektronischen Kommunikationsvorgangs oder zur Bereitstellung bestimmter, 
-                            von Ihnen erwünschter Funktionen erforderlich sind, werden auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO gespeichert. 
-                            Der Websitebetreiber hat ein berechtigtes Interesse an der Speicherung von Cookies zur technisch fehlerfreien und optimierten 
-                            Bereitstellung seiner Dienste.
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">2. Wer ist wofür verantwortlich?</h2>
+                        <p>
+                            PulseDeck ist eine Plattform, auf der Organisationen (z.&nbsp;B. Vereine, Ortsgruppen, Initiativen) ihre Mitglieder,
+                            Termine, Beiträge, Dokumente und Arbeitsgruppen verwalten.
                         </p>
-
-                        <h3 class="text-xl font-medium text-[var(--color-text)] mt-6 mb-3">Server-Log-Dateien</h3>
-                        <p class="text-[var(--color-text-muted)] leading-relaxed">
-                            Der Provider der Seiten erhebt und speichert automatisch Informationen in so genannten Server-Log-Dateien, 
-                            die Ihr Browser automatisch an uns übermittelt. Dies sind:
-                        </p>
-                        <ul class="list-disc list-inside text-[var(--color-text-muted)] mt-2 mb-4 ml-4">
-                            <li>Browsertyp und Browserversion</li>
-                            <li>Verwendetes Betriebssystem</li>
-                            <li>Referrer URL</li>
-                            <li>Hostname des zugreifenden Rechners</li>
-                            <li>Uhrzeit der Serveranfrage</li>
-                            <li>IP-Adresse</li>
+                        <ul class="list-disc ml-6 mt-3 space-y-2">
+                            <li>
+                                <strong class="text-[var(--color-text)]">Für die Website, Ihr Benutzerkonto und den technischen Betrieb</strong>
+                                sind wir (Abschnitt 1) verantwortlich.
+                            </li>
+                            <li>
+                                <strong class="text-[var(--color-text)]">Für die Inhalte und Mitgliederdaten innerhalb einer Organisation</strong>
+                                (z.&nbsp;B. Mitgliederliste, Termine, Wiki, Dateien, Newsletter) ist die jeweilige Organisation verantwortlich.
+                                Wir verarbeiten diese Daten in ihrem Auftrag (Art.&nbsp;28 DSGVO). Wenden Sie sich mit Anliegen zu diesen Daten
+                                bitte zuerst an die Organisation; wir leiten Anfragen, die uns erreichen, an sie weiter.
+                            </li>
                         </ul>
-                        <p class="text-[var(--color-text-muted)] leading-relaxed">
-                            Eine Zusammenführung dieser Daten mit anderen Datenquellen wird nicht vorgenommen. 
-                            Die Erfassung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Der Websitebetreiber hat ein berechtigtes 
-                            Interesse an der technisch fehlerfreien Darstellung und der Optimierung seiner Website - hierzu müssen die Server-Log-Files erfasst werden.
-                        </p>
+                    </section>
 
-                        <h3 class="text-xl font-medium text-[var(--color-text)] mt-6 mb-3">Registrierung auf dieser Website</h3>
-                        <p class="text-[var(--color-text-muted)] leading-relaxed">
-                            Sie können sich auf dieser Website registrieren, um zusätzliche Funktionen auf der Seite zu nutzen. Die dazu eingegebenen Daten 
-                            verwenden wir nur zum Zwecke der Nutzung des jeweiligen Angebotes oder Dienstes, für den Sie sich registriert haben. 
-                            Die bei der Registrierung abgefragten Pflichtangaben müssen vollständig angegeben werden. Anderenfalls werden wir die Registrierung ablehnen.
-                            Für wichtige Änderungen etwa beim Angebotsumfang oder bei technisch notwendigen Änderungen nutzen wir die bei der Registrierung 
-                            angegebene E-Mail-Adresse, um Sie auf diesem Wege zu informieren.<br>
-                            Die Verarbeitung der bei der Registrierung eingegebenen Daten erfolgt zum Zwecke der Durchführung des durch die Registrierung 
-                            begründeten Nutzungsverhältnisses und ggf. zur Anbahnung weiterer Verträge (Art. 6 Abs. 1 lit. b DSGVO).
+                    <!-- 3. Hosting -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">3. Hosting und Serverstandort</h2>
+                        <p>
+                            Die Anwendung, die Datenbank und alle hochgeladenen Dateien liegen auf einem Server der
+                            <strong class="text-[var(--color-text)]">Hetzner Online GmbH</strong>, Industriestr.&nbsp;25, 91710 Gunzenhausen,
+                            in einem Rechenzentrum in <strong class="text-[var(--color-text)]">Nürnberg (Deutschland)</strong>. Wir betreiben die Software
+                            selbst; Hetzner stellt nur die Server-Infrastruktur bereit und ist als Auftragsverarbeiter vertraglich gebunden
+                            (Art.&nbsp;28 DSGVO). Rechtsgrundlage ist Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;b und f DSGVO (Bereitstellung des Dienstes,
+                            sicherer und zuverlässiger Betrieb).
+                        </p>
+                        <p class="mt-3">
+                            Die Verbindung zur Website ist per TLS verschlüsselt. Passwörter speichern wir nur als bcrypt-Hash, Zugangsdaten zu
+                            Mailservern der Organisationen verschlüsselt. Datensicherungen von Datenbank und Dateien werden täglich auf dem Server
+                            erstellt und nach 14 Tagen gelöscht.
                         </p>
                     </section>
 
-                    <!-- 5. Plugins und Tools -->
+                    <!-- 4. Aufruf der Website -->
                     <section>
-                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">5. Plugins und Tools</h2>
-                        
-                        <h3 class="text-xl font-medium text-[var(--color-text)] mt-6 mb-3">Google Fonts (Web Fonts)</h3>
-                        <p class="text-[var(--color-text-muted)] leading-relaxed">
-                            Diese Seite nutzt zur einheitlichen Darstellung von Schriftarten so genannte Web Fonts, die von Google bereitgestellt werden. 
-                            Beim Aufruf einer Seite lädt Ihr Browser die benötigten Web Fonts in ihren Browsercache, um Texte und Schriftarten korrekt anzuzeigen.<br>
-                            Zu diesem Zweck muss der von Ihnen verwendete Browser Verbindung zu den Servern von Google aufnehmen. Hierdurch erlangt Google Kenntnis darüber, 
-                            dass über Ihre IP-Adresse diese Website aufgerufen wurde. Die Nutzung von Google Fonts erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. 
-                            Der Websitebetreiber hat ein berechtigtes Interesse an der einheitlichen Darstellung des Schriftbildes auf seiner Website. 
-                            Sofern eine entsprechende Einwilligung abgefragt wurde, erfolgt die Verarbeitung ausschließlich auf Grundlage von Art. 6 Abs. 1 lit. a DSGVO.<br><br>
-                            Weitere Informationen zu Google Fonts finden Sie unter <a href="https://developers.google.com/fonts/faq" target="_blank" class="text-linke hover:underline">https://developers.google.com/fonts/faq</a> 
-                            und in der Datenschutzerklärung von Google: <a href="https://policies.google.com/privacy?hl=de" target="_blank" class="text-linke hover:underline">https://policies.google.com/privacy?hl=de</a>.
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">4. Aufruf der Website und Protokolldaten</h2>
+                        <p>Beim Aufruf der Website verarbeitet unser Server automatisch:</p>
+                        <ul class="list-disc ml-6 mt-2 mb-3">
+                            <li>IP-Adresse, Datum und Uhrzeit der Anfrage</li>
+                            <li>aufgerufene Adresse (ohne Parameter), HTTP-Methode, Statuscode und übertragene Datenmenge</li>
+                            <li>Browser und Betriebssystem (User-Agent)</li>
+                            <li>bei angemeldeten Personen intern die Konto-ID (ohne IP-Adresse) zur Fehlersuche</li>
+                        </ul>
+                        <p>
+                            Diese Daten brauchen wir, um die Website auszuliefern, Fehler zu finden und Angriffe abzuwehren (Art.&nbsp;6 Abs.&nbsp;1
+                            lit.&nbsp;f DSGVO). Zugangslinks und Tokens werden nicht protokolliert. Die Protokolle werden nicht mit anderen Daten
+                            zusammengeführt und fortlaufend überschrieben (begrenzte Dateigröße).
+                        </p>
+                        <p class="mt-3">
+                            Zum Schutz vor Missbrauch (z.&nbsp;B. Passwort-Rateversuche) speichern wir bei Anmeldung, Registrierung und
+                            Link-Anforderung die E-Mail-Adresse zusammen mit der IP-Adresse in einem Zähler; dieser wird nach spätestens zwei Tagen
+                            gelöscht (Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;f DSGVO).
                         </p>
                     </section>
 
-                    <!-- 6. Rechte -->
+                    <!-- 5. Speicherung im Browser -->
                     <section>
-                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">6. Ihre Rechte</h2>
-                        
-                        <div class="grid gap-4 mt-6">
-                            <div class="bg-[var(--color-surface-raised)] rounded-xl p-5 border border-[var(--color-border)]">
-                                <h4 class="text-[var(--color-text)] font-medium mb-2">Recht auf Auskunft</h4>
-                                <p class="text-[var(--color-text-muted)] text-sm">
-                                    Sie haben im Rahmen der geltenden gesetzlichen Bestimmungen jederzeit das Recht auf unentgeltliche Auskunft über Ihre 
-                                    gespeicherten personenbezogenen Daten, deren Herkunft und Empfänger und den Zweck der Datenverarbeitung und ggf. 
-                                    ein Recht auf Berichtigung oder Löschung dieser Daten.
-                                </p>
-                            </div>
-                            <div class="bg-[var(--color-surface-raised)] rounded-xl p-5 border border-[var(--color-border)]">
-                                <h4 class="text-[var(--color-text)] font-medium mb-2">Recht auf Einschränkung der Verarbeitung</h4>
-                                <p class="text-[var(--color-text-muted)] text-sm">
-                                    Sie haben das Recht, die Einschränkung der Verarbeitung Ihrer personenbezogenen Daten zu verlangen. 
-                                    Dies gilt in bestimmten Situationen, z.B. wenn Sie die Richtigkeit Ihrer bei uns gespeicherten Daten bestreiten.
-                                </p>
-                            </div>
-                            <div class="bg-[var(--color-surface-raised)] rounded-xl p-5 border border-[var(--color-border)]">
-                                <h4 class="text-[var(--color-text)] font-medium mb-2">Widerruf Ihrer Einwilligung</h4>
-                                <p class="text-[var(--color-text-muted)] text-sm">
-                                    Viele Datenverarbeitungsvorgänge sind nur mit Ihrer ausdrücklichen Einwilligung möglich. Sie können eine bereits erteilte 
-                                    Einwilligung jederzeit widerrufen. Die Rechtmäßigkeit der bis zum Widerruf erfolgten Datenverarbeitung bleibt vom Widerruf unberührt.
-                                </p>
-                            </div>
-                            <div class="bg-[var(--color-surface-raised)] rounded-xl p-5 border border-[var(--color-border)]">
-                                <h4 class="text-[var(--color-text)] font-medium mb-2">Beschwerderecht</h4>
-                                <p class="text-[var(--color-text-muted)] text-sm">
-                                    Im Falle von Verstößen gegen die DSGVO steht den Betroffenen ein Beschwerderecht bei einer Aufsichtsbehörde zu, 
-                                    insbesondere in dem Mitgliedstaat ihres gewöhnlichen Aufenthalts, ihres Arbeitsplatzes oder des Orts des mutmaßlichen Verstoßes.
-                                </p>
-                            </div>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">5. Speicherung im Browser (keine Tracking-Cookies)</h2>
+                        <p>
+                            Wir setzen keine Cookies für Werbung oder Tracking und binden keine Analyse- oder Werbedienste Dritter ein. Im lokalen
+                            Speicher Ihres Browsers legen wir nur ab, was für die Nutzung nötig ist:
+                        </p>
+                        <ul class="list-disc ml-6 mt-2 mb-3">
+                            <li>Ihre Anmeldesitzung (<code>pulsedeck.session</code>), solange Sie angemeldet sind</li>
+                            <li>die zuletzt geöffnete Organisation und eine begonnene Organisationsanlage</li>
+                            <li>Ihre Anzeige-Einstellung (helles/dunkles Design)</li>
+                            <li>Programmdateien der App im Browser-Cache (Offline-Fähigkeit)</li>
+                        </ul>
+                        <p>
+                            Diese Speicherung ist für den von Ihnen gewünschten Dienst unbedingt erforderlich (§&nbsp;25 Abs.&nbsp;2 Nr.&nbsp;2 TDDDG)
+                            und braucht deshalb keine Einwilligung. Sie können die Daten jederzeit über die Browser-Einstellungen löschen; danach
+                            müssen Sie sich neu anmelden.
+                        </p>
+                    </section>
+
+                    <!-- 6. Konto -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">6. Benutzerkonto und Anmeldung</h2>
+                        <p>
+                            Für ein Konto verarbeiten wir Ihre E-Mail-Adresse, Ihr Passwort (nur als Hash) sowie Zeitpunkte von Registrierung,
+                            Bestätigung und Anmeldung. Zur Bestätigung der E-Mail-Adresse, für Anmeldelinks und zum Zurücksetzen des Passworts
+                            senden wir Ihnen E-Mails; die Links gelten 24 Stunden und nur einmal. Eine Anmeldung endet, wenn Sie sich abmelden
+                            oder die App 30 Tage lang nicht nutzen.
+                        </p>
+                        <p class="mt-3">
+                            Rechtsgrundlage ist Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;b DSGVO (Nutzungsverhältnis). Die Daten speichern wir, solange das
+                            Konto besteht. Die Löschung Ihres Kontos können Sie jederzeit per E-Mail an
+                            <a href="mailto:kontakt@pulsedeck.de" class="text-linke hover:underline">kontakt@pulsedeck.de</a> verlangen.
+                        </p>
+                    </section>
+
+                    <!-- 7. Organisationen -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">7. Daten innerhalb einer Organisation</h2>
+                        <p>Je nachdem, was die Organisation und Sie selbst eintragen, verarbeiten wir in ihrem Auftrag insbesondere:</p>
+                        <ul class="list-disc ml-6 mt-2 mb-3">
+                            <li>Stammdaten: Name, E-Mail, Telefon, Anschrift, Geburtstag, Eintrittsdatum, Funktion, Rolle, Status, Profilbild-Link, freie Angaben</li>
+                            <li>Fähigkeiten, Interessen und Verfügbarkeiten, Zugehörigkeit zu Arbeitsgruppen</li>
+                            <li>Teilnahme an Terminen und Helferschichten, Umfragestimmen, Lesestatus von Beiträgen, Aufgaben und Onboarding-Fortschritt</li>
+                            <li>von Mitgliedern erstellte Inhalte: Beiträge, Wiki-Seiten, Dateien, Kontakte, Feedback</li>
+                            <li>ein Änderungsprotokoll (wer hat wann was geändert), das Administratoren der Organisation einsehen können</li>
+                            <li>einen Anwesenheitsstatus (zuletzt geöffnete Seite, letzte 5 Minuten), den nur Administratoren der Organisation sehen</li>
+                        </ul>
+                        <p>
+                            <strong class="text-[var(--color-text)]">Besondere Kategorien:</strong> Die Mitgliedschaft in einer politischen
+                            Organisation kann Rückschlüsse auf politische Meinungen zulassen (Art.&nbsp;9 DSGVO). Die Organisation verarbeitet diese
+                            Daten auf Grundlage von Art.&nbsp;9 Abs.&nbsp;2 lit.&nbsp;d DSGVO (Mitglieder und regelmäßige Kontakte einer politisch,
+                            weltanschaulich oder gewerkschaftlich ausgerichteten Organisation ohne Gewinnerzielungsabsicht) oder einer Einwilligung.
+                            Diese Daten sind nur für Mitglieder der jeweiligen Organisation nach deren Rollen und Rechten sichtbar.
+                        </p>
+                        <p class="mt-3">
+                            <strong class="text-[var(--color-text)]">Öffentliche Inhalte:</strong> Eine Organisation kann eine öffentliche Seite mit
+                            öffentlichen Terminen, Beiträgen, Wiki-Seiten, Dateien und Ansprechpersonen (Name, Funktion, E-Mail, Bild) freigeben.
+                            Diese Inhalte sind ohne Anmeldung abrufbar und können von Suchmaschinen erfasst werden.
+                        </p>
+                        <p class="mt-3">
+                            <strong class="text-[var(--color-text)]">Kalender-Abo:</strong> Termine können über einen persönlichen Link in eigene
+                            Kalender-Apps übernommen werden. Behandeln Sie diesen Link wie ein Passwort.
+                        </p>
+                    </section>
+
+                    <!-- 8. E-Mail -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">8. E-Mail-Versand</h2>
+                        <p>
+                            Systemmails (Bestätigung, Anmeldelinks, Passwort-Reset, Einladungen, Benachrichtigungen) versenden wir über den
+                            Mailserver der <strong class="text-[var(--color-text)]">IONOS SE</strong>, Elgendorfer Str.&nbsp;57, 56410 Montabaur
+                            (Auftragsverarbeiter, Server in Deutschland). Verarbeitet werden Empfängeradresse und Inhalt der Nachricht. Versandaufträge
+                            löschen wir nach 30 Tagen (fehlgeschlagene nach 90 Tagen).
+                        </p>
+                        <p class="mt-3">
+                            Newsletter einer Organisation werden über den Mailserver versandt, den die Organisation selbst einträgt; Verantwortliche
+                            für den Newsletter ist die Organisation.
+                        </p>
+                    </section>
+
+                    <!-- 9. KI -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">9. KI-Assistent und Dokumentensuche</h2>
+                        <p>
+                            Der KI-Assistent ist freiwillig. Für Antworten nutzen wir die Sprachmodelle der
+                            <strong class="text-[var(--color-text)]">Mistral AI SAS</strong>, 15 rue des Halles, 75001 Paris, Frankreich
+                            (Auftragsverarbeiter, Verarbeitung in der EU). Übermittelt werden Ihre Frage, der bisherige Gesprächsverlauf und Auszüge aus
+                            Dokumenten der Organisation, die Sie selbst sehen dürfen; die Rechteprüfung erfolgt vor der Übermittlung. Damit Dokumente
+                            durchsuchbar sind, wird ihr Text zur Berechnung von Suchvektoren ebenfalls an Mistral übermittelt.
+                        </p>
+                        <p class="mt-3">
+                            Ihre Gesprächsverläufe speichern wir in Ihrem Konto, solange es besteht; auf Wunsch löschen wir sie vorher
+                            (E-Mail an <a href="mailto:kontakt@pulsedeck.de" class="text-linke hover:underline">kontakt@pulsedeck.de</a>).
+                            Rechtsgrundlage ist Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;b DSGVO. Bitte geben Sie im Chat keine besonders sensiblen Daten
+                            über andere Personen ein. KI-Antworten können fehlerhaft sein.
+                        </p>
+                    </section>
+
+                    <!-- 10. Push -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">10. Push-Benachrichtigungen</h2>
+                        <p>
+                            Wenn Sie Push-Benachrichtigungen in Ihrem Browser erlauben, speichern wir die vom Browser erzeugte Empfangsadresse.
+                            Die Zustellung läuft über den Push-Dienst Ihres Browserherstellers (z.&nbsp;B. Google, Mozilla, Apple), der dabei Ihre
+                            IP-Adresse erhält; je nach Anbieter kann eine Übermittlung in die USA stattfinden. Rechtsgrundlage ist Ihre Einwilligung
+                            (Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;a DSGVO), die Sie jederzeit in den Browser-Einstellungen widerrufen können.
+                        </p>
+                    </section>
+
+                    <!-- 11. Nutzungsstatistik und Feedback -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">11. Nutzungsstatistik und Feedback</h2>
+                        <p>
+                            Um die App zu verbessern, zählen wir auf unserem eigenen Server einzelne Ereignisse (z.&nbsp;B. „Seite aufgerufen“,
+                            „Termin angelegt“) mit Seitenpfad und Organisation, aber ohne IP-Adresse, ohne Cookies und ohne Konto-Zuordnung
+                            (Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;f DSGVO). Über das Feedback-Formular gesendete Hinweise speichern wir mit Ihren
+                            Angaben, um sie zu bearbeiten.
+                        </p>
+                    </section>
+
+                    <!-- 12. Externe Inhalte -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">12. Externe Inhalte und Links</h2>
+                        <p>
+                            Schriftarten und Programmbibliotheken liefern wir selbst aus. Trägt eine Organisation für Logo oder Profilbilder die
+                            Adresse eines fremden Servers ein, lädt Ihr Browser das Bild von dort; der Betreiber dieses Servers erhält dabei Ihre
+                            IP-Adresse. Links zu Diensten wie Discord, Signal, WhatsApp, Zoom oder Google Maps öffnen den jeweiligen Dienst erst,
+                            wenn Sie darauf klicken; dort gelten dessen Datenschutzbestimmungen.
+                        </p>
+                    </section>
+
+                    <!-- 13. Weitergabe -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">13. Empfänger und Drittlandübermittlung</h2>
+                        <p>
+                            Wir verkaufen keine Daten und geben sie nicht zu Werbezwecken weiter. Empfänger sind nur die oben genannten
+                            Auftragsverarbeiter (Hetzner, IONOS, Mistral) sowie innerhalb einer Organisation deren Mitglieder nach Rollen und
+                            Rechten. Eine Übermittlung in Länder außerhalb der EU findet nicht statt, außer bei Push-Benachrichtigungen über den
+                            Dienst Ihres Browserherstellers (Abschnitt 10). Eine automatisierte Entscheidungsfindung oder Profilbildung im Sinne von
+                            Art.&nbsp;22 DSGVO findet nicht statt.
+                        </p>
+                    </section>
+
+                    <!-- 14. Rechte -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">14. Ihre Rechte</h2>
+                        <p>Sie haben das Recht auf</p>
+                        <ul class="list-disc ml-6 mt-2 mb-3">
+                            <li>Auskunft über Ihre gespeicherten Daten (Art.&nbsp;15 DSGVO)</li>
+                            <li>Berichtigung unrichtiger Daten (Art.&nbsp;16 DSGVO)</li>
+                            <li>Löschung (Art.&nbsp;17 DSGVO) und Einschränkung der Verarbeitung (Art.&nbsp;18 DSGVO)</li>
+                            <li>Datenübertragbarkeit (Art.&nbsp;20 DSGVO)</li>
+                            <li>Widerruf einer Einwilligung mit Wirkung für die Zukunft (Art.&nbsp;7 Abs.&nbsp;3 DSGVO)</li>
+                        </ul>
+                        <div class="bg-[var(--color-surface-raised)] rounded-xl p-5 border border-[var(--color-border)] my-4">
+                            <h3 class="text-[var(--color-text)] font-medium mb-2">Widerspruchsrecht (Art.&nbsp;21 DSGVO)</h3>
+                            <p class="text-sm">
+                                Soweit wir Daten auf Grundlage berechtigter Interessen (Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;f DSGVO) verarbeiten,
+                                können Sie aus Gründen, die sich aus Ihrer besonderen Situation ergeben, jederzeit widersprechen.
+                            </p>
                         </div>
+                        <p>
+                            Schreiben Sie dazu an <a href="mailto:kontakt@pulsedeck.de" class="text-linke hover:underline">kontakt@pulsedeck.de</a>.
+                            Betrifft Ihr Anliegen Daten einer Organisation (Abschnitt 7), wenden Sie sich bitte an diese; wir unterstützen sie dabei.
+                        </p>
+                        <p class="mt-3">
+                            Sie haben außerdem das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren (Art.&nbsp;77 DSGVO), insbesondere
+                            in dem Mitgliedstaat Ihres Aufenthaltsorts, Ihres Arbeitsplatzes oder des mutmaßlichen Verstoßes.
+                        </p>
+                    </section>
+
+                    <!-- 15. Änderungen -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-6 pb-2 border-b border-[var(--color-border)]">15. Änderungen</h2>
+                        <p>
+                            Wir passen diese Datenschutzerklärung an, wenn sich der Dienst oder die Rechtslage ändert. Es gilt die jeweils hier
+                            veröffentlichte Fassung.
+                        </p>
                     </section>
 
                 </div>
 
                 <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
                     <p class="text-[var(--color-text-muted)] text-sm">
-                        Stand: Januar 2026
+                        Stand: Oktober 2026
                     </p>
                 </div>
             </div>

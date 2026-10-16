@@ -94,7 +94,7 @@ Datenübernahme betrafen.
 
 | # | Punkt |
 |---|---|
-| O12 | Hosting-Angaben (Dienstleister, Standort, Auftragsverarbeitung) in der Datenschutzerklärung. |
+| O12 | Datenschutzerklärung nach bestem Wissen erstellt (2026-10-17: Hetzner Nürnberg, IONOS, Mistral, Rollen Plattform/Organisation, Art. 9); **juristische Prüfung steht aus**, ebenso Verträge zur Auftragsverarbeitung mit Hetzner, IONOS, Mistral und den Organisationen sowie eine feste Löschfrist für Server-Logs. |
 | O14 | Native Apps auf einem echten Gerät prüfen (Ursprung, CORS, SSE im WebView). |
 | O15 | Abhängigkeitsfunde: `xlsx` 0.18.5 (Prototype Pollution beim Mitglieder-Import, gepflegte Version nur vom SheetJS-CDN), `@nestjs/swagger` → `js-yaml` (Fix erst mit Major 12). |
 | O16 | Content-Security-Policy am Reverse Proxy (Härtung der Sitzung im `localStorage`, E31). |

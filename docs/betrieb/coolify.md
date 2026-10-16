@@ -64,10 +64,14 @@ docker exec "$P" pg_dump -U pulsedeck_admin -Fc pulsedeck > backup-$(date +%F).p
 docker run --rm -v <ressource>_files-data:/data:ro -v "$PWD":/backup alpine tar czf /backup/files-$(date +%F).tar.gz -C /data .
 ```
 
+**Eingerichtet (2026-10-17):** `/root/pulsedeck-backups/backup.sh` per Root-Cron täglich 03:15 UTC (Datenbank + Datei-Volume, Dump wird
+mit `pg_restore --list` geprüft, Aufbewahrung 14 Tage, Protokoll `backup.log`). Die Sicherungen liegen auf **demselben Server** — eine
+Kopie außerhalb (z. B. Hetzner Storage Box) fehlt noch.
+
 Volume-Namen mit `docker volume ls` prüfen. Restore: `selfhosting.md` („Backup / Restore“). Die Umgebungsvariablen (vor allem
 `SECRETS_ENCRYPTION_KEY`) getrennt und geschützt sichern.
 
 ## 5. Offen
 
-Regelmäßiges, automatisches Backup mit Aufbewahrung; realer Mail-Testversand über IONOS (SPF/DKIM der Domain prüfen); Hosting-Angaben in
-der Datenschutzerklärung (O12); Restore auf dem Zielserver geprobt.
+Backup-Kopie außerhalb des Servers; SPF/DKIM der Domain prüfen (Zustellbarkeit); juristische Prüfung der Datenschutzerklärung (O12);
+Restore auf dem Zielserver proben.

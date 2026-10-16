@@ -19,7 +19,7 @@ import { AuthService } from '../../shared/services/auth.service';
                 
                 <div class="max-w-none space-y-8">
                     <section>
-                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-4">Angaben gemäß § 5 TMG</h2>
+                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-4">Angaben gemäß § 5 DDG</h2>
                         <div class="bg-[var(--color-surface-raised)] rounded-xl p-6 border border-[var(--color-border)]">
                             <div class="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-sm text-[var(--color-text)]">
                                 <i class="pi pi-info-circle mr-2 text-blue-500"></i>
@@ -47,17 +47,6 @@ import { AuthService } from '../../shared/services/auth.service';
                     </section>
 
                     <section>
-                        <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-4">EU-Streitschlichtung</h2>
-                        <div class="bg-[var(--color-surface-raised)] rounded-xl p-6 border border-[var(--color-border)]">
-                            <p class="text-[var(--color-text-muted)]">
-                                Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: 
-                                <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer" class="text-linke hover:text-linke-light">https://ec.europa.eu/consumers/odr/</a>.<br>
-                                Unsere E-Mail-Adresse finden Sie oben im Impressum.
-                            </p>
-                        </div>
-                    </section>
-
-                    <section>
                         <h2 class="text-2xl font-semibold text-[var(--color-text)] mb-4">Verbraucherstreitbeilegung / Universalschlichtungsstelle</h2>
                         <div class="bg-[var(--color-surface-raised)] rounded-xl p-6 border border-[var(--color-border)]">
                             <p class="text-[var(--color-text-muted)]">
@@ -73,8 +62,8 @@ import { AuthService } from '../../shared/services/auth.service';
                         <p class="text-[var(--color-text-muted)] leading-relaxed">
                             Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, 
                             Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. 
-                            Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten 
-                            nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als 
+                            Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG für eigene Inhalte auf diesen Seiten 
+                            nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG sind wir als 
                             Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde 
                             Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige 
                             Tätigkeit hinweisen.
@@ -101,7 +90,7 @@ import { AuthService } from '../../shared/services/auth.service';
 
                 <div class="mt-12 pt-8 border-t border-[var(--color-border)]">
                     <p class="text-[var(--color-text-muted)] text-sm">
-                        Zuletzt aktualisiert: Januar 2024
+                        Zuletzt aktualisiert: Oktober 2026
                     </p>
                 </div>
             </div>

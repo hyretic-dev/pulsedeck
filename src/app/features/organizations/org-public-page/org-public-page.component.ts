@@ -279,8 +279,14 @@ import { RichTextRendererComponent } from '../../../shared/components/rich-text-
                             <div class="divide-y divide-[var(--color-border)]">
                                 @for (c of contacts(); track c.id) {
                                     <div class="p-4 flex items-center gap-4 hover:bg-[var(--color-surface-ground)] transition-colors">
-                                        <img [src]="c.image_url || 'https://www.gravatar.com/avatar?d=mp'" 
-                                             class="w-12 h-12 rounded-full object-cover border border-[var(--color-border)] bg-gray-100" />
+                                        @if (c.image_url) {
+                                            <img [src]="c.image_url"
+                                                 class="w-12 h-12 rounded-full object-cover border border-[var(--color-border)] bg-gray-100" />
+                                        } @else {
+                                            <div class="w-12 h-12 shrink-0 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-raised)] flex items-center justify-center">
+                                                <i class="pi pi-user text-lg text-[var(--color-text-muted)]"></i>
+                                            </div>
+                                        }
                                         <div class="min-w-0 flex-1">
                                             <div class="font-bold text-sm text-[var(--color-text)] truncate">{{ c.name }}</div>
                                             <div class="text-xs text-[var(--color-text-muted)] truncate mb-1">{{ c.role }}</div>
