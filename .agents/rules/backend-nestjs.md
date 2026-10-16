@@ -6,9 +6,7 @@ alwaysApply: false
 
 # Backend: NestJS + PostgreSQL
 
-Das Backend hat Supabase vollständig ersetzt (Stand der Migration: `docs/migration/00-status.md`); das Repo enthält keinen
-Supabase-Code mehr. Was von früher übrig ist, dient nur der einmaligen Datenübernahme: `backend/src/migration/`,
-`backend/scripts/legacy-replay/` und `scripts/prod-mirror/`.
+Gültige Architektur- und Rechteentscheidungen (IDs `E…`/`O…`/`D…` in Kommentaren): `docs/architektur-entscheidungen.md`.
 
 ## Aufbau
 
@@ -25,7 +23,7 @@ Supabase-Code mehr. Was von früher übrig ist, dient nur der einmaligen Datenü
   der DB, nie aus dem Client) → `PermissionGuard` (`@RequireAdmin`, `@RequirePermission`). Plattformrechte: `PlatformAdminGuard`.
 - Jede Abfrage ist an die Organisation des Aufrufers gebunden (`WHERE organization_id = $n`), auch bei Einzelobjekten,
   Zählungen, Suche, Dateien, Streams. Sichtbarkeit (`member`/`committee`/`admin`, AG-Bezug) wird in SQL gefiltert, nicht danach.
-- Unsichtbar → 404, sichtbar aber nicht erlaubt → 403. Die Rechte-Matrix steht in `docs/migration/04-rechte-matrix.md`;
+- Unsichtbar → 404, sichtbar aber nicht erlaubt → 403. Die Rechte stehen in `docs/architektur-entscheidungen.md` („Rechte“);
   jede Änderung der Rechte ändert dort die Zeile und bekommt einen Negativtest.
 - Nebenwirkungen (Audit `schreibeAudit`, Echtzeit `meldeAenderung`, Mail/Push über Outbox bzw. Queue) laufen in derselben
   Transaktion wie die Änderung. Keine Trigger.
@@ -35,8 +33,6 @@ Supabase-Code mehr. Was von früher übrig ist, dient nur der einmaligen Datenü
 - Schema-Änderungen nur über `backend/migrations/` (node-pg-migrate, SQL, Up und Down). Nie direkt in der Datenbank.
   Migrationen laufen mit der Migrations-Rolle; die Runtime-Rolle hat nur DML. Neue Tabellen: Grants für `pulsedeck_runtime`
   in derselben Migration und Zweck als Kommentar.
-- Datenmigration aus Supabase: `backend/src/migration/` (Export/Import/Validierung). Neue Tabellen müssen dort in
-  `tables.ts` stehen — ein Test schlägt fehl, wenn eine Zieltabelle weder übernommen noch begründet ausgelassen ist.
 
 ## Fehler und API-Vertrag
 

@@ -1,6 +1,6 @@
 -- Up migration
 -- Fähigkeiten, Interessen und Verfügbarkeiten je Organisation und ihre Zuordnung zu Mitgliedern.
--- Abgeleitet aus dem rekonstruierten Live-Schema (docs/migration/04-rechte-matrix.md), ohne RLS und Trigger.
+-- Ohne RLS und Trigger (E4/E5).
 
 CREATE TABLE skills (
     id uuid DEFAULT gen_random_uuid() NOT NULL,

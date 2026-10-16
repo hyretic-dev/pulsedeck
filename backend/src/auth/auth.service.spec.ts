@@ -7,10 +7,10 @@ import type { RefreshTokenStore } from './refresh-token.store';
 
 /**
  * Passwort-Login als Backend-Vertrag.
- * Fachliche Anforderungen aus docs/prompts/supabase-to-nestjs-postgres.md §5:
+ * Fachliche Anforderungen:
  * - Login mit korrekten Zugangsdaten liefert eine Session (Access + Refresh).
  * - Falsches Passwort und unbekannte E-Mail erzeugen dieselbe Fehlermeldung
- *   (keine Kontoenumeration als Parität zum Supabase-Verhalten erzwungen).
+ *   (keine Kontoenumeration).
  * - Gesperrte Konten können sich nicht anmelden.
  */
 describe('AuthService Passwort-Login', () => {

@@ -8,7 +8,7 @@ const AUDIENCE = 'pulsedeck-file-download';
 export const LINK_GUELTIGKEIT_SEKUNDEN = 300;
 
 /**
- * Kurzlebige Download-Links (Ersatz der Supabase-Signed-URLs): Der Link trägt nur Konto, Organisation und Datei und gilt
+ * Kurzlebige Download-Links: Der Link trägt nur Konto, Organisation und Datei und gilt
  * fünf Minuten. Beim Einlösen werden Mitgliedschaft und Sichtbarkeit erneut geprüft; der Token ist als Zugriffstoken unbrauchbar
  * (andere Zielgruppe).
  */

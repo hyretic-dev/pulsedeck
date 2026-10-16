@@ -218,7 +218,7 @@ export class OrganizationsService {
    * Inhalte der öffentlichen Organisationsseite in einer Antwort (Ersatz für sechs Einzelabfragen
    * des Bestands). Öffentlich sind nur Termine mit Rolle `public`, veröffentlichte öffentliche
    * Wiki-Dokumente und freigegebene öffentliche Beiträge; Kontakte nur mit den Feldern, die die
-   * Seite zeigt. Im Bestand las anonym alles (04-rechte-matrix.md, D4).
+   * Seite zeigt. Regel D4 (docs/architektur-entscheidungen.md).
    */
   async oeffentlicheUebersicht(orgId: string): Promise<Record<string, unknown>> {
     const heute = new Date().toISOString().split('T')[0];

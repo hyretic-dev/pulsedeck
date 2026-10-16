@@ -13,10 +13,7 @@
     "start": "node dist/main.js",
     "migration:up": "node-pg-migrate -d MIGRATIONS_DATABASE_URL up",
     "migration:down": "node-pg-migrate -d MIGRATIONS_DATABASE_URL down",
-    "migration:create": "node-pg-migrate -d MIGRATIONS_DATABASE_URL -j sql create",
-    "migrate:export": "node dist/migration/cli.js export",
-    "migrate:import": "node dist/migration/cli.js import",
-    "migrate:validate": "node dist/migration/cli.js validate"
+    "migration:create": "node-pg-migrate -d MIGRATIONS_DATABASE_URL -j sql create"
   },
   "devDependencies": {
     "@nestjs/testing": "11.2.7",

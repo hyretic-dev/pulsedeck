@@ -44,7 +44,7 @@ bash scripts/smoke-compose.sh     # isoliertes Projekt, leere Volumes, Wegwerf-S
 
 Prüft Start mit leeren Volumes, Healthchecks, Auth-Ablauf inkl. Rotation/Logout, Mandanten-Endpunkte ohne Anmeldung, gesperrte OpenAPI (auch per Schreibweise), Token-freies nginx-Log, die Fachfunktionen durch den Proxy (Organisation, Termine, Beiträge, Dateien inkl. Download-Header, Echtzeit, iCal, Sitemap, Chat/Push ohne Konfiguration), unprivilegierten Backend-Prozess, Login und Datei nach Backend-Neustart und die schreibgeschützte Abnahme (`READ_ONLY`). Dieselbe Prüfung läuft im CI-Job `compose-smoke`.
 
-Weitere Nachweise, jeweils auch in CI: `e2e/browser-smoke.mjs` (echte Oberfläche im Headless-Chromium: Registrierung, E-Mail-Bestätigung, alle Seiten, Anlegen-Dialoge, Upload, Passwort-Login; Job `browser-smoke`, Beschreibung `e2e/README.md`) und `scripts/rehearse-migration.sh` (Datenmigration mit Restore-Probe; Job `migration-rehearsal`, siehe `migration.md`).
+Weitere Nachweise, jeweils auch in CI: `e2e/browser-smoke.mjs` (echte Oberfläche im Headless-Chromium: Registrierung, E-Mail-Bestätigung, alle Seiten, Anlegen-Dialoge, Upload, Passwort-Login; Job `browser-smoke`, Beschreibung `e2e/README.md`).
 
 ## Logs und Request-ID
 
@@ -65,8 +65,8 @@ Alle Werte stehen in `.env.example` (nie Secrets einchecken). Ergänzend zu den 
 | Dateien | `FILES_DIR` (`/data/files`, Volume `files-data`), `MAX_UPLOAD_MB` (25) | Volume in die Datensicherung (unten) |
 | KI | `MISTRAL_API_KEY`, `DOCS_FILE` | Ohne Schlüssel antworten Chat und Indexierung mit 503; `DOCS_FILE` ist die mitgelieferte `DOCS.md` |
 | Echtzeit | `REALTIME_ENABLED` | SSE `GET /api/v1/orgs/:orgId/realtime`; nginx puffert diesen Pfad und `/chat` nicht |
-| Native Apps | `CORS_ORIGINS` | Exakte Ursprünge, kommagetrennt; leer = nur gleicher Ursprung (siehe `migration.md` §7) |
-| Abnahme nach Migration | `READ_ONLY` (Frontend-Container) | `true` weist schreibende API-Aufrufe mit 503 ab; Login bleibt möglich |
+| Native Apps | `CORS_ORIGINS` | Exakte Ursprünge, kommagetrennt; leer = nur gleicher Ursprung (E36) |
+| Schreibgeschützter Betrieb | `READ_ONLY` (Frontend-Container) | `true` weist schreibende API-Aufrufe mit 503 ab; Login bleibt möglich |
 
 Sitemap und `robots.txt` liefert das Backend (nginx proxyt `/sitemap.xml` und `/robots.txt`); die Adresse der Instanz stammt aus `APP_BASE_URL`.
 
@@ -100,7 +100,7 @@ curl -s -X POST http://localhost:8080/api/v1/auth/refresh -H 'Content-Type: appl
 
 Nachweis der Ausführung (2026-10-13): Signup 202 → Verify 200 (UUID userId) → Login 200 → Refresh 200 → Logout 204 → Refresh danach 401 `session_invalid`; Login nach Backend-Neustart weiterhin 200 (Daten erhalten). Wartungsendpunkt: ohne Token 404, mit `X-Maintenance-Token` 204.
 
-Zusätzlich im Audit (2026-10-13, frisches Compose-Projekt, siehe `docs/migration/03-abgleich-und-luecken.md` §1.2):
+Zusätzlich im Audit (2026-10-13, frisches Compose-Projekt):
 
 - Login **vor** der Verifikation → 403 `email_not_verified` (E19); Verify-Token erneut → 401 `link_invalid`.
 - Refresh mit bereits rotiertem Token → 401 `session_invalid`.
@@ -142,9 +142,6 @@ docker run --rm -v pulsedeck_files-data:/data -v "$PWD":/backup alpine tar xzf /
 **Belegt (2026-10-14):**
 
 - *Dateien:* Archiv aus dem Volume gezogen und in ein frisches Volume entpackt, alle 7 Objekte mit identischer SHA-256.
-- *Vollständiger Restore der migrierten Daten:* `bash scripts/rehearse-migration.sh <export>` legt eine Datenbank per Import an, sichert sie (`pg_dump -Fc` + Dateikopie), stellt sie in eine frische Datenbank wieder her und führt dort dieselbe Validierung aus (93 Prüfungen: Inhaltsprüfsummen, Zählung je Organisation, Fremdschlüssel, Dateiinhalte).
 - *Plain-SQL-Variante der Datenbank* (ältere Anleitung, `pg_dump | gzip` → `psql`): im Audit 2026-10-13 in ein neues Projekt eingespielt, Prüfsumme der Nutzerdaten identisch, Logins funktionieren.
 
-Grenzen: Die Proben liefen auf einem Host mit kleinen synthetischen Datenmengen — keine RTO-Aussage; Aufbewahrung, RPO/RTO und ein regelmäßiger automatischer Zeitplan sind Betreiber-Entscheidungen (O8). Eine Wiederherstellung auf einem **anderen** Host (Netz, DNS, Secrets neu) wurde nicht geprobt.
-
-Datenmigration und Cutover aus Supabase: `docs/betrieb/migration.md`. Produktive Umschaltung nur nach O8-Freigabe.
+Grenzen: Die Proben liefen auf einem Host mit kleinen synthetischen Datenmengen — keine RTO-Aussage; Aufbewahrung, RPO/RTO und ein regelmäßiger automatischer Zeitplan sind Betreiber-Entscheidungen. Eine Wiederherstellung auf einem **anderen** Host (Netz, DNS, Secrets neu) wurde nicht geprobt.

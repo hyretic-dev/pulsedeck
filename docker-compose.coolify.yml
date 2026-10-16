@@ -104,7 +104,7 @@ services:
     expose:
       - "80"
     environment:
-      # true = schreibgeschützte Abnahme (schreibende API-Aufrufe → 503, Login bleibt möglich), docs/betrieb/migration.md
+      # true = schreibgeschützte Abnahme (schreibende API-Aufrufe → 503, Login bleibt möglich), docs/betrieb/coolify.md
       READ_ONLY: ${READ_ONLY:-false}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]

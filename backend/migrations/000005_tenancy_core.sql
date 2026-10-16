@@ -1,8 +1,6 @@
 -- Up migration
--- Mandantenkern: Organisationen, Rollen, Mitgliedschaften. Abgeleitet aus dem rekonstruierten
--- Live-Schema (docs/migration/04-rechte-matrix.md), ohne Supabase-Plattformobjekte:
+-- Mandantenkern: Organisationen, Rollen, Mitgliedschaften (Rechte: docs/architektur-entscheidungen.md):
 --  * keine RLS und keine Trigger (E4/E5: Rechte und Nebenwirkungen liegen im Backend)
---  * auth.users -> auth_users
 --  * members.email als citext (case-insensitiv wie auth_users)
 --  * Rolle und Mitglied müssen zur selben Organisation gehören (Verbund-FK); im Bestand ließ
 --    sich eine fremde Rolle zuweisen

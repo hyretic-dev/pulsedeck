@@ -12,8 +12,8 @@ export const PLATZHALTER_HASH =
   '$2b$10$Y5X2Py8WUJlWHHo8psI06u8HkHOlKzAJkvHwy6E8L6zfxbcKk.gtq';
 
 /**
- * bcrypt-Verifikation mit Kostenfaktor 10 — identisch zu Supabase-Hashes,
- * damit importierte Konten ohne Passwort-Reset weiter funktionieren.
+ * bcrypt mit Kostenfaktor 10; verifiziert auch die übernommenen $2a$-Hashes,
+ * damit diese Konten ohne Passwort-Reset weiter funktionieren.
  */
 export class BcryptPasswordHasher implements PasswordHasher {
   private static readonly COST = 10;
