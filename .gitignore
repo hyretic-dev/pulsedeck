@@ -1,7 +1,7 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
 # Compiled output
-/dist
+/app/dist
 /tmp
 /out-tsc
 /bazel-out
@@ -29,10 +29,10 @@ yarn-error.log
 .history/*
 
 # Miscellaneous
-/.angular/cache
+/app/.angular/cache
 .sass-cache/
 /connect.lock
-/coverage
+/app/coverage
 /libpeerconnection.log
 testem.log
 /typings
@@ -45,7 +45,7 @@ Thumbs.db
 
 # Environment: environment.ts/environment.prod.ts enthalten keine Secrets (nur die API-Basis) und sind versioniert;
 # die für den Mobile-Build erzeugte Datei nicht
-src/environments/environment.capacitor.ts
+app/src/environments/environment.capacitor.ts
 
 # Lokale Compose-Betriebswerte (Secrets) — .env.example ist die Vorlage
 .env

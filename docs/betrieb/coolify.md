@@ -72,7 +72,7 @@ Bis zur Trennung lieferte `pulsedeck.de` die Anwendung aus. Danach gilt:
   Frontend der Anwendung. Beides (Safety-Worker, `/api/`-Block, `ngsw.json`) kann nach einigen Monaten aus `website/` entfernt werden.
 - **Search Console:** `app.pulsedeck.de` als neue Property anlegen und die Sitemap `https://app.pulsedeck.de/sitemap.xml` einreichen;
   für `pulsedeck.de` gilt `sitemap-index.xml`. Die Verifizierungsdatei der Website liegt unter `website/public/`.
-- **Native Apps:** `PULSEDECK_API_URL=https://app.pulsedeck.de npm run build:mobile`, `CORS_ORIGINS` unverändert.
+- **Native Apps:** `cd app && PULSEDECK_API_URL=https://app.pulsedeck.de npm run build:mobile`, `CORS_ORIGINS` unverändert.
 - **E-Mails:** Mailvorlagen und Kalender-Links nutzen `APP_BASE_URL`, zeigen also automatisch auf die Anwendung.
 
 ## 4. Datensicherung

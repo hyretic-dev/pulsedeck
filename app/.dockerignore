@@ -1,0 +1,34 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Angular cache
+.angular
+
+# Git
+.git
+.gitignore
+
+# Misc
+README.md
+*.log
+.DS_Store
+Thumbs.db
+
+# Test
+coverage
+*.spec.ts
+
+
+# Secrets gehören nicht in den Build-Kontext
+.env
+.env.*
+!.env.example

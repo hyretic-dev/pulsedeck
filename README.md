@@ -53,6 +53,15 @@ PulseDeck setzt auf moderne, robuste Technologien:
 *   Node.js (v22)
 *   Docker (PostgreSQL und Backend; Compose-Stack siehe `docs/betrieb/selfhosting.md`)
 
+### Repo-Aufbau
+
+| Ordner | Inhalt | Adresse |
+|---|---|---|
+| `app/` | Angular-Anwendung (inkl. Vereinsdashboard, Android per Capacitor) | `app.pulsedeck.de` |
+| `backend/` | NestJS-API, Migrationen | intern, `/api/` der App |
+| `website/` | Astro-Website: Startseite, Handbuch, Blog, Impressum, Datenschutz (Markdown mit Frontmatter) | `pulsedeck.de` |
+| `docker/`, `docker-compose*.yml`, `scripts/`, `docs/`, `e2e/` | Betrieb, Prüfskripte, Doku | |
+
 ### Setup
 
 1.  **Repo klonen:**
@@ -61,9 +70,9 @@ PulseDeck setzt auf moderne, robuste Technologien:
     cd pulsedeck
     ```
 
-2.  **Abhängigkeiten installieren:**
+2.  **Abhängigkeiten der Anwendung installieren:**
     ```bash
-    npm install
+    cd app && npm install
     ```
 
 3.  **Backend und Datenbank starten:**
@@ -75,13 +84,13 @@ PulseDeck setzt auf moderne, robuste Technologien:
 
 4.  **Frontend im Entwicklungsmodus (optional):**
     ```bash
-    npm start
+    cd app && npm start
     # Öffnet http://localhost:4200; die API-Basis ist /api/v1 (Proxy auf das Backend per proxy.conf, siehe angular.json)
     ```
 
 5.  **Tests:**
     ```bash
-    npm test -- --watch=false                       # Frontend
+    cd app && npm test -- --watch=false              # Anwendung
     cd backend && npx tsc --noEmit && npm test      # Backend, braucht PostgreSQL auf Port 5433 (backend/scripts/test-db-setup.mjs)
     bash scripts/smoke-compose.sh                   # Compose-Stack Ende-zu-Ende
     ```
@@ -89,6 +98,7 @@ PulseDeck setzt auf moderne, robuste Technologien:
 ### Android Build (Capacitor)
 
 ```bash
+cd app
 npm run build
 npx cap sync
 npx cap open android
@@ -128,5 +138,5 @@ npm install
 PUBLIC_APP_URL=http://localhost:4200 npm run dev   # http://localhost:4321
 ```
 
-Das Handbuch besteht aus einer Markdown-Datei je Kapitel in `website/src/content/handbook/` (Frontmatter: `title`, `description`, `order`, `icon`).
+Das Handbuch besteht aus einer Markdown-Datei je Kapitel in `website/src/content/handbook/` (Frontmatter: `title`, `description`, `order`, `icon`). Das Blog liegt in `website/src/content/blog/` (eine Datei je Beitrag, Frontmatter: `title`, `description`, `date`, optional `updated`, `author`, `tags`, `draft`; Dateiname = URL; RSS unter `/blog/rss.xml`).
 Dieselben Dateien liest das Backend für die Wissensbasis der KI.
