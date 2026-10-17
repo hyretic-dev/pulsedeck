@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
+import { environment } from '../../../../environments/environment';
 import { EventsService } from '../../../shared/services/events.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ButtonModule } from 'primeng/button';
@@ -22,6 +23,8 @@ import { CardModule } from 'primeng/card';
     templateUrl: './event-details.component.html'
 })
 export class EventDetailsComponent implements OnInit {
+    /** Produktseite; liegt auf der Website. */
+    readonly websiteUrl = environment.websiteUrl;
     private route = inject(ActivatedRoute);
     private eventsService = inject(EventsService);
     private auth = inject(AuthService);

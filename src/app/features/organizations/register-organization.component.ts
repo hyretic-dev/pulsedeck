@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
@@ -141,7 +142,7 @@ import { OrganizationService } from '../../shared/services/organization.service'
 
                 <!-- Back Link -->
                 <div class="text-center mt-4">
-                    <a routerLink="/" 
+                    <a [href]="websiteUrl" 
                         class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
                         <i class="pi pi-arrow-left mr-1"></i> Zurück zur Startseite
                     </a>
@@ -151,6 +152,8 @@ import { OrganizationService } from '../../shared/services/organization.service'
     `,
 })
 export class RegisterOrganizationComponent {
+    /** Produktseite; liegt auf der Website. */
+    readonly websiteUrl = environment.websiteUrl;
     private auth = inject(AuthService);
     private orgService = inject(OrganizationService);
     private router = inject(Router);

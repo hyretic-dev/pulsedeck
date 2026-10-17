@@ -49,9 +49,24 @@ jobs:
       - run: npm run build
       - run: npm test -- --watch=false
 
+  website:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
   compose-smoke:
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    needs: [backend, frontend, website]
     steps:
       - uses: actions/checkout@v4
       - run: bash scripts/check-compose.sh
@@ -62,7 +77,7 @@ jobs:
   # Echte Oberfläche im Headless-Browser gegen den Compose-Stack (e2e/README.md).
   browser-smoke:
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    needs: [backend, frontend, website]
     env:
       E2E_PORT: 18095
     steps:

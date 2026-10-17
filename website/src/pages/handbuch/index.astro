@@ -1,0 +1,43 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import Footer from '../../components/Footer.astro';
+
+const kapitel = (await getCollection('handbook')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base
+  title="Handbuch – PulseDeck"
+  description="Anleitungen, Workflows und Hilfe für PulseDeck: von der ersten Anmeldung bis zur Verwaltung deiner Organisation."
+  path="/handbuch"
+>
+  <SiteHeader aktiv="handbuch" />
+  <main class="max-w-5xl mx-auto px-6 py-16">
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-3">Handbuch</h1>
+    <p class="text-lg text-[var(--color-text-muted)] mb-12 max-w-2xl">
+      Anleitungen, Workflows und Hilfe für PulseDeck – von der ersten Anmeldung bis zur Verwaltung deiner Organisation.
+    </p>
+    <ul class="grid gap-4 sm:grid-cols-2">
+      {
+        kapitel.map((k) => (
+          <li>
+            <a
+              href={`/handbuch/${k.id}`}
+              class="flex gap-4 h-full p-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] hover:border-linke/40 hover:bg-[var(--color-surface-overlay)] transition-colors"
+            >
+              <div class="w-11 h-11 rounded-xl bg-linke/10 flex items-center justify-center shrink-0">
+                <i class={`pi ${k.data.icon} text-linke`} aria-hidden="true" />
+              </div>
+              <div>
+                <h2 class="font-bold text-lg">{k.data.title}</h2>
+                <p class="text-sm text-[var(--color-text-muted)] mt-1 leading-snug">{k.data.description}</p>
+              </div>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+  <Footer />
+</Base>

@@ -6,6 +6,7 @@ import {
   RouterModule
 } from '@angular/router';
 import { trigger, style, animate, transition } from '@angular/animations';
+import { environment } from '../../../environments/environment';
 import { SidebarLeft } from '../sidebar-left/sidebar-left';
 import { SidebarRight } from '../sidebar-right/sidebar-right';
 import { FeedbackBadgeComponent } from '../../features/feedback/feedback-badge/feedback-badge.component';
@@ -53,6 +54,9 @@ export class MainLayout {
   leftSidebarVisible = signal(false);
   rightSidebarVisible = signal(false);
   footerMenuOpen = signal(false);
+
+  /** Impressum, Datenschutz und Handbuch liegen auf der Website. */
+  readonly websiteUrl = environment.websiteUrl;
 
   /** Desktop: Right sidebar collapsed state (default: expanded) */
   rightSidebarCollapsed = signal(false);

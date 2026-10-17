@@ -34,3 +34,6 @@ coverage
 .env.*
 !.env.example
 backend
+
+# Die Website hat ein eigenes Dockerfile und gehört nicht in den Anwendungs-Build
+website

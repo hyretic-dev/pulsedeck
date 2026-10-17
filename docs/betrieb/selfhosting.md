@@ -1,17 +1,18 @@
 # Self-Hosting: Compose-Stack (Stand 2026-10-14)
 
-Stack: `docker-compose.yml` (dev/local) + `docker-compose.prod.yml` (Produktiv-Overrides). Dienste: PostgreSQL (pgvector/pg17), NestJS-Backend, Angular/Nginx-Frontend. Dateien liegen im Docker-Volume `files-data` (E26, kein MinIO). Optional (Entwicklung): `mailpit`.
+Stack: `docker-compose.yml` (dev/local) + `docker-compose.prod.yml` (Produktiv-Overrides). Dienste: PostgreSQL (pgvector/pg17), NestJS-Backend, Angular/Nginx-Frontend (die Anwendung) und die statische Website (`website/`, Astro: Startseite, Handbuch, Impressum, Datenschutz). Dateien liegen im Docker-Volume `files-data` (E26, kein MinIO). Optional (Entwicklung): `mailpit`.
 
 ## Starten
 
 ```bash
 cp .env.example .env          # Werte setzen (JWT_SECRET z. B. mit: openssl rand -hex 32)
-docker compose up -d --build  # postgres, backend, frontend
-docker compose ps             # postgres, backend und frontend müssen (healthy) sein
+docker compose up -d --build  # postgres, backend, frontend, website
+docker compose ps             # alle vier müssen (healthy) sein
 ```
 
 - PostgreSQL hat **keinen** öffentlichen Port; das Backend nur im internen Netz. Nur das Backend hängt zusätzlich im Netz `egress` (ausgehender Zugriff für Mail, Mistral, Web-Push; O10), Postgres nicht.
 - Frontend veröffentlicht `${FRONTEND_PORT:-8080}:80`; nginx routet `/api/` ans Backend, SPA-Fallback danach.
+- Website veröffentlicht `${WEBSITE_PORT:-8081}:80`. `APP_BASE_URL` ist die Adresse der Anwendung: die Website verlinkt dorthin (beim Bauen eingetragen) und leitet alte Anwendungsadressen dorthin weiter. `SITE_URL` (optional) ist die Adresse der Website selbst (kanonische URLs, Sitemap). Das Handbuch liegt als Markdown mit Frontmatter in `website/src/content/handbook/`.
 - Backend-Health: `/health/liveness` (Prozess lebt) und `/health/readiness` (DB-Ping) — nur intern erreichbar, Compose-Healthcheck nutzt readiness. Hinweis: Über nginx extern liefert `/health/readiness` 200 aus dem **statischen** nginx-`/health`-Block (Coolify-Healthcheck), nicht vom Backend; extern daher nur `/health` für die Frontend-Erreichbarkeit verwenden. Der Frontend-Dienst hat seit 2026-10-14 einen Compose-Healthcheck auf `/health`.
 - Migration-before-serve: der Backend-Entrypoint (`backend/docker-entrypoint.sh`) führt `node-pg-migrate -d MIGRATIONS_DATABASE_URL up` mit der Migrations-Rolle aus; schlägt das fehl, startet der Server nicht.
 - Rollen-Trennung: `docker/postgres/10-roles.sh` legt `pulsedeck_migrations` (DDL) und `pulsedeck_runtime` (nur DML, Grants aus Migration `000004`) an.
@@ -63,7 +64,7 @@ Alle Werte stehen in `.env.example` (nie Secrets einchecken). Ergänzend zu den 
 | Newsletter/SMTP je Organisation | `SMTP_ALLOW_PRIVATE_HOSTS` | Standard `false`: Ziele in privaten Netzen werden abgelehnt (SSRF-Schutz) |
 | Web-Push | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Leer = Push aus. Schlüssel erzeugen: `npx web-push generate-vapid-keys`; neue Schlüssel = Geräte melden sich neu an |
 | Dateien | `FILES_DIR` (`/data/files`, Volume `files-data`), `MAX_UPLOAD_MB` (25) | Volume in die Datensicherung (unten) |
-| KI | `MISTRAL_API_KEY`, `DOCS_FILE` | Ohne Schlüssel antworten Chat und Indexierung mit 503; `DOCS_FILE` ist die mitgelieferte `DOCS.md` |
+| KI | `MISTRAL_API_KEY`, `DOCS_FILE` | Ohne Schlüssel antworten Chat und Indexierung mit 503; `DOCS_FILE` ist das mitgelieferte Handbuch: ein Verzeichnis mit Markdown-Dateien (Frontmatter `title`, `order`; Standard im Image `/app/handbook`, Quelle `website/src/content/handbook/`) oder eine einzelne Markdown-Datei |
 | Echtzeit | `REALTIME_ENABLED` | SSE `GET /api/v1/orgs/:orgId/realtime`; nginx puffert diesen Pfad und `/chat` nicht |
 | Native Apps | `CORS_ORIGINS` | Exakte Ursprünge, kommagetrennt; leer = nur gleicher Ursprung (E36) |
 | Schreibgeschützter Betrieb | `READ_ONLY` (Frontend-Container) | `true` weist schreibende API-Aufrufe mit 503 ab; Login bleibt möglich |

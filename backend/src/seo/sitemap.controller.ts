@@ -6,9 +6,10 @@ import { APP_CONFIG, type AppConfig } from '../config/configuration';
 import { PG_POOL } from '../infrastructure/postgres/pg.pool';
 import { maskiere } from '../mail/mail-templates';
 
-const STATISCHE_SEITEN = ['', '/login', '/registrieren', '/erstellen', '/organisationen', '/impressum', '/datenschutz', '/docs'];
+// Startseite, Handbuch, Impressum und Datenschutz gehören zur Website (website/) und stehen in deren Sitemap.
+const STATISCHE_SEITEN = ['/login', '/registrieren', '/erstellen', '/organisationen'];
 
-/** Sitemap für Suchmaschinen: feste Seiten plus die öffentlichen Seiten aller Organisationen (Ersatz der Edge Function sitemap). */
+/** Sitemap der Anwendung für Suchmaschinen: feste Seiten der Anwendung plus die öffentlichen Seiten aller Organisationen (Ersatz der Edge Function sitemap). */
 @ApiTags('public')
 @Controller('public')
 export class SitemapController {

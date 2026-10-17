@@ -13,10 +13,14 @@ zeigte dort ins Leere). `NODE_ENV=production`; Pflichtwerte werden beim Start de
    **Docker Compose Location `/docker-compose.coolify.yml`**.
 2. **Auto-Deploy bewusst wählen:** Mit Auto-Deploy geht jeder Push auf `main` sofort live. Außerdem veröffentlicht
    `.github/workflows/docker-release.yml` bei jedem Push auf `main` ein Frontend-Image nach Docker Hub.
-3. **Domains nur am Dienst `frontend`** eintragen (`https://pulsedeck.de,https://www.pulsedeck.de`, Port 80). `postgres` und
-   `backend` bekommen **keine** Domain. Coolify bietet die Domain-Felder für alle Dienste an; landet die Domain bei `postgres`,
-   leitet Traefik dorthin und die Seite antwortet mit **502 Bad Gateway**. Kontrolle: die Labels des Frontend-Containers
-   (`docker inspect <frontend> --format '{{json .Config.Labels}}' | grep -o 'Host([^)]*)'`).
+3. **Domains nur an `frontend` und `website`** eintragen, jeweils Port 80:
+   - `frontend` (die Anwendung): `https://app.pulsedeck.de`
+   - `website` (Startseite, Handbuch, Impressum, Datenschutz): `https://pulsedeck.de,https://www.pulsedeck.de`
+
+   `postgres` und `backend` bekommen **keine** Domain. Coolify bietet die Domain-Felder für alle Dienste an; landet die Domain bei
+   `postgres`, leitet Traefik dorthin und die Seite antwortet mit **502 Bad Gateway**. Kontrolle: die Labels der Container
+   (`docker inspect <frontend> --format '{{json .Config.Labels}}' | grep -o 'Host([^)]*)'`). Für `app.pulsedeck.de` braucht es einen
+   DNS-Eintrag (A/CNAME) auf denselben Server.
 4. Eine Domain kann nur an einer Ressource hängen: vorher bei der alten Ressource entfernen (Coolify meldet sonst einen Konflikt).
 
 ## 2. Umgebungsvariablen
@@ -31,11 +35,11 @@ keinem Geheimnis das Häkchen gesetzt ist. Werte nie in den Chat oder ins Repo.
 |---|---|
 | `POSTGRES_PASSWORD`, `POSTGRES_MIGRATIONS_PASSWORD`, `POSTGRES_RUNTIME_PASSWORD` | je `openssl rand -hex 24` (drei verschiedene) |
 | `JWT_SECRET` | `openssl rand -hex 32` |
-| `APP_BASE_URL` | `https://pulsedeck.de` (einzige Basis für Links in Mails, Sitemap, Kalender) |
+| `APP_BASE_URL` | `https://app.pulsedeck.de` (die Anwendung; einzige Basis für Links in Mails, Sitemap, Kalender; die Website verlinkt und leitet alte Adressen hierhin weiter) |
 | `MAIL_TRANSPORT`, `MAIL_FROM`, `SMTP_*` | IONOS: `smtp`, `PulseDeck <mailer@pulsedeck.de>`, `SMTP_HOST=smtp.ionos.de`, `SMTP_PORT=587`, `SMTP_SECURE=false`, `SMTP_USER=mailer@pulsedeck.de`, `SMTP_PASSWORD` als Secret. Alternativ `resend` + `RESEND_API_KEY` |
 | `SECRETS_ENCRYPTION_KEY` | `openssl rand -base64 32` — **verloren = SMTP-Passwörter der Organisationen neu eingeben**; getrennt sichern |
 
-**Optional:** `MISTRAL_API_KEY` (Chat und Wissensbasis, sonst 503), `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT` (Push;
+**Optional:** `SITE_URL` (Adresse der Website, Standard `https://pulsedeck.de`; nur bei anderer Domain), `MISTRAL_API_KEY` (Chat und Wissensbasis, sonst 503), `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT` (Push;
 `npx web-push generate-vapid-keys`), `CORS_ORIGINS` (native Apps), `MAINTENANCE_TOKEN`, `MAX_UPLOAD_MB`, `APP_TIMEZONE`,
 Rate-Limits (`.env.example`). `READ_ONLY=true` sperrt schreibende API-Aufrufe (503, Login bleibt möglich), `JOBS_ENABLED=false`
 schaltet Newsletter, Push und Mail-Outbox ab — beides nur für Wartung oder Abnahme.
@@ -43,8 +47,9 @@ schaltet Newsletter, Push und Mail-Outbox ab — beides nur für Wartung oder Ab
 ## 3. Deployment und Prüfung
 
 *Deploy* auslösen. Der Backend-Entrypoint migriert mit der Migrations-Rolle, bevor der Server startet (schlägt das fehl, startet
-nichts). Erwartung: `postgres`, `backend`, `frontend` **healthy**; `https://pulsedeck.de/health` → 200, `/api/docs` → 404,
-`/robots.txt` nennt `https://pulsedeck.de/sitemap.xml`.
+nichts). Erwartung: `postgres`, `backend`, `frontend`, `website` **healthy**; `https://app.pulsedeck.de/health` → 200, `/api/docs` → 404,
+`https://app.pulsedeck.de/robots.txt` nennt `https://app.pulsedeck.de/sitemap.xml`; `https://pulsedeck.de/` zeigt die Startseite,
+`https://pulsedeck.de/robots.txt` nennt `https://pulsedeck.de/sitemap-index.xml`.
 
 | Fehlerbild | Ursache |
 |---|---|
@@ -52,6 +57,23 @@ nichts). Erwartung: `postgres`, `backend`, `frontend` **healthy**; `https://puls
 | `password authentication failed for user pulsedeck_migrations` | Das Daten-Volume wurde ohne die Rollen initialisiert. Das Rollen-Skript läuft nur beim ersten Start eines **leeren** Volumes (`docker/postgres/Dockerfile`) |
 | 502 Bad Gateway auf der Domain | Domain hängt am falschen Dienst (siehe §1.3) |
 | Domain-Konflikt beim Speichern | Domain ist noch einer anderen Ressource zugeordnet |
+
+### Umzug von `pulsedeck.de` auf `app.pulsedeck.de`
+
+Bis zur Trennung lieferte `pulsedeck.de` die Anwendung aus. Danach gilt:
+
+- **Neu anmelden:** Die Sitzung liegt im `localStorage` der alten Adresse und geht nicht auf `app.pulsedeck.de` über. Mitglieder
+  melden sich einmal neu an (Magic Link). Vorher ankündigen.
+- **Alte Adressen bleiben nutzbar:** Die Website leitet `/login`, `/registrieren`, `/auth/callback?…` (bereits verschickte
+  Anmelde-Links), `/event/…` und `/<kürzel>…` (öffentliche Seiten der Organisationen) mit 301 an die Anwendung weiter. Der Query-String
+  mit dem Token wird dabei nicht protokolliert (Log-Format `ohne_query` in `website/nginx.conf.template`).
+- **Alter Service-Worker:** Browser mit der alten App-Installation holen `ngsw-worker.js` neu; die Website liefert dort einen
+  Safety-Worker, der sich abmeldet, und beantwortet `ngsw.json` mit 404. Bis dahin leitet `/api/` der Website temporär an das
+  Frontend der Anwendung. Beides (Safety-Worker, `/api/`-Block, `ngsw.json`) kann nach einigen Monaten aus `website/` entfernt werden.
+- **Search Console:** `app.pulsedeck.de` als neue Property anlegen und die Sitemap `https://app.pulsedeck.de/sitemap.xml` einreichen;
+  für `pulsedeck.de` gilt `sitemap-index.xml`. Die Verifizierungsdatei der Website liegt unter `website/public/`.
+- **Native Apps:** `PULSEDECK_API_URL=https://app.pulsedeck.de npm run build:mobile`, `CORS_ORIGINS` unverändert.
+- **E-Mails:** Mailvorlagen und Kalender-Links nutzen `APP_BASE_URL`, zeigen also automatisch auf die Anwendung.
 
 ## 4. Datensicherung
 
