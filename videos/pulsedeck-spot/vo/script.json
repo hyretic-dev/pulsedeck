@@ -1,0 +1,137 @@
+{
+  "voice": {
+    "provider": "elevenlabs",
+    "voiceId": "SiMvlSW9cKKHDYT4BzOp",
+    "name": "Lola",
+    "model": "eleven_v4",
+    "language": "de"
+  },
+  "total": 60,
+  "preroll": 0.7,
+  "tail": 1.6,
+  "segments": [
+    {
+      "id": "hook",
+      "text": "Samstag ist Sommerfest. Und im Vereinschat? Dreihundert Nachrichten. Wer grillt? Wo ist das PDF? Und wer kommt eigentlich?",
+      "gapAfter": 0.55,
+      "cues": {
+        "sommerfest": "Sommerfest",
+        "chat": "Vereinschat",
+        "n300": "Dreihundert",
+        "q1": "Wer",
+        "q2": "Wo",
+        "q3": "kommt"
+      }
+    },
+    {
+      "id": "turn",
+      "text": "Durchatmen.",
+      "gapAfter": 0.55,
+      "minGap": 0.45,
+      "cues": {
+        "breathe": "Durchatmen"
+      }
+    },
+    {
+      "id": "brand",
+      "scene": false,
+      "text": "Das ist PulseDeck.",
+      "gapAfter": 1.1,
+      "minGap": 1.0,
+      "cues": {
+        "das": "Das",
+        "brand": "PulseDeck"
+      }
+    },
+    {
+      "id": "claim",
+      "text": "Euer Chat bleibt. Das Chaos geht.",
+      "gapAfter": 0.6,
+      "cues": {
+        "a": "Euer",
+        "bleibt": "bleibt",
+        "b": "Das",
+        "geht": "geht"
+      }
+    },
+    {
+      "id": "feed",
+      "text": "Wichtiges landet im Feed und bleibt dort. Dazu Umfragen, Newsletter und Push aufs Handy, wenn es wirklich zählt.",
+      "gapAfter": 0.45,
+      "cues": {
+        "feed": "Feed",
+        "bleibt": "bleibt",
+        "poll": "Umfragen",
+        "news": "Newsletter",
+        "push": "Push",
+        "zaehlt": "zählt"
+      }
+    },
+    {
+      "id": "shifts",
+      "text": "Fürs Sommerfest: Termin anlegen, Schichten festlegen, Link teilen, gern auch in eure Gruppe. Jeder trägt sich selbst ein. Einer klickt, Schicht besetzt.",
+      "gapAfter": 0.45,
+      "cues": {
+        "termin": "Termin",
+        "schichten": "Schichten",
+        "link": "Link",
+        "gruppe": "Gruppe",
+        "jeder": "Jeder",
+        "einer": "Einer",
+        "klickt": "klickt",
+        "besetzt": "besetzt"
+      }
+    },
+    {
+      "id": "activ",
+      "text": "So werden aus Mitgliedern Aktive: mit Onboarding-Quest, Mikrotasks und offenen Schichten, die zu ihren Fähigkeiten passen.",
+      "gapAfter": 0.45,
+      "cues": {
+        "mitgliedern": "Mitgliedern",
+        "aktive": "Aktive",
+        "quest": "Onboarding-Quest",
+        "micro": "Mikrotasks",
+        "offenen": "offenen",
+        "skills": "Fähigkeiten"
+      }
+    },
+    {
+      "id": "wissen",
+      "text": "Euer Wissen bleibt: im Wiki, in Dateien und Arbeitsgruppen. Und auf Wunsch kennt ein KI-Assistent eure Dokumente.",
+      "gapAfter": 0.45,
+      "cues": {
+        "bleibt": "bleibt",
+        "wiki": "Wiki",
+        "dateien": "Dateien",
+        "ag": "Arbeitsgruppen",
+        "wunsch": "Wunsch",
+        "ki": "KI-Assistent",
+        "doku": "Dokumente"
+      }
+    },
+    {
+      "id": "trust",
+      "text": "Gehostet in Deutschland. Keine Telefonnummern, kein Tracking, Open Source.",
+      "gapAfter": 0.55,
+      "cues": {
+        "de": "Gehostet",
+        "tel": "Keine",
+        "track": "kein",
+        "os": "Open"
+      }
+    },
+    {
+      "id": "cta",
+      "text": "PulseDeck. Endlich Mitglieder nachhaltig aktivieren und informieren. Jetzt kostenlos starten, auf pulsedeck.de.",
+      "gapAfter": 0,
+      "cues": {
+        "brand": "PulseDeck",
+        "mitglieder": "Mitglieder",
+        "aktiv": "aktivieren",
+        "info": "informieren",
+        "jetzt": "Jetzt",
+        "url": "pulsedeck.de"
+      }
+    }
+  ]
+}

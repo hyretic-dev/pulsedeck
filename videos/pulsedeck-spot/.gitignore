@@ -1,0 +1,7 @@
+# Erzeugt von tools/audio.py bzw. HyperFrames, jederzeit reproduzierbar
+audio/stems/
+audio/mix.wav
+renders/
+.hyperframes/
+node_modules/
+audio/music/
