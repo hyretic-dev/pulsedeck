@@ -10,7 +10,7 @@ const link = 'text-sm font-medium transition-colors hover:text-[var(--color-text
 ---
 
 <header class="sticky top-0 z-50 border-b border-[var(--color-border)]/50 bg-[var(--color-bg)]/80 backdrop-blur-md">
-  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 sm:gap-8">
     <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-linke to-linke-dark flex items-center justify-center shadow-lg shadow-linke/20">
         <i class="pi pi-users text-white text-lg" aria-hidden="true"></i>
@@ -18,11 +18,11 @@ const link = 'text-sm font-medium transition-colors hover:text-[var(--color-text
       <span class="text-lg font-bold tracking-tight">PulseDeck</span>
     </a>
 
-    <nav class="flex items-center gap-4 sm:gap-6" aria-label="Hauptnavigation">
+    <nav class="flex items-center gap-3 sm:gap-6" aria-label="Hauptnavigation">
       <a href="/#dashboard" class={`hidden md:inline ${link} text-[var(--color-text-muted)]`}>Funktionen</a>
       <a
         href="/handbuch"
-        class={`${link} ${aktiv === 'handbuch' ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}
+        class={`hidden sm:inline ${link} ${aktiv === 'handbuch' ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}
         aria-current={aktiv === 'handbuch' ? 'page' : undefined}>Handbuch</a
       >
       <a
@@ -31,7 +31,7 @@ const link = 'text-sm font-medium transition-colors hover:text-[var(--color-text
         aria-current={aktiv === 'blog' ? 'page' : undefined}>Blog</a
       >
       <a href={`${APP_URL}/login`} class={`hidden sm:inline ${link} text-[var(--color-text-muted)]`}>Login</a>
-      <a href={`${APP_URL}/registrieren`} class="px-5 py-2 bg-linke hover:bg-linke-light text-white rounded-lg text-sm font-bold transition-all">Testen</a>
+      <a href={`${APP_URL}/registrieren`} class="px-4 sm:px-5 py-2 bg-linke hover:bg-linke-light text-white rounded-lg text-sm font-bold transition-all whitespace-nowrap">Testen</a>
     </nav>
   </div>
 </header>

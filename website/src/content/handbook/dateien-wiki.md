@@ -1,6 +1,6 @@
 ---
 title: "Dateien & Wiki"
-description: "PulseDeck Handbuch – Dateien & Wiki: Dateiverwaltung, Wiki (Wissensdatenbank)."
+description: "Dateien mit Zugriffsrechten ablegen und das Wiki als Gedächtnis eurer Organisation nutzen: Dateiverwaltung und Wissensdatenbank in PulseDeck."
 order: 60
 icon: pi-folder
 ---

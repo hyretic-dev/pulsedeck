@@ -3,32 +3,74 @@ import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import SiteHeader from '../../components/SiteHeader.astro';
 import Footer from '../../components/Footer.astro';
-import { SITE_URL } from '../../config';
+import { APP_URL, SITE_URL } from '../../config';
 import { beitraege, datum } from '../../blog';
+import { brotkrumen, lesezeit, ORG_ID, STANDARD_BILD, WEBSITE_ID } from '../../seo';
 
 export async function getStaticPaths() {
-  return (await beitraege()).map((eintrag) => ({ params: { slug: eintrag.id }, props: { eintrag } }));
+  const alle = await beitraege();
+  return alle.map((eintrag) => {
+    // Verwandte Beiträge: gemeinsame Schlagworte zuerst, sonst die neuesten
+    const verwandt = alle
+      .filter((b) => b.id !== eintrag.id)
+      .map((b) => ({ b, treffer: b.data.tags.filter((t) => eintrag.data.tags.includes(t)).length }))
+      .sort((x, y) => y.treffer - x.treffer || y.b.data.date.valueOf() - x.b.data.date.valueOf())
+      .slice(0, 3)
+      .map((x) => x.b);
+    return { params: { slug: eintrag.id }, props: { eintrag, verwandt } };
+  });
 }
 
-const { eintrag } = Astro.props;
-const { Content } = await render(eintrag);
-const { title, description, date, updated, author, tags } = eintrag.data;
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'BlogPosting',
-  headline: title,
-  description,
-  datePublished: date.toISOString(),
-  dateModified: (updated ?? date).toISOString(),
-  author: { '@type': 'Organization', name: author },
-  publisher: { '@type': 'Organization', name: 'PulseDeck' },
-  keywords: tags.join(', '),
-  inLanguage: 'de',
-  mainEntityOfPage: `${SITE_URL}/blog/${eintrag.id}`,
-};
+const { eintrag, verwandt } = Astro.props;
+const { Content, headings } = await render(eintrag);
+const { title, seoTitle, description, date, updated, author, tags, faq, image } = eintrag.data;
+const url = `${SITE_URL}/blog/${eintrag.id}`;
+const bild = image ? SITE_URL + image : STANDARD_BILD;
+const minuten = lesezeit(eintrag.body ?? '');
+const inhalt = headings.filter((h) => h.depth === 2);
+const autor = author === 'PulseDeck' ? { '@id': ORG_ID } : { '@type': 'Person', name: author };
+
+const jsonLd: Array<Record<string, unknown>> = [
+  {
+    '@type': 'BlogPosting',
+    '@id': `${url}#beitrag`,
+    headline: title,
+    description,
+    image: bild,
+    datePublished: date.toISOString(),
+    dateModified: (updated ?? date).toISOString(),
+    author: autor,
+    publisher: { '@id': ORG_ID },
+    keywords: tags.join(', '),
+    inLanguage: 'de-DE',
+    url,
+    mainEntityOfPage: url,
+    isPartOf: { '@id': `${SITE_URL}/blog#blog` },
+    timeRequired: `PT${minuten}M`,
+  },
+  brotkrumen([
+    { name: 'Blog', pfad: '/blog' },
+    { name: title, pfad: `/blog/${eintrag.id}` },
+  ]),
+];
+if (faq.length > 0) {
+  jsonLd.push({
+    '@type': 'FAQPage',
+    '@id': `${url}#faq`,
+    isPartOf: { '@id': WEBSITE_ID },
+    mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.frage, acceptedAnswer: { '@type': 'Answer', text: f.antwort } })),
+  });
+}
 ---
 
-<Base title={`${title} – PulseDeck Blog`} description={description} path={`/blog/${eintrag.id}`} jsonLd={jsonLd}>
+<Base
+  title={seoTitle ?? `${title} | PulseDeck`}
+  description={description}
+  path={`/blog/${eintrag.id}`}
+  jsonLd={jsonLd}
+  image={bild}
+  article={{ published: date, modified: updated, author, tags }}
+>
   <SiteHeader aktiv="blog" />
   <main class="max-w-3xl mx-auto px-6 py-16">
     <nav class="text-sm text-[var(--color-text-muted)] mb-6" aria-label="Brotkrumen">
@@ -37,16 +79,89 @@ const jsonLd = {
     <article>
       <header class="mb-10">
         <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">{title}</h1>
+        <p class="text-lg text-[var(--color-text-muted)] mb-4">{description}</p>
         <p class="text-sm text-[var(--color-text-muted)]">
-          <time datetime={date.toISOString()}>{datum(date)}</time> · {author}
-          {updated && <span> · aktualisiert <time datetime={updated.toISOString()}>{datum(updated)}</time></span>}
+          <time datetime={date.toISOString()}>{datum(date)}</time>
+          {updated && <span> · aktualisiert am <time datetime={updated.toISOString()}>{datum(updated)}</time></span>}
+          · {author} · {minuten} Min. Lesezeit
         </p>
       </header>
-      <div class="handbuch prose prose-invert max-w-none">
+
+      {
+        inhalt.length >= 3 && (
+          <nav class="mb-10 p-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-raised)]" aria-label="Inhalt">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">Inhalt</h2>
+            <ul class="space-y-1 text-sm list-disc list-inside marker:text-linke">
+              {inhalt.map((h) => (
+                <li>
+                  <a href={`#${h.slug}`} class="hover:text-linke">{h.text}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+
+      <div class="handbuch prose prose-invert max-w-none prose-headings:scroll-mt-24">
         <Content />
       </div>
+
+      {
+        faq.length > 0 && (
+          <section class="mt-14" aria-labelledby="faq">
+            <h2 id="faq" class="text-2xl font-bold mb-6">Häufige Fragen</h2>
+            <div class="space-y-3">
+              {faq.map((f) => (
+                <details class="group rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-5">
+                  <summary class="cursor-pointer font-semibold list-none flex justify-between gap-4">
+                    {f.frage}
+                    <i class="pi pi-chevron-down text-xs mt-1.5 transition-transform group-open:rotate-180" aria-hidden="true" />
+                  </summary>
+                  <p class="mt-3 text-[var(--color-text-muted)] leading-relaxed">{f.antwort}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      {
+        tags.length > 0 && (
+          <ul class="flex flex-wrap gap-2 mt-10" aria-label="Schlagworte">
+            {tags.map((t) => (
+              <li class="text-xs px-2 py-1 rounded-full bg-linke/10 text-linke">{t}</li>
+            ))}
+          </ul>
+        )
+      }
     </article>
-    <p class="mt-14 pt-8 border-t border-[var(--color-border)]"><a href="/blog" class="text-linke hover:underline">← Alle Beiträge</a></p>
+
+    <aside class="mt-14 p-6 rounded-2xl border border-linke/30 bg-linke/5">
+      <h2 class="text-xl font-bold mb-2">PulseDeck ausprobieren</h2>
+      <p class="text-[var(--color-text-muted)] mb-4">
+        Termine, Helferslots, Mitglieder, Wiki und Dateien an einem Ort – im Early Access kostenlos.
+      </p>
+      <a href={`${APP_URL}/registrieren`} class="inline-block px-5 py-2.5 bg-linke hover:bg-linke-light text-white rounded-lg font-bold transition-all">
+        Organisation anlegen
+      </a>
+    </aside>
+
+    {
+      verwandt.length > 0 && (
+        <section class="mt-14 pt-8 border-t border-[var(--color-border)]" aria-labelledby="weiterlesen">
+          <h2 id="weiterlesen" class="text-xl font-bold mb-4">Weiterlesen</h2>
+          <ul class="space-y-3">
+            {verwandt.map((b) => (
+              <li>
+                <a href={`/blog/${b.id}`} class="font-semibold hover:text-linke">{b.data.title}</a>
+                <p class="text-sm text-[var(--color-text-muted)]">{b.data.description}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+    <p class="mt-10"><a href="/blog" class="text-linke hover:underline">← Alle Beiträge</a></p>
   </main>
   <Footer />
 </Base>

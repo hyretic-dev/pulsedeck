@@ -1,20 +1,31 @@
 ---
 import '../styles/global.css';
 import { SITE_URL } from '../config';
+import { organisation, website, STANDARD_BILD } from '../seo';
 
 interface Props {
   title: string;
   description: string;
   /** Pfad der Seite ohne Domain, z. B. "/handbuch/erste-schritte" – ergibt die kanonische URL. */
   path: string;
-  /** Strukturierte Daten (schema.org), werden als JSON-LD eingebettet. */
-  jsonLd?: Record<string, unknown>;
+  /** Seitenspezifische strukturierte Daten (schema.org); landen zusammen mit Organisation und WebSite in einem @graph. */
+  jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
   /** Für Seiten, die nicht in Suchmaschinen gehören (z. B. 404). */
   noindex?: boolean;
+  /** Vorschaubild für soziale Netzwerke und Suchmaschinen (absolute URL); Standard: das PulseDeck-Bild. */
+  image?: string;
+  /** Beiträge: Open-Graph-Typ "article" mit Datumsangaben. */
+  article?: { published: Date; modified?: Date; author: string; tags: string[] };
 }
 
-const { title, description, path, jsonLd, noindex = false } = Astro.props;
-const kanonisch = SITE_URL + (path === '/' ? '' : path);
+const { title, description, path, jsonLd, noindex = false, image = STANDARD_BILD, article } = Astro.props;
+// Startseite mit Schrägstrich, wie in der Sitemap; alle anderen Seiten ohne (trailingSlash: 'never')
+const kanonisch = path === '/' ? `${SITE_URL}/` : SITE_URL + path;
+const seitenDaten = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [organisation, website, ...seitenDaten.map(({ ['@context']: _, ...rest }) => rest)],
+};
 ---
 
 <!doctype html>
@@ -24,24 +35,49 @@ const kanonisch = SITE_URL + (path === '/' ? '' : path);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="author" content="PulseDeck" />
+    <meta name="author" content={article?.author ?? 'PulseDeck'} />
     <meta name="theme-color" content="#050505" />
-    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={kanonisch} />}
+    {
+      noindex ? (
+        <meta name="robots" content="noindex, follow" />
+      ) : (
+        <>
+          <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+          <link rel="canonical" href={kanonisch} />
+        </>
+      )
+    }
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="alternate" type="application/rss+xml" title="PulseDeck Blog" href="/blog/rss.xml" />
 
     <meta property="og:site_name" content="PulseDeck" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
     <meta property="og:locale" content="de_DE" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={kanonisch} />
-    <meta property="og:image" content={`${SITE_URL}/icons/icon-512x512.png`} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+    {
+      article && (
+        <>
+          <meta property="article:published_time" content={article.published.toISOString()} />
+          <meta property="article:modified_time" content={(article.modified ?? article.published).toISOString()} />
+          <meta property="article:author" content={article.author} />
+          {article.tags.map((t) => <meta property="article:tag" content={t} />)}
+        </>
+      )
+    }
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
 
-    {jsonLd && <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />}
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(graph)} />
   </head>
   <body class="min-h-screen">
     <slot />

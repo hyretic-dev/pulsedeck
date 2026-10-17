@@ -1,6 +1,6 @@
 ---
 title: "Für Admins: Verwaltung"
-description: "PulseDeck Handbuch – Für Admins: Verwaltung: Einstellungen & Branding, Nutzer einladen, E-Mail Setup (SMTP), Audit Logs."
+description: "Für Admins: Branding anpassen, Mitglieder einladen, eigenen SMTP-Server für E-Mails hinterlegen und Änderungen im Audit-Log nachvollziehen."
 order: 80
 icon: pi-cog
 ---

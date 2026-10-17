@@ -1,8 +1,9 @@
 ---
 title: "Häufige Fragen (FAQ)"
-description: "PulseDeck Handbuch – Häufige Fragen (FAQ): Ich kann mich nicht einloggen., Ich sehe keine Dateien/Termine., Wie lade ich Dateien hoch?."
+description: "Antworten auf häufige Fragen zu PulseDeck: Probleme beim Login, fehlende Dateien oder Termine und das Hochladen von Dateien."
 order: 90
 icon: pi-question-circle
+faq: true
 ---
 
 ### Ich kann mich nicht einloggen.

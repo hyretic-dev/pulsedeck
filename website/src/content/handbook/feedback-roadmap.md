@@ -1,6 +1,6 @@
 ---
 title: "Feedback & Roadmap"
-description: "PulseDeck Handbuch – Feedback & Roadmap: Issue Tracker, Roadmap."
+description: "Fehler melden, Wünsche einreichen und sehen, woran gearbeitet wird: Issue Tracker und Roadmap in PulseDeck."
 order: 70
 icon: pi-book
 ---

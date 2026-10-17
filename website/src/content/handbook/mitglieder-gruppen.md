@@ -1,6 +1,6 @@
 ---
 title: "Mitglieder & Gruppen"
-description: "PulseDeck Handbuch – Mitglieder & Gruppen: Mitgliederliste, Arbeitsgruppen (AGs), Rollenkonzept."
+description: "Mitgliederliste pflegen, Arbeitsgruppen anlegen und Rollen vergeben: so steuert ihr in PulseDeck, wer was sehen und bearbeiten darf."
 order: 50
 icon: pi-book
 ---

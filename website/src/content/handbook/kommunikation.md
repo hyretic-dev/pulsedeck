@@ -1,6 +1,6 @@
 ---
 title: "Kommunikation"
-description: "PulseDeck Handbuch – Kommunikation: News Feed & Umfragen, E-Mail Newsletter."
+description: "Neuigkeiten im Feed teilen, Umfragen und Abstimmungen starten und E-Mail-Newsletter an Mitglieder versenden: Kommunikation in PulseDeck."
 order: 40
 icon: pi-megaphone
 ---
