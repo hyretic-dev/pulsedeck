@@ -16,7 +16,7 @@ export const GET: APIRoute = () =>
       'Allow: /',
       'Disallow: /api/',
       '',
-      `Sitemap: ${SITE_URL}/sitemap-index.xml`,
+      `Sitemap: ${SITE_URL}/sitemap.xml`,
       '',
     ].join('\n'),
     { headers: { 'Content-Type': 'text/plain; charset=utf-8' } }

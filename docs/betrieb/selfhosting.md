@@ -69,7 +69,7 @@ Alle Werte stehen in `.env.example` (nie Secrets einchecken). Ergänzend zu den 
 | Native Apps | `CORS_ORIGINS` | Exakte Ursprünge, kommagetrennt; leer = nur gleicher Ursprung (E36) |
 | Schreibgeschützter Betrieb | `READ_ONLY` (Frontend-Container) | `true` weist schreibende API-Aufrufe mit 503 ab; Login bleibt möglich |
 
-Sitemap und `robots.txt` liefert das Backend (nginx proxyt `/sitemap.xml` und `/robots.txt`); die Adresse der Instanz stammt aus `APP_BASE_URL`.
+Sitemap und `robots.txt` der Anwendung liefert das Backend (nginx proxyt `/sitemap.xml` und `/robots.txt`); die Adresse der Instanz stammt aus `APP_BASE_URL`. Die Sitemap enthält Anmeldung, Registrierung und die öffentlichen Seiten der Organisationen; `robots.txt` sperrt `/api/`, `/auth/` und die internen Bereiche (`/*/dashboard`). Die Website (`website/`) hat eine eigene Sitemap unter `/sitemap.xml`.
 
 Der Compose-Stack **braucht keine zweite Komponente für Dateien**: Uploads gehen als Multipart an das Backend, das sie unter `<orgId>/<fileId>` im Volume ablegt (UUIDs, kein Pfad vom Client); Downloads laufen über das Backend mit Rechteprüfung (E26).
 

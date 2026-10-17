@@ -6,13 +6,12 @@
   "description": "Öffentliche Website von PulseDeck (Startseite, Handbuch, Rechtliches). Die Anwendung selbst liegt unter app.pulsedeck.de.",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check && astro build && node scripts/pruefe-sitemap.mjs",
     "preview": "astro preview"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
     "@astrojs/rss": "^4.0.19",
-    "@astrojs/sitemap": "^3.7.4",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^6.4.8",

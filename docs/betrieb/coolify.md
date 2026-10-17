@@ -49,7 +49,7 @@ schaltet Newsletter, Push und Mail-Outbox ab — beides nur für Wartung oder Ab
 *Deploy* auslösen. Der Backend-Entrypoint migriert mit der Migrations-Rolle, bevor der Server startet (schlägt das fehl, startet
 nichts). Erwartung: `postgres`, `backend`, `frontend`, `website` **healthy**; `https://app.pulsedeck.de/health` → 200, `/api/docs` → 404,
 `https://app.pulsedeck.de/robots.txt` nennt `https://app.pulsedeck.de/sitemap.xml`; `https://pulsedeck.de/` zeigt die Startseite,
-`https://pulsedeck.de/robots.txt` nennt `https://pulsedeck.de/sitemap-index.xml`.
+`https://pulsedeck.de/robots.txt` nennt `https://pulsedeck.de/sitemap.xml`.
 
 | Fehlerbild | Ursache |
 |---|---|
@@ -71,7 +71,8 @@ Bis zur Trennung lieferte `pulsedeck.de` die Anwendung aus. Danach gilt:
   Safety-Worker, der sich abmeldet, und beantwortet `ngsw.json` mit 404. Bis dahin leitet `/api/` der Website temporär an das
   Frontend der Anwendung. Beides (Safety-Worker, `/api/`-Block, `ngsw.json`) kann nach einigen Monaten aus `website/` entfernt werden.
 - **Search Console:** `app.pulsedeck.de` als neue Property anlegen und die Sitemap `https://app.pulsedeck.de/sitemap.xml` einreichen;
-  für `pulsedeck.de` gilt `sitemap-index.xml`. Die Verifizierungsdatei der Website liegt unter `website/public/`.
+  für `pulsedeck.de` gilt `https://pulsedeck.de/sitemap.xml`. Nach jedem Deploy mit neuen Seiten: `cd website && node scripts/indexnow.mjs`
+  (meldet die Sitemap per IndexNow an Bing und andere). Die Verifizierungsdatei der Website liegt unter `website/public/`.
 - **Native Apps:** `cd app && PULSEDECK_API_URL=https://app.pulsedeck.de npm run build:mobile`, `CORS_ORIGINS` unverändert.
 - **E-Mails:** Mailvorlagen und Kalender-Links nutzen `APP_BASE_URL`, zeigen also automatisch auf die Anwendung.
 

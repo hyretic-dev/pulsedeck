@@ -148,9 +148,10 @@ nach Abstimmung, weil es den Ton der Seite ändert.
 
 ## 6. Außerhalb des Codes (nötig für Rankings)
 
-1. **Google Search Console** für `pulsedeck.de` und `app.pulsedeck.de`, Sitemaps einreichen (`/sitemap-index.xml`,
+1. **Google Search Console** für `pulsedeck.de` und `app.pulsedeck.de`, Sitemaps einreichen (`https://pulsedeck.de/sitemap.xml`,
    `https://app.pulsedeck.de/sitemap.xml`).
 2. **Bing Webmaster Tools** einrichten (Import aus der Search Console). ChatGPT-Suche greift auf den Bing-Index zurück.
+   Nach jedem Deploy mit neuen oder geänderten Beiträgen `node website/scripts/indexnow.mjs` ausführen (IndexNow).
 3. **Backlinks/Erwähnungen:** Eintrag in Vergleichsportalen (trusted.de, OMR Reviews, drweb.de – die ranken für alle
    Kernbegriffe), Gastbeiträge bei Landessportbünden/Ehrenamtsportalen, Open-Source-Verzeichnisse, GitHub-README mit Link.
 4. **Autorenseite** mit echter Person (Name, Rolle, Bezug zu Vereinsarbeit) – stärkt E-E-A-T; nur mit Einverständnis.

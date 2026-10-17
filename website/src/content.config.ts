@@ -14,6 +14,8 @@ const handbook = defineCollection({
     description: z.string(),
     order: z.number(),
     icon: z.string().default('pi-book'),
+    /** Datum der letzten inhaltlichen Änderung; landet als lastmod in der Sitemap. Nur bei echten Änderungen setzen. */
+    updated: z.coerce.date().optional(),
     /** Kapitel aus Fragen (### Frage) und Antworten: wird zusätzlich als FAQPage ausgezeichnet. */
     faq: z.boolean().default(false),
   }),

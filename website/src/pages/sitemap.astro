@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Footer from '../components/Footer.astro';
+import { alleSeiten, type Seite } from '../seiten';
+import { brotkrumen } from '../seo';
+
+const seiten = await alleSeiten();
+const gruppen: Array<Seite['gruppe']> = ['Allgemein', 'Blog', 'Handbuch', 'Rechtliches'];
+---
+
+<Base
+  title="Seitenübersicht | PulseDeck"
+  description="Alle Seiten von pulsedeck.de auf einen Blick: Blogbeiträge, Kapitel des Handbuchs und rechtliche Informationen."
+  path="/sitemap"
+  jsonLd={brotkrumen([{ name: 'Seitenübersicht', pfad: '/sitemap' }])}
+>
+  <SiteHeader />
+  <main class="max-w-4xl mx-auto px-6 py-16">
+    <h1 class="text-4xl font-extrabold tracking-tight mb-3">Seitenübersicht</h1>
+    <p class="text-[var(--color-text-muted)] mb-12">
+      Alle Seiten dieser Website. Für Suchmaschinen gibt es dieselbe Liste als <a href="/sitemap.xml" class="text-linke hover:underline">XML-Sitemap</a>.
+    </p>
+    <div class="grid gap-10 sm:grid-cols-2">
+      {
+        gruppen.map((g) => (
+          <section>
+            <h2 class="text-lg font-bold mb-3">{g}</h2>
+            <ul class="space-y-2">
+              {seiten
+                .filter((s) => s.gruppe === g)
+                .map((s) => (
+                  <li>
+                    <a href={s.pfad} class="text-[var(--color-text-muted)] hover:text-linke transition-colors">
+                      {s.titel}
+                    </a>
+                  </li>
+                ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </main>
+  <Footer />
+</Base>
