@@ -58,6 +58,8 @@ aktuell = 'Registrierung';
 await seite.goto(`${BASIS}/registrieren`);
 await seite.getByPlaceholder('Max Mustermann').fill('E2E Tester');
 await seite.getByPlaceholder('max@example.de').fill(email);
+// Passwort ist optional (Standard: Magic Link); der Test legt eins fest, um später die Passwort-Anmeldung zu prüfen
+await seite.getByRole('button', { name: /Lieber ein Passwort festlegen/ }).click();
 await seite.locator('p-password input').first().fill(passwort);
 await seite.locator('p-password input').first().press('Tab');
 await seite.getByRole('button', { name: /Weiter/ }).dispatchEvent('click'); // das Passwort-Panel überdeckt den Knopf
@@ -66,7 +68,7 @@ await seite.getByPlaceholder('mein-verein').fill(slug);
 await seite.getByPlaceholder('mein-verein').blur();
 await seite.waitForTimeout(500);
 await seite.getByRole('button', { name: /Organisation erstellen/ }).click();
-await sichtbar('Registrierung verlangt E-Mail-Bestätigung', 'Bitte bestätige deine E-Mail-Adresse');
+await sichtbar('Registrierung verlangt E-Mail-Bestätigung', 'Bitte bestätige damit deine E-Mail-Adresse');
 
 aktuell = 'Bestätigung';
 await seite.waitForTimeout(1500);
