@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { AuthService, UserMembership } from '../../shared/services/auth.service';
 import { ThemeService } from '../../shared/services/theme.service';
 import { OrganizationService } from '../../shared/services/organization.service';
+import { PulseLogoComponent } from '../../shared/components/pulse-logo.component';
 
 @Component({
   selector: 'app-sidebar-left',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterLink, RouterLinkActive, CommonModule, PulseLogoComponent],
   templateUrl: './sidebar-left.html',
   styleUrl: './sidebar-left.css',
 })

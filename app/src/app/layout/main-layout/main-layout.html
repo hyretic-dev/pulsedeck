@@ -13,7 +13,10 @@
             z-10 sticky top-0">
             <p-button icon="pi pi-bars" [text]="true" (click)="leftSidebarVisible.set(true)" styleClass="text-[var(--color-text-muted)]
                     hover:text-[var(--color-text)]" />
-            <span class="text-lg font-bold text-linke">PulseDeck</span>
+            <span class="flex items-center gap-2">
+                <app-pulse-logo [groesse]="24" />
+                <span class="text-lg font-bold text-[var(--color-text)] tracking-tight">PulseDeck</span>
+            </span>
             <div class="w-10"></div>
         </header>
 

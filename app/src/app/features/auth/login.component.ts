@@ -7,6 +7,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
 import { AuthService, LoginCheckResult } from '../../shared/services/auth.service';
+import { PulseLogoComponent } from '../../shared/components/pulse-logo.component';
 
 type LoginStep = 'email' | 'password' | 'invitation-sent' | 'not-found';
 
@@ -14,6 +15,7 @@ type LoginStep = 'email' | 'password' | 'invitation-sent' | 'not-found';
   selector: 'app-login',
   standalone: true,
   imports: [
+    PulseLogoComponent,
     CommonModule,
     FormsModule,
     RouterModule,
@@ -36,8 +38,8 @@ type LoginStep = 'email' | 'password' | 'invitation-sent' | 'not-found';
           
           <!-- Logo & Header -->
           <div class="flex flex-col items-center mb-8">
-            <div class="w-16 h-16 mb-4 rounded-2xl bg-gradient-to-br from-linke to-linke-dark flex items-center justify-center shadow-lg shadow-linke/20 ring-4 ring-linke/5">
-              <i class="pi pi-users text-white text-2xl"></i>
+            <div class="mb-4 rounded-2xl shadow-lg shadow-linke/20 ring-4 ring-linke/5">
+              <app-pulse-logo [groesse]="64" />
             </div>
             <h1 class="text-2xl font-bold text-[var(--color-text)] mb-1">PulseDeck</h1>
             <p class="text-[var(--color-text-muted)] text-sm">Melde dich an, um fortzufahren</p>
