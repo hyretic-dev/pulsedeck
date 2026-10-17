@@ -427,7 +427,7 @@ html, body {
 .tt .sketch { right: 44px; top: 40px; width: 150px; height: 150px; }
 
 /* ---------- Szene 9: Abschluss ---------- */
-#cta-ecg-path { fill: none; stroke: rgba(255, 40, 40, 0.22); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.6)); }
+#cta-ecg-path { fill: none; stroke: rgba(255, 40, 40, 0.5); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.6)); }
 #cta-logo { left: 0; top: 190px; width: 1920px; justify-content: center; gap: 34px; }
 #cta-logo .logo-mark { width: 150px; height: 150px; }
 #cta-logo .logo-word { font-size: 112px; }
@@ -438,9 +438,6 @@ html, body {
 .btn-cta { display: inline-flex; align-items: center; gap: 16px; background: var(--cta); color: #fff; font-size: 40px; font-weight: 700; padding: 26px 46px; border-radius: 22px; box-shadow: 0 24px 60px rgba(255, 0, 0, 0.3); }
 .btn-cta .pi { font-size: 30px; }
 .url { font-size: 46px; font-weight: 700; letter-spacing: -0.02em; }
-#cta-ea { position: absolute; left: 0; right: 0; top: 900px; display: flex; justify-content: center; }
+#cta-ea { position: absolute; left: 0; right: 0; top: 870px; display: flex; justify-content: center; }
 .ea { display: inline-flex; align-items: center; gap: 12px; padding: 12px 24px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--muted); font-size: 24px; font-weight: 600; }
 .ea i { width: 12px; height: 12px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px rgba(34, 197, 94, 0.8); }
-#cta-chips { position: absolute; left: 0; right: 0; top: 980px; display: flex; justify-content: center; gap: 30px; font-size: 20px; color: #6b7280; }
-#cta-chips span { display: flex; align-items: center; gap: 8px; }
-#cta-chips .pi { color: var(--green); font-size: 16px; }

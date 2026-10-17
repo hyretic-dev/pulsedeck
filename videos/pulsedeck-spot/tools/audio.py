@@ -34,6 +34,7 @@ MUSIC_FILE = os.path.join(ROOT, 'audio/music/shiny-tech_kevin-macleod.mp3')
 # Quelle: Spiegel der CC-BY-Titel von Kevin MacLeod auf GitHub, fester Commit und Prüfsumme; nicht im Repo eingecheckt
 MUSIC_URL = 'https://raw.githubusercontent.com/noobsandnerdsgroup/audio/24a545705ba6277d03c2c2d736048a72ff12d681/Shiny%20Tech.mp3'
 MUSIC_SHA256 = '1889779e953b392ae07c57219066e2a14407e796eaa5a167da5cea6fc622d357'
+VOICE_TEMPO = json.load(open(os.path.join(ROOT, 'vo/script.json')))['voice'].get('tempo', 1.0)
 MUSIC_DROP = 7.012  # erster Takt nach dem Intro in "Shiny Tech" (Beat-Analyse mit librosa)
 MUSIC_BEAT = 0.6502  # 92,3 BPM
 
@@ -353,11 +354,13 @@ def build_sfx():
     for cue, p in (('wiki', -0.6), ('dateien', 0.0), ('ag', 0.1)):
         put(norm(W(0.45, 300, 2600, 700, p - 0.2, p + 0.2)), C['wissen.' + cue] - 0.2, -25)
     put(norm(W(0.6, 250, 2400, 600, 0.9, 0.6)), C['wissen.wunsch'] - 0.2, -23)
-    put(norm(sfx_pop(1.3)), C['wissen.ki'] - 0.3, -19, 0.6)
+    t_ask = C['wissen.wunsch'] + 0.25
+    t_ans = min(C['wissen.ki'] + 0.45, C['wissen.doku'] - 0.2)
+    put(norm(sfx_pop(1.3)), t_ask, -19, 0.6)
     for i in range(4):
-        put(norm(sfx_tick(0.55)), C['wissen.ki'] + 0.2 + i * 0.16, -30, 0.6)
-    put(norm(sfx_chime([1046.5, 1568], gap=0.07)), C['wissen.doku'] - 0.2, -20, 0.5)
-    put(norm(sfx_pen(0.6)), C['wissen.doku'] - 0.1, -26, 0.2)
+        put(norm(sfx_tick(0.55)), t_ask + 0.4 + i * 0.16, -30, 0.6)
+    put(norm(sfx_chime([1046.5, 1568], gap=0.07)), t_ans, -20, 0.5)
+    put(norm(sfx_pen(0.6)), t_ans + 0.1, -26, 0.2)
 
     # 8 Vertrauen
     put(norm(W(0.7, 250, 4500, 600, -0.9, 0.9)), S['trust']['start'] - 0.1, -17)
@@ -432,6 +435,18 @@ def build_music():
     return out, {'start_track': start_track, 'xfade_spot': xfade_spot, 'hit_spot': hit_spot}
 
 
+def load_tempo(path, tempo):
+    """Stimme tonhöhen- und formanterhaltend beschleunigen (Rubberband in ffmpeg)."""
+    import subprocess
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix='.wav') as tmp:
+        # Tempo, Trittschall weg, sanfte Sprachkompression (weniger Spitzen, damit der Master-Limiter kaum arbeiten muss)
+        chain = f'rubberband=tempo={tempo}:formant=preserved:transients=mixed:window=standard,highpass=f=80,acompressor=threshold=-24dB:ratio=3:attack=5:release=90:knee=4:makeup=2,alimiter=limit=0.89:attack=2:release=40:level=disabled'
+        subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', path, '-af', chain, '-ar', str(SR), tmp.name], check=True)
+        y, sr = sf.read(tmp.name)
+    return y, sr
+
+
 def load_mp3(path):
     import librosa
     y, sr = librosa.load(path, sr=SR, mono=False)
@@ -446,7 +461,7 @@ def build_vo():
         p = os.path.join(ROOT, f"vo/{seg['id']}.mp3")
         if not os.path.exists(p):
             continue
-        y, _ = load_mp3(p)
+        y, _ = load_tempo(p, VOICE_TEMPO)
         if y.ndim == 1:
             y = np.stack([y, y], axis=1)
         k = int(round(seg['start'] * SR))
@@ -524,10 +539,10 @@ def main():
     pre = lufs(mix)
     if n_vo:
         master = mix * 10 ** ((TARGET_MIX - pre) / 20)
-        for _ in range(4):
+        for _ in range(8):
             master = true_peak_limit(master, CEILING_DBTP)
             cur = lufs(master)
-            if abs(cur - TARGET_MIX) < 0.05:
+            if abs(cur - TARGET_MIX) < 0.02:
                 break
             master *= 10 ** ((TARGET_MIX - cur) / 20)
         master = true_peak_limit(master, CEILING_DBTP)

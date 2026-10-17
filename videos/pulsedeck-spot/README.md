@@ -1,4 +1,4 @@
-# PulseDeck-Werbespot (ca. 60 s, HyperFrames)
+# PulseDeck-Werbespot (62 s, HyperFrames)
 
 „Euer Chat bleibt, das Chaos geht.“ Ein Motion-Graphics-Spot in PulseDecks eigener Welt: Inter, Rot auf Tiefschwarz,
 die echte Oberfläche der App, das Original-Logo. Gebaut mit [HyperFrames](https://github.com/heygen-com/hyperframes)
@@ -11,10 +11,10 @@ die echte Oberfläche der App, das Original-Logo. Gebaut mit [HyperFrames](https
 | 1 | Chaos | Samstag ist Sommerfest. Und im Vereinschat? Dreihundert Nachrichten. Wer grillt? Wo ist das PDF? Und wer kommt eigentlich? | Gruppenchat läuft über, Benachrichtigungen stapeln sich, „300“ ungelesen, Fragen mit roten Markierungen, eine Kritzellinie wächst durchs Bild |
 | 2 | Durchatmen | Durchatmen. Das ist PulseDeck. | Alles fällt in sich zusammen, die Kritzellinie glättet sich, schlägt als Puls aus und wird zum Logo |
 | 3 | Claim | Euer Chat bleibt. Das Chaos geht. | Derselbe Chat, jetzt ruhig, mit PulseDeck-Link; „Chaos“ wird durchgestrichen |
-| 4 | Feed | Wichtiges landet im Feed und bleibt dort. Dazu Umfragen, Newsletter und Push aufs Handy, wenn es wirklich zählt. | Nachgebauter Feed „Aktuelles“, angepinnte Umfrage, Balken füllen sich, Newsletter, Push auf dem Sperrbildschirm |
-| 5 | Schichten | Fürs Sommerfest: Termin anlegen, Schichten festlegen, Link teilen, gern auch in eure Gruppe. Jeder trägt sich selbst ein. Einer klickt, Schicht besetzt. | Die drei Schritte der Website, Termin und Schichtkarten wie in der App, Link landet im Gruppenchat, Avatare tragen sich ein, „Schicht voll“ |
-| 6 | Aktivieren | So werden aus Mitgliedern Aktive: mit Onboarding-Quest, Mikrotasks und offenen Schichten, die zu ihren Fähigkeiten passen. | Mitglieder-Symbole leuchten auf, Dashboard mit Onboarding-Quest (20 % → 100 %), Mikrotasks, passende Skills |
-| 7 | Wissen | Euer Wissen bleibt: im Wiki, in Dateien und Arbeitsgruppen. Und auf Wunsch kennt ein KI-Assistent eure Dokumente. | Wiki „Sommerfest von A bis Z“, Dateien mit Sichtbarkeit, Arbeitsgruppen, der PulseDeck AI Agent beantwortet eine Frage aus dem Wiki |
+| 4 | Feed | Wichtiges steht im Feed und bleibt dort. Dazu Umfragen, Newsletter und Push aufs Handy, wenn es zählt. | Nachgebauter Feed „Aktuelles“, angepinnte Umfrage, Balken füllen sich, Newsletter, Push auf dem Sperrbildschirm |
+| 5 | Schichten | Termin anlegen, Schichten festlegen, Link in eure Gruppe teilen. Jeder trägt sich selbst ein. Ein Klick, Schicht besetzt. | Die drei Schritte der Website, Termin und Schichtkarten wie in der App, Link landet im Gruppenchat, Avatare tragen sich ein, „Schicht voll“ |
+| 6 | Aktivieren | So werden aus Mitgliedern Aktive: mit Onboarding-Quest, Mikrotasks und Schichten, die zu ihren Fähigkeiten passen. | Mitglieder-Symbole leuchten auf, Dashboard mit Onboarding-Quest (20 % → 100 %), Mikrotasks, passende Skills |
+| 7 | Wissen | Euer Wissen bleibt: in Wiki, Dateien und Arbeitsgruppen. Auf Wunsch kennt ein KI-Assistent eure Dokumente. | Wiki „Sommerfest von A bis Z“, Dateien mit Sichtbarkeit, Arbeitsgruppen, der PulseDeck AI Agent beantwortet eine Frage aus dem Wiki |
 | 8 | Vertrauen | Gehostet in Deutschland. Keine Telefonnummern, kein Tracking, Open Source. | Vier Kacheln mit eigenen Strichskizzen |
 | 9 | Abschluss | PulseDeck. Endlich Mitglieder nachhaltig aktivieren und informieren. Jetzt kostenlos starten, auf pulsedeck.de. | Logo, „Mitglieder aktivieren. Nachhaltig informieren.“, „Kostenlos starten“, Early Access, zwei Herzschläge |
 
@@ -37,7 +37,13 @@ Vertrauensaussagen (`website/src/data/vertrauen.ts`), Dashboard, Onboarding-Ques
 
 ## Ton
 
-- **Stimme**: ElevenLabs, Stimme „Lola“ (`SiMvlSW9cKKHDYT4BzOp`), Modell `eleven_v4`, Deutsch, je Szene ein Segment mit Wortzeiten.
+- **Stimme (Ziel)**: ElevenLabs, „Lola – Fresh & Dynamic“ (`SiMvlSW9cKKHDYT4BzOp`), Modell `eleven_v4`, Deutsch, je Szene ein Segment mit Wortzeiten.
+  Lola stammt aus der Voice Library und ist über die API erst ab dem **Creator-Tarif** nutzbar.
+- **Stimme (aktueller Entwurf)**: Das verwendete Konto ist ein Free-Konto. Der Spot nutzt deshalb vorerst die Standardstimme
+  „Sarah“ (`EXAVITQu4vr4xnSDxMaL`, `eleven_v4`, Deutsch), siehe `vo/voice.json`. Free-Generierungen sind laut ElevenLabs
+  nicht für kommerzielle Nutzung lizenziert: **nicht veröffentlichen**, vorher mit Lola auf einem bezahlten Konto neu erzeugen.
+- **Sprachbearbeitung** (`tools/audio.py`): tonhöhen- und formanterhaltend um Faktor 1,1 beschleunigt (`voice.tempo`), Hochpass 80 Hz,
+  sanfte Kompression 3:1; die Wortzeiten werden entsprechend umgerechnet.
 - **Musik**: „Shiny Tech“ von Kevin MacLeod (incompetech.com), Lizenz Creative Commons BY 4.0
   (https://creativecommons.org/licenses/by/4.0/). Der Drop nach dem Intro liegt auf dem Wort „PulseDeck“, der Schlussschlag auf dem letzten Herzschlag.
   `tools/audio.py` lädt die Datei von einem festen GitHub-Commit (Prüfsumme im Skript), sie liegt nicht im Repo.
@@ -50,11 +56,12 @@ Vertrauensaussagen (`website/src/data/vertrauen.ts`), Dashboard, Onboarding-Ques
 
 ```bash
 cd videos/pulsedeck-spot
-ELEVENLABS_API_KEY=... python3 -I tools/voiceover.py   # Stimme + Wortzeiten nach vo/
+ELEVENLABS_API_KEY=... python3 -I tools/voiceover.py   # Lola + Wortzeiten nach vo/ (ab Creator-Tarif)
+# ELEVENLABS_VOICE=draft ... tools/voiceover.py       # Entwurfsstimme aus vo/script.json
 node tools/timing.mjs                                  # Szenen und Cues an die Wortzeiten anpassen (stempelt index.html)
 python3 -I tools/audio.py                              # Sounds, Musik, Mix, Lautheitsbericht
-npx --yes hyperframes@0.8.169 check                    # Prüfung
-npx --yes hyperframes@0.8.169 render --quality delivery --output renders/pulsedeck-spot.mp4
+npx --yes hyperframes@0.8.169 lint                     # Prüfung (0 Fehler; die Warnungen sind Strukturhinweise zu Sub-Kompositionen)
+bash tools/deliver.sh renders/pulsedeck-spot.mp4      # Render in Lieferqualität, Master-Mix direkt ins MP4
 ```
 
 Python braucht `numpy scipy soundfile pyloudnorm librosa`.

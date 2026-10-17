@@ -180,7 +180,7 @@
     tl.to('#pulse-path, #pulse-glow', { attr: { d: toD(flatPts) }, duration: 0.95, ease: 'power3.inOut' }, tSwap + 0.02);
 
     const tBreOut = C['brand.das'] - 0.3;
-    const tBreIn = C['turn.start'] + 0.15;
+    const tBreIn = C['turn.start'] + 0.4;
     tl.fromTo('#turn-breathe', { opacity: 0, letterSpacing: '0.62em', y: 12 }, { opacity: 1, letterSpacing: '0.32em', y: 0, duration: Math.min(0.9, tBreOut - tBreIn - 0.05), ease: 'power2.out' }, tBreIn);
     tl.to('#turn-breathe', { opacity: 0, y: -24, duration: 0.35, ease: 'power2.in' }, tBreOut);
 
@@ -310,7 +310,7 @@
     tl.fromTo('#sb-full', { opacity: 0 }, { opacity: 1, duration: 0.3 }, fullB);
 
     // "Einer klickt, Schicht besetzt."
-    tl.to('#cursor-1', { x: cx(joinA), y: cy(joinA), duration: 0.55, ease: 'power3.inOut' }, C['shifts.einer'] - 0.2);
+    tl.to('#cursor-1', { x: cx(joinA), y: cy(joinA), duration: 0.55, ease: 'power3.inOut' }, C['shifts.klickt'] - 0.7);
     tl.to('#cursor-1', { scale: 0.85, duration: 0.08, yoyo: true, repeat: 1, ease: 'none' }, C['shifts.klickt']);
     tl.fromTo('#ripple-1', { x: cx(joinA), y: cy(joinA), scale: 0.2, opacity: 0.9 }, { scale: 1.4, opacity: 0, duration: 0.5, ease: 'power2.out', immediateRender: false }, C['shifts.klickt'] + 0.02);
     tl.to(avA[5], { scale: 1, duration: 0.35, ease: 'back.out(2.5)' }, C['shifts.klickt'] + 0.05);
@@ -408,16 +408,18 @@
     // Fokus auf den KI-Assistenten: das Panel wächst, der Rest tritt zurück
     tl.to(['#wiki-panel', '#files-panel', '#groups-panel', '#wissen-head', '#wissen-key'], { opacity: 0.38, x: -40, duration: 0.9, ease: 'power3.inOut' }, C['wissen.wunsch'] - 0.1);
     tl.to('#ai-panel', { scale: 1.12, x: -40, transformOrigin: '100% 50%', boxShadow: '0 60px 160px rgba(0,0,0,0.85), 0 0 0 1px rgba(139,92,246,0.35)', duration: 0.9, ease: 'power3.inOut' }, C['wissen.wunsch'] - 0.1);
-    tl.fromTo('#ai-q', { opacity: 0, scale: 0.7, transformOrigin: '100% 0%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, C['wissen.ki'] - 0.3);
-    tl.fromTo('#ai-dots', { opacity: 0 }, { opacity: 1, duration: 0.2 }, C['wissen.ki'] + 0.15);
-    tl.fromTo('#ai-dots i', { y: 0 }, { y: -8, duration: 0.16, yoyo: true, repeat: 3, stagger: 0.07, ease: 'sine.inOut' }, C['wissen.ki'] + 0.2);
-    tl.to('#ai-dots', { opacity: 0, duration: 0.15 }, C['wissen.doku'] - 0.25);
-    tl.fromTo('#ai-a', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35 }, C['wissen.doku'] - 0.22);
+    const tAsk = C['wissen.wunsch'] + 0.25;
+    const tAns = Math.min(C['wissen.ki'] + 0.45, C['wissen.doku'] - 0.2);
+    tl.fromTo('#ai-q', { opacity: 0, scale: 0.7, transformOrigin: '100% 0%' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, tAsk);
+    tl.fromTo('#ai-dots', { opacity: 0 }, { opacity: 1, duration: 0.2 }, tAsk + 0.35);
+    tl.fromTo('#ai-dots i', { y: 0 }, { y: -8, duration: 0.16, yoyo: true, repeat: 3, stagger: 0.07, ease: 'sine.inOut' }, tAsk + 0.4);
+    tl.to('#ai-dots', { opacity: 0, duration: 0.15 }, tAns - 0.05);
+    tl.fromTo('#ai-a', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35 }, tAns);
     const aiWords = new SplitText('#ai-a-text', { type: 'words' }).words;
-    tl.fromTo(aiWords, { opacity: 0 }, { opacity: 1, duration: 0.12, stagger: 0.035, ease: 'none' }, C['wissen.doku'] - 0.18);
-    tl.fromTo('#ai-src', { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2)' }, C['wissen.doku'] - 0.18 + aiWords.length * 0.035);
-    tl.to('#ws-3', { backgroundColor: 'rgba(255,0,0,0.09)', boxShadow: 'inset 4px 0 0 #ff0000', duration: 0.4 }, C['wissen.doku']);
-    tl.fromTo('#wissen-key path, #wissen-key circle', { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: 0.6, stagger: 0.1, ease: 'power2.inOut' }, C['wissen.doku'] - 0.1);
+    tl.fromTo(aiWords, { opacity: 0 }, { opacity: 1, duration: 0.12, stagger: 0.035, ease: 'none' }, tAns + 0.04);
+    tl.fromTo('#ai-src', { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2)' }, tAns + 0.04 + aiWords.length * 0.035);
+    tl.to('#ws-3', { opacity: 1, backgroundColor: 'rgba(255,0,0,0.09)', boxShadow: 'inset 4px 0 0 #ff0000', duration: 0.4 }, tAns + 0.3);
+    tl.fromTo('#wissen-key path, #wissen-key circle', { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: 0.6, stagger: 0.1, ease: 'power2.inOut' }, tAns + 0.1);
 
     // Übergang zum Datenschutz
     const tT0 = S.trust.start;
@@ -453,10 +455,9 @@
     tl.fromTo('#cta-btn', { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.55, ease: 'back.out(2)' }, C['cta.jetzt'] - 0.1);
     tl.fromTo('#cta-url', { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: 'expo.out' }, C['cta.url'] - 0.25);
     tl.fromTo('#cta-ea', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, C['cta.url'] + 0.2);
-    tl.fromTo('#cta-chips span', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.08 }, C['cta.url'] + 0.35);
     // Zum Schluss schlägt der Puls zweimal; dahinter läuft eine EKG-Linie, ihr Ausschlag trifft den Herzschlag
     const tBeat = end - 1.25;
-    $('#cta-ecg-path').setAttribute('d', toD(WIPE));
+    $('#cta-ecg-path').setAttribute('d', toD(resample([[-60, 1000], [860, 1000], [900, 952], [948, 1052], [988, 972], [1014, 1000], [1980, 1000]], 120)));
     tl.set('#cta-ecg-path', { drawSVG: '0% 0%' }, 0);
     tl.fromTo('#cta-ecg-path', { drawSVG: '0% 0%' }, { drawSVG: '0% 16%', duration: 0.5, ease: 'none', immediateRender: false }, tB + 0.3);
     tl.to('#cta-ecg-path', { drawSVG: '84% 100%', duration: 2.6, ease: 'none' }, tB + 0.8);

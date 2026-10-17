@@ -4,9 +4,14 @@
     "voiceId": "SiMvlSW9cKKHDYT4BzOp",
     "name": "Lola",
     "model": "eleven_v4",
-    "language": "de"
+    "language": "de",
+    "tempo": 1.1
   },
-  "total": 60,
+  "draftVoice": {
+    "voiceId": "EXAVITQu4vr4xnSDxMaL",
+    "name": "Sarah (Entwurf, Standardstimme im Free-Konto)"
+  },
+  "total": 62,
   "preroll": 0.7,
   "tail": 1.6,
   "segments": [
@@ -56,7 +61,7 @@
     },
     {
       "id": "feed",
-      "text": "Wichtiges landet im Feed und bleibt dort. Dazu Umfragen, Newsletter und Push aufs Handy, wenn es wirklich zählt.",
+      "text": "Wichtiges steht im Feed und bleibt dort. Dazu Umfragen, Newsletter und Push aufs Handy, wenn es zählt.",
       "gapAfter": 0.45,
       "cues": {
         "feed": "Feed",
@@ -69,7 +74,7 @@
     },
     {
       "id": "shifts",
-      "text": "Fürs Sommerfest: Termin anlegen, Schichten festlegen, Link teilen, gern auch in eure Gruppe. Jeder trägt sich selbst ein. Einer klickt, Schicht besetzt.",
+      "text": "Termin anlegen, Schichten festlegen, Link in eure Gruppe teilen. Jeder trägt sich selbst ein. Ein Klick, Schicht besetzt.",
       "gapAfter": 0.45,
       "cues": {
         "termin": "Termin",
@@ -77,27 +82,25 @@
         "link": "Link",
         "gruppe": "Gruppe",
         "jeder": "Jeder",
-        "einer": "Einer",
-        "klickt": "klickt",
+        "klickt": "Klick",
         "besetzt": "besetzt"
       }
     },
     {
       "id": "activ",
-      "text": "So werden aus Mitgliedern Aktive: mit Onboarding-Quest, Mikrotasks und offenen Schichten, die zu ihren Fähigkeiten passen.",
+      "text": "So werden aus Mitgliedern Aktive: mit Onboarding-Quest, Mikrotasks und Schichten, die zu ihren Fähigkeiten passen.",
       "gapAfter": 0.45,
       "cues": {
         "mitgliedern": "Mitgliedern",
         "aktive": "Aktive",
         "quest": "Onboarding-Quest",
         "micro": "Mikrotasks",
-        "offenen": "offenen",
         "skills": "Fähigkeiten"
       }
     },
     {
       "id": "wissen",
-      "text": "Euer Wissen bleibt: im Wiki, in Dateien und Arbeitsgruppen. Und auf Wunsch kennt ein KI-Assistent eure Dokumente.",
+      "text": "Euer Wissen bleibt: in Wiki, Dateien und Arbeitsgruppen. Auf Wunsch kennt ein KI-Assistent eure Dokumente.",
       "gapAfter": 0.45,
       "cues": {
         "bleibt": "bleibt",

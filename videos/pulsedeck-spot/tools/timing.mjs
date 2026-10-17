@@ -43,9 +43,10 @@ function measured(seg) {
   const dur = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', mp3]).toString());
   const a = JSON.parse(readFileSync(al, 'utf8'));
   const chars = a.characters.join('');
-  const ws = words(chars).map(({ w, i, j }) => ({ w, s: a.character_start_times_seconds[i], e: a.character_end_times_seconds[j - 1] }));
-  // Stille am Anfang/Ende der Aufnahme nicht als Sprechzeit zählen
-  return { words: ws, dur, lead: ws[0]?.s ?? 0 };
+  // Die Aufnahme wird in tools/audio.py um voice.tempo beschleunigt, die Zeitmarken entsprechend gestaucht
+  const k = script.voice.tempo ?? 1;
+  const ws = words(chars).map(({ w, i, j }) => ({ w, s: a.character_start_times_seconds[i] / k, e: a.character_end_times_seconds[j - 1] / k }));
+  return { words: ws, dur: dur / k };
 }
 
 const segs = script.segments.map((seg) => {

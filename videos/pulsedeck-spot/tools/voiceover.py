@@ -4,7 +4,10 @@ Erzeugt pro Segment aus vo/script.json eine MP3 und die Zeichen-Zeitmarken (vo/<
 Danach tools/timing.mjs (Szenen an die echten Wortzeiten anpassen) und tools/audio.py (Mix) ausführen.
 
     ELEVENLABS_API_KEY=... python3 -I tools/voiceover.py [segment-id ...]
+    ELEVENLABS_VOICE=draft ...   # Entwurfsstimme aus vo/script.json (draftVoice) statt Lola
 
+Lola ist eine Stimme aus der Voice Library: über die API erst ab dem Creator-Tarif nutzbar.
+ELEVENLABS_FORMAT setzt das Ausgabeformat (Standard mp3_44100_128, ab Creator z. B. mp3_44100_192).
 Der Schlüssel kommt nur aus der Umgebung und wird nirgends gespeichert.
 """
 import base64
@@ -15,7 +18,7 @@ import urllib.error
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-API = 'https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format=mp3_44100_192'
+API = 'https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format={fmt}'
 
 
 def tts(cfg, text, prev_text, next_text, use_context=True):
@@ -29,7 +32,7 @@ def tts(cfg, text, prev_text, next_text, use_context=True):
         body['previous_text'] = prev_text
         body['next_text'] = next_text
     req = urllib.request.Request(
-        API.format(voice=cfg['voiceId']),
+        API.format(voice=cfg['voiceId'], fmt=os.environ.get('ELEVENLABS_FORMAT', 'mp3_44100_128')),
         data=json.dumps(body).encode(),
         headers={'xi-api-key': os.environ['ELEVENLABS_API_KEY'], 'Content-Type': 'application/json', 'Accept': 'application/json'},
         method='POST',
@@ -42,7 +45,10 @@ def main():
     if not os.environ.get('ELEVENLABS_API_KEY'):
         sys.exit('ELEVENLABS_API_KEY fehlt')
     script = json.load(open(os.path.join(ROOT, 'vo/script.json')))
-    cfg = script['voice']
+    cfg = dict(script['voice'])
+    if os.environ.get('ELEVENLABS_VOICE') == 'draft':
+        cfg.update(script['draftVoice'])
+    print(f"Stimme: {cfg['name']} ({cfg['voiceId']}), Modell {cfg['model']}")
     segs = script['segments']
     only = set(sys.argv[1:])
     for i, seg in enumerate(segs):
@@ -62,6 +68,7 @@ def main():
         open(os.path.join(ROOT, f'vo/{seg["id"]}.mp3'), 'wb').write(base64.b64decode(res['audio_base64']))
         json.dump(res.get('alignment') or res['normalized_alignment'], open(os.path.join(ROOT, f'vo/{seg["id"]}.alignment.json'), 'w'), ensure_ascii=False)
         print(f'{seg["id"]}: ok')
+    json.dump({'voiceId': cfg['voiceId'], 'name': cfg['name'], 'model': cfg['model']}, open(os.path.join(ROOT, 'vo/voice.json'), 'w'), ensure_ascii=False, indent=2)
 
 
 if __name__ == '__main__':
