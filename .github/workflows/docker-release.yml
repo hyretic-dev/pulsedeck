@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/lexion
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/pulsedeck
 
 jobs:
   build-and-push:
