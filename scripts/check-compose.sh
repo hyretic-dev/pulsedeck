@@ -45,4 +45,18 @@ if [ "$BINDS" = "0" ]; then echo "ok     Coolify: keine Bind-Mounts (alles im Im
 # Der Coolify-Stack veröffentlicht keine Host-Ports und hängt an keinem selbst definierten Netz
 PORTS="$(docker compose --env-file "$ENV_DATEI" -f docker-compose.coolify.yml config --format json 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(sum(1 for s in d['services'].values() if s.get('ports')) + len([n for n in d.get('networks', {}) if n != 'default']))")"
 if [ "$PORTS" = "0" ]; then echo "ok     Coolify: keine veröffentlichten Ports, keine eigenen Netze"; else echo "FEHLER Coolify veröffentlicht Ports oder definiert Netze"; FEHLER=1; fi
+# Website: in beiden Varianten vorhanden; Coolify baut ohne Laufzeitvariablen, die Links müssen dann auf die echte App zeigen
+for datei in docker-compose.yml docker-compose.coolify.yml; do
+  if docker compose --env-file "$ENV_DATEI" -f "$datei" config --services 2>/dev/null | grep -qx website; then echo "ok     $datei: Dienst website"; else echo "FEHLER $datei: Dienst website fehlt"; FEHLER=1; fi
+done
+APP_LINK="$(docker compose --env-file /dev/null -f docker-compose.coolify.yml config --format json 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin)['services']['website']['build']['args']['PUBLIC_APP_URL'])")"
+if [ "$APP_LINK" = "https://app.pulsedeck.de" ]; then echo "ok     Coolify: Website-Links zeigen ohne Laufzeitvariablen auf https://app.pulsedeck.de"; else echo "FEHLER Coolify: Website-Links zeigen auf '$APP_LINK'"; FEHLER=1; fi
+# Das Backend liest das Handbuch aus dem Website-Ordner (Verzeichnis, nicht Datei)
+for datei in docker-compose.yml docker-compose.coolify.yml; do
+  DOCS="$(docker compose --env-file "$ENV_DATEI" -f "$datei" config --format json 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin)['services']['backend']; print(d['environment']['DOCS_FILE'], d['build']['additional_contexts']['docs'])")"
+  case "$DOCS" in
+    "/app/handbook "*/website/src/content/handbook) echo "ok     $datei: Backend bekommt das Handbuch der Website" ;;
+    *) echo "FEHLER $datei: Handbuch-Quelle des Backends: $DOCS"; FEHLER=1 ;;
+  esac
+done
 exit "$FEHLER"

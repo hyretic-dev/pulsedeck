@@ -141,7 +141,8 @@ describe('Kalender-Abo und Sitemap (echtes PostgreSQL)', () => {
     expect(antwort.headers['content-type']).toBe('application/xml; charset=utf-8');
     expect(antwort.headers['cache-control']).toBe('public, max-age=3600');
     expect(antwort.text.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
-    for (const pfad of ['https://app.pulsedeck.example</loc>', 'https://app.pulsedeck.example/login', 'https://app.pulsedeck.example/alpha</loc>', 'https://app.pulsedeck.example/beta</loc>']) expect(antwort.text).toContain(pfad);
+    for (const pfad of ['https://app.pulsedeck.example/login</loc>', 'https://app.pulsedeck.example/registrieren</loc>', 'https://app.pulsedeck.example/alpha</loc>', 'https://app.pulsedeck.example/beta</loc>']) expect(antwort.text).toContain(pfad);
+    for (const pfad of ['/impressum', '/datenschutz', '/docs']) expect(antwort.text).not.toContain(`example${pfad}<`); // gehören zur Website
     expect(antwort.text).toContain('/a%26b%3Cc</loc>');
     expect(antwort.text).not.toContain('a&b<c');
   });

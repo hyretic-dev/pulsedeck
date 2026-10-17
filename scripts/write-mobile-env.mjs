@@ -3,6 +3,7 @@
 // absolute Adresse der API. Das Backend muss diesen Ursprung in CORS_ORIGINS freigeben.
 //
 //   PULSEDECK_API_URL=https://app.example.org npm run build:mobile
+// Optional: PULSEDECK_WEBSITE_URL = Adresse der Website für Impressum, Datenschutz und Handbuch (Standard: https://pulsedeck.de).
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -17,12 +18,15 @@ try {
   process.exit(1);
 }
 
+const webseite = (process.env.PULSEDECK_WEBSITE_URL ?? 'https://pulsedeck.de').replace(/\/+$/, '');
+
 writeFileSync(
   join(import.meta.dirname, '..', 'src', 'environments', 'environment.capacitor.ts'),
   `// Erzeugt von scripts/write-mobile-env.mjs – nicht einchecken.
 export const environment = {
     production: true,
     apiBaseUrl: '${basis}/api/v1',
+    websiteUrl: '${webseite}',
 };
 `
 );

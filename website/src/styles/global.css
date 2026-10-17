@@ -1,0 +1,128 @@
+@import 'tailwindcss';
+@import 'primeicons/primeicons.css';
+@plugin '@tailwindcss/typography';
+
+/* Farben und Namen wie in der Anwendung (tailwind.config.js der App), damit Website und App gleich aussehen */
+@theme {
+  --color-linke: #ff0000;
+  --color-linke-light: #ff5050;
+  --color-linke-dark: #6f003c;
+  --color-linke-darker: #1a000f;
+  --color-teal: #00b19c;
+  --color-teal-light: #00b19c;
+  --color-teal-dark: #004b5b;
+  --color-teal-darker: #001519;
+  --color-violet: #8100a1;
+  --color-violet-light: #d675d8;
+  --color-violet-dark: #8100a1;
+  --color-violet-darker: #1a0021;
+  --color-blue: #2e4fc4;
+  --color-blue-light: #d4d4ff;
+  --color-blue-dark: #2e4fc4;
+  --color-blue-darker: #0a1133;
+  --animate-blob: blob 7s infinite;
+  --animate-fadein-up: fadein-up 0.8s ease-out forwards;
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+  @keyframes fadein-up {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+}
+
+:root {
+  --linke-rot: #ff0000;
+  --color-primary: #ff0000;
+  --color-bg: #050505;
+  --color-surface: #0f0f0f;
+  --color-surface-card: #141414;
+  --color-surface-raised: #141414;
+  --color-surface-overlay: #1c1c1c;
+  --color-text: #ffffff;
+  --color-text-muted: #9ca3af;
+  --color-border: #262626;
+  --color-border-light: #404040;
+  color-scheme: dark;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+::selection { background-color: var(--linke-rot); color: #fff; }
+
+a:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--linke-rot);
+  outline-offset: 2px;
+}
+
+/* Animationen der Startseite (aus der App übernommen) */
+.animation-delay-100 { animation-delay: 100ms !important; }
+.animation-delay-200 { animation-delay: 200ms !important; }
+.animation-delay-300 { animation-delay: 300ms !important; }
+.animation-delay-500 { animation-delay: 500ms !important; }
+.animation-delay-1000 { animation-delay: 1000ms !important; }
+.animation-delay-2000 { animation-delay: 2000ms !important; }
+.animation-delay-4000 { animation-delay: 4000ms !important; }
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.2); }
+  50% { box-shadow: 0 0 40px rgba(255, 0, 0, 0.4); }
+}
+@keyframes gradient-shift { 0% { background-position: 0% center; } 50% { background-position: 100% center; } 100% { background-position: 0% center; } }
+
+.animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+.animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+.animate-slide-in-left { animation: slideInLeft 0.6s ease-out forwards; }
+.animate-slide-in-right { animation: slideInRight 0.6s ease-out forwards; }
+.animate-scale-in { animation: scaleIn 0.5s ease-out forwards; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+.btn-primary-enhanced { position: relative; overflow: hidden; transition: all 0.3s ease; }
+.btn-primary-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+.btn-primary-enhanced:hover::before { left: 100%; }
+
+.text-gradient-animated {
+  background: linear-gradient(90deg, var(--linke-rot), #ff5050, var(--linke-rot));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Handbuch-Text */
+.handbuch h3 { scroll-margin-top: 6rem; }
+.handbuch a { color: var(--linke-rot); }

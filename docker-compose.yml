@@ -28,7 +28,7 @@ services:
     build:
       context: ./backend
       additional_contexts:
-        docs: ./public
+        docs: ./website/src/content/handbook
     restart: unless-stopped
     depends_on:
       postgres:
@@ -76,7 +76,7 @@ services:
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-}
       # KI (Chat, Wissensbasis); leer = KI-Funktionen antworten mit 503
       MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
-      DOCS_FILE: /app/DOCS.md
+      DOCS_FILE: /app/handbook
       REALTIME_ENABLED: ${REALTIME_ENABLED:-}
       # Ursprünge nativer Apps (Capacitor), die die API aufrufen dürfen, kommagetrennt; leer = nur gleicher Ursprung
       CORS_ORIGINS: ${CORS_ORIGINS:-}
@@ -117,6 +117,30 @@ services:
       - internal
       - edge
 
+  # Öffentliche Website (Startseite, Handbuch, Impressum, Datenschutz): statisches Astro-Projekt in ./website.
+  # Die Anwendung läuft getrennt im Dienst `frontend` (eigene Adresse, APP_BASE_URL). Die Adresse der Anwendung wird beim Bauen in die
+  # Links geschrieben und zur Laufzeit für die Weiterleitung alter Adressen genutzt; SITE_URL ist die Adresse der Website selbst.
+  website:
+    build:
+      context: ./website
+      args:
+        PUBLIC_APP_URL: ${APP_BASE_URL:-https://app.pulsedeck.de}
+        PUBLIC_SITE_URL: ${SITE_URL:-https://pulsedeck.de}
+    restart: unless-stopped
+    environment:
+      APP_URL: ${APP_BASE_URL:-https://app.pulsedeck.de}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+    ports:
+      - "${WEBSITE_PORT:-8081}:80"
+    networks:
+      - internal
+      - edge
+
   # Lokaler Test-SMTP-Server (nur Entwicklung): docker compose --profile dev-mail up -d
   # und MAIL_TRANSPORT=smtp, SMTP_HOST=mailpit, SMTP_PORT=1025, MAIL_FROM=PulseDeck <noreply@pulsedeck.local>.
   # Weboberfläche nur intern; Abruf z. B. per `docker compose exec backend wget -qO- http://mailpit:8025/api/v1/messages`.
@@ -132,7 +156,7 @@ volumes:
   files-data:
 
 networks:
-  # Kein öffentlicher Port für Postgres/Backend; nur frontend veröffentlicht.
+  # Kein öffentlicher Port für Postgres/Backend; nur frontend und website veröffentlicht.
   internal:
     internal: true
   # Edge-Netzwerk nur für Port-Publishing (internal-Netzwerke haben keinen Gateway).

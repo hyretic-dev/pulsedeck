@@ -1,0 +1,48 @@
+---
+import '../styles/global.css';
+import { SITE_URL } from '../config';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Pfad der Seite ohne Domain, z. B. "/handbuch/erste-schritte" – ergibt die kanonische URL. */
+  path: string;
+  /** Strukturierte Daten (schema.org), werden als JSON-LD eingebettet. */
+  jsonLd?: Record<string, unknown>;
+  /** Für Seiten, die nicht in Suchmaschinen gehören (z. B. 404). */
+  noindex?: boolean;
+}
+
+const { title, description, path, jsonLd, noindex = false } = Astro.props;
+const kanonisch = SITE_URL + (path === '/' ? '' : path);
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="PulseDeck" />
+    <meta name="theme-color" content="#050505" />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={kanonisch} />}
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:site_name" content="PulseDeck" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={kanonisch} />
+    <meta property="og:image" content={`${SITE_URL}/icons/icon-512x512.png`} />
+    <meta name="twitter:card" content="summary" />
+
+    {jsonLd && <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body class="min-h-screen">
+    <slot />
+  </body>
+</html>

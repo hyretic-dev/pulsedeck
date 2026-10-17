@@ -1,0 +1,120 @@
+# Website (pulsedeck.de): statische Astro-Seiten. Die Anwendung läuft getrennt unter ${APP_URL}.
+# Diese Datei ist eine Vorlage: beim Start ersetzt der nginx-Entrypoint nur ${APP_URL} (NGINX_ENVSUBST_FILTER im Dockerfile),
+# alle anderen $-Variablen sind nginx-Variablen und bleiben unverändert.
+#
+# Wird als conf.d-Datei im http-Kontext eingebunden, daher stehen map und log_format hier vor dem server-Block.
+
+# Ohne Query-String und ohne Referer: Einlöse-Links (/auth/callback?token=…) aus E-Mails, die vor der Trennung verschickt wurden,
+# landen zuerst hier und werden an die Anwendung weitergeleitet. Der Token ist ein Zugangsdatum und gehört nicht ins Log.
+# Der Pfad kommt aus $request_uri, nicht aus $uri (das würde nach internen Weiterleitungen den Zielpfad zeigen).
+map $request_uri $log_path {
+    ~^(?<pfad>[^?]*) $pfad;
+    default          "-";
+}
+log_format ohne_query '$remote_addr - $remote_user [$time_local] '
+                      '"$request_method $log_path $server_protocol" '
+                      '$status $body_bytes_sent '
+                      '"$http_user_agent" rid=$request_id';
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+    access_log /var/log/nginx/access.log ohne_query;
+    error_page 404 /404.html;
+
+    # Docker-DNS; verhindert veraltete IPs nach einem Neustart des Frontend-Containers
+    resolver 127.0.0.11 valid=10s;
+
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/javascript application/javascript application/json application/xml image/svg+xml;
+
+    # Security headers. Die Seiten enthalten keine eigenen Skripte (nur JSON-LD, das nicht ausgeführt wird); style-src
+    # 'unsafe-inline', weil Astro kleine Stylesheets einbetten kann.
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'" always;
+
+    # Gesundheitsprüfung (Coolify / Compose)
+    location = /health {
+        access_log off;
+        default_type text/plain;
+        return 200 "healthy\n";
+    }
+
+    # Gebaute Assets tragen einen Hash im Namen und ändern sich nie
+    location ^~ /_astro/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
+    # Alter Angular-Service-Worker (bis zur Trennung lieferte diese Adresse die Anwendung samt Worker aus):
+    # ngsw-worker.js ist jetzt ein Safety-Worker, der sich selbst abmeldet. Beides nie cachen, sonst erreicht die Ablösung
+    # die Browser nicht. ngsw.json (Update-Manifest des alten Workers) gibt es nicht mehr: 404 lässt den alten Worker aufgeben.
+    # Beides kann entfallen, wenn der alte Worker nirgends mehr vorkommt (grob: einige Monate nach der Umstellung).
+    location = /ngsw-worker.js {
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header X-Content-Type-Options "nosniff" always;
+    }
+    location = /ngsw.json {
+        add_header Cache-Control "no-store" always;
+        return 404;
+    }
+
+    # TEMPORÄR: bis der alte Service-Worker abgelöst ist, rufen gecachte Anwendungsstände der alten Adresse weiter /api/ hier auf.
+    # Die Anfragen gehen an das Frontend der Anwendung (nicht direkt ans Backend), damit dessen Regeln (Schreibsperre READ_ONLY,
+    # Streaming, Größenlimits, gesperrtes OpenAPI) gelten. Danach löschen: der Block, der Dienst-Verweis und die Netzanbindung.
+    location ^~ /api/ {
+        set $frontend_upstream http://frontend:80;
+        proxy_pass $frontend_upstream;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Request-Id $request_id;
+        proxy_hide_header X-Content-Type-Options; # sonst doppelt (hier und im Frontend)
+        proxy_hide_header Content-Security-Policy;
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+        client_max_body_size 50m;
+    }
+
+    # Alte Adressen
+    location = /docs { return 301 /handbuch; }
+    location = /sitemap.xml { return 301 /sitemap-index.xml; }
+
+    # Seiten der Anwendung, die früher unter dieser Adresse lagen (auch bereits verschickte Anmelde-Links): inklusive Query-String
+    # an die Anwendung. 301 statt 308 ist hier gewollt: es sind nur GET-Aufrufe aus Browser und E-Mail.
+    location ~ ^/(login|registrieren|erstellen|organisationen|dashboard|auth/callback|event/.+)$ {
+        return 301 ${APP_URL}$request_uri;
+    }
+
+    # Handbuch: unbekannte Kapitel sind ein echtes 404 (und nicht die Anwendung)
+    location = /handbuch/ { return 301 /handbuch; }
+    location ^~ /handbuch/ {
+        try_files $uri.html =404;
+    }
+
+    # Abschließender Schrägstrich weg (Astro erzeugt Seiten ohne), außer bei der Startseite
+    location ~ ^/(.+)/$ {
+        return 301 /$1;
+    }
+
+    # Alles Übrige: Datei der Website, sonst gehört die Adresse der Anwendung. Das sind die öffentlichen Seiten der Organisationen
+    # (/<kuerzel>, früher auf dieser Adresse, bei Suchmaschinen indexiert): sie werden dauerhaft dorthin umgezogen.
+    location / {
+        try_files $uri $uri.html $uri/index.html @anwendung;
+    }
+    location @anwendung {
+        return 301 ${APP_URL}$request_uri;
+    }
+}

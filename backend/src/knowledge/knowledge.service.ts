@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
 
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import type { Pool } from 'pg';
@@ -16,6 +15,7 @@ import type { Membership } from '../tenancy/membership';
 import { isAdmin } from '../tenancy/permissions';
 
 import { teileDokumentation, teileInAbschnitte } from './chunking';
+import { ladeDokumentation } from './docs-quelle';
 import { extrahierePdfText } from './pdf-text';
 
 const MAX_INDEX_BYTES = 10 * 1024 * 1024;
@@ -208,7 +208,7 @@ export class KnowledgeService {
 
     if (this.config.docsFile) {
       try {
-        const text = await readFile(this.config.docsFile, 'utf8');
+        const text = await ladeDokumentation(this.config.docsFile);
         await abgleich(null, ['doc'], teileDokumentation(text).map((d) => ({ sourceType: 'doc', sourceId: null, titel: `PulseDeck Doc: ${d.titel}`, inhalt: d.inhalt })));
       } catch (fehler) {
         this.logger.warn(`Dokumentation nicht eingelesen: ${fehler instanceof Error ? fehler.message : 'unbekannt'}`);

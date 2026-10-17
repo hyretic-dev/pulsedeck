@@ -11,7 +11,7 @@
         <i class="pi pi-exclamation-circle text-4xl text-red-500 mb-3"></i>
         <h1 class="text-xl font-bold mb-2">Ups!</h1>
         <p class="text-[var(--color-text-muted)] mb-4">{{ error() }}</p>
-        <a routerLink="/" pButton label="Zur Startseite"></a>
+        <a [href]="websiteUrl" pButton label="Zur Startseite"></a>
     </div>
     }
 
@@ -105,7 +105,7 @@
                 Dieses Event wird datensicher mit <strong class="text-linke font-bold">PulseDeck</strong> organisiert.
             </div>
         </div>
-        <a routerLink="/" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-lg bg-linke text-white hover:bg-linke-light transition-all shadow hover:shadow-md whitespace-nowrap flex items-center gap-1.5">
+        <a [href]="websiteUrl" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-lg bg-linke text-white hover:bg-linke-light transition-all shadow hover:shadow-md whitespace-nowrap flex items-center gap-1.5">
             <span>Eigenen Verein digitalisieren</span>
             <i class="pi pi-arrow-right text-[10px]"></i>
         </a>

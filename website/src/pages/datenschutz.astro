@@ -1,19 +1,13 @@
-import { Component, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { AuthService } from '../../shared/services/auth.service';
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Footer from '../components/Footer.astro';
+---
 
-@Component({
-    selector: 'app-datenschutz',
-    standalone: true,
-    imports: [CommonModule, RouterModule],
-    template: `
-        <div class="min-h-screen bg-[var(--color-bg)]">
-            <div class="max-w-4xl mx-auto px-6 py-16">
-                <a [routerLink]="backLink()" class="inline-flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] mb-8 transition-colors">
-                    <i class="pi pi-arrow-left"></i>
-                    Zurück zur Startseite
-                </a>
+<Base title="Datenschutzerklärung – PulseDeck" description="Datenschutzerklärung von PulseDeck: Verantwortliche, Hosting, Datenverarbeitung und Ihre Rechte." path="/datenschutz">
+  <SiteHeader />
+        
+            <main class="max-w-4xl mx-auto px-6 py-16">
 
                 <h1 class="text-4xl font-bold text-[var(--color-text)] mb-8">Datenschutzerklärung</h1>
 
@@ -290,15 +284,6 @@ import { AuthService } from '../../shared/services/auth.service';
                         Stand: Oktober 2026
                     </p>
                 </div>
-            </div>
-        </div>
-    `,
-})
-export class DatenschutzComponent {
-    auth = inject(AuthService);
-    backLink = computed(() => {
-        if (!this.auth.user()) return '/';
-        const slug = localStorage.getItem('lastOrgSlug');
-        return slug ? `/${slug}/dashboard` : '/organisationen';
-    });
-}
+            </main>
+  <Footer />
+</Base>

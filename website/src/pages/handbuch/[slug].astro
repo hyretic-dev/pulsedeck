@@ -1,0 +1,98 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import Footer from '../../components/Footer.astro';
+import { SITE_URL } from '../../config';
+
+export async function getStaticPaths() {
+  const kapitel = (await getCollection('handbook')).sort((a, b) => a.data.order - b.data.order);
+  return kapitel.map((eintrag, i) => ({
+    params: { slug: eintrag.id },
+    props: { eintrag, kapitel, davor: kapitel[i - 1], danach: kapitel[i + 1] },
+  }));
+}
+
+const { eintrag, kapitel, davor, danach } = Astro.props;
+const { Content, headings } = await render(eintrag);
+const abschnitte = headings.filter((h) => h.depth === 3);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: eintrag.data.title,
+  description: eintrag.data.description,
+  inLanguage: 'de',
+  url: `${SITE_URL}/handbuch/${eintrag.id}`,
+  isPartOf: { '@type': 'WebSite', name: 'PulseDeck Handbuch', url: `${SITE_URL}/handbuch` },
+};
+---
+
+<Base
+  title={`${eintrag.data.title} – PulseDeck Handbuch`}
+  description={eintrag.data.description}
+  path={`/handbuch/${eintrag.id}`}
+  jsonLd={jsonLd}
+>
+  <SiteHeader aktiv="handbuch" />
+  <div class="max-w-7xl mx-auto px-6 py-10 lg:flex lg:gap-12">
+    <aside class="lg:w-72 shrink-0 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto mb-8 lg:mb-0">
+      <h2 class="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Kapitel</h2>
+      <nav class="space-y-0.5 border-l border-[var(--color-border)]" aria-label="Handbuch-Kapitel">
+        {
+          kapitel.map((k) => (
+            <>
+              <a
+                href={`/handbuch/${k.id}`}
+                aria-current={k.id === eintrag.id ? 'page' : undefined}
+                class:list={[
+                  'block px-4 py-1.5 text-sm -ml-px border-l transition-colors hover:border-linke hover:text-linke',
+                  k.id === eintrag.id ? 'border-linke text-linke font-medium' : 'border-transparent text-[var(--color-text-muted)]',
+                ]}
+              >
+                {k.data.title}
+              </a>
+              {k.id === eintrag.id &&
+                abschnitte.map((h) => (
+                  <a href={`#${h.slug}`} class="block pl-8 pr-4 py-1 text-xs text-[var(--color-text-muted)] hover:text-linke transition-colors">
+                    {h.text}
+                  </a>
+                ))}
+            </>
+          ))
+        }
+      </nav>
+    </aside>
+
+    <main class="min-w-0 flex-1 max-w-3xl">
+      <nav class="text-sm text-[var(--color-text-muted)] mb-4" aria-label="Brotkrumen">
+        <a href="/handbuch" class="hover:text-linke">Handbuch</a> <span aria-hidden="true">/</span> {eintrag.data.title}
+      </nav>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-8">{eintrag.data.title}</h1>
+      <article class="handbuch prose prose-invert max-w-none prose-headings:scroll-mt-24">
+        <Content />
+      </article>
+
+      <nav class="mt-14 pt-8 border-t border-[var(--color-border)] grid gap-4 sm:grid-cols-2" aria-label="Weiter im Handbuch">
+        {
+          davor ? (
+            <a href={`/handbuch/${davor.id}`} class="p-4 rounded-xl border border-[var(--color-border)] hover:border-linke/40 transition-colors">
+              <div class="text-xs text-[var(--color-text-muted)] mb-1">← Zurück</div>
+              <div class="font-semibold">{davor.data.title}</div>
+            </a>
+          ) : (
+            <span />
+          )
+        }
+        {
+          danach && (
+            <a href={`/handbuch/${danach.id}`} class="p-4 rounded-xl border border-[var(--color-border)] hover:border-linke/40 transition-colors sm:text-right">
+              <div class="text-xs text-[var(--color-text-muted)] mb-1">Weiter →</div>
+              <div class="font-semibold">{danach.data.title}</div>
+            </a>
+          )
+        }
+      </nav>
+    </main>
+  </div>
+  <Footer />
+</Base>

@@ -63,9 +63,9 @@
 
                         <!-- Desktop Links -->
                         <div class="hidden md:flex items-center gap-4">
-                            <a routerLink="/impressum" class="hover:text-linke transition-colors">Impressum</a>
-                            <a routerLink="/datenschutz" class="hover:text-linke transition-colors">Datenschutz</a>
-                            <a routerLink="/docs" class="hover:text-linke transition-colors">Handbuch</a>
+                            <a [href]="websiteUrl + '/impressum'" class="hover:text-linke transition-colors">Impressum</a>
+                            <a [href]="websiteUrl + '/datenschutz'" class="hover:text-linke transition-colors">Datenschutz</a>
+                            <a [href]="websiteUrl + '/handbuch'" class="hover:text-linke transition-colors">Handbuch</a>
                             <a href="mailto:support@example.com" class="hover:text-linke transition-colors">Hilfe</a>
                         </div>
 
@@ -80,11 +80,11 @@
                             @if (footerMenuOpen()) {
                             <div
                                 class="absolute bottom-full left-0 mb-2 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-xl flex flex-col min-w-[160px] p-1.5 z-50 animate-fade-in origin-bottom-left">
-                                <a routerLink="/impressum" (click)="footerMenuOpen.set(false)"
+                                <a [href]="websiteUrl + '/impressum'" (click)="footerMenuOpen.set(false)"
                                     class="px-3 py-2 text-sm hover:bg-[var(--color-surface-overlay)] hover:text-linke rounded transition-colors text-left">Impressum</a>
-                                <a routerLink="/datenschutz" (click)="footerMenuOpen.set(false)"
+                                <a [href]="websiteUrl + '/datenschutz'" (click)="footerMenuOpen.set(false)"
                                     class="px-3 py-2 text-sm hover:bg-[var(--color-surface-overlay)] hover:text-linke rounded transition-colors text-left">Datenschutz</a>
-                                <a routerLink="/docs" (click)="footerMenuOpen.set(false)"
+                                <a [href]="websiteUrl + '/handbuch'" (click)="footerMenuOpen.set(false)"
                                     class="px-3 py-2 text-sm hover:bg-[var(--color-surface-overlay)] hover:text-linke rounded transition-colors text-left">Handbuch</a>
                                 <a href="mailto:support@example.com" (click)="footerMenuOpen.set(false)"
                                     class="px-3 py-2 text-sm hover:bg-[var(--color-surface-overlay)] hover:text-linke rounded transition-colors text-left">Hilfe</a>

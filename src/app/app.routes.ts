@@ -3,13 +3,16 @@ import { adminGuard } from './shared/guards/admin.guard';
 import { issueTrackerGuard } from './shared/guards/issue-tracker.guard';
 
 import { organizationGuard } from './shared/guards/organization.guard';
+import { startGuard } from './shared/guards/start.guard';
 
 export const routes: Routes = [
-    // Public Landing
+    // Startseite der Anwendung: leitet je nach Anmeldung weiter. Die Produktseite (Startseite, Handbuch, Impressum, Datenschutz)
+    // ist eine eigene Website (Ordner website/) und nicht Teil der Anwendung.
     {
         path: '',
-
-        loadComponent: () => import('./features/public/landing-page/landing-page').then(m => m.LandingPage)
+        pathMatch: 'full',
+        canActivate: [startGuard],
+        children: []
     },
 
     // Auth
@@ -38,22 +41,6 @@ export const routes: Routes = [
         path: 'organisationen',
 
         loadComponent: () => import('./features/organizations/select-organization.component').then(m => m.SelectOrganizationComponent)
-    },
-
-    // Legal Pages
-    {
-        path: 'impressum',
-
-        loadComponent: () => import('./features/legal/impressum.component').then(m => m.ImpressumComponent)
-    },
-    {
-        path: 'datenschutz',
-
-        loadComponent: () => import('./features/legal/datenschutz.component').then(m => m.DatenschutzComponent)
-    },
-    {
-        path: 'docs',
-        loadComponent: () => import('./features/public/docs/docs.component').then(m => m.DocsComponent)
     },
 
     // Legacy dashboard route (redirect to organization select)

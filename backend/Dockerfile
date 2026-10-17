@@ -28,8 +28,9 @@ COPY --from=build /app/migrations ./migrations
 COPY docker-entrypoint.sh ./
 RUN chmod 755 docker-entrypoint.sh
 
-# Produktdokumentation für die Wissensbasis des Chats (Build-Kontext "docs" = ../public, siehe docker-compose.yml)
-COPY --from=docs DOCS.md ./DOCS.md
+# Produktdokumentation für die Wissensbasis des Chats: das Handbuch der Website (Build-Kontext "docs" = website/src/content/handbook,
+# siehe docker-compose.yml). DOCS_FILE zeigt auf das Verzeichnis; das Backend entfernt das Frontmatter beim Einlesen.
+COPY --from=docs . ./handbook/
 
 # Dateispeicher (Volume) gehört dem unprivilegierten Benutzer; der Prozess läuft nicht als root
 # Dateien aus dem Build-Kontext können je nach umask des Entwicklers nur für den Besitzer lesbar sein

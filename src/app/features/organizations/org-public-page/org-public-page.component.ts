@@ -13,6 +13,7 @@ import { MessageModule } from 'primeng/message';
 import { DialogModule } from 'primeng/dialog';
 
 // Services
+import { environment } from '../../../../environments/environment';
 import { ApiService } from '../../../core/api.service';
 import { Organization } from '../../../shared/services/organization.service';
 import { AuthService, LoginCheckResult } from '../../../shared/services/auth.service';
@@ -354,7 +355,7 @@ import { RichTextRendererComponent } from '../../../shared/components/rich-text-
                             <i class="pi pi-shield text-linke"></i>
                             <span>Datensicher organisiert mit <strong>PulseDeck</strong></span>
                         </div>
-                        <a routerLink="/" class="text-xs font-semibold text-linke hover:underline whitespace-nowrap flex items-center gap-1 border-l border-[var(--color-border)] pl-3 ml-1">
+                        <a [href]="websiteUrl" class="text-xs font-semibold text-linke hover:underline whitespace-nowrap flex items-center gap-1 border-l border-[var(--color-border)] pl-3 ml-1">
                             <span>Eigenen Verein digitalisieren</span>
                             <i class="pi pi-arrow-right text-[10px]"></i>
                         </a>
@@ -362,8 +363,8 @@ import { RichTextRendererComponent } from '../../../shared/components/rich-text-
 
                     <!-- Legal & Theme -->
                     <div class="flex flex-wrap justify-center items-center gap-6 text-xs text-[var(--color-text-muted)]">
-                        <a routerLink="/impressum" class="hover:underline">Impressum</a>
-                        <a routerLink="/datenschutz" class="hover:underline">Datenschutz</a>
+                        <a [href]="websiteUrl + '/impressum'" class="hover:underline">Impressum</a>
+                        <a [href]="websiteUrl + '/datenschutz'" class="hover:underline">Datenschutz</a>
                         
                         <!-- Theme Toggle -->
                         <button (click)="toggleTheme()" class="flex items-center gap-2 hover:text-[var(--color-text)] transition-colors ml-4 pl-4 border-l border-[var(--color-border)] cursor-pointer">
@@ -446,6 +447,8 @@ import { RichTextRendererComponent } from '../../../shared/components/rich-text-
     `,
 })
 export class OrgPublicPageComponent implements OnInit {
+    /** Impressum, Datenschutz und Produktseite liegen auf der Website. */
+    readonly websiteUrl = environment.websiteUrl;
     private readonly api = inject(ApiService);
     private auth = inject(AuthService);
     private route = inject(ActivatedRoute);

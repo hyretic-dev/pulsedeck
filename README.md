@@ -28,7 +28,8 @@ Wir ersetzen das Chaos aus WhatsApp-Gruppen, Excel-Listen und verlorenen E-Mails
 
 PulseDeck setzt auf moderne, robuste Technologien:
 
-*   **Frontend:** [Angular 21](https://angular.dev) (Standalone Components, Signals)
+*   **Website:** [Astro](https://astro.build) (statisch, Markdown mit Frontmatter für das Handbuch) in `website/` – Startseite, Handbuch, Impressum, Datenschutz, unter `pulsedeck.de`
+*   **Anwendung (Frontend):** [Angular 21](https://angular.dev) (Standalone Components, Signals), unter `app.pulsedeck.de`
 *   **UI Library:** [PrimeNG](https://primeng.org) + [Tailwind CSS](https://tailwindcss.com) (für Utility-Styling)
 *   **Backend / DB:** [NestJS](https://nestjs.com) (REST-API, Auth, Jobs, Echtzeit per SSE) + [PostgreSQL 17](https://www.postgresql.org) mit pgvector; Dateien im Volume. Alles selbst gehostet (Docker Compose).
 *   **Mobile:** [Capacitor](https://capacitorjs.com) (Native Android/iOS Apps)
@@ -97,7 +98,7 @@ npx cap open android
 
 ## 🤖 AI / RAG Aktualisieren
 
-Die Wissensbasis (RAG) des PulseDeck AI Agents wird vom Backend selbst gepflegt: Der nächtliche Job liest die mitgelieferte `DOCS.md` (`DOCS_FILE`) und die Stammdaten der Organisationen ein und erzeugt nur für geänderte Inhalte neue Embeddings (Mistral, `MISTRAL_API_KEY`). Hochgeladene Dateien werden beim Upload im Hintergrund indiziert (`POST /api/v1/orgs/:orgId/files/:fileId/index` löst es manuell aus).
+Die Wissensbasis (RAG) des PulseDeck AI Agents wird vom Backend selbst gepflegt: Der nächtliche Job liest das mitgelieferte Handbuch (`DOCS_FILE`, das Verzeichnis `website/src/content/handbook/`) und die Stammdaten der Organisationen ein und erzeugt nur für geänderte Inhalte neue Embeddings (Mistral, `MISTRAL_API_KEY`). Hochgeladene Dateien werden beim Upload im Hintergrund indiziert (`POST /api/v1/orgs/:orgId/files/:fileId/index` löst es manuell aus).
 
 ---
 
@@ -114,3 +115,18 @@ Dieses Projekt ist lizenziert unter der **GNU Affero General Public License v3.0
 Das bedeutet: Wenn du PulseDeck nutzt, veränderst und als Service anbietest, musst du deine Änderungen ebenfalls der Community zur Verfügung stellen.
 
 *Datensouveränität ist kein Feature, sondern ein Grundrecht.* 🛡️
+
+---
+
+## 🌐 Website entwickeln
+
+Die öffentliche Website (Werbung, Beschreibung, Handbuch, Rechtliches) ist von der Anwendung getrennt:
+
+```bash
+cd website
+npm install
+PUBLIC_APP_URL=http://localhost:4200 npm run dev   # http://localhost:4321
+```
+
+Das Handbuch besteht aus einer Markdown-Datei je Kapitel in `website/src/content/handbook/` (Frontmatter: `title`, `description`, `order`, `icon`).
+Dieselben Dateien liest das Backend für die Wissensbasis der KI.

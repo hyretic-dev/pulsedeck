@@ -38,7 +38,7 @@ services:
     build:
       context: ./backend
       additional_contexts:
-        docs: ./public
+        docs: ./website/src/content/handbook
     restart: unless-stopped
     depends_on:
       postgres:
@@ -80,7 +80,7 @@ services:
       FILES_DIR: /data/files
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-}
       MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
-      DOCS_FILE: /app/DOCS.md
+      DOCS_FILE: /app/handbook
       REALTIME_ENABLED: ${REALTIME_ENABLED:-}
       CORS_ORIGINS: ${CORS_ORIGINS:-}
     volumes:
@@ -106,6 +106,27 @@ services:
     environment:
       # true = schreibgeschützte Abnahme (schreibende API-Aufrufe → 503, Login bleibt möglich), docs/betrieb/coolify.md
       READ_ONLY: ${READ_ONLY:-false}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+
+  # Öffentliche Website (pulsedeck.de). In Coolify bekommt dieser Dienst die Domain der Website (Port 80), `frontend` die der Anwendung.
+  # Beim Bauen sieht Coolify keine Laufzeitvariablen: die Standardwerte unten sind deshalb die echten Adressen, und APP_BASE_URL /
+  # SITE_URL müssen nur gesetzt werden, wenn die Instanz unter anderen Adressen läuft (dann auch für den Build freigeben).
+  website:
+    build:
+      context: ./website
+      args:
+        PUBLIC_APP_URL: ${APP_BASE_URL:-https://app.pulsedeck.de}
+        PUBLIC_SITE_URL: ${SITE_URL:-https://pulsedeck.de}
+    restart: unless-stopped
+    expose:
+      - "80"
+    environment:
+      APP_URL: ${APP_BASE_URL:-https://app.pulsedeck.de}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
       interval: 10s

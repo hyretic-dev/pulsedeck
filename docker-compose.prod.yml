@@ -18,3 +18,5 @@ services:
   frontend:
     restart: always
 
+  website:
+    restart: always
