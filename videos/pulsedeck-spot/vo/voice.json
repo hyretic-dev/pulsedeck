@@ -1,5 +1,6 @@
 {
-  "voiceId": "EXAVITQu4vr4xnSDxMaL",
-  "name": "Sarah (Entwurf, Standardstimme im Free-Konto)",
-  "model": "eleven_v4"
+  "voiceId": "cgSgspJ2msm6clMCkdW9",
+  "name": "Jessica (Entwurf, Standardstimme im Free-Konto, wie im cai-spot)",
+  "model": "eleven_v4",
+  "take_seconds": 55.72
 }

@@ -37,7 +37,8 @@ function estimate(text) {
 }
 
 function measured(seg) {
-  const mp3 = join(root, `vo/${seg.id}.mp3`);
+  const wav = join(root, `vo/${seg.id}.wav`);
+  const mp3 = existsSync(wav) ? wav : join(root, `vo/${seg.id}.mp3`);
   const al = join(root, `vo/${seg.id}.alignment.json`);
   if (!existsSync(mp3) || !existsSync(al)) return null;
   const dur = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', mp3]).toString());

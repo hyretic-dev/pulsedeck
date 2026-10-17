@@ -441,7 +441,8 @@ def load_tempo(path, tempo):
     import tempfile
     with tempfile.NamedTemporaryFile(suffix='.wav') as tmp:
         # Tempo, Trittschall weg, sanfte Sprachkompression (weniger Spitzen, damit der Master-Limiter kaum arbeiten muss)
-        chain = f'rubberband=tempo={tempo}:formant=preserved:transients=mixed:window=standard,highpass=f=80,acompressor=threshold=-24dB:ratio=3:attack=5:release=90:knee=4:makeup=2,alimiter=limit=0.89:attack=2:release=40:level=disabled'
+        stretch = f'rubberband=tempo={tempo}:formant=preserved:transients=mixed:window=standard,' if abs(tempo - 1) > 1e-6 else ''
+        chain = stretch + 'highpass=f=80,acompressor=threshold=-24dB:ratio=3:attack=5:release=90:knee=4:makeup=2,alimiter=limit=0.89:attack=2:release=40:level=disabled'
         subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', path, '-af', chain, '-ar', str(SR), tmp.name], check=True)
         y, sr = sf.read(tmp.name)
     return y, sr
@@ -458,7 +459,9 @@ def build_vo():
     out = np.zeros((N, 2))
     found = 0
     for seg in T['segments']:
-        p = os.path.join(ROOT, f"vo/{seg['id']}.mp3")
+        p = os.path.join(ROOT, f"vo/{seg['id']}.wav")
+        if not os.path.exists(p):
+            p = os.path.join(ROOT, f"vo/{seg['id']}.mp3")
         if not os.path.exists(p):
             continue
         y, _ = load_tempo(p, VOICE_TEMPO)

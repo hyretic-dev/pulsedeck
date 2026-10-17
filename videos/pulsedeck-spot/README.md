@@ -37,13 +37,16 @@ Vertrauensaussagen (`website/src/data/vertrauen.ts`), Dashboard, Onboarding-Ques
 
 ## Ton
 
-- **Stimme (Ziel)**: ElevenLabs, „Lola – Fresh & Dynamic“ (`SiMvlSW9cKKHDYT4BzOp`), Modell `eleven_v4`, Deutsch, je Szene ein Segment mit Wortzeiten.
+- **Stimme (Ziel)**: ElevenLabs, „Lola – Fresh & Dynamic“ (`SiMvlSW9cKKHDYT4BzOp`), Modell `eleven_v4`, Deutsch, ein Take mit Wortzeiten.
   Lola stammt aus der Voice Library und ist über die API erst ab dem **Creator-Tarif** nutzbar.
 - **Stimme (aktueller Entwurf)**: Das verwendete Konto ist ein Free-Konto. Der Spot nutzt deshalb vorerst die Standardstimme
-  „Sarah“ (`EXAVITQu4vr4xnSDxMaL`, `eleven_v4`, Deutsch), siehe `vo/voice.json`. Free-Generierungen sind laut ElevenLabs
-  nicht für kommerzielle Nutzung lizenziert: **nicht veröffentlichen**, vorher mit Lola auf einem bezahlten Konto neu erzeugen.
-- **Sprachbearbeitung** (`tools/audio.py`): tonhöhen- und formanterhaltend um Faktor 1,1 beschleunigt (`voice.tempo`), Hochpass 80 Hz,
-  sanfte Kompression 3:1; die Wortzeiten werden entsprechend umgerechnet.
+  „Jessica“ (`cgSgspJ2msm6clMCkdW9`, `eleven_v4`, Deutsch), wie schon im `cai-spot`, siehe `vo/voice.json`.
+  Free-Generierungen sind laut ElevenLabs nicht für kommerzielle Nutzung lizenziert: **nicht veröffentlichen**,
+  vorher mit Lola auf einem bezahlten Konto neu erzeugen.
+- **Aufnahme als ein Take** (`tools/voiceover.py`): Der ganze Text geht in einer Anfrage raus, damit Betonung und Fluss
+  natürlich bleiben; danach wird an den Pausen zwischen den Szenen geschnitten (`vo/<szene>.wav`, Rohtake `vo/take.mp3`).
+- **Sprachbearbeitung** (`tools/audio.py`): Hochpass 80 Hz, sanfte Kompression 3:1. Optionales Tempo über `voice.tempo`
+  (tonhöhenerhaltend, derzeit 1,0 = unverändert); die Wortzeiten werden entsprechend umgerechnet.
 - **Musik**: „Shiny Tech“ von Kevin MacLeod (incompetech.com), Lizenz Creative Commons BY 4.0
   (https://creativecommons.org/licenses/by/4.0/). Der Drop nach dem Intro liegt auf dem Wort „PulseDeck“, der Schlussschlag auf dem letzten Herzschlag.
   `tools/audio.py` lädt die Datei von einem festen GitHub-Commit (Prüfsumme im Skript), sie liegt nicht im Repo.
@@ -57,7 +60,7 @@ Vertrauensaussagen (`website/src/data/vertrauen.ts`), Dashboard, Onboarding-Ques
 ```bash
 cd videos/pulsedeck-spot
 ELEVENLABS_API_KEY=... python3 -I tools/voiceover.py   # Lola + Wortzeiten nach vo/ (ab Creator-Tarif)
-# ELEVENLABS_VOICE=draft ... tools/voiceover.py       # Entwurfsstimme aus vo/script.json
+# ELEVENLABS_VOICE=draft ... tools/voiceover.py       # Entwurfsstimme (Jessica) aus vo/script.json
 node tools/timing.mjs                                  # Szenen und Cues an die Wortzeiten anpassen (stempelt index.html)
 python3 -I tools/audio.py                              # Sounds, Musik, Mix, Lautheitsbericht
 npx --yes hyperframes@0.8.169 lint                     # Prüfung (0 Fehler; die Warnungen sind Strukturhinweise zu Sub-Kompositionen)
