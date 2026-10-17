@@ -10,6 +10,7 @@ import FaqListe from '../components/FaqListe.astro';
 import CtaAbschluss from '../components/CtaAbschluss.astro';
 import { APP_URL, KONTAKT, SITE_URL } from '../config';
 import { DASHBOARD_BILD, FUNKTIONEN } from '../data/funktionen';
+import spotPoster from '../assets/video/pulsedeck-spot-poster.webp';
 import { ZIELGRUPPEN } from '../data/zielgruppen';
 import { VERTRAUEN_KURZ } from '../data/vertrauen';
 import { FAQ_ALLGEMEIN } from '../data/faq';
@@ -80,7 +81,13 @@ const jsonLd = [
         <p class="text-lg text-[var(--color-text-muted)] mt-4">Termin anlegen, Schichten festlegen, Link teilen: Den Rest erledigen eure Mitglieder selbst.</p>
       </div>
       <div class="max-w-4xl mx-auto mt-10">
-        <VideoPlatzhalter poster={DASHBOARD_BILD} titel="PulseDeck in 90 Sekunden" />
+        <VideoPlatzhalter
+          src="/video/pulsedeck-in-60-sekunden.mp4"
+          untertitel="/video/pulsedeck-in-60-sekunden.de.vtt"
+          poster={spotPoster}
+          titel="PulseDeck in 60 Sekunden"
+          nachweis="Musik: „Shiny Tech“ von Kevin MacLeod (incompetech.com), Lizenz Creative Commons BY 4.0."
+        />
       </div>
       <ol class="max-w-5xl mx-auto mt-12 grid gap-4 md:grid-cols-3">
         {

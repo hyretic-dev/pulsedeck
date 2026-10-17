@@ -1,0 +1,15 @@
+{
+  "stimme_stem_lufs": -14.01,
+  "stimme_segmente": 10,
+  "musik_stem_lufs": -35.98,
+  "sfx_stem_lufs": -25.0,
+  "summe_vor_master_lufs": -14.01,
+  "master_gain_db": 2.01,
+  "mix_lufs": -12.01,
+  "mix_true_peak_dbtp": -1.5,
+  "musik": {
+    "start_track": 5.571,
+    "xfade_spot": 55.496,
+    "hit_spot": 60.698
+  }
+}

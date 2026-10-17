@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>PulseDeck - Euer Chat bleibt, das Chaos geht</title>
+    <link rel="stylesheet" href="assets/spot.css" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <script src="assets/vendor/CustomEase.min.js"></script>
+    <script src="assets/vendor/DrawSVGPlugin.min.js"></script>
+    <script src="assets/vendor/SplitText.min.js"></script>
+    <script src="timing.js"></script>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-width="1920" data-height="1080" data-duration="62.266666666666666">
+      <!-- Grund: Schwarz mit den Lichtern der Website (rot oben links, türkis unten rechts) -->
+      <div id="bg" class="layer">
+        <div id="glow-red" class="glow"></div>
+        <div id="glow-teal" class="glow"></div>
+        <div id="grid" class="layer"></div>
+      </div>
+
+      <!-- 1 Chaos im Vereinschat -->
+      <section id="s-hook" class="clip scene" data-scene="hook" data-start="0" data-duration="10.553" data-track-index="1">
+        <div id="hook-cam" class="cam">
+          <div id="hook-300">0</div>
+          <div id="hook-300-label">ungelesene Nachrichten</div>
+          <svg id="hook-scribble" class="layer" viewBox="0 0 1920 1080"><path id="scribble-path" d="M960 540" /></svg>
+
+          <div id="hook-day" class="hook-day">
+            <div class="kicker"><i class="pi pi-calendar"></i>Samstag</div>
+            <h2 class="display nosp"><span class="word">Sommer</span><span class="word">fest.</span></h2>
+            <svg class="sketch s-red" id="hook-day-ul" viewBox="0 0 520 40" style="left: -6px; top: 200px; width: 520px; height: 40px; stroke-width: 7">
+              <path d="M6 26 C 120 10, 260 8, 360 16 S 480 30, 512 12" />
+            </svg>
+          </div>
+
+          <div id="hook-phone" class="phone">
+            <div class="phone-screen">
+              <div class="phone-notch"></div>
+              <div class="chat-head">
+                <div class="chat-ava">TSV</div>
+                <div class="chat-title"><b>Vereinschat TSV</b><span>48 Mitglieder</span></div>
+                <div class="chat-badge"><span id="hook-badge">3</span><span id="hook-plus">+</span></div>
+              </div>
+              <div class="chat-body">
+                <div id="hook-list" class="chat-list">
+                  <div class="b"><span class="n" style="color: #f472b6">Jens</span>Hat wer Zeit am Samstag? 🙏</div>
+                  <div class="b"><span class="n" style="color: #60a5fa">Mia</span>Ich nicht, sry</div>
+                  <div class="b emoji">😬</div>
+                  <div class="b"><span class="n" style="color: #fbbf24">Petra</span>Wer bringt den Grill mit??</div>
+                  <div class="b me">Welchen Grill?</div>
+                  <div class="b"><span class="n" style="color: #34d399">Ali</span>Wo ist das PDF mit dem Plan?</div>
+                  <div class="b"><span class="n" style="color: #f472b6">Jens</span>Welches PDF?</div>
+                  <div class="b"><span class="n" style="color: #a78bfa">Sara</span>Alles Gute, Uwe!! 🎂🎂</div>
+                  <div class="b"><span class="n" style="color: #fb923c">Uwe</span>Danke 🥳</div>
+                  <div class="b"><span class="n" style="color: #60a5fa">Mia</span>Wann war nochmal die Versammlung?</div>
+                  <div class="b emoji">👍</div>
+                  <div class="b"><span class="n" style="color: #fbbf24">Petra</span>Kann jemand Kasse machen?</div>
+                  <div class="b"><span class="n" style="color: #34d399">Ali</span>Bin raus</div>
+                  <div class="b"><span class="n" style="color: #a78bfa">Sara</span>📷 Foto</div>
+                  <div class="b"><span class="n" style="color: #f472b6">Jens</span>???</div>
+                  <div class="b"><span class="n" style="color: #fb923c">Uwe</span>Wer hat den Schlüssel?</div>
+                  <div class="b me">Steht doch oben</div>
+                  <div class="b"><span class="n" style="color: #60a5fa">Mia</span>Wo oben??</div>
+                </div>
+              </div>
+              <div class="chat-input"><div>Nachricht</div><i></i></div>
+            </div>
+          </div>
+
+          <div id="hook-toasts">
+            <div class="toast" style="top: 70px"><div class="ti" style="background: #0c3d47">💬</div><div><b>Vereinschat TSV</b><span id="toast-n1">37 neue Nachrichten</span></div><div class="tmeta">jetzt</div></div>
+            <div class="toast" style="top: 180px"><div class="ti" style="background: #3b0764">💬</div><div><b>Festausschuss</b><span>54 neue Nachrichten</span></div><div class="tmeta">jetzt</div></div>
+            <div class="toast" style="top: 290px"><div class="ti" style="background: #1e3a8a">💬</div><div><b>Eltern U12</b><span>19 neue Nachrichten</span></div><div class="tmeta">jetzt</div></div>
+          </div>
+
+          <div id="q1" class="q">Wer grillt?<svg class="sketch s-red" viewBox="0 0 600 220" preserveAspectRatio="none" style="stroke-width: 6"><path d="M70 120 C 60 40, 300 18, 470 34 C 600 48, 590 170, 420 196 C 280 214, 70 206, 44 140 C 30 96, 120 52, 230 44" /></svg></div>
+          <div id="q2" class="q">Wo ist das PDF?<svg class="sketch s-red" viewBox="0 0 600 220" preserveAspectRatio="none" style="stroke-width: 6"><path d="M80 110 C 70 30, 330 14, 500 40 C 610 58, 586 176, 400 198 C 250 214, 64 200, 40 130 C 26 84, 140 48, 260 40" /></svg></div>
+          <div id="q3" class="q">Und wer kommt?<svg class="sketch s-red" viewBox="0 0 600 220" preserveAspectRatio="none" style="stroke-width: 6"><path d="M60 130 C 56 46, 290 20, 480 36 C 604 50, 594 172, 430 198 C 270 216, 60 210, 40 140 C 28 92, 130 50, 250 42" /></svg></div>
+        </div>
+      </section>
+
+      <!-- 2 Durchatmen: die Chaoslinie wird zum Puls, der Puls zum Logo -->
+      <section id="s-turn" class="clip scene" data-scene="turn" data-start="9.853" data-duration="4.87" data-track-index="2">
+        <div id="turn-breathe">Durchatmen.</div>
+        <div id="turn-logo" class="logo">
+          <div id="turn-mark" class="logo-mark">
+            <svg viewBox="0 0 512 512">
+              <defs>
+                <linearGradient id="lg-turn" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff2a2a" /><stop offset="1" stop-color="#b80000" /></linearGradient>
+              </defs>
+              <rect id="turn-rect" width="512" height="512" rx="112" fill="url(#lg-turn)" />
+              <path id="turn-icon-line" d="M88 272H176L212 168L268 360L312 216L340 272H424" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <div class="logo-word-mask"><div id="turn-word" class="logo-word">PulseDeck</div></div>
+        </div>
+      </section>
+
+      <!-- 3 Claim: Euer Chat bleibt. Das Chaos geht. -->
+      <section id="s-claim" class="clip scene" data-scene="claim" data-start="14.023" data-duration="3.929" data-track-index="1">
+        <div id="claim-cam" class="cam">
+          <div id="claim-phone" class="phone">
+            <div class="phone-screen">
+              <div class="phone-notch"></div>
+              <div class="chat-head">
+                <div class="chat-ava">TSV</div>
+                <div class="chat-title"><b>Vereinschat TSV</b><span>48 Mitglieder</span></div>
+              </div>
+              <div class="chat-body">
+                <div id="claim-list" class="chat-list" style="top: auto; bottom: 0">
+                  <div class="b me">Die Schichten fürs Sommerfest stehen 👇</div>
+                  <div class="b me link">
+                    <div class="lp">
+                      <div class="lp-top"><img src="assets/brand/pulsedeck-icon.svg" alt="" /><div><b>Schichten: Sommerfest 2027</b><span>Sa., 10. Juli · Sportplatz</span></div></div>
+                      <div class="lp-url">app.pulsedeck.de</div>
+                    </div>
+                  </div>
+                  <div class="b"><span class="n" style="color: #fbbf24">Petra</span>Grill übernehm ich 🔥</div>
+                  <div class="b"><span class="n" style="color: #34d399">Ali</span>Bin beim Aufbau dabei 💪</div>
+                  <div class="b"><span class="n" style="color: #60a5fa">Mia</span>Endlich mal übersichtlich 😄</div>
+                </div>
+              </div>
+              <div class="chat-input"><div>Nachricht</div><i></i></div>
+            </div>
+          </div>
+          <div id="claim-text">
+            <div class="line-mask"><div class="display cl" id="claim-l1"><span class="word">Euer</span><span class="word">Chat</span></div></div>
+            <div class="line-mask"><div class="display cl" id="claim-l1b"><span class="word">bleibt.</span></div></div>
+            <div id="claim-l2" class="display cl"><span class="word grad">Das</span><span id="claim-chaos" class="word">Chaos</span>
+              <svg id="claim-strike" class="sketch s-white" viewBox="0 0 500 120" preserveAspectRatio="none" style="stroke-width: 10">
+                <path d="M8 74 C 110 46, 230 70, 330 50 S 450 34, 494 44" />
+              </svg>
+            </div>
+            <div id="claim-l3" class="display cl"><span class="word grad">geht.</span></div>
+            <div class="claim-sub">PulseDeck ergänzt euren Messenger um alles, was verbindlich sein muss.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 Feed, Umfragen, Newsletter, Push -->
+      <section id="s-feed" class="clip scene" data-scene="feed" data-start="17.252" data-duration="7.481" data-track-index="2">
+        <div id="feed-cam" class="cam">
+          <div id="feed-text">
+            <div class="kicker"><i class="pi pi-megaphone"></i>Feed &amp; Umfragen</div>
+            <h2 class="display"><span class="line-mask"><span class="word">Wichtiges</span></span><span class="line-mask"><span class="word">bleibt</span><span class="word grad">oben.</span></span></h2>
+            <p>Ankündigungen, Umfragen und Newsletter, statt 300 Nachrichten.</p>
+          </div>
+          <div id="feed-win" class="win">
+            <div class="win-bar"><i></i><i></i><i></i><span>app.pulsedeck.de</span></div>
+            <div class="app">
+              <div class="side">
+                <div class="side-logo">PulseDeck</div>
+                <div class="org"><i class="pi pi-building"></i><b>TSV Musterstadt e. V.</b></div>
+                <div class="nav"><i class="pi pi-home"></i>Dashboard</div>
+                <div class="nav on"><i class="pi pi-megaphone"></i>Aktuelles</div>
+                <div class="nav"><i class="pi pi-users"></i>Mitglieder</div>
+                <div class="nav"><i class="pi pi-calendar"></i>Termine</div>
+                <div class="nav"><i class="pi pi-book"></i>Wiki</div>
+                <div class="nav"><i class="pi pi-users"></i>Gruppen</div>
+                <div class="nav"><i class="pi pi-folder"></i>Dateien</div>
+              </div>
+              <div class="main">
+                <div class="page-h">
+                  <div><h3>Aktuelles</h3><p>Neuigkeiten und Artikel aus der Community</p></div>
+                  <div class="btn-red"><i class="pi pi-plus"></i>Neuer Beitrag</div>
+                </div>
+                <div class="tabs"><span class="on">Aktuelles</span><span>Meine Beiträge</span><span>Verwaltung</span></div>
+                <div class="chips"><span class="chip on">Alle</span><span class="chip">Festausschuss</span><span class="chip">Jugendabteilung</span><span class="chip">Platz &amp; Technik</span></div>
+                <div id="feed-list">
+                  <div id="feed-poll" class="post">
+                    <div id="feed-pinflag" class="pinned-flag"><i class="pi pi-thumbtack"></i>Angepinnt</div>
+                    <div class="post-h"><div class="ava kv">KV</div><div><b>Katrin Vogel</b><span>Festausschuss · heute</span></div><div class="tag">Umfrage</div></div>
+                    <h4>Welches Motto soll unser Sommerfest haben?</h4>
+                    <div class="pl">Stimmt bis Freitag ab.</div>
+                    <div class="opt" id="opt-1"><div class="opt-fill"></div><div class="rad"><i></i></div><span>Sport &amp; Spiel</span><em><span class="pc" id="pc-1">0</span>%</em></div>
+                    <div class="opt" id="opt-2"><div class="opt-fill"></div><div class="rad"></div><span>Retro-Sommer</span><em><span class="pc" id="pc-2">0</span>%</em></div>
+                    <div class="opt" id="opt-3"><div class="opt-fill"></div><div class="rad"></div><span>Rund um den Globus</span><em><span class="pc" id="pc-3">0</span>%</em></div>
+                    <div class="post-f"><i class="pi pi-eye"></i><span id="feed-seen">0</span><span style="margin-left: 18px"><span id="feed-votes">0</span> Stimmen</span><span class="read"><i class="pi pi-check"></i>Als gelesen markieren</span><span class="pin" id="feed-pin"><i class="pi pi-thumbtack"></i></span></div>
+                  </div>
+                  <div class="post" id="feed-p2">
+                    <div class="post-h"><div class="ava kv">KV</div><div><b>Katrin Vogel</b><span>Jugendabteilung · gestern</span></div><div class="tag">Artikel</div></div>
+                    <h4>Neue Trainingszeiten ab November</h4>
+                    <div class="pl">Ab dem 1. November trainiert die U12 dienstags und donnerstags von 17:00 bis 18:30 Uhr auf Feld 2.</div>
+                  </div>
+                  <div class="post" id="feed-p3">
+                    <div class="post-h"><div class="ava kv">KV</div><div><b>Katrin Vogel</b><span>Platz &amp; Technik · Mo.</span></div><div class="tag">Artikel</div></div>
+                    <h4>Arbeitseinsatz am Vereinsheim</h4>
+                    <div class="pl">Wir streichen die Fenster und mähen den Rasen. Schichten sind eingetragen.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="feed-mail" class="mail">
+            <div class="mail-top"><small>Newsletter · TSV Musterstadt e. V.</small><b>Sommerfest: Stimmt jetzt ab!</b></div>
+            <div class="mail-body"><i></i><i></i><i class="s"></i></div>
+            <div class="mail-meta"><i class="pi pi-envelope"></i>An alle Mitglieder · über euren Mailserver</div>
+          </div>
+          <div id="feed-phone" class="phone">
+            <div class="phone-screen">
+              <div class="phone-notch"></div>
+              <div class="lock"></div>
+              <div class="lock-date">Mittwoch, 30. Juni</div>
+              <div class="lock-time">18:24</div>
+              <div id="feed-push" class="push">
+                <div class="push-h"><img src="assets/brand/pulsedeck-icon.svg" alt="" />PULSEDECK<span>jetzt</span></div>
+                <b>Neue Umfrage im Festausschuss</b>
+                <p>Welches Motto soll unser Sommerfest haben? Stimm bis Freitag ab.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 Termin, Schichten, Link teilen, eintragen -->
+      <section id="s-shifts" class="clip scene" data-scene="shifts" data-start="24.033" data-duration="8.722" data-track-index="1">
+        <div id="shifts-cam" class="cam">
+          <svg id="shifts-sketch" class="sketch s-faint" viewBox="0 0 700 360" style="stroke-width: 3">
+            <!-- Zelt -->
+            <path class="sk" d="M40 300 L40 170 L170 90 L300 170 L300 300" />
+            <path class="sk" d="M40 170 C 72 196, 104 196, 126 170 C 148 196, 192 196, 214 170 C 236 196, 278 196, 300 170" />
+            <path class="sk" d="M150 300 L150 230 Q 170 206 190 230 L190 300" />
+            <!-- Wimpelkette -->
+            <path class="sk" d="M300 120 Q 470 170 660 90" />
+            <path class="sk" d="M340 132 L352 168 L366 138 M410 148 L420 186 L436 152 M490 150 L498 188 L514 150 M570 132 L574 170 L594 128" />
+            <!-- Grill -->
+            <path class="sk" d="M420 236 Q 500 300 580 236 Z" />
+            <path class="sk" d="M444 262 L420 330 M556 262 L580 330 M500 286 L500 330" />
+            <path class="sk" d="M470 214 C 460 196, 484 186, 474 168 M506 210 C 496 192, 520 182, 510 164 M542 214 C 532 196, 556 186, 546 168" />
+            <path class="sk" d="M20 330 L680 330" />
+          </svg>
+
+          <div id="shifts-steps">
+            <div class="kicker"><i class="pi pi-check-square"></i>Termine &amp; Helferschichten</div>
+            <div class="step" id="step-1"><div class="step-n">1</div><b>Termin anlegen</b></div>
+            <div class="step" id="step-2"><div class="step-n">2</div><b>Schichten festlegen</b></div>
+            <div class="step" id="step-3"><div class="step-n">3</div><b>Link teilen</b></div>
+            <div class="step-sub" id="step-sub">Den Rest erledigen eure Mitglieder selbst.</div>
+          </div>
+
+          <div id="shift-ev" class="ev">
+            <div class="ev-date"><small>JUL.</small><b>10</b></div>
+            <div class="ev-main">
+              <div class="ev-t"><span class="ag">AG</span><b>Sommerfest 2027</b></div>
+              <div class="pills"><span class="pill"><i class="pi pi-clock"></i>10:00 - 18:00</span><span class="pill"><i class="pi pi-map-marker"></i>Sportplatz</span></div>
+            </div>
+            <div class="ev-act">
+              <div class="ev-btn" id="ev-btn-link"><i class="pi pi-link"></i>Link teilen</div>
+              <div class="ev-btn on"><i class="pi pi-list"></i>Schichten</div>
+            </div>
+          </div>
+
+          <div id="shift-a" class="shift">
+            <h5>Aufbau Zelte und Bänke</h5>
+            <div class="tm"><i class="pi pi-clock"></i>09:00 - 11:00</div>
+            <div class="bel"><span>Belegung</span><em><span id="sa-c">0</span> / 6</em></div>
+            <div class="bar"><i id="sa-bar"></i></div>
+            <div class="join" id="sa-join"><i class="pi pi-check"></i>Ich bin dabei<div class="full" id="sa-full"><i class="pi pi-lock"></i>Schicht voll</div></div>
+            <div class="avs" id="sa-avs">
+              <div class="av" style="background: #c026d3">JW</div>
+              <div class="av" style="background: #db2777">MH</div>
+              <div class="av" style="background: #16a34a">TE</div>
+              <div class="av" style="background: #0891b2">EY</div>
+              <div class="av" style="background: #7c3aed">PR</div>
+              <div class="av" style="background: #dc2626">KV</div>
+            </div>
+          </div>
+          <div id="shift-b" class="shift">
+            <h5>Grill</h5>
+            <div class="tm"><i class="pi pi-clock"></i>11:30 - 14:00</div>
+            <div class="bel"><span>Belegung</span><em id="sb-n"><span id="sb-c">0</span> / 3</em></div>
+            <div class="bar"><i id="sb-bar"></i></div>
+            <div class="join" id="sb-join"><i class="pi pi-check"></i>Ich bin dabei<div class="full" id="sb-full"><i class="pi pi-lock"></i>Schicht voll</div></div>
+            <div class="avs" id="sb-avs">
+              <div class="av" style="background: #7c3aed">PR</div>
+              <div class="av" style="background: #16a34a">TE</div>
+              <div class="av" style="background: #0891b2">EY</div>
+            </div>
+          </div>
+
+          <div id="shifts-phone" class="phone">
+            <div class="phone-screen">
+              <div class="phone-notch"></div>
+              <div class="chat-head">
+                <div class="chat-ava">TSV</div>
+                <div class="chat-title"><b>Vereinschat TSV</b><span>48 Mitglieder</span></div>
+              </div>
+              <div class="chat-body">
+                <div class="chat-list">
+                  <div class="b me link" id="shifts-linkb">
+                    <div class="lp">
+                      <div class="lp-top"><img src="assets/brand/pulsedeck-icon.svg" alt="" /><div><b>Schichten: Sommerfest 2027</b><span>Sa., 10. Juli · Sportplatz</span></div></div>
+                      <div class="lp-url">app.pulsedeck.de</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <svg id="shift-check" class="sketch s-red" viewBox="0 0 260 220" style="stroke-width: 10"><path d="M30 120 L100 186 L236 30" /></svg>
+          <div id="cursor-1" class="cursor"><svg viewBox="0 0 44 54"><path d="M4 2 L4 44 L15 34 L23 52 L31 48 L23 31 L38 30 Z" fill="#fff" stroke="#000" stroke-width="2.5" stroke-linejoin="round" /></svg></div>
+          <div id="ripple-1" class="ripple"></div>
+        </div>
+      </section>
+
+      <!-- 6 Aus Mitgliedern werden Aktive -->
+      <section id="s-activ" class="clip scene" data-scene="activ" data-start="32.055" data-duration="8.541" data-track-index="2">
+        <div id="activ-cam" class="cam">
+          <div id="activ-people"></div>
+          <div id="activ-head">
+            <div class="kicker"><i class="pi pi-bolt"></i>Mitglieder aktivieren</div>
+            <h2 class="display"><span class="word">Aus</span><span class="word">Mitgliedern</span><span class="word">werden</span><span class="word grad">Aktive.</span></h2>
+          </div>
+          <div id="activ-board">
+            <div class="hello"><b>Guten Tag, Katrin!</b><span>Seit 4 Jahren dabei</span></div>
+            <div id="activ-quest" class="quest">
+              <div class="quest-glow"></div>
+              <div class="quest-h">
+                <div class="quest-ic"><i class="pi pi-compass"></i></div>
+                <div><b>Deine Onboarding Quest</b><span>Schließe alle Aufgaben ab, um dein volles Potential zu entfalten.</span></div>
+                <div class="quest-pct"><b><span id="quest-pct">20</span>%</b><span>Fortschritt</span></div>
+              </div>
+              <div class="qbar"><i id="quest-bar"></i></div>
+              <div class="badges">
+                <div class="badge"><div class="done"></div><div class="bi"><i class="pi pi-user-edit"></i><i class="pi pi-check"></i></div><b>Profil-Held</b><small>Identität bestätigt</small></div>
+                <div class="badge"><div class="done"></div><div class="bi"><i class="pi pi-users"></i><i class="pi pi-check"></i></div><b>Team-Player</b><small>Platz gefunden</small></div>
+                <div class="badge"><div class="done"></div><div class="bi"><i class="pi pi-book"></i><i class="pi pi-check"></i></div><b>Wissens-Sucher</b><small>Weisheit erlangt</small></div>
+                <div class="badge"><div class="done"></div><div class="bi"><i class="pi pi-bell"></i><i class="pi pi-check"></i></div><b>Wächter</b><small>Sinn geschärft</small></div>
+                <div class="badge"><div class="done"></div><div class="bi"><i class="pi pi-check-circle"></i><i class="pi pi-check"></i></div><b>Macher</b><small>Tatkraft bewiesen</small></div>
+              </div>
+            </div>
+            <div class="micro">
+              <div class="mt" id="mt-1">
+                <div class="mt-ic"><i class="pi pi-star"></i></div>
+                <div>
+                  <b>Helfer gesucht!</b>
+                  <p>Es gibt 3 offene Schichten, die zu deinen Skills passen.</p>
+                  <div class="skills"><span class="skill" id="sk-1">Aufbau</span><span class="skill" id="sk-2">Fahrdienst</span><span class="skill" id="sk-3">Grafikdesign</span></div>
+                </div>
+              </div>
+              <div class="mt" id="mt-2">
+                <div class="mt-ic"><i class="pi pi-chart-bar"></i></div>
+                <div>
+                  <b>Umfrage: Welches Motto soll unser Sommerfest haben?</b>
+                  <p>Deine Meinung zählt! Nimm an der Umfrage teil.</p>
+                  <a>JETZT ERLEDIGEN <i class="pi pi-arrow-right"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 Wissen bleibt: Wiki, Dateien, Arbeitsgruppen, KI-Assistent -->
+      <section id="s-wissen" class="clip scene" data-scene="wissen" data-start="39.896" data-duration="7.982" data-track-index="1">
+        <div id="wissen-cam" class="cam">
+          <div id="wissen-head">
+            <div class="kicker"><i class="pi pi-book"></i>Wiki, Dateien &amp; Gruppen</div>
+            <h2 class="display"><span class="word">Wissen,</span><span class="word">das</span><span class="word grad">bleibt.</span></h2>
+          </div>
+          <svg id="wissen-key" class="sketch s-white" viewBox="0 0 200 120" style="stroke-width: 4">
+            <circle cx="46" cy="60" r="30" /><circle cx="46" cy="60" r="10" /><path d="M76 60 L186 60 M150 60 L150 86 M170 60 L170 80" />
+          </svg>
+          <div id="wiki-panel" class="panel">
+            <div class="panel-h"><i class="pi pi-book"></i>Wiki</div>
+            <div class="wiki-a">
+              <h6>Sommerfest von A bis Z</h6>
+              <div class="meta"><span>Katrin Vogel</span><em>Abläufe</em><span class="pub"><i class="pi pi-check-circle"></i> Veröffentlicht</span></div>
+              <div class="wiki-s" id="ws-1"><b>8 Wochen vorher</b><p>Festausschuss trifft sich, Termin mit der Gemeinde abstimmen</p></div>
+              <div class="wiki-s" id="ws-2"><b>6 Wochen vorher</b><p>Helferschichten in PulseDeck anlegen und im Feed ankündigen</p></div>
+              <div class="wiki-s" id="ws-3"><b>Am Festtag</b><p>Treffpunkt für alle Helfer: 8:45 Uhr am Vereinsheim. Schlüssel hat der Platzwart.</p></div>
+            </div>
+          </div>
+          <div id="files-panel" class="panel">
+            <div class="panel-h"><i class="pi pi-folder"></i>Dateien</div>
+            <div class="file" id="f-1"><i class="pi pi-thumbtack"></i>Satzung TSV Musterstadt.pdf<em>Mitglieder</em></div>
+            <div class="file" id="f-2"><i class="pi pi-file-pdf"></i>Helferplan Sommerfest.pdf<em>Mitglieder</em></div>
+            <div class="file" id="f-3"><i class="pi pi-file-pdf"></i>Protokoll Jahreshauptversammlung.pdf<em class="v">Vorstand</em></div>
+          </div>
+          <div id="groups-panel" class="panel">
+            <div class="panel-h"><i class="pi pi-users"></i>Arbeitsgruppen</div>
+            <div class="grp" id="g-1"><i style="background: #ea7a1f">F</i>Festausschuss<span>6 Mitgl.</span></div>
+            <div class="grp" id="g-2"><i style="background: #2f6fde">J</i>Jugendabteilung<span>4 Mitgl.</span></div>
+            <div class="grp" id="g-3"><i style="background: #e0313f">P&amp;</i>Platz &amp; Technik<span>4 Mitgl.</span></div>
+          </div>
+          <div id="ai-panel" class="panel">
+            <div class="ai-h"><div class="ai-ic"><i class="pi pi-sparkles"></i></div><div><b>PulseDeck AI Agent</b><span>Powered by Mistral</span></div></div>
+            <div class="ai-body">
+              <div class="ai-q" id="ai-q"><span id="ai-q-text">Wer hat am Festtag den Schlüssel?</span></div>
+              <div class="ai-wrap"><div class="dots" id="ai-dots"><i></i><i></i><i></i></div>
+              <div class="ai-a" id="ai-a">
+                <span id="ai-a-text">Laut Wiki hat der Platzwart den Schlüssel. Treffpunkt für alle Helfer ist um 8:45 Uhr am Vereinsheim.</span>
+                <div class="ai-src" id="ai-src"><i class="pi pi-book"></i>Sommerfest von A bis Z</div>
+              </div></div>
+            </div>
+            <div class="ai-in">Frag den AI-Assistenten...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8 Vertrauen -->
+      <section id="s-trust" class="clip scene" data-scene="trust" data-start="47.178" data-duration="6.213" data-track-index="2">
+        <div id="trust-cam" class="cam">
+          <div id="trust-head">
+            <div class="kicker"><i class="pi pi-shield"></i>Datenschutz &amp; Sicherheit</div>
+          </div>
+          <div id="trust-grid">
+            <div class="tt" id="tt-1"><div class="tt-glow"></div><div class="tt-ic"><i class="pi pi-server"></i></div><b>Gehostet in Deutschland</b>
+              <svg class="sketch s-faint" viewBox="0 0 150 150" style="stroke-width: 3"><rect x="20" y="22" width="110" height="34" rx="8" /><rect x="20" y="66" width="110" height="34" rx="8" /><path d="M40 39 L48 39 M40 83 L48 83 M75 112 L75 132 M45 132 L105 132" /></svg>
+            </div>
+            <div class="tt" id="tt-2"><div class="tt-glow"></div><div class="tt-ic"><i class="pi pi-mobile"></i></div><b>Keine Telefonnummern nötig</b>
+              <svg class="sketch s-faint" viewBox="0 0 150 150" style="stroke-width: 3"><rect x="44" y="14" width="62" height="120" rx="12" /><path d="M66 120 L84 120" /><path class="s-red" d="M22 128 L128 22" style="stroke: rgba(255, 0, 0, 0.6)" /></svg>
+            </div>
+            <div class="tt" id="tt-3"><div class="tt-glow"></div><div class="tt-ic"><i class="pi pi-ban"></i></div><b>Kein Tracking, keine Werbung</b>
+              <svg class="sketch s-faint" viewBox="0 0 150 150" style="stroke-width: 3"><path d="M14 75 C 40 34, 110 34, 136 75 C 110 116, 40 116, 14 75 Z" /><circle cx="75" cy="75" r="18" /><path d="M24 126 L126 24" style="stroke: rgba(255, 0, 0, 0.6)" /></svg>
+            </div>
+            <div class="tt" id="tt-4"><div class="tt-glow"></div><div class="tt-ic"><i class="pi pi-github"></i></div><b>Open Source (AGPLv3)</b>
+              <svg class="sketch s-faint" viewBox="0 0 150 150" style="stroke-width: 3"><path d="M52 40 L18 75 L52 110 M98 40 L132 75 L98 110 M86 30 L64 120" /></svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9 Abschluss -->
+      <section id="s-cta" class="clip scene" data-scene="cta" data-start="52.691" data-duration="9.576" data-track-index="1">
+        <div id="cta-cam" class="cam">
+          <svg id="cta-ecg" class="layer" viewBox="0 0 1920 1080"><path id="cta-ecg-path" d="M-60 540 L1980 540" /></svg>
+          <div id="cta-logo" class="logo">
+            <div class="logo-mark">
+              <svg viewBox="0 0 512 512">
+                <defs>
+                  <linearGradient id="lg-cta" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff2a2a" /><stop offset="1" stop-color="#b80000" /></linearGradient>
+                </defs>
+                <rect width="512" height="512" rx="112" fill="url(#lg-cta)" />
+                <path id="cta-icon-line" d="M88 272H176L212 168L268 360L312 216L340 272H424" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div class="logo-word" id="cta-word">PulseDeck</div>
+          </div>
+          <div id="cta-claim">
+            <div class="line-mask"><div class="display" id="cta-l1">Mitglieder aktivieren.</div></div>
+            <div class="line-mask"><div class="display grad" id="cta-l2">Nachhaltig informieren.</div></div>
+          </div>
+          <div id="cta-row">
+            <div class="btn-cta" id="cta-btn">Kostenlos starten <i class="pi pi-arrow-right"></i></div>
+            <div class="url" id="cta-url">pulsedeck.de</div>
+          </div>
+          <div id="cta-ea"><div class="ea"><i></i>Early Access: alle Funktionen kostenlos</div></div>
+        </div>
+      </section>
+
+      <!-- Leitmotiv über allen Szenen: die Pulslinie aus dem Logo -->
+      <svg id="pulse-svg" class="layer" viewBox="0 0 1920 1080">
+        <path id="pulse-glow" d="M-60 540 L1980 540" />
+        <path id="pulse-path" d="M-60 540 L1980 540" />
+        <path id="wipe-path" d="M-60 540 L1980 540" />
+      </svg>
+      <svg id="grain" class="layer" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+        <filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" stitchTiles="stitch" /><feColorMatrix type="saturate" values="0" /></filter>
+        <rect width="1920" height="1080" filter="url(#noise)" />
+      </svg>
+      <div id="vignette" class="layer"></div>
+      <div id="flash" class="layer"></div>
+
+      <audio id="mix" src="audio/mix.m4a" data-start="0" data-duration="62.266666666666666" data-track-index="10" data-volume="1"></audio>
+    </div>
+    <script src="assets/spot.js"></script>
+    <script>
+      // Erst nach dem Laden der Schriften aufbauen: SplitText und die Messungen brauchen die echten Glyphenbreiten
+      document.fonts.ready.then(() => {
+        window.__timelines["main"] = window.buildPulseDeckSpot();
+        if (window.__hfForceTimelineRebind) window.__hfForceTimelineRebind();
+      });
+    </script>
+  </body>
+</html>

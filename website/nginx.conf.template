@@ -70,6 +70,19 @@ server {
         try_files $uri =404;
     }
 
+    # Videos und Untertitel: ein Tag Cache. Der Standard-mime.types von nginx kennt kein .vtt, mit nosniff würden
+    # Browser die Untertitel sonst verwerfen; Byte-Ranges (Spulen im Video) liefert nginx für statische Dateien von selbst
+    location ^~ /video/ {
+        types {
+            video/mp4 mp4;
+            text/vtt vtt;
+        }
+        expires 1d;
+        add_header Cache-Control "public";
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
     # Gebaute Assets tragen einen Hash im Namen und ändern sich nie
     location ^~ /_astro/ {
         expires 1y;
