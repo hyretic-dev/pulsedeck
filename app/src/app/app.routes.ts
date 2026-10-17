@@ -17,28 +17,28 @@ export const routes: Routes = [
 
     // Auth
     {
-        path: 'login',
+        path: 'login', title: 'Anmelden',
 
         loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent)
     },
     {
-        path: 'auth/callback',
+        path: 'auth/callback', title: 'Anmeldung',
         loadComponent: () => import('./features/auth/auth-callback.component').then(m => m.AuthCallbackComponent)
     },
 
     // Organization Management
     {
-        path: 'registrieren',
+        path: 'registrieren', title: 'Registrieren',
 
         loadComponent: () => import('./features/organizations/register-organization.component').then(m => m.RegisterOrganizationComponent)
     },
     {
-        path: 'erstellen',
+        path: 'erstellen', title: 'Organisation anlegen',
 
         loadComponent: () => import('./features/organizations/create-organization/create-organization.component').then(m => m.CreateOrganizationComponent)
     },
     {
-        path: 'organisationen',
+        path: 'organisationen', title: 'Organisation wählen',
 
         loadComponent: () => import('./features/organizations/select-organization.component').then(m => m.SelectOrganizationComponent)
     },
@@ -72,20 +72,20 @@ export const routes: Routes = [
                 canActivate: [organizationGuard],
                 loadComponent: () => import('./layout/main-layout/main-layout').then(m => m.MainLayout),
                 children: [
-                    { path: '', loadComponent: () => import('./features/dashboard/dashboard-home/dashboard-home').then(m => m.DashboardHome) },
-                    { path: 'feed', loadComponent: () => import('./features/dashboard/feed/feed').then(m => m.FeedComponent) },
-                    { path: 'wiki', loadComponent: () => import('./features/dashboard/wiki/wiki').then(m => m.WikiComponent) },
-                    { path: 'members', canActivate: [adminGuard], loadComponent: () => import('./features/dashboard/members/members').then(m => m.MembersComponent) },
-                    { path: 'calendar', loadComponent: () => import('./features/dashboard/calendar/calendar').then(m => m.CalendarComponent) },
-                    { path: 'gruppen', loadComponent: () => import('./features/dashboard/working-groups/working-groups').then(m => m.WorkingGroupsComponent) },
-                    { path: 'contacts', loadComponent: () => import('./features/dashboard/contacts/contacts').then(m => m.ContactsComponent) },
-                    { path: 'files', loadComponent: () => import('./features/dashboard/files/files.component').then(m => m.FilesComponent) },
-                    { path: 'profile', loadComponent: () => import('./features/dashboard/profile/profile').then(m => m.ProfileComponent) },
-                    { path: 'issue-tracker', canActivate: [issueTrackerGuard], loadComponent: () => import('./features/dashboard/issue-tracker/issue-tracker.component').then(m => m.IssueTrackerComponent) },
-                    { path: 'roadmap', loadComponent: () => import('./features/dashboard/roadmap/roadmap.component').then(m => m.RoadmapComponent) },
-                    { path: 'settings', canActivate: [adminGuard], loadComponent: () => import('./features/dashboard/settings/settings').then(m => m.SettingsComponent) },
+                    { path: '', title: 'Dashboard', loadComponent: () => import('./features/dashboard/dashboard-home/dashboard-home').then(m => m.DashboardHome) },
+                    { path: 'feed', title: 'Aktuelles', loadComponent: () => import('./features/dashboard/feed/feed').then(m => m.FeedComponent) },
+                    { path: 'wiki', title: 'Wiki', loadComponent: () => import('./features/dashboard/wiki/wiki').then(m => m.WikiComponent) },
+                    { path: 'members', title: 'Mitglieder', canActivate: [adminGuard], loadComponent: () => import('./features/dashboard/members/members').then(m => m.MembersComponent) },
+                    { path: 'calendar', title: 'Termine', loadComponent: () => import('./features/dashboard/calendar/calendar').then(m => m.CalendarComponent) },
+                    { path: 'gruppen', title: 'Gruppen', loadComponent: () => import('./features/dashboard/working-groups/working-groups').then(m => m.WorkingGroupsComponent) },
+                    { path: 'contacts', title: 'Kontakte', loadComponent: () => import('./features/dashboard/contacts/contacts').then(m => m.ContactsComponent) },
+                    { path: 'files', title: 'Dateien', loadComponent: () => import('./features/dashboard/files/files.component').then(m => m.FilesComponent) },
+                    { path: 'profile', title: 'Profil', loadComponent: () => import('./features/dashboard/profile/profile').then(m => m.ProfileComponent) },
+                    { path: 'issue-tracker', title: 'Feedback', canActivate: [issueTrackerGuard], loadComponent: () => import('./features/dashboard/issue-tracker/issue-tracker.component').then(m => m.IssueTrackerComponent) },
+                    { path: 'roadmap', title: 'Roadmap', loadComponent: () => import('./features/dashboard/roadmap/roadmap.component').then(m => m.RoadmapComponent) },
+                    { path: 'settings', title: 'Einstellungen', canActivate: [adminGuard], loadComponent: () => import('./features/dashboard/settings/settings').then(m => m.SettingsComponent) },
                     { path: 'logs', redirectTo: 'audit' }, // Alias
-                    { path: 'audit', loadComponent: () => import('./features/dashboard/logs/logs.component').then(m => m.LogsComponent) }
+                    { path: 'audit', title: 'Änderungsprotokoll', loadComponent: () => import('./features/dashboard/logs/logs.component').then(m => m.LogsComponent) }
                 ]
             }
         ]
