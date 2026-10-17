@@ -94,9 +94,10 @@
         "mitgliedern": "Mitgliedern",
         "aktive": "Aktive",
         "quest": "Onboarding-Quest",
-        "micro": "Mikrotasks",
+        "micro": "Mikro",
         "skills": "Fähigkeiten"
-      }
+      },
+      "spoken": "So werden aus Mitgliedern Aktive: mit Onboarding-Quest, Mikro-Tasks und Schichten, die zu ihren Fähigkeiten passen."
     },
     {
       "id": "wissen",

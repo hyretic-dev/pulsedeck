@@ -134,7 +134,8 @@ html, body {
 .word + .word { margin-left: 0.24em; }
 .nosp .word + .word { margin-left: 0; }
 .drift { position: absolute; inset: 0; transform-origin: 50% 50%; }
-.line-mask { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+/* Platz für Unterlängen (g, p, y): die Maske darf sie nicht abschneiden */
+.line-mask { display: block; overflow: hidden; padding-bottom: 0.24em; margin-bottom: -0.24em; }
 
 /* Handgezeichnete Skizzen (eigene Illustrationen im Strichstil der Marke) */
 .sketch { position: absolute; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; }
