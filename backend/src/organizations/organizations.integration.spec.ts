@@ -40,7 +40,7 @@ describe('Organisationen (echtes PostgreSQL)', () => {
       });
 
       expect(antwort.status).toBe(201);
-      expect(antwort.body).toMatchObject({ name: 'Müller & Söhne Verein', slug: 'mueller-soehne', subscription_tier: 'free', max_members: 10 });
+      expect(antwort.body).toMatchObject({ name: 'Müller & Söhne Verein', slug: 'mueller-soehne', subscription_tier: 'free', max_members: 9999 });
       expect(antwort.body).not.toHaveProperty('owner_id');
 
       const orgId = antwort.body.id as string;
@@ -259,7 +259,7 @@ describe('Organisationen (echtes PostgreSQL)', () => {
       }
       expect((await f.api('patch', `/api/v1/orgs/${ids.alpha}`, ids.olga, { primary_color: 'rot' })).status).toBe(400);
       const { rows } = await f.admin.query('SELECT subscription_tier, max_members, owner_id, slug FROM organizations WHERE id = $1', [ids.alpha]);
-      expect(rows[0]).toEqual({ subscription_tier: 'free', max_members: 10, owner_id: ids.olga, slug: 'alpha' });
+      expect(rows[0]).toEqual({ subscription_tier: 'free', max_members: 9999, owner_id: ids.olga, slug: 'alpha' });
     });
 
     it('listet die eigenen Organisationen je Konto', async () => {

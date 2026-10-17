@@ -1,6 +1,6 @@
 /**
  * Häufige Fragen (Startseite, /faq, /preise). Nur belegbare Antworten; Preise und Grenzen wie in der App umgesetzt.
- * Early Access: alle Funktionen kostenlos. Dauerhaft kostenloser Tarif danach: bis 10 Mitglieder (organizations.max_members).
+ * Early Access: alle Funktionen kostenlos, max_members 9999 (Migration 000017). Dauerhaft kostenloser Tarif danach: bis 10 Mitglieder.
  */
 export interface Frage {
   frage: string;
