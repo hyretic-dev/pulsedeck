@@ -1,5 +1,6 @@
 ---
 import { APP_URL } from '../config';
+import Logo from './Logo.astro';
 import { FUNKTIONEN } from '../data/funktionen';
 import { ZIELGRUPPEN } from '../data/zielgruppen';
 
@@ -17,9 +18,7 @@ const menue = 'absolute left-0 top-full mt-3 w-80 rounded-2xl border border-[var
 <header class="sticky top-0 z-50 border-b border-[var(--color-border)]/60 bg-[var(--color-bg)]/85 backdrop-blur-md">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-6">
     <a href="/" class="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity" aria-label="PulseDeck Startseite">
-      <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-linke to-linke-dark flex items-center justify-center" aria-hidden="true">
-        <i class="pi pi-users text-white"></i>
-      </span>
+      <Logo groesse={36} />
       <span class="text-lg font-bold tracking-tight">PulseDeck</span>
     </a>
 

@@ -13,6 +13,7 @@ import { FeedbackBadgeComponent } from '../../features/feedback/feedback-badge/f
 import { ChatbotComponent } from '../../shared/components/chatbot/chatbot.component';
 import { ThemeService } from '../../shared/services/theme.service';
 import { OrganizationService } from '../../shared/services/organization.service';
+import { PulseLogoComponent } from '../../shared/components/pulse-logo.component';
 import { DrawerModule } from 'primeng/drawer';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
@@ -21,6 +22,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-main-layout',
   imports: [
+    PulseLogoComponent,
     RouterOutlet,
     RouterModule,
     SidebarLeft,
