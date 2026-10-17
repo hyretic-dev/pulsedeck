@@ -1,7 +1,10 @@
 <div class="flex flex-col gap-2 h-full">
     <!-- Header with Logo and Org Switcher -->
     <div class="space-y-2">
-        <div class="text-xl font-bold text-linke px-2 py-1">PulseDeck</div>
+        <div class="flex items-center gap-2.5 px-2 py-1">
+            <app-pulse-logo [groesse]="28" />
+            <span class="text-xl font-bold text-[var(--color-text)] tracking-tight">PulseDeck</span>
+        </div>
 
         <!-- Organization Switcher (only if user has multiple orgs) -->
         @if (auth.isLoggedIn() && auth.hasMultipleOrgs()) {

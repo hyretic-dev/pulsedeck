@@ -2,6 +2,7 @@
 import { FUNKTIONEN } from '../data/funktionen';
 import { ZIELGRUPPEN } from '../data/zielgruppen';
 import { APP_URL, KONTAKT } from '../config';
+import Logo from './Logo.astro';
 
 const jahr = new Date().getFullYear();
 const link = 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors';
@@ -18,7 +19,7 @@ const spalten = [
     <div class="grid gap-10 md:grid-cols-[1.4fr_repeat(4,1fr)]">
       <div>
         <a href="/" class="flex items-center gap-3">
-          <span class="w-8 h-8 rounded-lg bg-linke/20 flex items-center justify-center" aria-hidden="true"><i class="pi pi-users text-linke text-sm"></i></span>
+          <Logo groesse={32} />
           <span class="font-semibold">PulseDeck</span>
         </a>
         <p class="text-sm text-[var(--color-text-muted)] mt-3 max-w-xs">Termine, Helferschichten und Vereinswissen an einem Ort. Gehostet in Deutschland.</p>
