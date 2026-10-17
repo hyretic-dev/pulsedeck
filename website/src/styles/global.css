@@ -126,3 +126,6 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 /* Handbuch-Text */
 .handbuch h3 { scroll-margin-top: 6rem; }
 .handbuch a { color: var(--linke-rot); }
+/* Breite Tabellen scrollen innerhalb des Artikels statt die Seite zu verbreitern (Mobil) */
+.handbuch table { display: block; max-width: 100%; overflow-x: auto; }
+.handbuch th, .handbuch td { min-width: 7rem; }

@@ -23,7 +23,7 @@ export async function getStaticPaths() {
 
 const { eintrag, verwandt } = Astro.props;
 const { Content, headings } = await render(eintrag);
-const { title, description, date, updated, author, tags, faq, image } = eintrag.data;
+const { title, seoTitle, description, date, updated, author, tags, faq, image } = eintrag.data;
 const url = `${SITE_URL}/blog/${eintrag.id}`;
 const bild = image ? SITE_URL + image : STANDARD_BILD;
 const minuten = lesezeit(eintrag.body ?? '');
@@ -64,7 +64,7 @@ if (faq.length > 0) {
 ---
 
 <Base
-  title={`${title} | PulseDeck`}
+  title={seoTitle ?? `${title} | PulseDeck`}
   description={description}
   path={`/blog/${eintrag.id}`}
   jsonLd={jsonLd}
@@ -91,13 +91,13 @@ if (faq.length > 0) {
         inhalt.length >= 3 && (
           <nav class="mb-10 p-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-raised)]" aria-label="Inhalt">
             <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">Inhalt</h2>
-            <ol class="space-y-1 text-sm list-decimal list-inside">
+            <ul class="space-y-1 text-sm list-disc list-inside marker:text-linke">
               {inhalt.map((h) => (
                 <li>
                   <a href={`#${h.slug}`} class="hover:text-linke">{h.text}</a>
                 </li>
               ))}
-            </ol>
+            </ul>
           </nav>
         )
       }

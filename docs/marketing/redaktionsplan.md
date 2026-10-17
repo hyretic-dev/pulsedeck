@@ -44,7 +44,8 @@ klar strukturierte, eigenständige Abschnitte, Quellenangaben und Zahlen erhöhe
   Mai 2026 keine FAQ-Rich-Results mehr, nutzt das Markup aber weiter zum Verständnis; für KI-Suche bleibt das Format nützlich.
 - **Interne Links.** Jeder Beitrag verlinkt 1 Pillar, 2 Geschwister-Beiträge und das passende Handbuch-Kapitel; der Pillar
   verlinkt alle Beiträge seines Clusters zurück.
-- **Länge nach Intention**, nicht nach Wortzahl: Ratgeber 1.200–2.000 Wörter, Checklisten/Vorlagen kürzer mit Download.
+- **Länge nach Intention**, nicht nach Wortzahl. Die ersten Fassungen haben 500–1.000 Wörter plus FAQ; ausgebaut wird, wo die
+  Search Console Impressionen ohne Klicks oder Positionen 5–20 zeigt (dann fehlen meist Tiefe, Beispiele oder Antworten auf Folgefragen).
 - **Titel ≤ 60 Zeichen, Description 120–155 Zeichen**, Hauptkeyword vorne, Dateiname = Keyword-Slug ohne Stoppwörter.
 
 ## 3. Cluster und Beiträge
@@ -98,6 +99,24 @@ Spalten: *Intention* I = informierend, V = vergleichend/kommerziell, T = transak
 
 **Reihenfolge für die ersten 8 Wochen** (2 Beiträge/Woche wären ideal, 1 ist das Minimum): A-Pillar → B-Pillar → C-Pillar →
 WhatsApp-Alternativen → Vorstandswechsel-Checkliste → Ortsverband/Wahlkampf → Schichtplan → Vereinsapp-oder-Verwaltung.
+
+## 3a. Stand: geschrieben (17.10.2026)
+
+| Beitrag | Cluster | Art |
+|---|---|---|
+| [WhatsApp im Verein: Was ist erlaubt?](/blog/whatsapp-im-verein) | A (Pillar) | Ratgeber, Recht |
+| [WhatsApp-Alternativen für Vereine](/blog/whatsapp-alternativen-verein) | A | Vergleich |
+| [Helferplan für das Vereinsfest](/blog/helferplan-vereinsfest) | B (Pillar) | Ratgeber mit Vorlage |
+| [Schichtplan für Ehrenamtliche](/blog/schichtplan-ehrenamt) | B | Ratgeber |
+| [Ehrenamtliche gewinnen und halten](/blog/ehrenamtliche-gewinnen-halten) | B | Ratgeber mit Daten |
+| [Ortsverband digital organisieren](/blog/ortsverband-digital-organisieren) | C (Pillar) | Ratgeber, Recht |
+| [Vorstandswechsel im Verein: Checkliste](/blog/vorstandswechsel-verein-checkliste) | D | Checkliste, Recht |
+| [Vereinswiki aufbauen](/blog/vereinswiki-aufbauen) | D | Ratgeber mit Vorlage |
+| [Online-Mitgliederversammlung nach § 32 BGB](/blog/online-mitgliederversammlung) | D | Ratgeber, Recht |
+| [Vereinsapp oder Vereinsverwaltung?](/blog/vereinsapp-oder-vereinsverwaltung) | E | Vergleich |
+
+Vergleichsbeiträge: Anbieterangaben mit Quelle und „Stand Oktober 2026“; alle drei Monate prüfen und `updated` setzen. Vorschaubilder:
+`node website/scripts/og-bilder.mjs` (siehe Kopf des Skripts).
 
 ## 4. Neue Seiten außerhalb des Blogs (höchster Hebel für Produkt-Keywords)
 

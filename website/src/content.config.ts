@@ -27,6 +27,8 @@ const blog = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/blog' }),
   schema: z.object({
     title: z.string(),
+    /** Titel für Suchergebnisse und Browser-Tab (höchstens 60 Zeichen); ohne Angabe „<title> | PulseDeck“. Die H1 bleibt `title`. */
+    seoTitle: z.string().max(60).optional(),
     description: z.string(),
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),

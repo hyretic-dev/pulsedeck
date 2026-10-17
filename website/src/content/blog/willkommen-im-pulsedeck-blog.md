@@ -4,6 +4,7 @@ description: "Was dich hier erwartet: Neuigkeiten zu PulseDeck, Praxis für die 
 date: 2026-10-17
 author: "PulseDeck"
 tags: ["PulseDeck", "Neuigkeiten"]
+image: "/og/blog/willkommen-im-pulsedeck-blog.png"
 ---
 
 PulseDeck ersetzt das Chaos aus WhatsApp-Gruppen, Excel-Listen und verlorenen E-Mails durch eine strukturierte, datenschutzkonforme Plattform für Parteien, NGOs, Aktionsbündnisse und moderne Vereine.
