@@ -20,7 +20,7 @@ alwaysApply: false
 - Layouts unter `magazin/src/layouts/`.
 - Wiederverwendbare Komponenten unter `magazin/src/components/`.
 
-## SEO — Pflicht für jeden Post
+## SEO - Pflicht für jeden Post
 
 Jeder Blog-Post braucht vollständiges Frontmatter:
 
@@ -36,7 +36,7 @@ heroImage: "/blog/image.jpg"  # optional
 ```
 
 - `title`: Aussagekräftig, keine generischen Titel.
-- `description`: 150–160 Zeichen, für Suchmaschinen optimiert.
+- `description`: 150-160 Zeichen, für Suchmaschinen optimiert.
 - `pubDate`: ISO-Format.
 - `tags`: Mindestens ein Tag.
 

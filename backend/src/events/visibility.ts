@@ -9,7 +9,7 @@ export function sichtbarkeitsRang(m: Membership): number {
 }
 
 /**
- * SQL-Bedingung, ob ein Termin `e` für ein Mitglied sichtbar ist, gegeben als SQL-Ausdrücke für den Rang (1–3)
+ * SQL-Bedingung, ob ein Termin `e` für ein Mitglied sichtbar ist, gegeben als SQL-Ausdrücke für den Rang (1-3)
  * und die Arbeitsgruppen (uuid[]). Die Stufen entsprechen den Optionen des Kalenders: Öffentlich/Nur Mitglieder
  * (Rang 1), Nur Vorstand (2), Nur Admin (3); leere Rollenliste mit Arbeitsgruppe = nur deren Mitglieder (und
  * Administratoren). Der Bestand setzte das nicht durch: jedes Mitglied sah jeden Termin der Organisation.

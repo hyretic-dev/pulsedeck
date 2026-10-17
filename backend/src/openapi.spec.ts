@@ -50,7 +50,7 @@ describe('OpenAPI unter /api/docs (Contract-Test)', () => {
 
   it('liefert OpenAPI nur unter exakt kleingeschriebenem Pfad (Proxy-Block darf nicht per Schreibweise umgehbar sein)', async () => {
     // Regression aus dem Abgleich-Audit: Express routet standardmäßig case-insensitive,
-    // der Reverse Proxy blockt aber nur `/api/docs*` — `/api/DOCS-json` war extern lesbar.
+    // der Reverse Proxy blockt aber nur `/api/docs*`, `/api/DOCS-json` war extern lesbar.
     const server = testApp.app.getHttpServer();
 
     for (const pfad of ['/api/DOCS-json', '/api/Docs-json', '/api/DOCS', '/api/Docs']) {

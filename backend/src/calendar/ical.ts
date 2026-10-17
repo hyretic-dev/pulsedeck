@@ -30,7 +30,7 @@ export function wandzeitNachUtc(datum: string, uhrzeit: string, zone: string): D
 
 const formatUtc = (d: Date): string => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 
-/** Text nach RFC 5545 maskieren (Backslash, Semikolon, Komma, Zeilenumbrüche – auch \r, sonst ließen sich Felder einschleusen). */
+/** Text nach RFC 5545 maskieren (Backslash, Semikolon, Komma, Zeilenumbrüche, auch \r, sonst ließen sich Felder einschleusen). */
 export function maskiereIcalText(text: string | null | undefined): string {
   return (text ?? '').replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\r\n|\r|\n/g, '\\n');
 }

@@ -36,7 +36,7 @@ export class CreateFeedItemDto {
   @ApiPropertyOptional() @IsOptional() @IsBoolean() is_public?: boolean;
   @ApiPropertyOptional({ format: 'uuid' }) @IsOptional() @IsUUID() working_group_id?: string | null;
   @ApiPropertyOptional({ type: PollConfigDto }) @IsOptional() @ValidateNested() @Type(() => PollConfigDto) poll_config?: PollConfigDto;
-  @ApiPropertyOptional({ type: [String], description: 'Antwortmöglichkeiten einer Umfrage (2–20)' })
+  @ApiPropertyOptional({ type: [String], description: 'Antwortmöglichkeiten einer Umfrage (2-20)' })
   @IsOptional() @IsArray() @ArrayMinSize(2) @ArrayMaxSize(20) @IsString({ each: true }) @IsNotEmpty({ each: true }) @MaxLength(200, { each: true }) options?: string[];
 }
 

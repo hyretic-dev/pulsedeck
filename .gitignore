@@ -47,7 +47,7 @@ Thumbs.db
 # die für den Mobile-Build erzeugte Datei nicht
 app/src/environments/environment.capacitor.ts
 
-# Lokale Compose-Betriebswerte (Secrets) — .env.example ist die Vorlage
+# Lokale Compose-Betriebswerte (Secrets) - .env.example ist die Vorlage
 .env
 backend/dist
 

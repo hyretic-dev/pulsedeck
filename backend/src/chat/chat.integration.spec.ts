@@ -197,7 +197,7 @@ describe('Chat (echtes PostgreSQL)', () => {
       expect(JSON.stringify(gruppen)).not.toContain('Beta-AG');
     });
 
-    it('ändert nur persönliche Profilangaben – nie Status oder Rolle', async () => {
+    it('ändert nur persönliche Profilangaben, nie Status oder Rolle', async () => {
       const protokoll = mitWerkzeug([{ name: 'updateProfile', arguments: { city: 'Köln', phone: '0221 123', status: 'Active', app_role: 'admin', permissions: ['feed:approve'] } }]);
       await f.admin.query("UPDATE members SET status = 'Pending' WHERE id = $1", [ids.annaMitglied]);
 

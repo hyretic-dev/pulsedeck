@@ -18,7 +18,7 @@ WORKDIR /app
 
 # NODE_ENV bewusst nicht im Image gesetzt: base Compose läuft mit MAIL_TRANSPORT=log
 # (O4 offen); docker-compose.prod.yml setzt NODE_ENV=production, sobald ein
-# produktiver Mail-Adapter (O4) existiert — die Start-Validierung erzwingt das.
+# produktiver Mail-Adapter (O4) existiert - die Start-Validierung erzwingt das.
 
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev

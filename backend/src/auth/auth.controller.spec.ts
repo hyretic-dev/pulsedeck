@@ -166,7 +166,7 @@ describe('AuthController /api/v1/auth (Integrationstest)', () => {
     expect(bekannt.body).toEqual(unbekannt.body);
   });
 
-  it('lehnt nach Überschreiten des Mail-Limits mit 429 ab — unabhängig davon, ob die E-Mail existiert', async () => {
+  it('lehnt nach Überschreiten des Mail-Limits mit 429 ab, unabhängig davon, ob die E-Mail existiert', async () => {
     testApp.ports.users.anlegen({
       ...nutzer,
       id: 'user-limit',

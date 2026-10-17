@@ -15,7 +15,7 @@ faq:
     antwort: "Mit festen Schichten: Infostand-Termine mit Uhrzeit und Zahl der Plätze, Plakatier-Touren als eigene Aufgaben mit Gebiet und Team. Aktive tragen sich selbst ein, offene Lücken sind für alle sichtbar."
 ---
 
-**Kurz gesagt:** Ein Ortsverband hat dieselben Probleme wie ein Verein – Termine, Aktive, Wissen – plus zwei Besonderheiten: **Wahlkämpfe** mit vielen kurzfristigen Einsätzen und **besonders schützenswerte Daten**, denn Parteimitgliedschaft verrät politische Meinungen (**Art. 9 DSGVO**). Gut organisiert ist ein Ortsverband, wenn Termine, Helferschichten, Beschlüsse und Wissen an **einem** geschützten Ort liegen statt in privaten Chats und E-Mail-Verteilern.
+**Kurz gesagt:** Ein Ortsverband hat dieselben Probleme wie ein Verein - Termine, Aktive, Wissen - plus zwei Besonderheiten: **Wahlkämpfe** mit vielen kurzfristigen Einsätzen und **besonders schützenswerte Daten**, denn Parteimitgliedschaft verrät politische Meinungen (**Art. 9 DSGVO**). Gut organisiert ist ein Ortsverband, wenn Termine, Helferschichten, Beschlüsse und Wissen an **einem** geschützten Ort liegen statt in privaten Chats und E-Mail-Verteilern.
 
 > Dieser Beitrag ist eine Orientierung und keine Rechtsberatung. Die Regeln eurer Partei, eurer Landesgeschäftsstelle und eurer Gemeinde gehen vor.
 
@@ -29,17 +29,17 @@ faq:
 | Wahljahr | Kandidatenaufstellung, Plakatieren, Infostände, Haustürgespräche, Verteilaktionen |
 | Jahresende | Planung, Rückblick, Ehrungen |
 
-Viele dieser Aufgaben wiederholen sich jedes Jahr – und jedes Jahr wird neu herumgefragt, wie es letztes Mal lief.
+Viele dieser Aufgaben wiederholen sich jedes Jahr, und jedes Jahr wird neu herumgefragt, wie es letztes Mal lief.
 
 ## Datenschutz: politische Daten sind besonders sensibel
 
 Nach **Art. 9 Abs. 1 DSGVO** gehören Daten, aus denen **politische Meinungen** hervorgehen, zu den besonderen Kategorien personenbezogener Daten. Schon die Information, dass jemand Mitglied einer Partei ist, fällt darunter.
 
-**Art. 9 Abs. 2 lit. d DSGVO** erlaubt Organisationen mit politischer Ausrichtung, die Daten ihrer Mitglieder, ehemaligen Mitglieder und Personen in regelmäßigem Kontakt im Rahmen ihrer Tätigkeit zu verarbeiten – **ohne Einwilligung aber nicht nach außen** offenzulegen.
+**Art. 9 Abs. 2 lit. d DSGVO** erlaubt Organisationen mit politischer Ausrichtung, die Daten ihrer Mitglieder, ehemaligen Mitglieder und Personen in regelmäßigem Kontakt im Rahmen ihrer Tätigkeit zu verarbeiten, **ohne Einwilligung aber nicht nach außen** offenzulegen.
 
 Was das praktisch bedeutet:
 
-- **Keine offenen Gruppen mit Telefonnummern.** In einem Gruppenchat sieht jede Person, wer Mitglied ist – auch Unterstützer, die nicht Mitglied sind.
+- **Keine offenen Gruppen mit Telefonnummern.** In einem Gruppenchat sieht jede Person, wer Mitglied ist, auch Unterstützer, die nicht Mitglied sind.
 - **Trennung von Mitgliedern und Unterstützern.** Wer nur beim Plakatieren hilft, muss nicht die Mitgliederliste sehen.
 - **Rechte nach Rollen.** Der Vorstand sieht mehr als Aktive, Aktive mehr als Gäste.
 - **Hosting und Auftragsverarbeitung prüfen.** Wo liegen die Daten, gibt es einen Auftragsverarbeitungsvertrag?
@@ -54,8 +54,8 @@ Was das praktisch bedeutet:
 
 | Einsatz | Wie planen |
 |---|---|
-| Plakatier-Touren | Pro Tour: Gebiet, Datum, Team von 2–3 Personen, Fahrzeug |
-| Infostände | Pro Stand: Ort, Zeitfenster von 2 Stunden, 2–3 Plätze, Material |
+| Plakatier-Touren | Pro Tour: Gebiet, Datum, Team von 2-3 Personen, Fahrzeug |
+| Infostände | Pro Stand: Ort, Zeitfenster von 2 Stunden, 2-3 Plätze, Material |
 | Haustür / Verteilen | Pro Gebiet: Straßenliste, Team, Rückmeldung danach |
 | Abbau der Plakate | Fester Termin nach der Wahl, mit genauso vielen Leuten wie beim Aufhängen |
 
@@ -63,11 +63,11 @@ Wie ihr Schichten schneidet und Lücken füllt: [Schichtplan für Ehrenamtliche]
 
 ## Wissen sichern
 
-Was in einem Wahlkampf gelernt wird, ist beim nächsten oft vergessen: Wo dürfen Plakate hängen, wer liefert, welche Standorte funktionieren? Haltet das nach jeder Wahl fest – zum Beispiel in einem [Wiki](/blog/vereinswiki-aufbauen).
+Was in einem Wahlkampf gelernt wird, ist beim nächsten oft vergessen: Wo dürfen Plakate hängen, wer liefert, welche Standorte funktionieren? Haltet das nach jeder Wahl fest, zum Beispiel in einem [Wiki](/blog/vereinswiki-aufbauen).
 
 ## Wie PulseDeck Ortsverbände unterstützt
 
-PulseDeck ist für Organisationen gemacht, die von Aktiven leben – Parteigliederungen, Bündnisse, NGOs und Vereine. Termine haben **Helferslots** für Infostände und Plakatier-Touren, Aktive tragen sich selbst ein. **Rollen** steuern, wer welche Termine, Artikel und Dokumente sieht; **Arbeitsgruppen** bündeln Themen wie „Wahlkampf“ oder „Kommunalpolitik“. Befreundete Gruppen könnt ihr als **Gast-Organisation** zu einzelnen Terminen einladen. Ankündigungen gehen über Feed und E-Mail, Wissen liegt im Wiki. Mitglieder melden sich per E-Mail an, eine Telefonnummer ist nicht nötig. PulseDeck wird in Deutschland gehostet.
+PulseDeck ist für Organisationen gemacht, die von Aktiven leben, Parteigliederungen, Bündnisse, NGOs und Vereine. Termine haben **Helferslots** für Infostände und Plakatier-Touren, Aktive tragen sich selbst ein. **Rollen** steuern, wer welche Termine, Artikel und Dokumente sieht; **Arbeitsgruppen** bündeln Themen wie „Wahlkampf“ oder „Kommunalpolitik“. Befreundete Gruppen könnt ihr als **Gast-Organisation** zu einzelnen Terminen einladen. Ankündigungen gehen über Feed und E-Mail, Wissen liegt im Wiki. Mitglieder melden sich per E-Mail an, eine Telefonnummer ist nicht nötig. PulseDeck wird in Deutschland gehostet.
 
 ## Quellen
 

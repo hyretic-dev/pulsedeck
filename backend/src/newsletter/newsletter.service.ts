@@ -141,7 +141,7 @@ export class NewsletterService {
 
   /**
    * Newsletter versenden: reiht je aktivem Mitglied der Organisation (mit E-Mail) eine Outbox-Mail ein, setzt die
-   * Beiträge auf `sent` und `last_sent_at` – alles in einer Transaktion. Zustellung und Wiederholung übernimmt die Outbox.
+   * Beiträge auf `sent` und `last_sent_at`, alles in einer Transaktion. Zustellung und Wiederholung übernimmt die Outbox.
    * Die Adressen stammen nur aus dieser Organisation (der Bestand mailte an alle Mitglieder aller Organisationen).
    */
   async versenden(userId: string | null, orgId: string, optionen: { erzwingen: boolean; nurWennFaellig?: boolean }): Promise<{ sent: boolean; message: string; items: number; recipients: number }> {

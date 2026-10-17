@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { SITE_URL } from '../config';
 
-// Alle Seiten der Website sind öffentlich und sollen gefunden werden – auch von KI-Suchsystemen (ChatGPT, Claude, Perplexity,
+// Alle Seiten der Website sind öffentlich und sollen gefunden werden, auch von KI-Suchsystemen (ChatGPT, Claude, Perplexity,
 // Gemini). Die KI-Crawler stehen ausdrücklich da, damit niemand sie später aus Versehen mit einer Pauschalregel aussperrt.
 const KI_CRAWLER = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot-Extended', 'CCBot'];
 

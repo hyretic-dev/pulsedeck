@@ -28,7 +28,7 @@ Wir ersetzen das Chaos aus WhatsApp-Gruppen, Excel-Listen und verlorenen E-Mails
 
 PulseDeck setzt auf moderne, robuste Technologien:
 
-*   **Website:** [Astro](https://astro.build) (statisch, Markdown mit Frontmatter für das Handbuch) in `website/` – Startseite, Handbuch, Impressum, Datenschutz, unter `pulsedeck.de`
+*   **Website:** [Astro](https://astro.build) (statisch, Markdown mit Frontmatter für das Handbuch) in `website/`, Startseite, Handbuch, Impressum, Datenschutz, unter `pulsedeck.de`
 *   **Anwendung (Frontend):** [Angular 21](https://angular.dev) (Standalone Components, Signals), unter `app.pulsedeck.de`
 *   **UI Library:** [PrimeNG](https://primeng.org) + [Tailwind CSS](https://tailwindcss.com) (für Utility-Styling)
 *   **Backend / DB:** [NestJS](https://nestjs.com) (REST-API, Auth, Jobs, Echtzeit per SSE) + [PostgreSQL 17](https://www.postgresql.org) mit pgvector; Dateien im Volume. Alles selbst gehostet (Docker Compose).

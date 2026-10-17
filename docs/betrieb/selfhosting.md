@@ -13,7 +13,7 @@ docker compose ps             # alle vier müssen (healthy) sein
 - PostgreSQL hat **keinen** öffentlichen Port; das Backend nur im internen Netz. Nur das Backend hängt zusätzlich im Netz `egress` (ausgehender Zugriff für Mail, Mistral, Web-Push; O10), Postgres nicht.
 - Frontend veröffentlicht `${FRONTEND_PORT:-8080}:80`; nginx routet `/api/` ans Backend, SPA-Fallback danach.
 - Website veröffentlicht `${WEBSITE_PORT:-8081}:80`. `APP_BASE_URL` ist die Adresse der Anwendung: die Website verlinkt dorthin (beim Bauen eingetragen) und leitet alte Anwendungsadressen dorthin weiter. `SITE_URL` (optional) ist die Adresse der Website selbst (kanonische URLs, Sitemap). Das Handbuch liegt als Markdown mit Frontmatter in `website/src/content/handbook/`.
-- Backend-Health: `/health/liveness` (Prozess lebt) und `/health/readiness` (DB-Ping) — nur intern erreichbar, Compose-Healthcheck nutzt readiness. Hinweis: Über nginx extern liefert `/health/readiness` 200 aus dem **statischen** nginx-`/health`-Block (Coolify-Healthcheck), nicht vom Backend; extern daher nur `/health` für die Frontend-Erreichbarkeit verwenden. Der Frontend-Dienst hat seit 2026-10-14 einen Compose-Healthcheck auf `/health`.
+- Backend-Health: `/health/liveness` (Prozess lebt) und `/health/readiness` (DB-Ping), nur intern erreichbar, Compose-Healthcheck nutzt readiness. Hinweis: Über nginx extern liefert `/health/readiness` 200 aus dem **statischen** nginx-`/health`-Block (Coolify-Healthcheck), nicht vom Backend; extern daher nur `/health` für die Frontend-Erreichbarkeit verwenden. Der Frontend-Dienst hat seit 2026-10-14 einen Compose-Healthcheck auf `/health`.
 - Migration-before-serve: der Backend-Entrypoint (`backend/docker-entrypoint.sh`) führt `node-pg-migrate -d MIGRATIONS_DATABASE_URL up` mit der Migrations-Rolle aus; schlägt das fehl, startet der Server nicht.
 - Rollen-Trennung: `docker/postgres/10-roles.sh` legt `pulsedeck_migrations` (DDL) und `pulsedeck_runtime` (nur DML, Grants aus Migration `000004`) an.
 
@@ -23,7 +23,7 @@ docker compose ps             # alle vier müssen (healthy) sein
 
 | Wert | Verhalten | Pflichtvariablen |
 |---|---|---|
-| `log` | schreibt Verifikations-/Magic-/Reset-Links **samt Token ins Backend-Log**; nur Entwicklung, in der Produktion gesperrt | – |
+| `log` | schreibt Verifikations-/Magic-/Reset-Links **samt Token ins Backend-Log**; nur Entwicklung, in der Produktion gesperrt | - |
 | `smtp` | Versand über nodemailer; mit `SMTP_USER`/`SMTP_PASSWORD` wird STARTTLS erzwungen (kein Klartext-Fallback), `SMTP_SECURE=true` oder Port 465 = implizites TLS | `MAIL_FROM`, `SMTP_HOST` (+ `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`) |
 | `resend` | Versand über die Resend-HTTP-API | `MAIL_FROM`, `RESEND_API_KEY` |
 
@@ -75,7 +75,7 @@ Der Compose-Stack **braucht keine zweite Komponente für Dateien**: Uploads gehe
 
 ## OpenAPI
 
-`/api/docs` (UI) und `/api/docs-json` existieren am Backend; der Reverse Proxy blockt sie extern (404, case-insensitive — `/api/DOCS-json` war bis zum Audit 2026-10-13 erreichbar, siehe E20; das Backend routet zusätzlich case-sensitive). Intern erreichbar per `docker compose exec backend wget -qO- http://127.0.0.1:3000/api/docs-json`.
+`/api/docs` (UI) und `/api/docs-json` existieren am Backend; der Reverse Proxy blockt sie extern (404, case-insensitive, `/api/DOCS-json` war bis zum Audit 2026-10-13 erreichbar, siehe E20; das Backend routet zusätzlich case-sensitive). Intern erreichbar per `docker compose exec backend wget -qO- http://127.0.0.1:3000/api/docs-json`.
 
 ## Auth-Smoke (manuell, per curl durch den nginx)
 
@@ -122,7 +122,7 @@ MIGRATIONS_DATABASE_URL='postgres://pulsedeck_migrations:<pw>@postgres-host:5432
 
 ## Backup / Restore
 
-Eine vollständige Sicherung besteht aus **Datenbank und Datei-Volume** — ein DB-Dump allein genügt nicht — sowie der `.env` (Secrets, `SECRETS_ENCRYPTION_KEY`, `JWT_SECRET`, VAPID-Schlüssel) an einem getrennten, geschützten Ort.
+Eine vollständige Sicherung besteht aus **Datenbank und Datei-Volume**, ein DB-Dump allein genügt nicht, sowie der `.env` (Secrets, `SECRETS_ENCRYPTION_KEY`, `JWT_SECRET`, VAPID-Schlüssel) an einem getrennten, geschützten Ort.
 
 ```bash
 # DB-Backup (custom format, wiederherstellbar mit pg_restore)
@@ -145,4 +145,4 @@ docker run --rm -v pulsedeck_files-data:/data -v "$PWD":/backup alpine tar xzf /
 - *Dateien:* Archiv aus dem Volume gezogen und in ein frisches Volume entpackt, alle 7 Objekte mit identischer SHA-256.
 - *Plain-SQL-Variante der Datenbank* (ältere Anleitung, `pg_dump | gzip` → `psql`): im Audit 2026-10-13 in ein neues Projekt eingespielt, Prüfsumme der Nutzerdaten identisch, Logins funktionieren.
 
-Grenzen: Die Proben liefen auf einem Host mit kleinen synthetischen Datenmengen — keine RTO-Aussage; Aufbewahrung, RPO/RTO und ein regelmäßiger automatischer Zeitplan sind Betreiber-Entscheidungen. Eine Wiederherstellung auf einem **anderen** Host (Netz, DNS, Secrets neu) wurde nicht geprobt.
+Grenzen: Die Proben liefen auf einem Host mit kleinen synthetischen Datenmengen, keine RTO-Aussage; Aufbewahrung, RPO/RTO und ein regelmäßiger automatischer Zeitplan sind Betreiber-Entscheidungen. Eine Wiederherstellung auf einem **anderen** Host (Netz, DNS, Secrets neu) wurde nicht geprobt.

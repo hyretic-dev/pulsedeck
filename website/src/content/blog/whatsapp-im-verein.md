@@ -1,7 +1,7 @@
 ---
-title: "WhatsApp im Verein: Was ist erlaubt – und was sind die Alternativen?"
+title: "WhatsApp im Verein: Was ist erlaubt, und was sind die Alternativen?"
 seoTitle: "WhatsApp im Verein: Was ist erlaubt? | PulseDeck"
-description: "Darf ein Verein WhatsApp nutzen? Was Datenschutzbehörden sagen, wo die Risiken liegen und wie ihr Vereinskommunikation sauber aufstellt – mit Checkliste."
+description: "Darf ein Verein WhatsApp nutzen? Was Datenschutzbehörden sagen, wo die Risiken liegen und wie ihr Vereinskommunikation sauber aufstellt, mit Checkliste."
 date: 2026-10-17
 author: "PulseDeck"
 tags: ["WhatsApp", "Datenschutz", "Vereinskommunikation"]
@@ -17,7 +17,7 @@ faq:
     antwort: "Das hängt vom Zweck ab. Für Chats eignen sich datensparsame Messenger wie Signal oder Threema. Für Termine, Helferplanung, Abstimmungen und Wissen eignet sich eine Vereinsplattform besser, weil Informationen dort nicht im Chatverlauf untergehen."
 ---
 
-**Kurz gesagt:** WhatsApp ist im Verein nicht ausdrücklich verboten, aber datenschutzrechtlich umstritten. Die Aufsichtsbehörden der Länder bewerten es unterschiedlich – von „unter Voraussetzungen möglich“ bis „in der Regel nicht zu begründen“. Wer WhatsApp nutzt, sollte Mitglieder einbeziehen, nichts Wichtiges *nur* dort verkünden und für Termine, Helferlisten und Beschlüsse einen eigenen, geordneten Kanal haben.
+**Kurz gesagt:** WhatsApp ist im Verein nicht ausdrücklich verboten, aber datenschutzrechtlich umstritten. Die Aufsichtsbehörden der Länder bewerten es unterschiedlich, von „unter Voraussetzungen möglich“ bis „in der Regel nicht zu begründen“. Wer WhatsApp nutzt, sollte Mitglieder einbeziehen, nichts Wichtiges *nur* dort verkünden und für Termine, Helferlisten und Beschlüsse einen eigenen, geordneten Kanal haben.
 
 > Dieser Beitrag ist eine Orientierung und keine Rechtsberatung. Im Zweifel fragt bei der Datenschutzaufsicht eures Bundeslandes oder eurem Landesverband nach.
 
@@ -27,7 +27,7 @@ WhatsApp ist praktisch, fast alle haben es installiert. Genau deshalb landet die
 
 1. **Telefonnummern werden sichtbar.** In einer Gruppe sieht jedes Mitglied die Nummern aller anderen. Für einen Verein, der die Daten seiner Mitglieder schützen muss, ist das eine Weitergabe, die nicht jede Person will.
 2. **Adressbuch und Metadaten.** WhatsApp gleicht das Adressbuch des Telefons ab. Das Bayerische Landesamt für Datenschutzaufsicht begründet seine kritische Haltung unter anderem mit diesem Zugriff auf Adressbücher Dritter und mit Metadaten, die in die USA gelangen.
-3. **Der Verein ist verantwortlich.** Organisiert der Vorstand Gruppen und fügt Mitglieder hinzu, handelt er für den Verein – und der Verein trägt die Verantwortung für die Verarbeitung der Mitgliederdaten nach der DSGVO.
+3. **Der Verein ist verantwortlich.** Organisiert der Vorstand Gruppen und fügt Mitglieder hinzu, handelt er für den Verein, und der Verein trägt die Verantwortung für die Verarbeitung der Mitgliederdaten nach der DSGVO.
 
 ## Was sagen die Datenschutzbehörden?
 
@@ -40,7 +40,7 @@ Eine bundeseinheitliche Linie gibt es nicht. Zwei Beispiele zeigen die Spannweit
 
 Für den Alltag heißt das: Ihr bewegt euch in einer Grauzone. Je mehr ihr freiwillig, transparent und mit Alternativen arbeitet, desto besser.
 
-## Typische Fehler – und was ihr stattdessen tut
+## Typische Fehler - und was ihr stattdessen tut
 
 | Fehler | Besser |
 |---|---|
@@ -85,5 +85,5 @@ Den Link zu einem Termin könnt ihr weiterhin in eure WhatsApp-Gruppe posten. Di
 - Landesbeauftragter für den Datenschutz und die Informationsfreiheit Rheinland-Pfalz: [Datenschutz in Vereinen](https://www.datenschutz.rlp.de/themen/vereine)
 - Bayerisches Landesamt für Datenschutzaufsicht: [FAQ](https://lda.bayern.de/de/faq.html)
 - Landesbeauftragter für den Datenschutz Baden-Württemberg: [Datenschutz im Verein](https://www.baden-wuerttemberg.datenschutz.de/datenschutz-im-verein/)
-- Sportbund Rheinhessen / VIBSS: [WhatsApp – Rechtslage mit Einführung der EU-DSGVO](https://sportbund-rheinhessen.vibss.de/vereinsmanagement/digitalisierung/kommunikation/social-media/whatsapp/whatsapp-rechtslage-mit-einfuehrung-der-eu-dsgvo?type=123)
+- Sportbund Rheinhessen / VIBSS: [WhatsApp - Rechtslage mit Einführung der EU-DSGVO](https://sportbund-rheinhessen.vibss.de/vereinsmanagement/digitalisierung/kommunikation/social-media/whatsapp/whatsapp-rechtslage-mit-einfuehrung-der-eu-dsgvo?type=123)
 - Internet-ABC: [WhatsApp jetzt ab 13 Jahren](https://www.internet-abc.de/kinder/neues-uebers-netz/whatsapp-jetzt-ab-13-jahren/)

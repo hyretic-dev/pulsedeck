@@ -6,7 +6,7 @@ import { organisation, website, STANDARD_BILD } from '../seo';
 interface Props {
   title: string;
   description: string;
-  /** Pfad der Seite ohne Domain, z. B. "/handbuch/erste-schritte" – ergibt die kanonische URL. */
+  /** Pfad der Seite ohne Domain, z. B. "/handbuch/erste-schritte", ergibt die kanonische URL. */
   path: string;
   /** Seitenspezifische strukturierte Daten (schema.org); landen zusammen mit Organisation und WebSite in einem @graph. */
   jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;

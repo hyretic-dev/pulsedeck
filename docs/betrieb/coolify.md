@@ -37,12 +37,12 @@ keinem Geheimnis das Häkchen gesetzt ist. Werte nie in den Chat oder ins Repo.
 | `JWT_SECRET` | `openssl rand -hex 32` |
 | `APP_BASE_URL` | `https://app.pulsedeck.de` (die Anwendung; einzige Basis für Links in Mails, Sitemap, Kalender; die Website verlinkt und leitet alte Adressen hierhin weiter) |
 | `MAIL_TRANSPORT`, `MAIL_FROM`, `SMTP_*` | IONOS: `smtp`, `PulseDeck <mailer@pulsedeck.de>`, `SMTP_HOST=smtp.ionos.de`, `SMTP_PORT=587`, `SMTP_SECURE=false`, `SMTP_USER=mailer@pulsedeck.de`, `SMTP_PASSWORD` als Secret. Alternativ `resend` + `RESEND_API_KEY` |
-| `SECRETS_ENCRYPTION_KEY` | `openssl rand -base64 32` — **verloren = SMTP-Passwörter der Organisationen neu eingeben**; getrennt sichern |
+| `SECRETS_ENCRYPTION_KEY` | `openssl rand -base64 32`, **verloren = SMTP-Passwörter der Organisationen neu eingeben**; getrennt sichern |
 
 **Optional:** `SITE_URL` (Adresse der Website, Standard `https://pulsedeck.de`; nur bei anderer Domain), `MISTRAL_API_KEY` (Chat und Wissensbasis, sonst 503), `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT` (Push;
 `npx web-push generate-vapid-keys`), `CORS_ORIGINS` (native Apps), `MAINTENANCE_TOKEN`, `MAX_UPLOAD_MB`, `APP_TIMEZONE`,
 Rate-Limits (`.env.example`). `READ_ONLY=true` sperrt schreibende API-Aufrufe (503, Login bleibt möglich), `JOBS_ENABLED=false`
-schaltet Newsletter, Push und Mail-Outbox ab — beides nur für Wartung oder Abnahme.
+schaltet Newsletter, Push und Mail-Outbox ab, beides nur für Wartung oder Abnahme.
 
 ## 3. Deployment und Prüfung
 
@@ -88,7 +88,7 @@ docker run --rm -v <ressource>_files-data:/data:ro -v "$PWD":/backup alpine tar 
 ```
 
 **Eingerichtet (2026-10-17):** `/root/pulsedeck-backups/backup.sh` per Root-Cron täglich 03:15 UTC (Datenbank + Datei-Volume, Dump wird
-mit `pg_restore --list` geprüft, Aufbewahrung 14 Tage, Protokoll `backup.log`). Die Sicherungen liegen auf **demselben Server** — eine
+mit `pg_restore --list` geprüft, Aufbewahrung 14 Tage, Protokoll `backup.log`). Die Sicherungen liegen auf **demselben Server** - eine
 Kopie außerhalb (z. B. Hetzner Storage Box) fehlt noch.
 
 Volume-Namen mit `docker volume ls` prüfen. Restore: `selfhosting.md` („Backup / Restore“). Die Umgebungsvariablen (vor allem

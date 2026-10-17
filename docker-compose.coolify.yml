@@ -50,7 +50,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-}
       JWT_ISSUER: ${JWT_ISSUER:-pulsedeck}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-pulsedeck-web}
-      # Endgültige Adresse mit https, z. B. https://app.example.org – einzige erlaubte Basis für Links in Mails
+      # Endgültige Adresse mit https, z. B. https://app.example.org - einzige erlaubte Basis für Links in Mails
       APP_BASE_URL: ${APP_BASE_URL:-}
       DATABASE_URL: postgres://pulsedeck_runtime:${POSTGRES_RUNTIME_PASSWORD:-}@postgres:5432/pulsedeck
       MIGRATIONS_DATABASE_URL: postgres://pulsedeck_migrations:${POSTGRES_MIGRATIONS_PASSWORD:-}@postgres:5432/pulsedeck
