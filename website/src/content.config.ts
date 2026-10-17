@@ -14,6 +14,8 @@ const handbook = defineCollection({
     description: z.string(),
     order: z.number(),
     icon: z.string().default('pi-book'),
+    /** Kapitel aus Fragen (### Frage) und Antworten: wird zusätzlich als FAQPage ausgezeichnet. */
+    faq: z.boolean().default(false),
   }),
 });
 
@@ -31,6 +33,10 @@ const blog = defineCollection({
     author: z.string().default('PulseDeck'),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    /** Vorschaubild (Pfad unter public/, z. B. /og/blog/beitrag.png); ohne Angabe das PulseDeck-Bild. */
+    image: z.string().optional(),
+    /** Häufige Fragen zum Beitrag: werden am Ende angezeigt und als FAQPage ausgezeichnet. Antworten kurz und eigenständig halten. */
+    faq: z.array(z.object({ frage: z.string(), antwort: z.string() })).default([]),
   }),
 });
 

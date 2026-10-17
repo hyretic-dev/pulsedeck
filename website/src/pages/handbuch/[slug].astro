@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import SiteHeader from '../../components/SiteHeader.astro';
 import Footer from '../../components/Footer.astro';
 import { SITE_URL } from '../../config';
+import { brotkrumen, fragenAusMarkdown, ORG_ID, SOFTWARE_ID, WEBSITE_ID } from '../../seo';
 
 export async function getStaticPaths() {
   const kapitel = (await getCollection('handbook')).sort((a, b) => a.data.order - b.data.order);
@@ -16,15 +17,38 @@ export async function getStaticPaths() {
 const { eintrag, kapitel, davor, danach } = Astro.props;
 const { Content, headings } = await render(eintrag);
 const abschnitte = headings.filter((h) => h.depth === 3);
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'TechArticle',
-  headline: eintrag.data.title,
-  description: eintrag.data.description,
-  inLanguage: 'de',
-  url: `${SITE_URL}/handbuch/${eintrag.id}`,
-  isPartOf: { '@type': 'WebSite', name: 'PulseDeck Handbuch', url: `${SITE_URL}/handbuch` },
-};
+const url = `${SITE_URL}/handbuch/${eintrag.id}`;
+const jsonLd: Array<Record<string, unknown>> = [
+  {
+    '@type': 'TechArticle',
+    '@id': `${url}#artikel`,
+    headline: eintrag.data.title,
+    description: eintrag.data.description,
+    inLanguage: 'de-DE',
+    url,
+    mainEntityOfPage: url,
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': SOFTWARE_ID },
+    author: { '@id': ORG_ID },
+    publisher: { '@id': ORG_ID },
+  },
+  brotkrumen([
+    { name: 'Handbuch', pfad: '/handbuch' },
+    { name: eintrag.data.title, pfad: `/handbuch/${eintrag.id}` },
+  ]),
+];
+// Fragenkapitel: Fragen und Antworten zusätzlich als FAQPage (hilft Suchmaschinen und KI-Assistenten beim Zuordnen)
+if (eintrag.data.faq && eintrag.body) {
+  jsonLd.push({
+    '@type': 'FAQPage',
+    '@id': `${url}#faq`,
+    mainEntity: fragenAusMarkdown(eintrag.body).map((f) => ({
+      '@type': 'Question',
+      name: f.frage,
+      acceptedAnswer: { '@type': 'Answer', text: f.antwort },
+    })),
+  });
+}
 ---
 
 <Base

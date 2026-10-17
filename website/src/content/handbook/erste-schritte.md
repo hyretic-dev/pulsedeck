@@ -1,6 +1,6 @@
 ---
 title: "Erste Schritte"
-description: "PulseDeck Handbuch – Erste Schritte: Anmeldung & Sicherheit, Profil & Skills, Benachrichtigungen, PulseDeck AI Agent (Chatbot)."
+description: "Anmelden per Magic Link oder Passwort, Profil und Fähigkeiten pflegen, Benachrichtigungen einstellen und den KI-Assistenten nutzen: der Einstieg in PulseDeck."
 order: 20
 icon: pi-flag
 ---

@@ -1,6 +1,6 @@
 ---
 title: "Willkommen"
-description: "Willkommen im PulseDeck Handbuch: Überblick und Aufbau der Anleitung."
+description: "Das offizielle Handbuch von PulseDeck: Anleitungen von der ersten Anmeldung bis zur Verwaltung deiner Organisation."
 order: 10
 icon: pi-book
 ---

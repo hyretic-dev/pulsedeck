@@ -1,6 +1,6 @@
 ---
 title: "Kalender & Events"
-description: "PulseDeck Handbuch – Kalender & Events: Termine finden & Exportieren, Anmelden & Helferslots, Events teilen & Gäste."
+description: "Termine finden, filtern und in den eigenen Kalender exportieren, sich für Helferslots eintragen und Events mit Gästen teilen: Kalender und Events in PulseDeck."
 order: 30
 icon: pi-calendar
 ---

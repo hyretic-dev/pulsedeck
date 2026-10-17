@@ -3,14 +3,30 @@ import Base from '../../layouts/Base.astro';
 import SiteHeader from '../../components/SiteHeader.astro';
 import Footer from '../../components/Footer.astro';
 import { beitraege, datum } from '../../blog';
+import { SITE_URL } from '../../config';
+import { brotkrumen, ORG_ID, WEBSITE_ID } from '../../seo';
 
 const liste = await beitraege();
+const jsonLd = [
+  {
+    '@type': 'Blog',
+    '@id': `${SITE_URL}/blog#blog`,
+    url: `${SITE_URL}/blog`,
+    name: 'PulseDeck Blog',
+    inLanguage: 'de-DE',
+    isPartOf: { '@id': WEBSITE_ID },
+    publisher: { '@id': ORG_ID },
+    blogPost: liste.map((b) => ({ '@type': 'BlogPosting', headline: b.data.title, url: `${SITE_URL}/blog/${b.id}`, datePublished: b.data.date.toISOString() })),
+  },
+  brotkrumen([{ name: 'Blog', pfad: '/blog' }]),
+];
 ---
 
 <Base
-  title="Blog – PulseDeck"
+  title="Blog: Vereinsarbeit, Ehrenamt und Datenschutz – PulseDeck"
   description="Neuigkeiten zu PulseDeck, Praxis für Vereine, Parteien und NGOs und Einblicke in die Entwicklung."
   path="/blog"
+  jsonLd={jsonLd}
 >
   <SiteHeader aktiv="blog" />
   <main class="max-w-3xl mx-auto px-6 py-16">

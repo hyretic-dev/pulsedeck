@@ -2,22 +2,50 @@
 import Base from '../layouts/Base.astro';
 import Footer from '../components/Footer.astro';
 import { APP_URL, SITE_URL } from '../config';
+import { ORG_ID, SOFTWARE_ID, STANDARD_BILD, WEBSITE_ID } from '../seo';
 
+const titel = 'PulseDeck – Vereinsapp für Helferplanung & Mitglieder';
 const beschreibung =
-  'PulseDeck ergänzt eure Messenger-Gruppen um verbindliche Einsatzplanung und ein datensicheres Vereinsgedächtnis. Für Parteien, NGOs, Aktionsbündnisse und Vereine. Hosted & made in EU.';
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'SoftwareApplication',
-  name: 'PulseDeck',
-  applicationCategory: 'BusinessApplication',
-  operatingSystem: 'Web',
-  url: SITE_URL,
-  description: beschreibung,
-  offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
-};
+  'Die datensichere Vereinsapp aus der EU: Termine, Helferslots, Mitglieder, Wiki und Dateien an einem Ort – für Vereine, Parteien, NGOs und Bündnisse.';
+const jsonLd = [
+  {
+    '@type': 'SoftwareApplication',
+    '@id': SOFTWARE_ID,
+    name: 'PulseDeck',
+    applicationCategory: 'BusinessApplication',
+    applicationSubCategory: 'Vereinsverwaltung und Mitgliederaktivierung',
+    operatingSystem: 'Web, Android',
+    url: `${SITE_URL}/`,
+    image: STANDARD_BILD,
+    description: beschreibung,
+    inLanguage: 'de-DE',
+    publisher: { '@id': ORG_ID },
+    featureList: [
+      'Termine und Kalender mit iCal-Abo',
+      'Helferslots und Schichtplanung',
+      'Mitgliederverwaltung mit Rollen und Rechten',
+      'Arbeitsgruppen',
+      'Newsfeed, Umfragen und E-Mail-Newsletter',
+      'Wiki als Vereinsgedächtnis',
+      'Dateiablage',
+      'KI-Assistent für Fragen zum eigenen Verein (optional)',
+    ],
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR', description: 'Early Access: voller Funktionsumfang kostenlos' },
+  },
+  {
+    '@type': 'WebPage',
+    '@id': `${SITE_URL}/#webseite`,
+    url: `${SITE_URL}/`,
+    name: titel,
+    description: beschreibung,
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': SOFTWARE_ID },
+    inLanguage: 'de-DE',
+  },
+];
 ---
 
-<Base title="PulseDeck – Mitgliederaktivierung für Vereine, Parteien und NGOs" description={beschreibung} path="/" jsonLd={jsonLd}>
+<Base title={titel} description={beschreibung} path="/" jsonLd={jsonLd}>
 <div class="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col">
 
     <!-- Animated Background -->

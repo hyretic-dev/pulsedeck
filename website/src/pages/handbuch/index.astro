@@ -3,14 +3,29 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import SiteHeader from '../../components/SiteHeader.astro';
 import Footer from '../../components/Footer.astro';
+import { SITE_URL } from '../../config';
+import { brotkrumen, WEBSITE_ID } from '../../seo';
 
 const kapitel = (await getCollection('handbook')).sort((a, b) => a.data.order - b.data.order);
+const jsonLd = [
+  {
+    '@type': 'CollectionPage',
+    '@id': `${SITE_URL}/handbuch#seite`,
+    url: `${SITE_URL}/handbuch`,
+    name: 'PulseDeck Handbuch',
+    inLanguage: 'de-DE',
+    isPartOf: { '@id': WEBSITE_ID },
+    hasPart: kapitel.map((k) => ({ '@type': 'TechArticle', name: k.data.title, url: `${SITE_URL}/handbuch/${k.id}` })),
+  },
+  brotkrumen([{ name: 'Handbuch', pfad: '/handbuch' }]),
+];
 ---
 
 <Base
-  title="Handbuch – PulseDeck"
+  title="PulseDeck Handbuch: Anleitungen für Mitglieder und Admins"
   description="Anleitungen, Workflows und Hilfe für PulseDeck: von der ersten Anmeldung bis zur Verwaltung deiner Organisation."
   path="/handbuch"
+  jsonLd={jsonLd}
 >
   <SiteHeader aktiv="handbuch" />
   <main class="max-w-5xl mx-auto px-6 py-16">

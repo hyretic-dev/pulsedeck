@@ -138,5 +138,5 @@ npm install
 PUBLIC_APP_URL=http://localhost:4200 npm run dev   # http://localhost:4321
 ```
 
-Das Handbuch besteht aus einer Markdown-Datei je Kapitel in `website/src/content/handbook/` (Frontmatter: `title`, `description`, `order`, `icon`). Das Blog liegt in `website/src/content/blog/` (eine Datei je Beitrag, Frontmatter: `title`, `description`, `date`, optional `updated`, `author`, `tags`, `draft`; Dateiname = URL; RSS unter `/blog/rss.xml`).
+Das Handbuch besteht aus einer Markdown-Datei je Kapitel in `website/src/content/handbook/` (Frontmatter: `title`, `description`, `order`, `icon`). Das Blog liegt in `website/src/content/blog/` (eine Datei je Beitrag, Frontmatter: `title`, `description`, `date`, optional `updated`, `author`, `tags`, `draft`, `image`, `faq`; Dateiname = URL; RSS unter `/blog/rss.xml`). Redaktionsplan und Schreibregeln für SEO und KI-Suche: `docs/marketing/redaktionsplan.md`.
 Dieselben Dateien liest das Backend für die Wissensbasis der KI.
