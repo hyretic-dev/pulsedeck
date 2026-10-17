@@ -10,18 +10,23 @@ interface Props {
   titel: string;
   /** Untertitel-Datei (WebVTT) unter public/, für Barrierefreiheit */
   untertitel?: string;
+  /** Quellennachweis unter dem Video, z. B. für Musik unter Creative-Commons-Lizenz */
+  nachweis?: string;
 }
-const { src, poster, titel, untertitel } = Astro.props;
+const { src, poster, titel, untertitel, nachweis } = Astro.props;
 // Das Video wird selbst gehostet (kein YouTube-Embed): keine Drittanbieter, keine Cookies, CSP bleibt bei 'self'.
 ---
 
 <figure class="relative rounded-2xl border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface)] shadow-2xl shadow-black/50">
   {
     src ? (
-      <video controls preload="none" playsinline poster={poster.src} class="block w-full h-auto" aria-label={titel}>
-        <source src={src} type="video/mp4" />
-        {untertitel && <track kind="captions" src={untertitel} srclang="de" label="Deutsch" default />}
-      </video>
+      <>
+        <video controls preload="none" playsinline poster={poster.src} width={poster.width} height={poster.height} class="block w-full h-auto" aria-label={titel}>
+          <source src={src} type="video/mp4" />
+          {untertitel && <track kind="captions" src={untertitel} srclang="de" label="Deutsch" default />}
+        </video>
+        {nachweis && <figcaption class="px-4 py-2.5 border-t border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">{nachweis}</figcaption>}
+      </>
     ) : (
       <div class="relative">
         <Image src={poster} alt="" widths={[800, 1200]} sizes="(min-width: 1024px) 896px, 100vw" class="block w-full h-auto opacity-40 blur-[2px]" loading="lazy" />

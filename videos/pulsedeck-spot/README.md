@@ -65,6 +65,14 @@ node tools/timing.mjs                                  # Szenen und Cues an die 
 python3 -I tools/audio.py                              # Sounds, Musik, Mix, Lautheitsbericht
 npx --yes hyperframes@0.8.169 lint                     # Prüfung (0 Fehler; die Warnungen sind Strukturhinweise zu Sub-Kompositionen)
 bash tools/deliver.sh renders/pulsedeck-spot.mp4      # Render in Lieferqualität, Master-Mix direkt ins MP4
+bash tools/website.sh renders/pulsedeck-spot.mp4      # Website-Fassung: Video, Poster und Untertitel für die Startseite
 ```
 
 Python braucht `numpy scipy soundfile pyloudnorm librosa`.
+
+## Auf der Website
+
+Der Spot läuft auf der Startseite im Abschnitt „So funktioniert's“ (`website/src/pages/index.astro`, Komponente
+`VideoPlatzhalter.astro`): selbst gehostet unter `website/public/video/` (H.264, ca. 11,6 MB), mit Poster,
+deutschen Untertiteln (WebVTT aus den Wortzeiten) und dem Musik-Nachweis unter dem Video.
+`tools/website.sh` erzeugt alle drei Dateien neu, z. B. nachdem die Stimme gegen Lola getauscht wurde.

@@ -129,6 +129,8 @@ html, body {
 .kicker .pi { font-size: 26px; letter-spacing: 0; }
 .display { font-weight: 800; letter-spacing: -0.04em; line-height: 1.0; word-spacing: 0.08em; }
 .grad { background: linear-gradient(90deg, #ff0000, #ff5050 50%, #ff0000); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+/* background-clip: text malt nur in der Box: Unterlängen (g) brauchen bei Zeilenhöhe 1 Platz darunter */
+.grad { padding-bottom: 0.22em; margin-bottom: -0.22em; }
 .muted { color: var(--muted); }
 .word { display: inline-block; }
 .word + .word { margin-left: 0.24em; }
