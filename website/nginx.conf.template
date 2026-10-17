@@ -104,6 +104,12 @@ server {
         try_files $uri.html =404;
     }
 
+    # Blog: wie das Handbuch; unbekannte Beiträge sind ein echtes 404. rss.xml wird als Datei ausgeliefert.
+    location = /blog/ { return 301 /blog; }
+    location ^~ /blog/ {
+        try_files $uri $uri.html =404;
+    }
+
     # Abschließender Schrägstrich weg (Astro erzeugt Seiten ohne), außer bei der Startseite
     location ~ ^/(.+)/$ {
         return 301 /$1;

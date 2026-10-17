@@ -17,4 +17,21 @@ const handbook = defineCollection({
   }),
 });
 
-export const collections = { handbook };
+/**
+ * Blog: eine Markdown-Datei je Beitrag. `draft: true` blendet einen Beitrag in Übersicht, Feed und Sitemap aus.
+ * Dateiname = URL (/blog/<dateiname>).
+ */
+const blog = defineCollection({
+  loader: glob({ pattern: '*.md', base: './src/content/blog' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    date: z.coerce.date(),
+    updated: z.coerce.date().optional(),
+    author: z.string().default('PulseDeck'),
+    tags: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { handbook, blog };

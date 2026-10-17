@@ -1,0 +1,42 @@
+---
+import Base from '../../layouts/Base.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import Footer from '../../components/Footer.astro';
+import { beitraege, datum } from '../../blog';
+
+const liste = await beitraege();
+---
+
+<Base
+  title="Blog – PulseDeck"
+  description="Neuigkeiten zu PulseDeck, Praxis für Vereine, Parteien und NGOs und Einblicke in die Entwicklung."
+  path="/blog"
+>
+  <SiteHeader aktiv="blog" />
+  <main class="max-w-3xl mx-auto px-6 py-16">
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-3">Blog</h1>
+    <p class="text-lg text-[var(--color-text-muted)] mb-12">
+      Neuigkeiten, Praxis und Einblicke. <a href="/blog/rss.xml" class="text-linke hover:underline">RSS-Feed</a>
+    </p>
+    <ul class="space-y-6">
+      {
+        liste.map((b) => (
+          <li>
+            <a href={`/blog/${b.id}`} class="block p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] hover:border-linke/40 transition-colors">
+              <time datetime={b.data.date.toISOString()} class="text-xs text-[var(--color-text-muted)]">{datum(b.data.date)}</time>
+              <h2 class="text-xl font-bold mt-1">{b.data.title}</h2>
+              <p class="text-[var(--color-text-muted)] mt-2">{b.data.description}</p>
+              {b.data.tags.length > 0 && (
+                <ul class="flex flex-wrap gap-2 mt-4">
+                  {b.data.tags.map((t) => <li class="text-xs px-2 py-1 rounded-full bg-linke/10 text-linke">{t}</li>)}
+                </ul>
+              )}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    {liste.length === 0 && <p class="text-[var(--color-text-muted)]">Noch keine Beiträge.</p>}
+  </main>
+  <Footer />
+</Base>

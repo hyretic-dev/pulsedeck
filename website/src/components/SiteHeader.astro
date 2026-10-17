@@ -3,7 +3,7 @@ import { APP_URL } from '../config';
 
 interface Props {
   /** Aktueller Bereich, hebt den Menüpunkt hervor. */
-  aktiv?: 'handbuch';
+  aktiv?: 'handbuch' | 'blog';
 }
 const { aktiv } = Astro.props;
 const link = 'text-sm font-medium transition-colors hover:text-[var(--color-text)]';
@@ -24,6 +24,11 @@ const link = 'text-sm font-medium transition-colors hover:text-[var(--color-text
         href="/handbuch"
         class={`${link} ${aktiv === 'handbuch' ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}
         aria-current={aktiv === 'handbuch' ? 'page' : undefined}>Handbuch</a
+      >
+      <a
+        href="/blog"
+        class={`${link} ${aktiv === 'blog' ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}
+        aria-current={aktiv === 'blog' ? 'page' : undefined}>Blog</a
       >
       <a href={`${APP_URL}/login`} class={`hidden sm:inline ${link} text-[var(--color-text-muted)]`}>Login</a>
       <a href={`${APP_URL}/registrieren`} class="px-5 py-2 bg-linke hover:bg-linke-light text-white rounded-lg text-sm font-bold transition-all">Testen</a>
