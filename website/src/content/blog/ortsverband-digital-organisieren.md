@@ -13,6 +13,11 @@ faq:
     antwort: "Für Plakate im öffentlichen Straßenraum ist in der Regel eine Sondernutzungserlaubnis der Gemeinde nötig. Parteien haben im Wahlkampf grundsätzlich einen Anspruch darauf, die Gemeinde legt aber Umfang und Standorte fest. Die Regeln unterscheiden sich je nach Gemeinde."
   - frage: "Wie koordiniert man Infostände und Plakatieren im Wahlkampf?"
     antwort: "Mit festen Schichten: Infostand-Termine mit Uhrzeit und Zahl der Plätze, Plakatier-Touren als eigene Aufgaben mit Gebiet und Team. Aktive tragen sich selbst ein, offene Lücken sind für alle sichtbar."
+cta:
+  titel: "Infostände planen, ohne Chat-Chaos"
+  text: "Schichten für Stände und Plakatier-Touren, Rollen für sensible Daten, Anmeldung ohne Telefonnummer. Gehostet in Deutschland."
+  link: "/parteien"
+  linkText: "PulseDeck für Ortsverbände"
 ---
 
 **Kurz gesagt:** Ein Ortsverband hat dieselben Probleme wie ein Verein - Termine, Aktive, Wissen - plus zwei Besonderheiten: **Wahlkämpfe** mit vielen kurzfristigen Einsätzen und **besonders schützenswerte Daten**, denn Parteimitgliedschaft verrät politische Meinungen (**Art. 9 DSGVO**). Gut organisiert ist ein Ortsverband, wenn Termine, Helferschichten, Beschlüsse und Wissen an **einem** geschützten Ort liegen statt in privaten Chats und E-Mail-Verteilern.

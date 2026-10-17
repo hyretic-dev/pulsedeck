@@ -1,0 +1,128 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Footer from '../components/Footer.astro';
+import SeitenKopf from '../components/SeitenKopf.astro';
+import VertrauensRaster from '../components/VertrauensRaster.astro';
+import FaqListe from '../components/FaqListe.astro';
+import CtaAbschluss from '../components/CtaAbschluss.astro';
+import { KONTAKT, SITE_URL } from '../config';
+import { FAQ_SICHERHEIT } from '../data/faq';
+import { brotkrumen, faqSchema } from '../seo';
+
+const titel = 'Datenschutz und Sicherheit - PulseDeck';
+const beschreibung =
+  'Wo eure Daten liegen und wer sie sieht: Hosting in Nürnberg, Auftragsverarbeitung nach Art. 28 DSGVO, kein Tracking, Open Source und optionale KI aus der EU.';
+const url = `${SITE_URL}/sicherheit`;
+const jsonLd = [faqSchema(url, FAQ_SICHERHEIT), brotkrumen([{ name: 'Datenschutz & Sicherheit', pfad: '/sicherheit' }])];
+
+// Jeder Punkt ist in der Datenschutzerklärung oder im Code belegt; Abschnittsnummern verweisen auf /datenschutz.
+const details = [
+  {
+    titel: 'Wo die Daten liegen',
+    punkte: [
+      'Anwendung, Datenbank und hochgeladene Dateien auf Servern der Hetzner Online GmbH, Rechenzentrum Nürnberg.',
+      'Wir betreiben die Software selbst; Hetzner stellt nur die Infrastruktur und ist als Auftragsverarbeiter gebunden.',
+      'Keine Übermittlung in Länder außerhalb der EU, außer bei Push-Benachrichtigungen über den Dienst eures Browserherstellers.',
+    ],
+    quelle: 'Abschnitte 3 und 13',
+  },
+  {
+    titel: 'Wie die Daten geschützt sind',
+    punkte: [
+      'Verbindungen per TLS verschlüsselt, Passwörter nur als bcrypt-Hash gespeichert.',
+      'Zugangsdaten zu euren Mailservern verschlüsselt abgelegt.',
+      'Tägliche Datensicherung von Datenbank und Dateien, Aufbewahrung 14 Tage.',
+      'Begrenzung von Anmeldeversuchen gegen das Erraten von Passwörtern.',
+    ],
+    quelle: 'Abschnitte 3 und 4',
+  },
+  {
+    titel: 'Wer was sieht',
+    punkte: [
+      'Daten einer Organisation sehen nur ihre Mitglieder, nach den Rollen und Rechten, die ihr vergebt.',
+      'Dateien, Wiki-Artikel und Beiträge lassen sich auf Rollen oder Arbeitsgruppen beschränken.',
+      'Ein Änderungsprotokoll zeigt Administratoren, wer wann was geändert hat.',
+      'Telefonnummern sind nicht nötig und nicht automatisch für alle sichtbar.',
+    ],
+    quelle: 'Abschnitte 6 und 7',
+  },
+  {
+    titel: 'Wer verantwortlich ist',
+    punkte: [
+      'Für die Daten in eurer Organisation seid ihr verantwortlich; wir verarbeiten sie als Auftragsverarbeiter nach Art. 28 DSGVO.',
+      'Für Konto und Anmeldung sind wir selbst verantwortlich.',
+      'Keine Werbung, kein Verkauf von Daten, keine Analyse- oder Werbedienste Dritter.',
+    ],
+    quelle: 'Abschnitte 2, 5 und 13',
+  },
+  {
+    titel: 'KI nur, wenn ihr wollt',
+    punkte: [
+      'Der KI-Assistent ist freiwillig und nutzt Modelle der Mistral AI SAS, Paris, mit Verarbeitung in der EU.',
+      'Übermittelt werden nur Auszüge aus Dokumenten, die die fragende Person selbst sehen darf; die Rechte werden vorher geprüft.',
+      'Gesprächsverläufe lassen sich jederzeit löschen.',
+    ],
+    quelle: 'Abschnitt 9',
+  },
+  {
+    titel: 'Offen und portabel',
+    punkte: [
+      'Der Quellcode steht unter der Open-Source-Lizenz AGPLv3.',
+      'Jedes Mitglied kann seine Daten im Profil exportieren.',
+      'Sicherheitslücken meldet ihr an ' + KONTAKT + '; die Angabe steht auch in /.well-known/security.txt.',
+    ],
+    quelle: 'Lizenz und Abschnitt 14',
+  },
+];
+---
+
+<Base title={titel} description={beschreibung} path="/sicherheit" jsonLd={jsonLd}>
+  <SiteHeader />
+  <main>
+    <SeitenKopf
+      kicker="Datenschutz & Sicherheit"
+      titel="Datenschutz, den ihr eurem Vorstand erklären könnt"
+      text="Mitgliederdaten sind Vertrauenssache. Hier steht, was mit ihnen passiert, mit Verweis auf die Stelle in der Datenschutzerklärung, an der ihr es nachlesen könnt."
+      pfad={[{ name: 'Datenschutz & Sicherheit' }]}
+    />
+
+    <section class="px-4 sm:px-6 pb-20" aria-label="Auf einen Blick">
+      <div class="max-w-6xl mx-auto"><VertrauensRaster /></div>
+    </section>
+
+    <section class="px-4 sm:px-6 py-20 bg-[var(--color-surface)] border-t border-[var(--color-border)]">
+      <div class="max-w-5xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Im Detail</h2>
+        <div class="grid gap-6 md:grid-cols-2 mt-10">
+          {
+            details.map((d) => (
+              <article class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-7">
+                <h3 class="text-lg font-bold">{d.titel}</h3>
+                <ul class="mt-4 space-y-2.5">
+                  {d.punkte.map((p) => (
+                    <li class="flex gap-2.5 text-[var(--color-text-muted)]"><i class="pi pi-check text-green-500 mt-1 text-sm" aria-hidden="true" /><span>{p}</span></li>
+                  ))}
+                </ul>
+                <p class="text-xs text-[var(--color-text-muted)] mt-5">Nachzulesen: <a href="/datenschutz" class="text-akzent hover:underline">Datenschutzerklärung</a>, {d.quelle}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="px-4 sm:px-6 py-20 border-t border-[var(--color-border)]">
+      <div class="max-w-3xl mx-auto">
+        <FaqListe fragen={FAQ_SICHERHEIT} titel="Fragen zu Datenschutz und Sicherheit" />
+        <p class="text-[var(--color-text-muted)] mt-8">
+          Mehr zur Praxis im Verein: <a href="/blog/whatsapp-alternativen-verein" class="text-akzent hover:underline">WhatsApp-Alternativen im Vergleich</a> ·
+          <a href="/blog/whatsapp-im-verein" class="text-akzent hover:underline">WhatsApp im Verein</a>
+        </p>
+      </div>
+    </section>
+
+    <CtaAbschluss />
+  </main>
+  <Footer />
+</Base>

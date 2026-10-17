@@ -143,6 +143,19 @@ describe('AuthController /api/v1/auth (Integrationstest)', () => {
     expect(testApp.ports.mailer.sendVerificationEmail).toHaveBeenCalledTimes(1);
   });
 
+  it('akzeptiert Signup ohne Passwort, lehnt aber ein leeres Passwort ab', async () => {
+    const ohne = await request(testApp.app.getHttpServer())
+      .post('/api/v1/auth/signup')
+      .send({ email: 'ohne-passwort@example.org' });
+    expect(ohne.status).toBe(202);
+    expect(testApp.ports.mailer.sendVerificationEmail).toHaveBeenCalledTimes(1);
+
+    const leer = await request(testApp.app.getHttpServer())
+      .post('/api/v1/auth/signup')
+      .send({ email: 'leer@example.org', password: '' });
+    expect(leer.status).toBe(400);
+  });
+
   it('antwortet bei Signup mit bereits vorhandener E-Mail identisch (keine Enumeration)', async () => {
     const antwort = await request(testApp.app.getHttpServer())
       .post('/api/v1/auth/signup')

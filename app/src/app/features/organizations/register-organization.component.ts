@@ -76,12 +76,28 @@ import { OrganizationService } from '../../shared/services/organization.service'
                                 class="w-full" placeholder="max@example.de" />
                         </div>
 
+                        @if (mitPasswort()) {
                         <div class="space-y-2">
-                            <label class="text-sm font-medium text-[var(--color-text)]">Passwort</label>
+                            <label for="registrieren-passwort" class="text-sm font-medium text-[var(--color-text)]">Passwort</label>
                             <p-password [(ngModel)]="password" [feedback]="true" [toggleMask]="true"
+                                inputId="registrieren-passwort"
                                 styleClass="w-full" inputStyleClass="w-full"
                                 placeholder="Mindestens 8 Zeichen" />
+                            <button type="button" (click)="mitPasswort.set(false); password = ''"
+                                class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline">
+                                Doch lieber ohne Passwort
+                            </button>
                         </div>
+                        } @else {
+                        <div class="rounded-lg border border-[var(--color-border)] p-3 text-sm text-[var(--color-text-muted)]">
+                            <i class="pi pi-envelope mr-1"></i>
+                            Kein Passwort nötig: Du meldest dich mit einem Link per E-Mail an.
+                            <button type="button" (click)="mitPasswort.set(true)"
+                                class="block mt-1 text-[var(--color-text)] underline">
+                                Lieber ein Passwort festlegen
+                            </button>
+                        </div>
+                        }
 
                         <div class="mt-4">
                             <p-button label="Weiter" icon="pi pi-arrow-right" iconPos="right"
@@ -107,7 +123,7 @@ import { OrganizationService } from '../../shared/services/organization.service'
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-[var(--color-text)]">URL</label>
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-[var(--color-text-muted)]">pulsedeck.de/</span>
+                                <span class="text-sm text-[var(--color-text-muted)]">{{ appHost }}/</span>
                                 <input pInputText [(ngModel)]="slug" (blur)="checkSlug()"
                                     class="flex-1" placeholder="mein-verein" />
                             </div>
@@ -123,6 +139,10 @@ import { OrganizationService } from '../../shared/services/organization.service'
                             }
                         </div>
 
+                        @if (gesendet()) {
+                        <p-message severity="success" styleClass="w-full"
+                            text="Fast geschafft: Wir haben dir einen Link geschickt. Bitte bestätige damit deine E-Mail-Adresse, danach wird deine Organisation automatisch erstellt." />
+                        }
                         @if (error()) {
                         <p-message severity="error" [text]="error()!" styleClass="w-full" />
                         }
@@ -162,11 +182,17 @@ export class RegisterOrganizationComponent {
     step = signal(1);
     loading = signal(false);
     error = signal<string | null>(null);
+    /** Bestätigungs-Mail ist unterwegs */
+    gesendet = signal(false);
 
     // Step 1: Account
     userName = '';
     email = '';
     password = '';
+    /** Passwort ist optional; ohne Passwort erfolgt die Anmeldung per Magic Link. */
+    mitPasswort = signal(false);
+    /** Adresse der öffentlichen Seite der Organisation (<host>/<slug>) */
+    readonly appHost = window.location.host;
 
     // Step 2: Organization
     orgName = '';
@@ -177,7 +203,7 @@ export class RegisterOrganizationComponent {
         return (
             this.userName.trim().length >= 2 &&
             this.email.includes('@') &&
-            this.password.length >= 8
+            (!this.mitPasswort() || this.password.length >= 8)
         );
     }
 
@@ -229,7 +255,8 @@ export class RegisterOrganizationComponent {
             this.orgName.trim().length >= 3 &&
             this.slug.length >= 3 &&
             this.slugAvailable === true &&
-            !this.loading()
+            !this.loading() &&
+            !this.gesendet()
         );
     }
 
@@ -241,16 +268,12 @@ export class RegisterOrganizationComponent {
 
         try {
             // 1. Konto anlegen: Die E-Mail-Adresse muss per Link bestätigt werden, bevor die Anmeldung möglich ist
-            const { error: authError } = await this.auth.signUp(this.email, this.password);
+            const { error: authError } = await this.auth.signUp(this.email, this.mitPasswort() ? this.password : undefined);
             if (authError) throw new Error(authError.message);
 
             // 2. Organisation nach der Bestätigung automatisch anlegen (Auth-Callback bzw. erste Anmeldung)
             this.savePendingOrganization();
-            this.error.set(
-                'Bitte bestätige deine E-Mail-Adresse. '
-                + 'Deine Organisation wird nach der '
-                + 'Bestätigung automatisch erstellt.'
-            );
+            this.gesendet.set(true);
         } catch (e) {
             this.error.set((e as Error).message);
         }

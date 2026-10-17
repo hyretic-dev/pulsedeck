@@ -13,6 +13,11 @@ faq:
     antwort: "Die Merkblätter der Registergerichte verlangen, dass Anmeldungen sofort erfolgen; das Gericht kann sie mit Zwangsgeld durchsetzen. Plant den Notartermin deshalb schon vor der Mitgliederversammlung."
   - frage: "Was gehört in eine Übergabe an den neuen Vorstand?"
     antwort: "Verträge und Fristen, Zugänge zu Konten und Online-Diensten, Schlüssel, Unterlagen wie Satzung und Protokolle, laufende Vorgänge und Kontakte. Am besten liegt das meiste schon vorher dokumentiert an einem gemeinsamen Ort."
+cta:
+  titel: "Wissen, das den Vorstand überlebt"
+  text: "Wiki, Dateiablage und Rollen an einem Ort: Beim Wechsel übertragt ihr Rechte, Dokumente und Abläufe bleiben, wo sie sind."
+  link: "/funktionen/vereinswiki"
+  linkText: "Vereinswiki ansehen"
 ---
 
 **Kurz gesagt:** Ein Vorstandswechsel hat einen **formalen Teil** - Anmeldung zum **Vereinsregister** in **öffentlich beglaubigter Form**, Unterschriftsberechtigungen bei der **Bank** - und einen **praktischen Teil**: Verträge, Fristen, Zugänge, Schlüssel und das Wissen, wie der Verein läuft. Der formale Teil ist klar geregelt. Der praktische scheitert oft, weil das Wissen nur in den Köpfen der Ausscheidenden steckt.

@@ -73,6 +73,18 @@ describe('AuthService Registrierung und E-Mail-Verifikation', () => {
     expect(link).toContain(`${appBaseUrl}/auth/callback?type=verify&token=`);
   });
 
+  it('registriert ohne Passwort ein Konto ohne nutzbares Passwort (Anmeldung per Magic Link) und sendet den Verifikations-Link', async () => {
+    repository.createInvited = vi.fn().mockResolvedValue({ ...neuerNutzer, passwordSet: false });
+
+    await service.signUp('neu@example.org');
+
+    expect(repository.create).not.toHaveBeenCalled();
+    const [email, passwordHash] = (repository.createInvited as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(email).toBe('neu@example.org');
+    expect(passwordHash).toMatch(/^\$2[aby]\$/);
+    expect(mailer.sendVerificationEmail).toHaveBeenCalledTimes(1);
+  });
+
   it('legt für bereits registrierte E-Mails keinen Account an und sendet keine Mail (keine Enumeration)', async () => {
     repository.findByEmail = vi.fn().mockResolvedValue(neuerNutzer);
 

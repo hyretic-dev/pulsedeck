@@ -88,16 +88,20 @@ export class AuthService {
     await this.refreshTokens.deleteByHash(this.hash(refreshToken));
   }
 
-  async signUp(email: string, password: string): Promise<void> {
-    // Hash immer zuerst berechnen (auch für bestehende E-Mails): gleicher Aufwand, keine Enumeration
+  /**
+   * Registrierung. Ohne Passwort entsteht ein Konto mit unbenutzbarem Hash (`passwordSet = false`, wie bei Einladungen):
+   * Anmeldung per Magic Link, ein Passwort lässt sich später über `set-password` setzen.
+   */
+  async signUp(email: string, password?: string): Promise<void> {
+    // Hash immer zuerst berechnen (auch für bestehende E-Mails und ohne Passwort): gleicher Aufwand, keine Enumeration
     // über die Antwortzeit.
-    const passwordHash = this.hasher.hash(password);
+    const passwordHash = this.hasher.hash(password ?? randomBytes(32).toString('base64'));
     const existing = await this.users.findByEmail(email);
     // Bestehende E-Mails nicht unterscheidbar behandeln: kein Account,
     // keine Mail, keine Fehlermeldung, keine Kontoenumeration.
     if (existing) return;
 
-    const user = await this.users.create(email, passwordHash);
+    const user = password ? await this.users.create(email, passwordHash) : await this.users.createInvited(email, passwordHash);
 
     const token = randomBytes(32).toString('base64url');
     await this.verificationTokens.save(

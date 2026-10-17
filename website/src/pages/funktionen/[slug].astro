@@ -1,0 +1,96 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import Footer from '../../components/Footer.astro';
+import SeitenKopf from '../../components/SeitenKopf.astro';
+import Screenshot from '../../components/Screenshot.astro';
+import CtaAbschluss from '../../components/CtaAbschluss.astro';
+import { APP_URL, SITE_URL } from '../../config';
+import { FUNKTIONEN, type Funktion } from '../../data/funktionen';
+import { ZIELGRUPPEN } from '../../data/zielgruppen';
+import { brotkrumen, SOFTWARE_ID } from '../../seo';
+
+export const getStaticPaths = (() => FUNKTIONEN.map((f) => ({ params: { slug: f.slug }, props: { f } }))) satisfies GetStaticPaths;
+
+const { f } = Astro.props as { f: Funktion };
+const pfad = `/funktionen/${f.slug}`;
+const titel = `${f.seoTitel} - PulseDeck`;
+const weitere = FUNKTIONEN.filter((x) => x.slug !== f.slug);
+const jsonLd = [
+  {
+    '@type': 'WebPage',
+    '@id': `${SITE_URL}${pfad}#webseite`,
+    url: SITE_URL + pfad,
+    name: titel,
+    description: f.kurz,
+    about: { '@id': SOFTWARE_ID },
+    primaryImageOfPage: { '@type': 'ImageObject', url: SITE_URL + f.bild.src, caption: f.bildAlt },
+    inLanguage: 'de-DE',
+  },
+  brotkrumen([
+    { name: 'Funktionen', pfad: '/funktionen' },
+    { name: f.name, pfad },
+  ]),
+];
+---
+
+<Base title={titel} description={f.kurz} path={pfad} jsonLd={jsonLd}>
+  <SiteHeader aktiv="funktionen" />
+  <main>
+    <SeitenKopf kicker={f.name} titel={f.titel} text={f.text} pfad={[{ name: 'Funktionen', href: '/funktionen' }, { name: f.name }]}>
+      <div class="flex flex-col sm:flex-row gap-3 mt-9">
+        <a href={`${APP_URL}/registrieren`} class="btn-primaer">Kostenlos starten <i class="pi pi-arrow-right" aria-hidden="true"></i></a>
+        <a href={f.handbuch} class="btn-sekundaer"><i class="pi pi-book" aria-hidden="true"></i> Im Handbuch nachlesen</a>
+      </div>
+    </SeitenKopf>
+
+    <section class="px-4 sm:px-6 pb-20">
+      <div class:list={['max-w-6xl mx-auto grid gap-12 items-start', f.hochformat ? 'md:grid-cols-[0.9fr_1.1fr]' : 'lg:grid-cols-[1.3fr_0.7fr]']}>
+        <Screenshot
+          bild={f.bild}
+          alt={f.bildAlt}
+          rahmen={f.hochformat ? 'karte' : 'browser'}
+          sizes={f.hochformat ? '(min-width: 768px) 480px, 100vw' : '(min-width: 1024px) 760px, 100vw'}
+          class={f.hochformat ? 'max-w-md mx-auto w-full' : ''}
+          prioritaet
+        />
+        <div>
+          <h2 class="text-2xl font-bold">Das steckt drin</h2>
+          <ul class="mt-5 space-y-3">
+            {f.punkte.map((p) => <li class="flex gap-2.5"><i class="pi pi-check text-green-500 mt-1 text-sm" aria-hidden="true" /><span>{p}</span></li>)}
+          </ul>
+          <h2 class="text-2xl font-bold mt-12">Passt zu</h2>
+          <ul class="mt-5 flex flex-wrap gap-2">
+            {
+              ZIELGRUPPEN.filter((z) => z.funktionen.slice(0, 4).includes(f.slug)).map((z) => (
+                <li><a href={`/${z.slug}`} class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] px-3 py-1.5 text-sm hover:border-linke/40"><i class={`pi ${z.icon} text-xs`} aria-hidden="true" />{z.name}</a></li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="px-4 sm:px-6 py-20 bg-[var(--color-surface)] border-t border-[var(--color-border)]">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight">Weitere Funktionen</h2>
+        <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mt-8">
+          {
+            weitere.map((x) => (
+              <li>
+                <a href={`/funktionen/${x.slug}`} class="block h-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-5 hover:border-linke/40 transition-colors">
+                  <i class={`pi ${x.icon} text-akzent`} aria-hidden="true" />
+                  <h3 class="font-bold mt-2">{x.name}</h3>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <CtaAbschluss />
+  </main>
+  <Footer />
+</Base>

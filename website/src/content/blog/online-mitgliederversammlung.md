@@ -13,6 +13,11 @@ faq:
     antwort: "Neben Ort, Zeit und Tagesordnung muss angegeben werden, wie Mitglieder ihre Rechte im Wege der elektronischen Kommunikation ausüben können, also etwa Zugang, Wortmeldungen und Abstimmungen."
   - frage: "Kann die Satzung Online-Versammlungen ausschließen?"
     antwort: "Ja. § 32 BGB ist nachgiebiges Recht (§ 40 BGB). Eine Satzungsregel zu Präsenz-, Hybrid- oder virtuellen Versammlungen geht der gesetzlichen Regel vor. Prüft daher zuerst eure Satzung."
+cta:
+  titel: "Alles rund um die Versammlung an einem Ort"
+  text: "Termin mit Zusagen, Einladung über Feed und E-Mail, Tagesordnung und Protokolle in der Dateiablage. Die Versammlung selbst führt ihr wie gewohnt durch."
+  link: "/funktionen/termine"
+  linkText: "Termine und Zusagen ansehen"
 ---
 
 **Kurz gesagt:** Seit dem **21. März 2023** erlaubt **§ 32 Abs. 2 BGB** ausdrücklich **hybride** Mitgliederversammlungen: Die Einladung kann vorsehen, dass Mitglieder elektronisch teilnehmen und ihre Rechte ausüben. **Rein virtuelle** Versammlungen sind möglich, wenn die **Mitglieder das beschlossen** haben. In jedem Fall muss die Einladung erklären, **wie** die elektronische Teilnahme funktioniert. Und: Eure **Satzung geht vor**.

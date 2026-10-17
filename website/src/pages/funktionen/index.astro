@@ -1,0 +1,59 @@
+---
+import Base from '../../layouts/Base.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import Footer from '../../components/Footer.astro';
+import SeitenKopf from '../../components/SeitenKopf.astro';
+import Screenshot from '../../components/Screenshot.astro';
+import CtaAbschluss from '../../components/CtaAbschluss.astro';
+import { SITE_URL } from '../../config';
+import { FUNKTIONEN } from '../../data/funktionen';
+import { brotkrumen, SOFTWARE_ID } from '../../seo';
+
+const titel = 'Funktionen: Helferplanung, Termine, Wiki und mehr - PulseDeck';
+const beschreibung = 'Alle Funktionen von PulseDeck: Helferschichten, Termine mit Zusagen, Vereinswiki, Feed und Umfragen, Arbeitsgruppen und Dateiablage mit Rechten.';
+const jsonLd = [
+  {
+    '@type': 'ItemList',
+    '@id': `${SITE_URL}/funktionen#liste`,
+    name: 'Funktionen von PulseDeck',
+    itemListElement: FUNKTIONEN.map((f, i) => ({ '@type': 'ListItem', position: i + 1, name: f.name, url: `${SITE_URL}/funktionen/${f.slug}` })),
+    about: { '@id': SOFTWARE_ID },
+  },
+  brotkrumen([{ name: 'Funktionen', pfad: '/funktionen' }]),
+];
+---
+
+<Base title={titel} description={beschreibung} path="/funktionen" jsonLd={jsonLd}>
+  <SiteHeader aktiv="funktionen" />
+  <main>
+    <SeitenKopf
+      kicker="Funktionen"
+      titel="Alles, was im Chat untergeht, an einem Ort"
+      text="PulseDeck ersetzt nicht euren Messenger, sondern das, was dort verloren geht: Zusagen, Schichten, Ankündigungen, Dokumente und Wissen."
+      pfad={[{ name: 'Funktionen' }]}
+    />
+    <section class="px-4 sm:px-6 pb-20">
+      <ul class="max-w-6xl mx-auto grid gap-6 md:grid-cols-2">
+        {
+          FUNKTIONEN.map((f) => (
+            <li>
+              <a href={`/funktionen/${f.slug}`} class="group block h-full rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] overflow-hidden hover:border-linke/40 transition-colors">
+                <div class="p-7">
+                  <p class="abschnitt-kicker"><i class={`pi ${f.icon} mr-1.5`} aria-hidden="true" />{f.name}</p>
+                  <h2 class="text-2xl font-bold tracking-tight">{f.titel}</h2>
+                  <p class="text-[var(--color-text-muted)] mt-3 leading-relaxed">{f.kurz}</p>
+                  <span class="inline-flex items-center gap-1.5 mt-5 text-sm font-semibold text-akzent">Mehr zu {f.name} <i class="pi pi-arrow-right text-xs" aria-hidden="true" /></span>
+                </div>
+                <div class:list={['px-7 pb-0', f.hochformat ? 'max-h-72 overflow-hidden' : '']}>
+                  <Screenshot bild={f.bild} alt={f.bildAlt} rahmen={f.hochformat ? 'karte' : 'browser'} sizes="(min-width: 768px) 520px, 100vw" class="rounded-b-none border-b-0" />
+                </div>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+    <CtaAbschluss />
+  </main>
+  <Footer />
+</Base>

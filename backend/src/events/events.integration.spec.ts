@@ -178,9 +178,12 @@ describe('Termine (echtes PostgreSQL)', () => {
     });
 
     it('legt Slots nur für Verwaltende an und prüft Fähigkeiten gegen die eigene Organisation', async () => {
-      const neu = await f.api('post', e(ids.alpha, `/${ev}/slots`), ids.olga, { title: 'Grill', max_helpers: 1, start_time: '10:00', required_skills: [skill] });
+      const neu = await f.api('post', e(ids.alpha, `/${ev}/slots`), ids.olga, { title: 'Grill', max_helpers: 1, start_time: '10:00', end_time: '12:30', required_skills: [skill] });
       expect(neu.status).toBe(201);
-      expect(neu.body).toMatchObject({ title: 'Grill', max_helpers: 1, organization_id: ids.alpha, required_skills: [skill] });
+      // Uhrzeiten wie bei Terminen als HH:MM (die Spalte ist vom Typ time und lieferte sonst 10:00:00)
+      expect(neu.body).toMatchObject({ title: 'Grill', max_helpers: 1, organization_id: ids.alpha, required_skills: [skill], start_time: '10:00', end_time: '12:30' });
+      const liste = await f.api('get', e(ids.alpha, `/${ev}/slots`), ids.olga);
+      expect(liste.body.find((s: { id: string }) => s.id === neu.body.id)).toMatchObject({ start_time: '10:00', end_time: '12:30' });
       slot = neu.body.id;
 
       expect((await f.api('post', e(ids.alpha, `/${ev}/slots`), ids.anna, { title: 'X' })).status).toBe(403);

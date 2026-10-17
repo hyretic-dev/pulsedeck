@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsEmail,
@@ -52,11 +52,13 @@ export class SignupDto {
   @IsEmail()
   email!: string;
 
-  @ApiProperty({ example: 'sicher123', minLength: 8 })
+  /** Optional: ohne Passwort meldet sich das Konto per Magic Link an und kann später im Profil eines setzen. */
+  @ApiPropertyOptional({ example: 'sicher123', minLength: 8 })
+  @IsOptional()
   @IsString()
   @MinLength(8)
   @MaxBytes(72)
-  password!: string;
+  password?: string;
 }
 
 export class TokenDto {

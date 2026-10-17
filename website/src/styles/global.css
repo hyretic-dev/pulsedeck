@@ -8,6 +8,11 @@
   --color-linke-light: #ff5050;
   --color-linke-dark: #6f003c;
   --color-linke-darker: #1a000f;
+  /* Markenrot bleibt für Akzente und Flächen. Für Buttons mit weißer Schrift und für roten Text gelten eigene Töne,
+     damit der Kontrast WCAG AA erfüllt (weiß auf #e00000: 5,04 : 1; #ff5050 auf #050505: 6,32 : 1). */
+  --color-cta: #e00000;
+  --color-cta-hover: #c40000;
+  --color-akzent: #ff5050;
   --color-teal: #00b19c;
   --color-teal-light: #00b19c;
   --color-teal-dark: #004b5b;
@@ -123,9 +128,53 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
   }
 }
 
+/* Einheitliche Buttons: Primär (eine Aktion: kostenlos starten) und Sekundär (mehr erfahren) */
+@layer components {
+  .btn-primaer {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-cta px-6 py-3 font-bold text-white shadow-lg shadow-linke/20 transition-colors hover:bg-cta-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white;
+  }
+  .btn-sekundaer {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-border-light)] bg-[var(--color-surface-raised)] px-6 py-3 font-semibold text-[var(--color-text)] transition-colors hover:border-[var(--color-text-muted)];
+  }
+  .abschnitt-kicker {
+    @apply mb-3 text-xs font-bold uppercase tracking-widest text-akzent;
+  }
+}
+
+/* Hintergrundlicht hinter dem Hero: statische Verläufe statt animierter Blur-Filter (die kosteten auf der Startseite ~1 s Layout/Paint) */
+.hero-licht {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(700px circle at 20% 0%, rgb(255 0 0 / 0.09), transparent 70%),
+    radial-gradient(600px circle at 85% 30%, rgb(0 177 156 / 0.07), transparent 70%);
+}
+
 /* Handbuch-Text */
 .handbuch h3 { scroll-margin-top: 6rem; }
 .handbuch a { color: var(--linke-rot); }
 /* Breite Tabellen scrollen innerhalb des Artikels statt die Seite zu verbreitern (Mobil) */
 .handbuch table { display: block; max-width: 100%; overflow-x: auto; }
 .handbuch th, .handbuch td { min-width: 7rem; }
+
+/* Checklisten ohne Formularfeld (rehypeCheckliste) */
+.handbuch .contains-task-list { list-style: none; padding-left: 0; }
+.handbuch .task-list-item { display: flex; gap: 0.6rem; align-items: baseline; }
+.checkliste-kasten {
+  flex-shrink: 0; width: 1rem; height: 1rem; border-radius: 0.25rem; border: 2px solid var(--color-border-light);
+  transform: translateY(0.15rem);
+}
+.checkliste-erledigt { background: var(--color-cta); border-color: var(--color-cta); }
+
+/* Kontextueller Aufruf im Blog (rehypeKontextCta) */
+.handbuch .kontext-cta {
+  margin: 2.5rem 0; padding: 1.5rem; border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--color-cta) 40%, transparent);
+  background: color-mix(in srgb, var(--color-cta) 7%, var(--color-surface-raised));
+}
+.handbuch .kontext-cta p { margin: 0 0 0.75rem; }
+.handbuch .kontext-cta-titel { font-weight: 700; font-size: 1.15rem; color: var(--color-text); }
+.handbuch .kontext-cta-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; margin: 1.25rem 0 0 !important; }
+.handbuch .kontext-cta a.btn-primaer { color: #fff; text-decoration: none; }
+.handbuch .kontext-cta-link { font-weight: 600; }

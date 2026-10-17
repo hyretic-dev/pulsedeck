@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { beitraege } from '../blog';
 import { APP_URL, KONTAKT, SITE_URL } from '../config';
+import { FUNKTIONEN } from '../data/funktionen';
+import { ZIELGRUPPEN } from '../data/zielgruppen';
 
 /**
  * llms.txt (https://llmstxt.org): kuratierte Übersicht für KI-Assistenten und Agenten. Ob Antwortmaschinen die Datei für Zitate
@@ -13,12 +15,24 @@ export const GET: APIRoute = async () => {
   const zeilen = [
     '# PulseDeck',
     '',
-    '> PulseDeck ist eine webbasierte Plattform für Vereine, Parteigliederungen, NGOs und Aktionsbündnisse im deutschsprachigen Raum: Termine mit Helferslots, Mitgliederverwaltung mit Rollen und Rechten, Arbeitsgruppen, Newsfeed mit Umfragen, E-Mail-Newsletter, Wiki, Dateiablage und ein optionaler KI-Assistent. Gehostet in der EU (Deutschland), Open Source (AGPLv3), im Early Access kostenlos.',
+    '> PulseDeck ist eine webbasierte Plattform für Vereine, Parteigliederungen, NGOs und Aktionsbündnisse im deutschsprachigen Raum: Termine mit Helferslots, Mitgliederverwaltung mit Rollen und Rechten, Arbeitsgruppen, Newsfeed mit Umfragen, E-Mail-Newsletter, Wiki, Dateiablage und ein optionaler KI-Assistent. Gehostet in der EU (Deutschland), Open Source (AGPLv3). Im Early Access alle Funktionen kostenlos und ohne Mitgliederlimit; danach dauerhaft kostenlos bis 10 Mitglieder, Staffelpreise für größere Organisationen.',
     '',
     `- Website: ${SITE_URL}/`,
     `- Anwendung (Anmeldung, Registrierung): ${APP_URL}/`,
     `- Kontakt: ${KONTAKT}`,
     '- Quellcode: https://github.com/julienstack/pulsedeck',
+    '',
+    '## Produkt',
+    '',
+    `- [Funktionen](${SITE_URL}/funktionen): Überblick über alle Funktionen`,
+    ...FUNKTIONEN.map((f) => `- [${f.name}](${SITE_URL}/funktionen/${f.slug}): ${f.kurz}`),
+    `- [Preise](${SITE_URL}/preise): Early Access kostenlos, danach dauerhaft kostenlos bis 10 Mitglieder`,
+    `- [Datenschutz & Sicherheit](${SITE_URL}/sicherheit): Hosting, Auftragsverarbeitung, Rechte, KI, Open Source`,
+    `- [Häufige Fragen](${SITE_URL}/faq)`,
+    '',
+    '## Für wen',
+    '',
+    ...ZIELGRUPPEN.map((z) => `- [PulseDeck für ${z.name}](${SITE_URL}/${z.slug}): ${z.beschreibung}`),
     '',
     '## Handbuch',
     '',

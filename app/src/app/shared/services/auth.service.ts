@@ -230,10 +230,14 @@ export class AuthService {
         }
     }
 
-    /** Registrierung; das Konto muss danach per Link in der E-Mail bestätigt werden. */
-    async signUp(email: string, password: string): Promise<{ error: Error | null }> {
+    /**
+     * Registrierung; das Konto muss danach per Link in der E-Mail bestätigt werden. Ohne Passwort meldet sich das Konto
+     * per Magic Link an (ein Passwort lässt sich später im Profil setzen).
+     */
+    async signUp(email: string, password?: string): Promise<{ error: Error | null }> {
         try {
-            await this.api.post('/auth/signup', { email: email.trim().toLowerCase(), password }, { auth: false });
+            const body = { email: email.trim().toLowerCase(), ...(password ? { password } : {}) };
+            await this.api.post('/auth/signup', body, { auth: false });
             return { error: null };
         } catch (e) {
             return { error: e as Error };

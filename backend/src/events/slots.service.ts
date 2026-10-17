@@ -9,7 +9,8 @@ import type { Membership } from '../tenancy/membership';
 import { EventsService } from './events.service';
 import { sichtbarkeitsBedingung, sichtbarkeitsRang } from './visibility';
 
-const SLOT_SPALTEN = 's.id, s.event_id, s.organization_id, s.title, s.start_time, s.end_time, s.max_helpers, COALESCE(s.required_skills, \'{}\') AS required_skills, s.sort_order, s.created_at, s.updated_at';
+// Uhrzeiten als HH:MM wie bei Terminen (Spaltentyp time würde HH:MM:SS liefern)
+const SLOT_SPALTEN = 's.id, s.event_id, s.organization_id, s.title, to_char(s.start_time, \'HH24:MI\') AS start_time, to_char(s.end_time, \'HH24:MI\') AS end_time, s.max_helpers, COALESCE(s.required_skills, \'{}\') AS required_skills, s.sort_order, s.created_at, s.updated_at';
 
 export interface SlotEingabe {
   title?: string;
@@ -136,7 +137,7 @@ export class SlotsService {
   /** Eigene bestätigte Helfer-Anmeldungen mit Slot und Termin (im Bestand scheiterte die Abfrage an einer falschen Spalte). */
   async meineAnmeldungen(orgId: string, aufrufer: Membership): Promise<Record<string, unknown>[]> {
     const { rows } = await this.pool.query(
-      `SELECT jsonb_build_object('id', s.id, 'title', s.title, 'start_time', s.start_time, 'end_time', s.end_time,
+      `SELECT jsonb_build_object('id', s.id, 'title', s.title, 'start_time', to_char(s.start_time, 'HH24:MI'), 'end_time', to_char(s.end_time, 'HH24:MI'),
                 'event', jsonb_build_object('id', e.id, 'title', e.title, 'date', e.date, 'start_time', e.start_time)) AS slot
          FROM event_slot_signups su JOIN event_slots s ON s.id = su.slot_id JOIN events e ON e.id = s.event_id
         WHERE su.member_id = $1 AND su.status = 'confirmed' AND s.organization_id = $2

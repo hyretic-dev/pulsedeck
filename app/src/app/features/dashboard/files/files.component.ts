@@ -249,50 +249,26 @@ export class FilesComponent implements OnInit {
             this.fileService.currentFolderId() ?? undefined;
 
         try {
-            const uploadedFile =
-                await this.fileService.uploadFile(
-                    file,
-                    this.fileService.currentFolder(),
-                    {
-                        visibility: this.uploadVisibility,
-                        description:
-                            this.uploadDescription || undefined,
-                        workingGroupId:
-                            this.uploadWorkingGroupId
-                            || undefined,
-                        folderId,
-                    }
-                );
+            // Die KI-Indizierung reiht das Backend beim Upload selbst ein (läuft im Hintergrund)
+            await this.fileService.uploadFile(
+                file,
+                this.fileService.currentFolder(),
+                {
+                    visibility: this.uploadVisibility,
+                    description:
+                        this.uploadDescription || undefined,
+                    workingGroupId:
+                        this.uploadWorkingGroupId
+                        || undefined,
+                    folderId,
+                }
+            );
 
             this.msg.add({
                 severity: 'success',
                 summary: 'Hochgeladen',
                 detail: `${file.name} wurde hochgeladen.`,
             });
-
-            // Trigger AI Ingestion
-            if (
-                uploadedFile.mime_type === 'application/pdf'
-                || uploadedFile.mime_type?.startsWith('text/')
-            ) {
-                const result =
-                    await this.fileService
-                        .triggerFileIngestion(
-                            uploadedFile.id!
-                        );
-                if (
-                    result
-                    && !result.success
-                    && result.message
-                ) {
-                    this.msg.add({
-                        severity: 'warn',
-                        summary: 'KI-Indizierung',
-                        detail: result.message,
-                        life: 6000,
-                    });
-                }
-            }
 
             this.uploadDialogVisible.set(false);
             this.selectedFile.set(null);

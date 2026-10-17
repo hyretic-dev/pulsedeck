@@ -95,6 +95,16 @@ describe('AuthService', () => {
         expect(await auth.checkEmail('x@example.org')).toEqual({ status: 'error', error: 'Zu viele Anfragen' });
     });
 
+    it('registriert mit Passwort oder ohne (dann ohne Passwort-Feld im Aufruf)', async () => {
+        routen['POST /auth/signup'] = () => json(202, {});
+
+        expect(await auth.signUp(' Neu@Example.org ', 'geheim-geheim')).toEqual({ error: null });
+        expect(aufrufe.at(-1)?.body).toEqual({ email: 'neu@example.org', password: 'geheim-geheim' });
+
+        expect(await auth.signUp('ohne@example.org')).toEqual({ error: null });
+        expect(aufrufe.at(-1)?.body).toEqual({ email: 'ohne@example.org' });
+    });
+
     it('legt die bei der Registrierung vorgemerkte Organisation nur für die passende E-Mail an', async () => {
         routen['POST /orgs'] = () => json(201, { id: 'o2', slug: 'neuverein', name: 'Neuverein' });
         await auth.signIn('anna@example.org', 'x');

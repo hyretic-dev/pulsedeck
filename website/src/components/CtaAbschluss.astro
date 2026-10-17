@@ -1,0 +1,22 @@
+---
+import { APP_URL } from '../config';
+interface Props {
+  titel?: string;
+  text?: string;
+}
+const {
+  titel = 'Probiert es mit eurem nächsten Termin aus',
+  text = 'Im Early Access kostenlos, mit allen Funktionen. Registrieren, ersten Termin mit Helferschichten anlegen, Link teilen.',
+} = Astro.props;
+---
+
+<section class="px-4 sm:px-6 py-20 bg-gradient-to-br from-linke/10 to-teal/5 border-t border-[var(--color-border)]">
+  <div class="max-w-3xl mx-auto text-center">
+    <h2 class="text-3xl md:text-4xl font-bold tracking-tight">{titel}</h2>
+    <p class="text-lg text-[var(--color-text-muted)] mt-4">{text}</p>
+    <div class="flex flex-col sm:flex-row justify-center gap-3 mt-8">
+      <a href={`${APP_URL}/registrieren`} class="btn-primaer text-lg">Kostenlos starten <i class="pi pi-arrow-right" aria-hidden="true"></i></a>
+      <a href="/funktionen" class="btn-sekundaer text-lg">Funktionen ansehen</a>
+    </div>
+  </div>
+</section>

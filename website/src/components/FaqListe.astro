@@ -1,0 +1,31 @@
+---
+import type { Frage as FaqEintrag } from '../data/faq';
+interface Props {
+  fragen: FaqEintrag[];
+  titel?: string;
+  /** Überschriftenebene des Titels (die Fragen sind eine Ebene tiefer) */
+  ebene?: 2 | 3;
+}
+const { fragen, titel = 'Häufige Fragen', ebene = 2 } = Astro.props;
+const Titel = `h${ebene}` as 'h2' | 'h3';
+const Frage = `h${ebene + 1}` as 'h3' | 'h4';
+// Eindeutige ID je Liste, falls mehrere auf einer Seite stehen
+const id = 'faq-' + titel.toLowerCase().replace(/[^a-z0-9äöüß]+/g, '-').replace(/^-|-$/g, '');
+---
+
+<section aria-labelledby={id}>
+  <Titel id={id} class="text-3xl font-bold tracking-tight mb-8">{titel}</Titel>
+  <div class="space-y-3">
+    {
+      fragen.map((f) => (
+        <details class="group rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-5">
+          <summary class="cursor-pointer list-none flex justify-between gap-4">
+            <Frage class="font-semibold">{f.frage}</Frage>
+            <i class="pi pi-chevron-down text-xs mt-1.5 transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <p class="mt-3 text-[var(--color-text-muted)] leading-relaxed">{f.antwort}</p>
+        </details>
+      ))
+    }
+  </div>
+</section>

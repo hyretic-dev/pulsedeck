@@ -1,0 +1,125 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Footer from '../components/Footer.astro';
+import SeitenKopf from '../components/SeitenKopf.astro';
+import Screenshot from '../components/Screenshot.astro';
+import VertrauensRaster from '../components/VertrauensRaster.astro';
+import CtaAbschluss from '../components/CtaAbschluss.astro';
+import { APP_URL, SITE_URL } from '../config';
+import { DASHBOARD_BILD, FUNKTIONEN } from '../data/funktionen';
+import { ZIELGRUPPEN, type Zielgruppe } from '../data/zielgruppen';
+import { brotkrumen, SOFTWARE_ID } from '../seo';
+
+export const getStaticPaths = (() => ZIELGRUPPEN.map((z) => ({ params: { zielgruppe: z.slug }, props: { z } }))) satisfies GetStaticPaths;
+
+const { z } = Astro.props as { z: Zielgruppe };
+const pfad = `/${z.slug}`;
+const funktionen = z.funktionen.map((s) => FUNKTIONEN.find((f) => f.slug === s)!).filter(Boolean);
+const titel = `${z.seoTitel} - PulseDeck`;
+const jsonLd = [
+  {
+    '@type': 'WebPage',
+    '@id': `${SITE_URL}${pfad}#webseite`,
+    url: SITE_URL + pfad,
+    name: titel,
+    description: z.beschreibung,
+    about: { '@id': SOFTWARE_ID },
+    audience: { '@type': 'Audience', audienceType: z.name },
+    inLanguage: 'de-DE',
+  },
+  brotkrumen([{ name: `Für ${z.name}`, pfad }]),
+];
+---
+
+<Base title={titel} description={z.beschreibung} path={pfad} jsonLd={jsonLd}>
+  <SiteHeader aktiv="zielgruppen" />
+  <main>
+    <SeitenKopf kicker={`PulseDeck für ${z.name}`} titel={z.h1} text={z.intro} pfad={[{ name: `Für ${z.name}` }]}>
+      <div class="flex flex-col sm:flex-row gap-3 mt-9">
+        <a href={`${APP_URL}/registrieren`} class="btn-primaer">Kostenlos starten <i class="pi pi-arrow-right" aria-hidden="true"></i></a>
+        <a href="#beispiel" class="btn-sekundaer">Beispiel ansehen</a>
+      </div>
+      <p class="text-sm text-[var(--color-text-muted)] mt-4">Im Early Access kostenlos, mit allen Funktionen.</p>
+    </SeitenKopf>
+
+    <section class="px-4 sm:px-6 pb-16">
+      <div class="max-w-6xl mx-auto">
+        <Screenshot bild={DASHBOARD_BILD} alt="Dashboard von PulseDeck mit offenen Helferschichten, nächsten Terminen und Mitgliederübersicht" sizes="(min-width: 1200px) 1152px, 100vw" prioritaet />
+      </div>
+    </section>
+
+    <section class="px-4 sm:px-6 py-20 bg-[var(--color-surface)] border-y border-[var(--color-border)]">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">Kennt ihr das?</h2>
+        <ul class="grid gap-4 md:grid-cols-3 mt-10">
+          {
+            z.probleme.map((p) => (
+              <li class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-6">
+                <h3 class="font-bold">{p.titel}</h3>
+                <p class="text-sm text-[var(--color-text-muted)] mt-2 leading-relaxed">{p.text}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="px-4 sm:px-6 py-20">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">Was PulseDeck für {z.name} übernimmt</h2>
+        <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-10">
+          {
+            funktionen.map((f) => (
+              <li>
+                <a href={`/funktionen/${f.slug}`} class="block h-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-6 hover:border-linke/40 transition-colors">
+                  <i class={`pi ${f.icon} text-akzent text-xl`} aria-hidden="true" />
+                  <h3 class="font-bold mt-3">{f.titel}</h3>
+                  <p class="text-sm text-[var(--color-text-muted)] mt-2 leading-relaxed">{f.kurz}</p>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section id="beispiel" class="px-4 sm:px-6 py-20 bg-[var(--color-surface)] border-y border-[var(--color-border)] scroll-mt-20">
+      <div class="max-w-3xl mx-auto">
+        <p class="abschnitt-kicker">So kann es laufen</p>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">{z.beispiel.titel}</h2>
+        <ol class="mt-10 space-y-6">
+          {
+            z.beispiel.schritte.map((s, i) => (
+              <li class="flex gap-4">
+                <span class="w-8 h-8 shrink-0 rounded-full bg-cta text-white text-sm font-bold flex items-center justify-center" aria-hidden="true">{i + 1}</span>
+                <p class="text-[var(--color-text-muted)] leading-relaxed pt-1">{s}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section class="px-4 sm:px-6 py-20">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">Datenschutz, auf den ihr euch berufen könnt</h2>
+        <div class="mt-10"><VertrauensRaster /></div>
+        <a href="/sicherheit" class="inline-flex items-center gap-1.5 mt-8 font-semibold text-akzent hover:underline">Alles zu Datenschutz und Sicherheit <i class="pi pi-arrow-right text-xs" aria-hidden="true"></i></a>
+      </div>
+    </section>
+
+    <section class="px-4 sm:px-6 py-16 border-t border-[var(--color-border)]">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-2xl font-bold">Weiterlesen</h2>
+        <ul class="mt-6 space-y-3">
+          {z.artikel.map((a) => <li><a href={a.pfad} class="text-akzent hover:underline font-medium">{a.titel}</a></li>)}
+        </ul>
+      </div>
+    </section>
+
+    <CtaAbschluss />
+  </main>
+  <Footer />
+</Base>

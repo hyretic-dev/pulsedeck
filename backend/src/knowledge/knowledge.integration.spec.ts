@@ -59,11 +59,23 @@ describe('Wissensbasis (echtes PostgreSQL mit pgvector)', () => {
   });
 
   describe('Indexierung von Dateien', () => {
+    it('reiht beim Hochladen indexierbare Dateien selbst ein, andere nicht (auch ohne KI-Schlüssel, der Auftrag wartet)', async () => {
+      await f.admin.query('DELETE FROM index_jobs');
+      const text = await datei(ids.anna, 'hochgeladen.txt', absatz('Hochgeladen'));
+      const bild = await datei(ids.anna, 'hochgeladen.png', Buffer.from('89504e47', 'hex'), {}, 'image/png');
+
+      const auftraege = (await f.admin.query('SELECT file_id FROM index_jobs')).rows.map((r) => r.file_id);
+      expect(auftraege).toEqual([text]);
+      expect(auftraege).not.toContain(bild);
+      await f.admin.query('DELETE FROM index_jobs');
+    });
+
     it('nimmt Aufträge nur von Hochladenden und Administratoren an und lehnt ungeeignete Dateien ab', async () => {
       const text = await datei(ids.anna, 'protokoll.txt', absatz('Sitzungsprotokoll'));
       const bild = await datei(ids.anna, 'bild.png', Buffer.from('89504e47', 'hex'), {}, 'image/png');
       const gross = await datei(ids.anna, 'gross.txt', 'x');
       await f.admin.query('UPDATE files SET size_bytes = 11000000 WHERE id = $1', [gross]);
+      await f.admin.query('DELETE FROM index_jobs'); // der Upload hat schon eingereiht; hier geht es um den manuellen Auftrag
 
       expect((await f.api('post', d(ids.alpha, `/${text}/index`), ids.paul)).status).toBe(403);
       expect((await f.api('post', d(ids.alpha, `/${text}/index`), ids.bernd)).status).toBe(403);

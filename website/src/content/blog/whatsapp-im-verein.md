@@ -15,6 +15,11 @@ faq:
     antwort: "Laut den Nutzungsbedingungen von WhatsApp liegt das Mindestalter in der EU seit 2024 bei 13 Jahren; Minderjährige brauchen die Zustimmung der Eltern. Für Jugendabteilungen ist WhatsApp deshalb besonders heikel."
   - frage: "Was ist die beste Alternative zu WhatsApp für Vereine?"
     antwort: "Das hängt vom Zweck ab. Für Chats eignen sich datensparsame Messenger wie Signal oder Threema. Für Termine, Helferplanung, Abstimmungen und Wissen eignet sich eine Vereinsplattform besser, weil Informationen dort nicht im Chatverlauf untergehen."
+cta:
+  titel: "Termine und Zusagen raus aus dem Chat"
+  text: "In PulseDeck melden sich Mitglieder per E-Mail an, ohne Telefonnummer. Termine, Schichten und Umfragen gehen nicht mehr im Verlauf unter."
+  link: "/sicherheit"
+  linkText: "Datenschutz bei PulseDeck"
 ---
 
 **Kurz gesagt:** WhatsApp ist im Verein nicht ausdrücklich verboten, aber datenschutzrechtlich umstritten. Die Aufsichtsbehörden der Länder bewerten es unterschiedlich, von „unter Voraussetzungen möglich“ bis „in der Regel nicht zu begründen“. Wer WhatsApp nutzt, sollte Mitglieder einbeziehen, nichts Wichtiges *nur* dort verkünden und für Termine, Helferlisten und Beschlüsse einen eigenen, geordneten Kanal haben.

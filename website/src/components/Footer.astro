@@ -1,28 +1,45 @@
 ---
+import { FUNKTIONEN } from '../data/funktionen';
+import { ZIELGRUPPEN } from '../data/zielgruppen';
+import { APP_URL, KONTAKT } from '../config';
+
 const jahr = new Date().getFullYear();
-const link = 'text-[var(--color-text-muted)] hover:text-linke transition-colors';
+const link = 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors';
+const spalten = [
+  { titel: 'Produkt', links: [...FUNKTIONEN.map((f) => ({ name: f.name, href: `/funktionen/${f.slug}` })), { name: 'Preise', href: '/preise' }] },
+  { titel: 'Für wen', links: ZIELGRUPPEN.map((z) => ({ name: z.name, href: `/${z.slug}` })) },
+  { titel: 'Wissen', links: [{ name: 'Blog', href: '/blog' }, { name: 'Handbuch', href: '/handbuch' }, { name: 'Häufige Fragen', href: '/faq' }] },
+  { titel: 'Vertrauen', links: [{ name: 'Sicherheit & Datenschutz', href: '/sicherheit' }, { name: 'Datenschutzerklärung', href: '/datenschutz' }, { name: 'Impressum', href: '/impressum' }, { name: 'Seitenübersicht', href: '/sitemap' }] },
+];
 ---
 
-<footer class="relative z-10 border-t border-[var(--color-border)] py-12 px-4 bg-[var(--color-surface)]">
+<footer class="relative z-10 border-t border-[var(--color-border)] bg-[var(--color-surface)] px-4 sm:px-6 pt-14 pb-10">
   <div class="max-w-7xl mx-auto">
-    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-linke/20 flex items-center justify-center">
-          <i class="pi pi-users text-linke text-sm" aria-hidden="true"></i>
-        </div>
-        <span class="font-semibold">PulseDeck</span>
-        <span class="text-[var(--color-text-muted)] text-sm">- Mitgliederaktivierung, einfach gemacht.</span>
+    <div class="grid gap-10 md:grid-cols-[1.4fr_repeat(4,1fr)]">
+      <div>
+        <a href="/" class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-linke/20 flex items-center justify-center" aria-hidden="true"><i class="pi pi-users text-linke text-sm"></i></span>
+          <span class="font-semibold">PulseDeck</span>
+        </a>
+        <p class="text-sm text-[var(--color-text-muted)] mt-3 max-w-xs">Termine, Helferschichten und Vereinswissen an einem Ort. Gehostet in Deutschland.</p>
+        <p class="text-sm mt-4"><a href={`mailto:${KONTAKT}`} class={link}>{KONTAKT}</a></p>
+        <a href={`${APP_URL}/registrieren`} class="btn-primaer !px-4 !py-2 text-sm mt-5">Kostenlos starten</a>
       </div>
-      <nav class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-sm" aria-label="Rechtliches und Hilfe">
-        <a href="/impressum" class={link}>Impressum</a>
-        <a href="/handbuch" class={link}>Handbuch</a>
-        <a href="/blog" class={link}>Blog</a>
-        <a href="/datenschutz" class={link}>Datenschutz</a>
-        <a href="/sitemap" class={link}>Seitenübersicht</a>
-      </nav>
+      {
+        spalten.map((s) => (
+          <nav aria-label={s.titel}>
+            <p class="text-sm font-semibold mb-3">{s.titel}</p>
+            <ul class="space-y-2 text-sm">
+              {s.links.map((l) => (
+                <li>
+                  <a href={l.href} class={link}>{l.name}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))
+      }
     </div>
-    <div class="flex flex-col items-center gap-4 mt-8 pt-8 border-t border-[var(--color-border)]">
-      <div class="text-sm text-[var(--color-text-muted)]">© {jahr} PulseDeck. Mit ❤️ entwickelt für gemeinnützige Organisationen.</div>
-    </div>
+    <p class="text-xs text-[var(--color-text-muted)] mt-12 pt-6 border-t border-[var(--color-border)]">© {jahr} PulseDeck. Open Source unter AGPLv3.</p>
   </div>
 </footer>

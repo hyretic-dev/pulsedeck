@@ -1,0 +1,15 @@
+---
+import { VERTRAUEN } from '../data/vertrauen';
+---
+
+<ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  {
+    VERTRAUEN.map((v) => (
+      <li class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-6">
+        <i class={`pi ${v.icon} text-akzent text-xl`} aria-hidden="true" />
+        <h3 class="font-bold mt-3">{v.titel}</h3>
+        <p class="text-sm text-[var(--color-text-muted)] mt-2 leading-relaxed">{v.text}</p>
+      </li>
+    ))
+  }
+</ul>
