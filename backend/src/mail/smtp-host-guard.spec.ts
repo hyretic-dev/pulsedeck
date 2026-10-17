@@ -21,7 +21,7 @@ describe('SMTP-Zielprüfung', () => {
     await expect(pruefeSmtpZiel('-oProxy', 587, false)).rejects.toMatchObject({ response: { code: 'smtp_host_invalid' } });
   });
 
-  it('erlaubt öffentliche Ziele und – nur auf Betreiberwunsch – private', async () => {
+  it('erlaubt öffentliche Ziele und, nur auf Betreiberwunsch, private', async () => {
     await expect(pruefeSmtpZiel('8.8.8.8', 587, false)).resolves.toEqual({ adresse: '8.8.8.8' });
     await expect(pruefeSmtpZiel('127.0.0.1', 2525, true)).resolves.toEqual({ adresse: '127.0.0.1' });
   });

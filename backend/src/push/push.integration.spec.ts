@@ -125,7 +125,7 @@ describe('Push (echtes PostgreSQL)', () => {
       expect(ziele()).toEqual(['anna', 'olga']); // Mitglied der AG und Admin
     });
 
-    it('benachrichtigt bei Beiträgen einmal beim Übergang nach „freigegeben“ – nicht bei Entwürfen und nicht bei späteren Änderungen', async () => {
+    it('benachrichtigt bei Beiträgen einmal beim Übergang nach „freigegeben“, nicht bei Entwürfen und nicht bei späteren Änderungen', async () => {
       const feed = (rest = '') => `/api/v1/orgs/${ids.alpha}/feed${rest}`;
       const entwurf = await f.api('post', feed(), ids.anna, { title: 'Entwurf', type: 'article' });
       expect((await f.admin.query('SELECT count(*)::int AS n FROM push_notification_queue')).rows[0].n).toBe(0);

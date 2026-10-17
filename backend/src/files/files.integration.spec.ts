@@ -77,7 +77,7 @@ describe('Dateien (echtes PostgreSQL und Dateisystem)', () => {
     expect((await f.api('post', d(ids.alpha), null).attach('file', Buffer.from('x'), 'x.txt')).status).toBe(401);
   });
 
-  it('zeigt jeder Stufe nur ihre Dateien – in Liste, Metadaten, Inhalt und Download-Link', async () => {
+  it('zeigt jeder Stufe nur ihre Dateien, in Liste, Metadaten, Inhalt und Download-Link', async () => {
     const dateien = {
       public: await hochgeladen(ids.olga, 'V-public.txt', { visibility: 'public' }),
       member: await hochgeladen(ids.olga, 'V-member.txt', { visibility: 'member' }),

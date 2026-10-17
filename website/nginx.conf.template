@@ -111,7 +111,8 @@ server {
 
     # Alte Adressen
     location = /docs { return 301 /handbuch; }
-    location = /sitemap.xml { return 301 /sitemap-index.xml; }
+    # Sitemap liegt unter /sitemap.xml; frühere Adressen der Astro-Integration leiten dorthin
+    location ~ ^/sitemap-(index|0)\.xml$ { return 301 /sitemap.xml; }
 
     # Seiten der Anwendung, die früher unter dieser Adresse lagen (auch bereits verschickte Anmelde-Links): inklusive Query-String
     # an die Anwendung. 301 statt 308 ist hier gewollt: es sind nur GET-Aufrufe aus Browser und E-Mail.

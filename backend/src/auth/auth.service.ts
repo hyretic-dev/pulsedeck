@@ -94,7 +94,7 @@ export class AuthService {
     const passwordHash = this.hasher.hash(password);
     const existing = await this.users.findByEmail(email);
     // Bestehende E-Mails nicht unterscheidbar behandeln: kein Account,
-    // keine Mail, keine Fehlermeldung — keine Kontoenumeration.
+    // keine Mail, keine Fehlermeldung, keine Kontoenumeration.
     if (existing) return;
 
     const user = await this.users.create(email, passwordHash);

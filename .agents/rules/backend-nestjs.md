@@ -1,5 +1,5 @@
 ---
-description: Backend-Konventionen — NestJS-Module, PostgreSQL (pg + node-pg-migrate), Autorisierung in Guards, Tests gegen echte DB
+description: Backend-Konventionen - NestJS-Module, PostgreSQL (pg + node-pg-migrate), Autorisierung in Guards, Tests gegen echte DB
 globs: backend/**/*.ts,backend/**/*.sql
 alwaysApply: false
 ---
@@ -13,7 +13,7 @@ Gültige Architektur- und Rechteentscheidungen (IDs `E…`/`O…`/`D…` in Komm
 - Ein Modul je Fachbereich unter `backend/src/<feature>/` (Controller, Service, DTOs, Specs). Auth, Tenancy, Mail, Jobs,
   Storage sind gemeinsame Infrastruktur.
 - Pinning: NestJS und Abhängigkeiten exakt in `backend/package.json`; neue Pakete nur mit Begründung.
-- SQL handgeschrieben und parametrisiert über `pg` — nie Werte in SQL-Text einsetzen. Bezeichner nur aus Konstanten.
+- SQL handgeschrieben und parametrisiert über `pg`, nie Werte in SQL-Text einsetzen. Bezeichner nur aus Konstanten.
 - Konfiguration ausschließlich über `config/configuration.ts` (validiert beim Start, Pflichtwerte brechen den Start ab).
   Neue Variablen: dort, in `.env.example` und im Compose-File ergänzen. Geheimnisse nie loggen, nie in Build-Args.
 

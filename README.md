@@ -28,7 +28,7 @@ Wir ersetzen das Chaos aus WhatsApp-Gruppen, Excel-Listen und verlorenen E-Mails
 
 PulseDeck setzt auf moderne, robuste Technologien:
 
-*   **Website:** [Astro](https://astro.build) (statisch, Markdown mit Frontmatter für das Handbuch) in `website/` – Startseite, Handbuch, Impressum, Datenschutz, unter `pulsedeck.de`
+*   **Website:** [Astro](https://astro.build) (statisch, Markdown mit Frontmatter für das Handbuch) in `website/`, Startseite, Handbuch, Impressum, Datenschutz, unter `pulsedeck.de`
 *   **Anwendung (Frontend):** [Angular 21](https://angular.dev) (Standalone Components, Signals), unter `app.pulsedeck.de`
 *   **UI Library:** [PrimeNG](https://primeng.org) + [Tailwind CSS](https://tailwindcss.com) (für Utility-Styling)
 *   **Backend / DB:** [NestJS](https://nestjs.com) (REST-API, Auth, Jobs, Echtzeit per SSE) + [PostgreSQL 17](https://www.postgresql.org) mit pgvector; Dateien im Volume. Alles selbst gehostet (Docker Compose).
@@ -139,4 +139,6 @@ PUBLIC_APP_URL=http://localhost:4200 npm run dev   # http://localhost:4321
 ```
 
 Das Handbuch besteht aus einer Markdown-Datei je Kapitel in `website/src/content/handbook/` (Frontmatter: `title`, `description`, `order`, `icon`). Das Blog liegt in `website/src/content/blog/` (eine Datei je Beitrag, Frontmatter: `title`, `description`, `date`, optional `updated`, `author`, `tags`, `draft`, `image`, `faq`; Dateiname = URL; RSS unter `/blog/rss.xml`). Redaktionsplan und Schreibregeln für SEO und KI-Suche: `docs/marketing/redaktionsplan.md`.
+
+Sitemap: `website/src/seiten.ts` ist die Liste aller Seiten (für `/sitemap.xml` und die Seitenübersicht `/sitemap`); `npm run build` prüft danach, dass keine gebaute Seite fehlt. Nach einem Deploy meldet `node scripts/indexnow.mjs` alle URLs per IndexNow an Bing und andere Suchmaschinen.
 Dieselben Dateien liest das Backend für die Wissensbasis der KI.

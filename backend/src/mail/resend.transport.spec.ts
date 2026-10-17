@@ -9,7 +9,7 @@ import { ResendMailTransport } from './resend.transport';
 /**
  * Resend-Transport gegen einen lokalen HTTP-Server, der die Resend-API simuliert
  * (externe Dienste dürfen für deterministische Tests simuliert werden; ein realer
- * Versand mit echtem Key ist nicht getestet — produktiv läuft SMTP, O4).
+ * Versand mit echtem Key ist nicht getestet, produktiv läuft SMTP, O4).
  */
 describe('ResendMailTransport (simulierte Resend-API)', () => {
   const nachricht: MailMessage = {

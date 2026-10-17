@@ -102,7 +102,7 @@ describe('Newsletter und Outbox (echtes PostgreSQL)', () => {
     const antwort = await f.api('post', n(ids.alpha, '/send'), ids.olga);
 
     expect(antwort.status).toBe(200);
-    expect(antwort.body).toMatchObject({ sent: true, items: 2, recipients: 3 }); // Olga, Clara, Anna – Paul ist inaktiv
+    expect(antwort.body).toMatchObject({ sent: true, items: 2, recipients: 3 }); // Olga, Clara, Anna, Paul ist inaktiv
     const zeilen = await outboxZeilen(ids.alpha);
     expect(zeilen.map((z) => z.recipient)).toEqual(['anna-10@example.org', 'clara-10@example.org', 'olga-10@example.org']);
     expect(zeilen.every((z) => z.status === 'pending' && z.use_org_smtp === false)).toBe(true);

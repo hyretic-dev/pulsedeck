@@ -216,7 +216,7 @@ describe('Aktivität (echtes PostgreSQL)', () => {
       expect((await f.api('get', o(ids.alpha, '/audit-logs'), ids.bernd)).status).toBe(403);
     });
 
-    it('lässt nur Plattformadministratoren plattformweit lesen – das Flag zählt sofort, nicht erst beim nächsten Login', async () => {
+    it('lässt nur Plattformadministratoren plattformweit lesen, das Flag zählt sofort, nicht erst beim nächsten Login', async () => {
       const pfade = ['/api/v1/platform/organizations', '/api/v1/platform/audit-logs', '/api/v1/platform/analytics/stats', '/api/v1/platform/feedback', '/api/v1/platform/online-users'];
       for (const pfad of pfade) {
         expect((await f.api('get', pfad, ids.olga)).status, pfad).toBe(403); // Organisationsadmin ist kein Plattformadmin

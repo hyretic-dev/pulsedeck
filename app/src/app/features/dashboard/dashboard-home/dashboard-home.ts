@@ -115,7 +115,7 @@ export class DashboardHome implements OnInit {
   ): void {
     // Guard: if memberships is empty but there
     // are AG events, memberships may not have
-    // loaded yet — skip to avoid filtering them out
+    // loaded yet, skip to avoid filtering them out
     const hasAgEvents = events.some(
       e => !!e.working_group_id
     );

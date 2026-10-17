@@ -1,5 +1,5 @@
 /**
- * SQL-Bedingung, ob Datei `alias` für ein Mitglied sichtbar ist (Ausdrücke für Mitglieds-ID, Rang 1–3, Arbeitsgruppen uuid[]):
+ * SQL-Bedingung, ob Datei `alias` für ein Mitglied sichtbar ist (Ausdrücke für Mitglieds-ID, Rang 1-3, Arbeitsgruppen uuid[]):
  * der Hochladende und Administratoren immer; sonst nach `visibility`: public/member = alle Mitglieder der Organisation,
  * committee = Vorstand und Admin, admin = nur Admin, ag-only = Mitglieder der Arbeitsgruppe der Datei.
  * Der Bestand ließ jedes angemeldete Konto Dateien jeder Organisation lesen (Policy `auth.uid() IS NOT NULL`).

@@ -22,7 +22,7 @@ const webseite = (process.env.PULSEDECK_WEBSITE_URL ?? 'https://pulsedeck.de').r
 
 writeFileSync(
   join(import.meta.dirname, '..', 'src', 'environments', 'environment.capacitor.ts'),
-  `// Erzeugt von scripts/write-mobile-env.mjs – nicht einchecken.
+  `// Erzeugt von scripts/write-mobile-env.mjs, nicht einchecken.
 export const environment = {
     production: true,
     apiBaseUrl: '${basis}/api/v1',

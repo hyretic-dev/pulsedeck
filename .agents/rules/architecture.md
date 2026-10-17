@@ -1,5 +1,5 @@
 ---
-description: Clean Architecture — Feature-Isolation, Domain/Application/Infrastructure-Schichten, Ports für Backend-Austauschbarkeit, opportunistisches Refactoring
+description: Clean Architecture - Feature-Isolation, Domain/Application/Infrastructure-Schichten, Ports für Backend-Austauschbarkeit, opportunistisches Refactoring
 alwaysApply: true
 ---
 
@@ -28,7 +28,7 @@ Jedes Feature lebt als eigenständige Einheit unter `src/app/features/<feature>/
 - Domain kennt weder Angular noch die HTTP-API noch andere Features. Reines TypeScript.
 - Application kennt nur Domain und die eigenen Ports.
 - Nur Infrastructure kennt die HTTP-API und die konkrete Datenbeschaffung.
-- Components injizieren UseCases oder Application-Services — nie Infrastructure direkt.
+- Components injizieren UseCases oder Application-Services, nie Infrastructure direkt.
 
 ### Beispielstruktur (Soll-Zustand)
 
@@ -62,7 +62,7 @@ export const MEMBERS_PROVIDERS: Provider[] = [
 ];
 ```
 
-Bei einem Backend-Wechsel ändert sich nur diese Datei und die Infrastructure-Schicht — Domain, Application und Components bleiben unangetastet.
+Bei einem Backend-Wechsel ändert sich nur diese Datei und die Infrastructure-Schicht, Domain, Application und Components bleiben unangetastet.
 
 ## Repository-Port-Konvention
 
@@ -86,10 +86,10 @@ Bei einem Backend-Wechsel ändert sich nur diese Datei und die Infrastructure-Sc
 
 - Ein Feature importiert **niemals** interne Klassen eines anderen Features. Kein `import { … } from '../../other-feature/…'`.
 - Kommunikation zwischen Features nur über `shared/` (Services, Models, Events/Signals).
-- `shared/` darf kein Feature importieren — Abhängigkeit strikt einseitig.
+- `shared/` darf kein Feature importieren, Abhängigkeit strikt einseitig.
 - `layout/` darf `shared/` und Feature-**Routen** referenzieren (via Lazy Loading), nicht Feature-Interna.
 
-## Shared — gemeinsame Grundbausteine
+## Shared - gemeinsame Grundbausteine
 
 `src/app/shared/` enthält domänenübergreifende Infrastruktur:
 
@@ -102,21 +102,21 @@ Aufnahme-Kriterien (alle müssen erfüllt sein): domänenübergreifend, stabil, 
 
 Ein wachsendes `shared/` ist ein Architektur-Warnsignal, kein Sammelplatz.
 
-## ApiService — eingefroren
+## ApiService - eingefroren
 
-`ApiService` (`core/api.service.ts`) ist die zentrale Infrastruktur-Schicht. Sie wird **nicht** beiläufig verändert — Änderungen nur nach expliziter Absprache.
+`ApiService` (`core/api.service.ts`) ist die zentrale Infrastruktur-Schicht. Sie wird **nicht** beiläufig verändert, Änderungen nur nach expliziter Absprache.
 
 - **Nur** Infrastructure-Klassen (Repository-Implementierungen) greifen auf `ApiService` zu.
 - Components und UseCases kennen `ApiService` **nicht**.
 - Neuer Datenzugriff = neues Repository-Interface (Port) + API-Implementierung.
 
-## Opportunistisches Refactoring — Migration des Ist-Zustands
+## Opportunistisches Refactoring - Migration des Ist-Zustands
 
 Die aktuellen Services in `shared/services/` (`members.service.ts`, `contacts.service.ts`, `events.service.ts`, `wiki.service.ts`, `working-groups.service.ts`) vermischen Application-Logik und Datenzugriff und liegen historisch in `shared/`.
 
-**Sie werden NICHT proaktiv umgebaut.** Refactoring erfolgt ausschließlich, wenn ein Feature im Rahmen eines konkreten Auftrags ohnehin angefasst wird. Die Rules deklarieren den Soll-Zustand für neuen und angefassten Code — bestehender Code, der nicht berührt wird, bleibt unverändert.
+**Sie werden NICHT proaktiv umgebaut.** Refactoring erfolgt ausschließlich, wenn ein Feature im Rahmen eines konkreten Auftrags ohnehin angefasst wird. Die Rules deklarieren den Soll-Zustand für neuen und angefassten Code, bestehender Code, der nicht berührt wird, bleibt unverändert.
 
-Analoges gilt für alle Architektur-Regeln: Sie definieren, wie neuer Code aussehen soll und wie angefasster alter Code angepasst wird — nicht, dass alles sofort umgebaut werden muss.
+Analoges gilt für alle Architektur-Regeln: Sie definieren, wie neuer Code aussehen soll und wie angefasster alter Code angepasst wird, nicht, dass alles sofort umgebaut werden muss.
 
 ### Refactoring-Reihenfolge (wenn ein Feature angefasst wird)
 
@@ -128,12 +128,12 @@ Analoges gilt für alle Architektur-Regeln: Sie definieren, wie neuer Code ausse
 6. Alten Service aus `shared/services/` entfernen (wenn keine anderen Konsumenten mehr)
 7. Tests laufen lassen
 
-## Neues Feature — Checkliste
+## Neues Feature - Checkliste
 
 1. Ordner: `src/app/features/<feature>/`
 2. Domain: Models + Repository-Port in `domain/`
 3. Infrastructure: API-Repository in `infrastructure/`
 4. Application: UseCase(s) in `application/`
 5. Providers: Port → Implementierung in `providers.ts`
-6. Komponente(n) — Standalone, Lazy-Loaded via `app.routes.ts`
+6. Komponente(n), Standalone, Lazy-Loaded via `app.routes.ts`
 7. Tests: `*.spec.ts` neben jeder Datei

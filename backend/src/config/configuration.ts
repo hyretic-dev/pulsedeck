@@ -83,7 +83,7 @@ function dekodiereSecret(wert: string): Uint8Array | null {
   }
   try {
     const bytes = Buffer.from(wert, 'base64');
-    // Buffer.from toleriert ungültige Base64 still — daher Längenprüfung gegen die Decoderwartung.
+    // Buffer.from toleriert ungültige Base64 still, daher Längenprüfung gegen die Decoderwartung.
     if (bytes.byteLength >= 32 && (bytes.toString('base64').replace(/=+$/, '') === wert.replace(/=+$/, ''))) {
       return new Uint8Array(bytes);
     }

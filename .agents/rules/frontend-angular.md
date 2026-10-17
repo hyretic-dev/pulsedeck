@@ -15,11 +15,11 @@ alwaysApply: false
 - DI über `inject()` statt Konstruktor-Parameter.
 - Smart/Dumb-Trennung: Datenbeschaffung im Smart-Component bzw. UseCase, Präsentationskomponenten arbeiten nur mit Inputs/Outputs.
 
-## Zoneless — Zielzustand
+## Zoneless - Zielzustand
 
 Die App läuft aktuell mit `provideZoneChangeDetection()` (Zone.js). Ziel ist die Migration auf zoneless.
 
-- **Neuer Code muss bereits zoneless-kompatibel sein:** Async-Ergebnisse (API-Aufrufe, Timer, Promises) müssen in Signals landen — ein Plain-Field-Assignment nach `await` aktualisiert die View in zoneless nicht.
+- **Neuer Code muss bereits zoneless-kompatibel sein:** Async-Ergebnisse (API-Aufrufe, Timer, Promises) müssen in Signals landen, ein Plain-Field-Assignment nach `await` aktualisiert die View in zoneless nicht.
 - Die eigentliche Migration (Austausch des Providers in `app.config.ts`, Entfernen von `zone.js`) ist ein **separater Task** und wird nicht beiläufig durchgeführt.
 
 ## UI-Komponenten
@@ -28,7 +28,7 @@ Die App läuft aktuell mit `provideZoneChangeDetection()` (Zone.js). Ziel ist di
 - Styling-Anpassungen über **Tailwind**. PrimeNG-Theme (`Aura`) ist konfiguriert mit CSS-Layer-Order `tailwind-base, primeng, tailwind-utilities`.
 - Keine Inline-Styles. Feature-lokale Styles in der Komponente, gemeinsame in `styles.css`.
 
-## Datenzugriff — Clean Architecture
+## Datenzugriff - Clean Architecture
 
 - Komponenten greifen **niemals** direkt auf `ApiService` zu.
 - Neuer Code: Komponenten injizieren **UseCases** oder **Application-Services** (siehe Rule `architecture`).
@@ -44,7 +44,7 @@ Die App läuft aktuell mit `provideZoneChangeDetection()` (Zone.js). Ziel ist di
 ## RxJS & Signals
 
 - Manuelle Subscriptions vermeiden: `toSignal()` bevorzugen. Wenn doch subscribed wird: `takeUntilDestroyed()`.
-- Keine verschachtelten `subscribe`-Aufrufe — Operatoren verwenden (`switchMap`, `combineLatest`, `forkJoin`).
+- Keine verschachtelten `subscribe`-Aufrufe, Operatoren verwenden (`switchMap`, `combineLatest`, `forkJoin`).
 - Signals sind der primäre Zustandsmechanismus. RxJS nur wo reaktive Streams tatsächlich nötig sind (z.B. Debounce, Merge komplexer Event-Ströme).
 
 ## Tests
@@ -52,7 +52,7 @@ Die App läuft aktuell mit `provideZoneChangeDetection()` (Zone.js). Ziel ist di
 - Jede Komponente / jeder Service hat eine `*.spec.ts` daneben.
 - TDD gemäß Rule `general`.
 - Tests prüfen Verhalten (gerendertes DOM, Outputs, Service-Verträge), nicht Interna.
-- Repository-Ports in Tests mocken — nicht den echten ApiService.
+- Repository-Ports in Tests mocken, nicht den echten ApiService.
 
 ## Qualitätstore (vor jedem Abschluss)
 

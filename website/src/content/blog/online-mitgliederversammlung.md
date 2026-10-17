@@ -10,7 +10,7 @@ faq:
   - frage: "Darf ein Verein seine Mitgliederversammlung online abhalten?"
     antwort: "Seit dem 21. März 2023 regelt § 32 Abs. 2 BGB das ausdrücklich: Bei der Einberufung kann vorgesehen werden, dass Mitglieder elektronisch teilnehmen (hybride Versammlung). Rein virtuelle Versammlungen sind möglich, wenn die Mitglieder das beschlossen haben. Die Satzung geht vor, wenn sie etwas anderes regelt."
   - frage: "Was muss in der Einladung zu einer hybriden oder virtuellen Versammlung stehen?"
-    antwort: "Neben Ort, Zeit und Tagesordnung muss angegeben werden, wie Mitglieder ihre Rechte im Wege der elektronischen Kommunikation ausüben können – also etwa Zugang, Wortmeldungen und Abstimmungen."
+    antwort: "Neben Ort, Zeit und Tagesordnung muss angegeben werden, wie Mitglieder ihre Rechte im Wege der elektronischen Kommunikation ausüben können, also etwa Zugang, Wortmeldungen und Abstimmungen."
   - frage: "Kann die Satzung Online-Versammlungen ausschließen?"
     antwort: "Ja. § 32 BGB ist nachgiebiges Recht (§ 40 BGB). Eine Satzungsregel zu Präsenz-, Hybrid- oder virtuellen Versammlungen geht der gesetzlichen Regel vor. Prüft daher zuerst eure Satzung."
 ---
@@ -29,7 +29,7 @@ Das *Gesetz zur Ermöglichung digitaler Mitgliederversammlungen im Vereinsrecht*
 2. **Virtuelle Versammlung:** Die Mitglieder können beschließen, dass künftige Versammlungen auch als virtuelle Versammlungen einberufen werden können.
 3. **Einladung:** Wird hybrid oder virtuell einberufen, muss die Einladung angeben, wie die Mitglieder ihre Rechte elektronisch ausüben können.
 
-## Hybrid, virtuell, Präsenz – der Unterschied
+## Hybrid, virtuell, Präsenz - der Unterschied
 
 | Form | Wer entscheidet? | Besonderheit |
 |---|---|---|
@@ -39,7 +39,7 @@ Das *Gesetz zur Ermöglichung digitaler Mitgliederversammlungen im Vereinsrecht*
 
 ## Die Satzung geht vor
 
-§ 32 BGB ist **nachgiebiges Recht** (§ 40 BGB): Regelt eure Satzung etwas zu Präsenz-, Hybrid- oder Online-Versammlungen, gilt die Satzung. Steht dort zum Beispiel ausdrücklich „Die Versammlung findet am Sitz des Vereins statt“, solltet ihr vor einer Online-Versammlung prüfen lassen, ob das genügt – oder die Satzung anpassen. Eine Satzungsänderung muss bei eingetragenen Vereinen ins Vereinsregister.
+§ 32 BGB ist **nachgiebiges Recht** (§ 40 BGB): Regelt eure Satzung etwas zu Präsenz-, Hybrid- oder Online-Versammlungen, gilt die Satzung. Steht dort zum Beispiel ausdrücklich „Die Versammlung findet am Sitz des Vereins statt“, solltet ihr vor einer Online-Versammlung prüfen lassen, ob das genügt, oder die Satzung anpassen. Eine Satzungsänderung muss bei eingetragenen Vereinen ins Vereinsregister.
 
 ## Checkliste: Einladung
 
@@ -47,7 +47,7 @@ Das *Gesetz zur Ermöglichung digitaler Mitgliederversammlungen im Vereinsrecht*
 - [ ] Datum, Uhrzeit, Ort (bei hybrid) bzw. Hinweis „virtuell“
 - [ ] Tagesordnung
 - [ ] **Wie** die elektronische Teilnahme funktioniert: Zugang, Anmeldung, Wortmeldungen, Abstimmungen
-- [ ] Wie Zugangsdaten verteilt werden – nur an Mitglieder
+- [ ] Wie Zugangsdaten verteilt werden, nur an Mitglieder
 - [ ] Ansprechperson für technische Fragen
 
 ## Praktische Vorbereitung
@@ -60,14 +60,14 @@ Das *Gesetz zur Ermöglichung digitaler Mitgliederversammlungen im Vereinsrecht*
 
 ## Wie PulseDeck bei der Versammlung hilft
 
-PulseDeck ersetzt kein Videokonferenz- oder Wahlsystem. Es hilft bei allem drumherum: Ihr legt die Versammlung als **Termin** an, Mitglieder sagen zu, Einladung und Unterlagen gehen über **Feed und E-Mail**, Tagesordnung, Anträge und Protokolle liegen in der **Dateiablage**. Ein Meinungsbild vorab holt ihr mit einer **Umfrage** – verbindliche Beschlüsse fasst ihr in der Versammlung nach den Regeln eurer Satzung. Das **Wiki** hält den Ablauf fest, damit die nächste Versammlung schneller vorbereitet ist.
+PulseDeck ersetzt kein Videokonferenz- oder Wahlsystem. Es hilft bei allem drumherum: Ihr legt die Versammlung als **Termin** an, Mitglieder sagen zu, Einladung und Unterlagen gehen über **Feed und E-Mail**, Tagesordnung, Anträge und Protokolle liegen in der **Dateiablage**. Ein Meinungsbild vorab holt ihr mit einer **Umfrage** - verbindliche Beschlüsse fasst ihr in der Versammlung nach den Regeln eurer Satzung. Das **Wiki** hält den Ablauf fest, damit die nächste Versammlung schneller vorbereitet ist.
 
 Weiterlesen: [Vorstandswechsel im Verein: Checkliste](/blog/vorstandswechsel-verein-checkliste)
 
 ## Quellen
 
 - Gesetzestext: [§ 32 BGB (lexetius)](https://lexetius.com/BGB/32), [§ 32 BGB (lxgesetze)](https://lxgesetze.de/bgb/32)
-- Haufe: [Gesetzesänderung – virtuelle Mitgliederversammlung im Verein](https://www.haufe.de/recht/weitere-rechtsgebiete/wirtschaftsrecht/gesetzesaenderung-virtuelle-mitgliederversammlung-im-verein_210_590540.html)
+- Haufe: [Gesetzesänderung - virtuelle Mitgliederversammlung im Verein](https://www.haufe.de/recht/weitere-rechtsgebiete/wirtschaftsrecht/gesetzesaenderung-virtuelle-mitgliederversammlung-im-verein_210_590540.html)
 - IHK Bodensee-Oberschwaben: [Hybride und virtuelle Sitzungen von Mitgliederversammlung und Vorstand](https://www.ihk.de/bodensee-oberschwaben/recht/news/hybride-und-virtuelle-sitzungen-5785542)
 - ADVANT Beiten: [Virtuelle Mitgliederversammlung im Verein](https://www.advant-beiten.com/aktuelles/virtuelle-mitgliederversammlung-im-verein)
-- Landesfeuerwehrverband Bayern: [Fachinformation Online-Versammlungen (PDF)](https://www.lfv-bayern.de/media/filer_public/00/ab/00ab2bd1-d633-4c31-9f0e-92c5a8949dcd/fachinformation_online_versammlungen.pdf) – mit strengerer Auslegung zur rein virtuellen Versammlung
+- Landesfeuerwehrverband Bayern: [Fachinformation Online-Versammlungen (PDF)](https://www.lfv-bayern.de/media/filer_public/00/ab/00ab2bd1-d633-4c31-9f0e-92c5a8949dcd/fachinformation_online_versammlungen.pdf), mit strengerer Auslegung zur rein virtuellen Versammlung

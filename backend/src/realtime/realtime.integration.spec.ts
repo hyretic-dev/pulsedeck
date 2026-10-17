@@ -91,7 +91,7 @@ describe('Echtzeit (echtes PostgreSQL)', () => {
     s.schliessen();
   });
 
-  it('liefert Änderungen der eigenen Organisation nach dem Commit – nie von anderen Organisationen oder zurückgerollte', async () => {
+  it('liefert Änderungen der eigenen Organisation nach dem Commit, nie von anderen Organisationen oder zurückgerollte', async () => {
     const alpha = await strom(ids.anna);
     const beta = await strom(ids.bernd, ids.beta);
     await warte(() => alpha.ereignisse.length > 0 && beta.ereignisse.length > 0);

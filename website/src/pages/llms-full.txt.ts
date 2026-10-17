@@ -8,7 +8,7 @@ export const GET: APIRoute = async () => {
   const kapitel = (await getCollection('handbook')).sort((a, b) => a.data.order - b.data.order);
   const posts = await beitraege();
   const teile = [
-    '# PulseDeck – Handbuch und Blog (Volltext)',
+    '# PulseDeck - Handbuch und Blog (Volltext)',
     '',
     `Quelle: ${SITE_URL}/ · Stand: ${new Date().toISOString().split('T')[0]}`,
     '',

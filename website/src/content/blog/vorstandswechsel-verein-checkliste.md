@@ -1,7 +1,7 @@
 ---
 title: "Vorstandswechsel im Verein: Checkliste für eine Übergabe ohne Wissensverlust"
 seoTitle: "Vorstandswechsel im Verein: Checkliste | PulseDeck"
-description: "Was beim Vorstandswechsel zu tun ist: Anmeldung zum Vereinsregister, Bank, Verträge, Zugänge und Wissen – als Checkliste zum Abhaken."
+description: "Was beim Vorstandswechsel zu tun ist: Anmeldung zum Vereinsregister, Bank, Verträge, Zugänge und Wissen, als Checkliste zum Abhaken."
 date: 2026-10-17
 author: "PulseDeck"
 tags: ["Vorstand", "Vereinsführung", "Checkliste", "Vereinswissen"]
@@ -15,15 +15,15 @@ faq:
     antwort: "Verträge und Fristen, Zugänge zu Konten und Online-Diensten, Schlüssel, Unterlagen wie Satzung und Protokolle, laufende Vorgänge und Kontakte. Am besten liegt das meiste schon vorher dokumentiert an einem gemeinsamen Ort."
 ---
 
-**Kurz gesagt:** Ein Vorstandswechsel hat einen **formalen Teil** – Anmeldung zum **Vereinsregister** in **öffentlich beglaubigter Form**, Unterschriftsberechtigungen bei der **Bank** – und einen **praktischen Teil**: Verträge, Fristen, Zugänge, Schlüssel und das Wissen, wie der Verein läuft. Der formale Teil ist klar geregelt. Der praktische scheitert oft, weil das Wissen nur in den Köpfen der Ausscheidenden steckt.
+**Kurz gesagt:** Ein Vorstandswechsel hat einen **formalen Teil** - Anmeldung zum **Vereinsregister** in **öffentlich beglaubigter Form**, Unterschriftsberechtigungen bei der **Bank** - und einen **praktischen Teil**: Verträge, Fristen, Zugänge, Schlüssel und das Wissen, wie der Verein läuft. Der formale Teil ist klar geregelt. Der praktische scheitert oft, weil das Wissen nur in den Köpfen der Ausscheidenden steckt.
 
 > Dieser Beitrag ist eine Orientierung und keine Rechtsberatung. Maßgeblich sind eure Satzung und das Merkblatt eures Registergerichts.
 
 ## Der formale Teil: Vereinsregister und Bank
 
-**Anmeldung zum Vereinsregister.** Jede Änderung des Vorstands ist anzumelden (§ 67 BGB). Die Anmeldung erfolgt durch den Vorstand in vertretungsberechtigter Zahl und muss **öffentlich beglaubigt** sein (§ 77 BGB) – in der Regel beglaubigt eine Notarin oder ein Notar die Unterschriften; inzwischen geht das auch online. Beizufügen ist eine Abschrift des Protokolls der Wahl. Die Merkblätter der Registergerichte verlangen, dass Anmeldungen **sofort** erfolgen; das Gericht kann sie per Zwangsgeld durchsetzen.
+**Anmeldung zum Vereinsregister.** Jede Änderung des Vorstands ist anzumelden (§ 67 BGB). Die Anmeldung erfolgt durch den Vorstand in vertretungsberechtigter Zahl und muss **öffentlich beglaubigt** sein (§ 77 BGB), in der Regel beglaubigt eine Notarin oder ein Notar die Unterschriften; inzwischen geht das auch online. Beizufügen ist eine Abschrift des Protokolls der Wahl. Die Merkblätter der Registergerichte verlangen, dass Anmeldungen **sofort** erfolgen; das Gericht kann sie per Zwangsgeld durchsetzen.
 
-**Bank.** Neue Zeichnungsberechtigte müssen bei der Bank eingetragen werden, ausscheidende ausgetragen. Banken verlangen dafür üblicherweise Nachweise über die Wahl bzw. einen aktuellen Registerauszug – fragt bei eurer Bank nach, welche Unterlagen sie braucht.
+**Bank.** Neue Zeichnungsberechtigte müssen bei der Bank eingetragen werden, ausscheidende ausgetragen. Banken verlangen dafür üblicherweise Nachweise über die Wahl bzw. einen aktuellen Registerauszug - fragt bei eurer Bank nach, welche Unterlagen sie braucht.
 
 ## Checkliste: Formales
 
@@ -45,7 +45,7 @@ faq:
 ## Checkliste: Zugänge und Schlüssel
 
 - [ ] Liste aller Online-Zugänge (E-Mail-Postfächer, Website, Social Media, Vereinssoftware)
-- [ ] Passwörter ändern und sicher übergeben – nicht per Chat
+- [ ] Passwörter ändern und sicher übergeben, nicht per Chat
 - [ ] Admin-Rechte übertragen und Rechte der Ausscheidenden entziehen
 - [ ] Schlüssel, Transponder, Kasse, Stempel übergeben und quittieren lassen
 
@@ -60,13 +60,13 @@ faq:
 
 ## Das eigentliche Problem: Wissen nur in Köpfen
 
-Viele Vereine schieben den Wechsel hinaus, bis er ungeplant passiert – durch Krankheit, Umzug oder Erschöpfung. Dann fehlt die Zeit für die Übergabe. Fachverbände empfehlen deshalb, den Wechsel **früh und systematisch** vorzubereiten. Der beste Zeitpunkt für Dokumentation ist nicht die Übergabe, sondern der Alltag: Wer Abläufe laufend festhält, muss beim Wechsel nur noch übergeben, nicht rekonstruieren.
+Viele Vereine schieben den Wechsel hinaus, bis er ungeplant passiert, durch Krankheit, Umzug oder Erschöpfung. Dann fehlt die Zeit für die Übergabe. Fachverbände empfehlen deshalb, den Wechsel **früh und systematisch** vorzubereiten. Der beste Zeitpunkt für Dokumentation ist nicht die Übergabe, sondern der Alltag: Wer Abläufe laufend festhält, muss beim Wechsel nur noch übergeben, nicht rekonstruieren.
 
 ## So hilft PulseDeck
 
-In PulseDeck liegt das Vereinswissen an einem Ort, der den Vorstand überlebt: Das **Wiki** sammelt Abläufe, Protokolle und Anleitungen, die **Dateiablage** Satzung, Verträge und Vorlagen – mit Rechten, wer was sehen darf. Beim Wechsel übertragt ihr die **Rollen** an die neuen Verantwortlichen; Dokumente und Wissen bleiben, wo sie sind. Der optionale **KI-Assistent** findet Antworten in euren hochgeladenen Dokumenten, etwa „Was sagt die Satzung zur Einberufung der Versammlung?“. Super-Admins können Änderungen im **Audit-Log** nachvollziehen.
+In PulseDeck liegt das Vereinswissen an einem Ort, der den Vorstand überlebt: Das **Wiki** sammelt Abläufe, Protokolle und Anleitungen, die **Dateiablage** Satzung, Verträge und Vorlagen, mit Rechten, wer was sehen darf. Beim Wechsel übertragt ihr die **Rollen** an die neuen Verantwortlichen; Dokumente und Wissen bleiben, wo sie sind. Der optionale **KI-Assistent** findet Antworten in euren hochgeladenen Dokumenten, etwa „Was sagt die Satzung zur Einberufung der Versammlung?“. Super-Admins können Änderungen im **Audit-Log** nachvollziehen.
 
-Mehr dazu: [Vereinswiki aufbauen](/blog/vereinswiki-aufbauen) · [Handbuch – Dateien & Wiki](/handbuch/dateien-wiki)
+Mehr dazu: [Vereinswiki aufbauen](/blog/vereinswiki-aufbauen) · [Handbuch - Dateien & Wiki](/handbuch/dateien-wiki)
 
 ## Quellen
 

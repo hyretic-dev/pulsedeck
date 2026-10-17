@@ -28,7 +28,7 @@ const MAX_PUFFER = 1024 * 1024;
 /**
  * Echtzeit-Änderungen: Eine dedizierte PostgreSQL-Verbindung hört auf `table_changes` (NOTIFY kommt erst nach dem Commit der
  * Änderung, siehe `meldeAenderung`) und verteilt je Organisation an die offenen SSE-Verbindungen. Die Nachricht enthält nur
- * Tabelle, Operation und ID – nie Daten; Clients laden über die geschützten REST-Endpunkte nach. Das Abo gilt nur, solange das
+ * Tabelle, Operation und ID, nie Daten; Clients laden über die geschützten REST-Endpunkte nach. Das Abo gilt nur, solange das
  * Mitglied Mitglied bleibt (regelmäßige Prüfung), und bricht nach einer Datenbank-Unterbrechung mit `resync` zum Neuladen auf.
  */
 @Injectable()

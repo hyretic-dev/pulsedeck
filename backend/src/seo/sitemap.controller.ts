@@ -7,7 +7,8 @@ import { PG_POOL } from '../infrastructure/postgres/pg.pool';
 import { maskiere } from '../mail/mail-templates';
 
 // Startseite, Handbuch, Impressum und Datenschutz gehören zur Website (website/) und stehen in deren Sitemap.
-const STATISCHE_SEITEN = ['/login', '/registrieren', '/erstellen', '/organisationen'];
+// Seiten hinter der Anmeldung (/organisationen, /erstellen, Dashboards) gehören nicht hinein.
+const STATISCHE_SEITEN = ['/login', '/registrieren'];
 
 /** Sitemap der Anwendung für Suchmaschinen: feste Seiten der Anwendung plus die öffentlichen Seiten aller Organisationen (Ersatz der Edge Function sitemap). */
 @ApiTags('public')
@@ -23,7 +24,12 @@ export class SitemapController {
   @Header('Content-Type', 'text/plain; charset=utf-8')
   @Header('Cache-Control', 'public, max-age=3600')
   robots(): string {
-    return `User-agent: *\nAllow: /\n\nSitemap: ${this.config.appBaseUrl.replace(/\/+$/, '')}/sitemap.xml\n`;
+    // Gesperrt: API, Einlöse-Links und alle internen Bereiche der Organisationen (nur nach Anmeldung sinnvoll).
+    // Öffentlich bleiben Anmeldung, Registrierung, die öffentlichen Seiten der Organisationen und öffentliche Termine.
+    return (
+      'User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /auth/\nDisallow: /organisationen\nDisallow: /erstellen\nDisallow: /*/dashboard\n\n' +
+      `Sitemap: ${this.config.appBaseUrl.replace(/\/+$/, '')}/sitemap.xml\n`
+    );
   }
 
   @Get('sitemap.xml')

@@ -37,19 +37,19 @@ keinem Geheimnis das Häkchen gesetzt ist. Werte nie in den Chat oder ins Repo.
 | `JWT_SECRET` | `openssl rand -hex 32` |
 | `APP_BASE_URL` | `https://app.pulsedeck.de` (die Anwendung; einzige Basis für Links in Mails, Sitemap, Kalender; die Website verlinkt und leitet alte Adressen hierhin weiter) |
 | `MAIL_TRANSPORT`, `MAIL_FROM`, `SMTP_*` | IONOS: `smtp`, `PulseDeck <mailer@pulsedeck.de>`, `SMTP_HOST=smtp.ionos.de`, `SMTP_PORT=587`, `SMTP_SECURE=false`, `SMTP_USER=mailer@pulsedeck.de`, `SMTP_PASSWORD` als Secret. Alternativ `resend` + `RESEND_API_KEY` |
-| `SECRETS_ENCRYPTION_KEY` | `openssl rand -base64 32` — **verloren = SMTP-Passwörter der Organisationen neu eingeben**; getrennt sichern |
+| `SECRETS_ENCRYPTION_KEY` | `openssl rand -base64 32`, **verloren = SMTP-Passwörter der Organisationen neu eingeben**; getrennt sichern |
 
 **Optional:** `SITE_URL` (Adresse der Website, Standard `https://pulsedeck.de`; nur bei anderer Domain), `MISTRAL_API_KEY` (Chat und Wissensbasis, sonst 503), `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT` (Push;
 `npx web-push generate-vapid-keys`), `CORS_ORIGINS` (native Apps), `MAINTENANCE_TOKEN`, `MAX_UPLOAD_MB`, `APP_TIMEZONE`,
 Rate-Limits (`.env.example`). `READ_ONLY=true` sperrt schreibende API-Aufrufe (503, Login bleibt möglich), `JOBS_ENABLED=false`
-schaltet Newsletter, Push und Mail-Outbox ab — beides nur für Wartung oder Abnahme.
+schaltet Newsletter, Push und Mail-Outbox ab, beides nur für Wartung oder Abnahme.
 
 ## 3. Deployment und Prüfung
 
 *Deploy* auslösen. Der Backend-Entrypoint migriert mit der Migrations-Rolle, bevor der Server startet (schlägt das fehl, startet
 nichts). Erwartung: `postgres`, `backend`, `frontend`, `website` **healthy**; `https://app.pulsedeck.de/health` → 200, `/api/docs` → 404,
 `https://app.pulsedeck.de/robots.txt` nennt `https://app.pulsedeck.de/sitemap.xml`; `https://pulsedeck.de/` zeigt die Startseite,
-`https://pulsedeck.de/robots.txt` nennt `https://pulsedeck.de/sitemap-index.xml`.
+`https://pulsedeck.de/robots.txt` nennt `https://pulsedeck.de/sitemap.xml`.
 
 | Fehlerbild | Ursache |
 |---|---|
@@ -71,7 +71,8 @@ Bis zur Trennung lieferte `pulsedeck.de` die Anwendung aus. Danach gilt:
   Safety-Worker, der sich abmeldet, und beantwortet `ngsw.json` mit 404. Bis dahin leitet `/api/` der Website temporär an das
   Frontend der Anwendung. Beides (Safety-Worker, `/api/`-Block, `ngsw.json`) kann nach einigen Monaten aus `website/` entfernt werden.
 - **Search Console:** `app.pulsedeck.de` als neue Property anlegen und die Sitemap `https://app.pulsedeck.de/sitemap.xml` einreichen;
-  für `pulsedeck.de` gilt `sitemap-index.xml`. Die Verifizierungsdatei der Website liegt unter `website/public/`.
+  für `pulsedeck.de` gilt `https://pulsedeck.de/sitemap.xml`. Nach jedem Deploy mit neuen Seiten: `cd website && node scripts/indexnow.mjs`
+  (meldet die Sitemap per IndexNow an Bing und andere). Die Verifizierungsdatei der Website liegt unter `website/public/`.
 - **Native Apps:** `cd app && PULSEDECK_API_URL=https://app.pulsedeck.de npm run build:mobile`, `CORS_ORIGINS` unverändert.
 - **E-Mails:** Mailvorlagen und Kalender-Links nutzen `APP_BASE_URL`, zeigen also automatisch auf die Anwendung.
 
@@ -87,7 +88,7 @@ docker run --rm -v <ressource>_files-data:/data:ro -v "$PWD":/backup alpine tar 
 ```
 
 **Eingerichtet (2026-10-17):** `/root/pulsedeck-backups/backup.sh` per Root-Cron täglich 03:15 UTC (Datenbank + Datei-Volume, Dump wird
-mit `pg_restore --list` geprüft, Aufbewahrung 14 Tage, Protokoll `backup.log`). Die Sicherungen liegen auf **demselben Server** — eine
+mit `pg_restore --list` geprüft, Aufbewahrung 14 Tage, Protokoll `backup.log`). Die Sicherungen liegen auf **demselben Server** - eine
 Kopie außerhalb (z. B. Hetzner Storage Box) fehlt noch.
 
 Volume-Namen mit `docker volume ls` prüfen. Restore: `selfhosting.md` („Backup / Restore“). Die Umgebungsvariablen (vor allem
