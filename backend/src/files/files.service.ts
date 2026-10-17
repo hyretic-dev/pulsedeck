@@ -9,6 +9,7 @@ import { inTransaction } from '../common/db';
 import { konflikt, nichtGefunden, ungueltig, verboten } from '../common/http-error';
 import { sichtbarkeitsRang } from '../events/visibility';
 import { PG_POOL } from '../infrastructure/postgres/pg.pool';
+import { istIndexierbar } from '../knowledge/knowledge.service';
 import { OBJECT_STORAGE, type ObjectStorage } from '../storage/object-storage';
 import type { Membership } from '../tenancy/membership';
 import { isAdmin } from '../tenancy/permissions';
@@ -149,6 +150,10 @@ export class FilesService {
            VALUES ($1, $2, $3, $3, $4, $5, $6, '/', $7, $8, $9, $10, $11)`,
           [id, orgId, name, key, datei.mimetype.slice(0, 200), datei.size, meta.folder_id ?? null, meta.description ?? null, aufrufer.member.id, meta.working_group_id ?? null, visibility]
         );
+        // Indexauftrag für den KI-Assistenten gleich mit anlegen; ohne KI-Schlüssel wartet er, bis einer gesetzt ist
+        if (istIndexierbar(datei.mimetype, datei.size).ok) {
+          await db.query('INSERT INTO index_jobs (file_id) VALUES ($1) ON CONFLICT (file_id) DO NOTHING', [id]);
+        }
         const neu = await this.einzeln(orgId, aufrufer, id, db);
         await schreibeAudit(db, { table: 'files', operation: 'INSERT', recordId: id, newData: neu, performedBy: userId, organizationId: orgId });
         await meldeAenderung(db, { table: 'files', organizationId: orgId, operation: 'INSERT', id });
