@@ -132,6 +132,12 @@ server {
         try_files $uri $uri.html =404;
     }
 
+    # Funktionsseiten: wie das Handbuch; unbekannte Funktionen sind ein echtes 404
+    location = /funktionen/ { return 301 /funktionen; }
+    location ^~ /funktionen/ {
+        try_files $uri.html =404;
+    }
+
     # Abschließender Schrägstrich weg (Astro erzeugt Seiten ohne), außer bei der Startseite
     location ~ ^/(.+)/$ {
         return 301 /$1;

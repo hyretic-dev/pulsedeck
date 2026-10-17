@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Footer from '../components/Footer.astro';
+import SeitenKopf from '../components/SeitenKopf.astro';
+import FaqListe from '../components/FaqListe.astro';
+import CtaAbschluss from '../components/CtaAbschluss.astro';
+import { KONTAKT, SITE_URL } from '../config';
+import { FAQ_ALLGEMEIN, FAQ_PREISE, FAQ_SICHERHEIT } from '../data/faq';
+import { brotkrumen, faqSchema } from '../seo';
+
+const titel = 'Häufige Fragen zu PulseDeck';
+const beschreibung = 'Antworten zu PulseDeck: WhatsApp, Kosten im Early Access, Datenschutz, Hosting in Deutschland, KI und Start in wenigen Minuten.';
+const url = `${SITE_URL}/faq`;
+const gruppen = [
+  { titel: 'Allgemein', fragen: FAQ_ALLGEMEIN },
+  { titel: 'Preise und Early Access', fragen: FAQ_PREISE },
+  { titel: 'Datenschutz und Sicherheit', fragen: FAQ_SICHERHEIT },
+];
+const jsonLd = [faqSchema(url, gruppen.flatMap((g) => g.fragen)), brotkrumen([{ name: 'Häufige Fragen', pfad: '/faq' }])];
+---
+
+<Base title="FAQ: Häufige Fragen zu PulseDeck" description={beschreibung} path="/faq" jsonLd={jsonLd}>
+  <SiteHeader />
+  <main>
+    <SeitenKopf kicker="FAQ" titel={titel} text="Was Vorstände, Ortsvorsitzende und Aktive vor dem Start wissen wollen." pfad={[{ name: 'Häufige Fragen' }]} />
+    <div class="px-4 sm:px-6 pb-20">
+      <div class="max-w-3xl mx-auto space-y-16">
+        {gruppen.map((g) => <FaqListe fragen={g.fragen} titel={g.titel} />)}
+        <p class="text-[var(--color-text-muted)]">
+          Eure Frage ist nicht dabei? Schreibt uns an <a href={`mailto:${KONTAKT}`} class="text-akzent hover:underline">{KONTAKT}</a> oder schaut ins
+          <a href="/handbuch" class="text-akzent hover:underline">Handbuch</a>.
+        </p>
+      </div>
+    </div>
+    <CtaAbschluss />
+  </main>
+  <Footer />
+</Base>

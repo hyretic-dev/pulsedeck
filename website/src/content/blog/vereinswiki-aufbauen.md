@@ -13,6 +13,11 @@ faq:
     antwort: "Vor allem wiederkehrende Abläufe (Fest, Mitgliederversammlung, Beitragseinzug), Anleitungen für Ämter, wichtige Kontakte, Regeln und Beschlüsse sowie eine Übersicht, wo welche Dokumente liegen. Persönliche Daten von Mitgliedern gehören nicht hinein."
   - frage: "Wie verhindert man, dass ein Wiki veraltet?"
     antwort: "Jede Seite bekommt eine verantwortliche Person, Abläufe werden direkt nach dem Ereignis aktualisiert, und einmal im Jahr wird geprüft, was nicht mehr stimmt. Kurze Seiten bleiben eher aktuell als lange."
+cta:
+  titel: "Das Vereinswiki ist in PulseDeck schon eingebaut"
+  text: "Kategorien, Arbeitsgruppen und Rechte je Rolle, daneben die Dateiablage. Auf Wunsch beantwortet ein KI-Assistent Fragen zu euren Dokumenten."
+  link: "/funktionen/vereinswiki"
+  linkText: "Vereinswiki ansehen"
 ---
 
 **Kurz gesagt:** Ein Vereinswiki hält fest, **wie euer Verein funktioniert** - damit nicht alles an wenigen Köpfen hängt. Hinein gehören **wiederkehrende Abläufe, Anleitungen für Ämter, Kontakte, Regeln und Beschlüsse**. Damit es lebendig bleibt, braucht jede Seite eine **verantwortliche Person**, und Abläufe werden **direkt nach dem Ereignis** aktualisiert. Fangt mit drei Seiten an, nicht mit dreißig.

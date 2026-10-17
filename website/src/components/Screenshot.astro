@@ -1,0 +1,42 @@
+---
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  bild: ImageMetadata;
+  alt: string;
+  /** Sichtbare Breite im Layout, für die Auswahl der Bildgröße */
+  sizes?: string;
+  /** Rahmen als Browserfenster (Querformat) oder als Dialog-Karte (Hochformat) */
+  rahmen?: 'browser' | 'karte';
+  /** Above the fold: sofort laden statt lazy */
+  prioritaet?: boolean;
+  class?: string;
+}
+const { bild, alt, sizes = '(min-width: 1024px) 640px, 100vw', rahmen = 'browser', prioritaet = false, class: klasse = '' } = Astro.props;
+const breiten = [480, 800, 1200, Math.min(1600, bild.width)].filter((w, i, a) => w <= bild.width && a.indexOf(w) === i);
+---
+
+<figure class:list={['rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl shadow-black/50 overflow-hidden', klasse]}>
+  {
+    rahmen === 'browser' && (
+      <div class="flex items-center gap-1.5 px-4 py-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]" aria-hidden="true">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+        <span class="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+        <span class="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+        <span class="ml-3 text-[11px] text-[var(--color-text-muted)] truncate">app.pulsedeck.de</span>
+      </div>
+    )
+  }
+  <Picture
+    src={bild}
+    alt={alt}
+    widths={breiten}
+    sizes={sizes}
+    formats={['webp']}
+    loading={prioritaet ? 'eager' : 'lazy'}
+    fetchpriority={prioritaet ? 'high' : 'auto'}
+    decoding="async"
+    class="block w-full h-auto"
+  />
+</figure>

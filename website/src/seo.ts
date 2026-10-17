@@ -14,6 +14,7 @@ export const organisation = {
   url: `${SITE_URL}/`,
   logo: { '@type': 'ImageObject', url: `${SITE_URL}/icons/icon-512x512.png`, width: 512, height: 512 },
   email: KONTAKT,
+  contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', email: KONTAKT, availableLanguage: ['de'] },
   sameAs: ['https://github.com/julienstack/pulsedeck'],
 };
 
@@ -62,4 +63,13 @@ export function fragenAusMarkdown(markdown: string) {
       return { frage: klartext(frage), antwort: klartext(rest.join('\n')) };
     })
     .filter((f) => f.frage && f.antwort);
+}
+
+/** FAQPage aus sichtbaren Fragen und Antworten (nur auszeichnen, was auf der Seite steht). */
+export function faqSchema(url: string, fragen: Array<{ frage: string; antwort: string }>) {
+  return {
+    '@type': 'FAQPage',
+    '@id': `${url}#faq`,
+    mainEntity: fragen.map((f) => ({ '@type': 'Question', name: f.frage, acceptedAnswer: { '@type': 'Answer', text: f.antwort } })),
+  };
 }

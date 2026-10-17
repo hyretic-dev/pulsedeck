@@ -13,6 +13,11 @@ faq:
     antwort: "Schichtplan-Apps für Unternehmen sind auf bezahlte Teams ausgelegt. Für Vereine passen Lösungen besser, in denen sich Mitglieder selbst in Schichten eintragen und die Teil der Vereinsorganisation sind, etwa die Helferslots in PulseDeck."
   - frage: "Wie geht man mit kurzfristigen Absagen um?"
     antwort: "Plant Springer ein, macht Absagen einfach und sichtbar, damit die Lücke sofort auffällt, und haltet eine Liste von Leuten bereit, die kurzfristig einspringen."
+cta:
+  titel: "Der Schichtplan hängt direkt am Termin"
+  text: "Schichten mit Uhrzeit, Platzzahl und Fähigkeiten anlegen, Mitglieder tragen sich selbst ein und wieder aus. Freie Plätze sieht jeder sofort."
+  link: "/funktionen/helferplanung"
+  linkText: "Helferplanung ansehen"
 ---
 
 **Kurz gesagt:** Ein Schichtplan im Ehrenamt ist ein **Angebot**, keine Anweisung. Er funktioniert, wenn Schichten **kurz und klar beschrieben** sind, Helfer sich **selbst eintragen**, **Lücken für alle sichtbar** sind und **Absagen leicht** gehen. Schichtplan-Software für Betriebe passt dafür meist schlecht, weil sie auf Zuteilung und Arbeitszeiterfassung ausgelegt ist.

@@ -13,6 +13,12 @@ faq:
     antwort: "Etwa acht Wochen vor dem Fest: Stände und Schichten festlegen, sechs Wochen vorher den Plan öffnen, zwei Wochen vorher Lücken gezielt besetzen und in der Woche davor allen ihre Schichten bestätigen."
   - frage: "Wie bekommt man mehr Helfer?"
     antwort: "Kurze, klar beschriebene Schichten, Selbsteintragung statt Zuteilung, persönliche Ansprache für die letzten Lücken und Aufgaben, die zu den Fähigkeiten der Leute passen. Und nach dem Fest: Danke sagen."
+cta:
+  titel: "Euer Helferplan zum Selbsteintragen"
+  text: "Fest als Termin anlegen, Schichten darunter, Link teilen: Mitglieder tragen sich selbst ein, und offene Lücken seht ihr auf einen Blick."
+  link: "/funktionen/helferplanung"
+  linkText: "Helferplanung ansehen"
+  vor: "Nach dem Fest"
 ---
 
 **Kurz gesagt:** Ein guter Helferplan teilt das Fest in **Stände oder Aufgaben** und diese in **Schichten mit festen Plätzen** (zum Beispiel „Grill, 14-16 Uhr, 3 Personen“). Helfer tragen sich **selbst** ein, Lücken sind sofort sichtbar, und jede Person weiß vorher, wann sie wo gebraucht wird. Startet etwa **acht Wochen** vor dem Fest.

@@ -13,6 +13,11 @@ faq:
     antwort: "Häufige Gründe sind Zeitmangel durch Beruf und Familie, zu viel Last auf zu wenigen Schultern, fehlende Wertschätzung und unklare Aufgaben. Vereine, die Aufgaben teilen, klar beschreiben und Anerkennung zeigen, halten ihre Engagierten länger."
   - frage: "Wie gewinnt man junge Menschen fürs Ehrenamt?"
     antwort: "Laut Freiwilligensurvey 2024 sind 14- bis 29-Jährige überdurchschnittlich engagiert. Sie lassen sich eher für konkrete, zeitlich begrenzte Aufgaben gewinnen als für lange Ämter, und erwarten, dass Organisation digital und unkompliziert funktioniert."
+cta:
+  titel: "Konkrete Aufgaben statt allgemeiner Aufrufe"
+  text: "In PulseDeck tragen sich Neue selbst in überschaubare Schichten ein, Arbeitsgruppen geben ihnen einen Platz und das Wiki erklärt, wie euer Verein tickt."
+  link: "/funktionen/helferplanung"
+  linkText: "So funktioniert die Helferplanung"
 ---
 
 **Kurz gesagt:** Laut dem **Freiwilligensurvey 2024** engagieren sich **36,7 Prozent** der Menschen ab 14 Jahren, rund **27 Millionen**. Die Quote ist leicht gesunken, aber wer sich engagiert, tut es **intensiver**: Etwa die Hälfte ist mindestens einmal pro Woche aktiv. Für Vereine heißt das: Die Last liegt auf weniger Schultern. Wer neue Menschen gewinnen will, braucht **kleine, klare Einstiegsaufgaben**, **echte Wertschätzung** und eine Organisation, die **Zeit spart statt kostet**.

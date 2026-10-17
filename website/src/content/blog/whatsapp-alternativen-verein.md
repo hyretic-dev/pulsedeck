@@ -15,6 +15,11 @@ faq:
     antwort: "Ja, Signal braucht zur Registrierung eine Telefonnummer. Die Nummer lässt sich in den Einstellungen aber vor anderen verbergen. Threema funktioniert ohne Telefonnummer."
   - frage: "Kann man WhatsApp und eine Vereinsapp gleichzeitig nutzen?"
     antwort: "Ja, und viele Vereine machen genau das: schneller Austausch im Messenger, alles Verbindliche wie Termine, Helferschichten, Abstimmungen und Dokumente in der Vereinsapp. Wichtig ist eine klare Regel, was wohin gehört."
+cta:
+  titel: "Messenger behalten, Organisation auslagern"
+  text: "PulseDeck übernimmt Termine, Helferschichten, Ankündigungen und Wissen. Den Link teilt ihr weiter in eurer Gruppe. Im Early Access kostenlos."
+  link: "/funktionen"
+  linkText: "Funktionen ansehen"
 ---
 
 **Kurz gesagt:** Die beste WhatsApp-Alternative hängt davon ab, *welches* Problem ihr lösen wollt. Für einen datensparsamen **Chat** sind **Signal** und **Threema** die naheliegenden Kandidaten. Für **Organisation** - Termine, Zusagen, Helfer, Mitglieder - braucht ihr eine **Vereinsapp**: **Spond** ist stark im Mannschaftssport, **Vereinsplaner** verbindet Kommunikation mit Verwaltung und Beiträgen, **PulseDeck** konzentriert sich auf Engagement, Helferplanung und Vereinswissen.

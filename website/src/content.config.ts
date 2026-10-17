@@ -41,6 +41,13 @@ const blog = defineCollection({
     image: z.string().optional(),
     /** Häufige Fragen zum Beitrag: werden am Ende angezeigt und als FAQPage ausgezeichnet. Antworten kurz und eigenständig halten. */
     faq: z.array(z.object({ frage: z.string(), antwort: z.string() })).default([]),
+    /**
+     * Kontextueller Aufruf, eingefügt von rehypeKontextCta (src/markdown) vor der H2, die mit `vor` beginnt (Standard „Quellen“).
+     * `link` führt zur passenden Funktions- oder Zielgruppenseite.
+     */
+    cta: z
+      .object({ titel: z.string(), text: z.string(), link: z.string().startsWith('/'), linkText: z.string(), vor: z.string().optional() })
+      .optional(),
   }),
 });
 

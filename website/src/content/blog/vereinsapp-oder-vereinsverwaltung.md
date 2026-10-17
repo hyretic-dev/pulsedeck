@@ -13,6 +13,11 @@ faq:
     antwort: "Ja. Open-Source-Programme wie JVerein kosten keine Lizenz, Vereinsplaner und Spond haben kostenlose Angebote, PulseDeck ist im Early Access kostenlos. Kostenlose Tarife sind oft im Umfang begrenzt; prüft, ob sie für eure Größe reichen."
   - frage: "Kann man mehrere Programme kombinieren?"
     antwort: "Ja, viele Vereine tun das: eine Verwaltungssoftware für Beiträge und Buchhaltung und eine Vereinsapp für Termine und Engagement. Wichtig ist, Mitgliedsdaten nicht doppelt zu pflegen, wo es sich vermeiden lässt."
+cta:
+  titel: "Lebt euer Verein von Aktionen und Ehrenamtlichen?"
+  text: "Dann probiert PulseDeck mit eurem nächsten Termin aus. Im Early Access kostenlos, mit allen Funktionen, und gut kombinierbar mit eurer Vereinsverwaltung."
+  link: "/funktionen"
+  linkText: "Alle Funktionen ansehen"
 ---
 
 **Kurz gesagt:** „Vereinssoftware“ sind eigentlich vier verschiedene Werkzeuge: **Verwaltung** (Mitglieder, Beiträge, SEPA, Buchhaltung), **Team- und Sportapps** (Trainings, Spiele, Anwesenheit), **Engagement-Plattformen** (Termine, Helfer, Arbeitsgruppen, Wissen) und **Messenger**. Fragt zuerst, **wo euer Verein heute Zeit verliert** - bei der Kasse oder beim Organisieren der Menschen. Danach richtet sich die Wahl, und oft ist die Antwort eine Kombination.

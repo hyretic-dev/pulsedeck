@@ -2,11 +2,13 @@ import { getCollection } from 'astro:content';
 import { beitraege } from './blog';
 import { SITE_URL } from './config';
 import { STANDARD_BILD } from './seo';
+import { FUNKTIONEN } from './data/funktionen';
+import { ZIELGRUPPEN } from './data/zielgruppen';
 
 export interface Seite {
   pfad: string;
   titel: string;
-  gruppe: 'Allgemein' | 'Handbuch' | 'Blog' | 'Rechtliches';
+  gruppe: 'Allgemein' | 'Funktionen' | 'Für wen' | 'Handbuch' | 'Blog' | 'Rechtliches';
   /** Letzte inhaltliche Änderung; nur wenn bekannt (kein Build-Datum, das würde lastmod entwerten). */
   geaendert?: Date;
   /** Vorschaubild (absolute URL) für die Bild-Erweiterung der Sitemap. */
@@ -22,6 +24,12 @@ export async function alleSeiten(): Promise<Seite[]> {
   const posts = await beitraege();
   return [
     { pfad: '/', titel: 'Startseite', gruppe: 'Allgemein', bild: STANDARD_BILD },
+    { pfad: '/funktionen', titel: 'Funktionen', gruppe: 'Funktionen' },
+    ...FUNKTIONEN.map((f) => ({ pfad: `/funktionen/${f.slug}`, titel: f.name, gruppe: 'Funktionen' as const, bild: SITE_URL + f.bild.src })),
+    ...ZIELGRUPPEN.map((z) => ({ pfad: `/${z.slug}`, titel: `PulseDeck für ${z.name}`, gruppe: 'Für wen' as const })),
+    { pfad: '/preise', titel: 'Preise', gruppe: 'Allgemein' },
+    { pfad: '/sicherheit', titel: 'Datenschutz & Sicherheit', gruppe: 'Allgemein' },
+    { pfad: '/faq', titel: 'Häufige Fragen', gruppe: 'Allgemein' },
     { pfad: '/blog', titel: 'Blog', gruppe: 'Blog', geaendert: posts[0]?.data.updated ?? posts[0]?.data.date },
     ...posts.map((b) => ({
       pfad: `/blog/${b.id}`,

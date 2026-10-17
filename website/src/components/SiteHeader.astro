@@ -1,37 +1,89 @@
 ---
 import { APP_URL } from '../config';
+import { FUNKTIONEN } from '../data/funktionen';
+import { ZIELGRUPPEN } from '../data/zielgruppen';
 
 interface Props {
   /** Aktueller Bereich, hebt den Menüpunkt hervor. */
-  aktiv?: 'handbuch' | 'blog';
+  aktiv?: 'funktionen' | 'zielgruppen' | 'preise' | 'handbuch' | 'blog';
 }
 const { aktiv } = Astro.props;
-const link = 'text-sm font-medium transition-colors hover:text-[var(--color-text)]';
+const link = (bereich?: string) =>
+  `text-sm font-medium transition-colors hover:text-[var(--color-text)] ${aktiv === bereich ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`;
+const menue = 'absolute left-0 top-full mt-3 w-80 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-2xl';
+// Dropdowns und mobiles Menü als <details>: funktioniert ohne JavaScript und mit Tastatur
 ---
 
-<header class="sticky top-0 z-50 border-b border-[var(--color-border)]/50 bg-[var(--color-bg)]/80 backdrop-blur-md">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 sm:gap-8">
-    <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-linke to-linke-dark flex items-center justify-center shadow-lg shadow-linke/20">
-        <i class="pi pi-users text-white text-lg" aria-hidden="true"></i>
-      </div>
+<header class="sticky top-0 z-50 border-b border-[var(--color-border)]/60 bg-[var(--color-bg)]/85 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-6">
+    <a href="/" class="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity" aria-label="PulseDeck Startseite">
+      <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-linke to-linke-dark flex items-center justify-center" aria-hidden="true">
+        <i class="pi pi-users text-white"></i>
+      </span>
       <span class="text-lg font-bold tracking-tight">PulseDeck</span>
     </a>
 
-    <nav class="flex items-center gap-3 sm:gap-6" aria-label="Hauptnavigation">
-      <a href="/#dashboard" class={`hidden md:inline ${link} text-[var(--color-text-muted)]`}>Funktionen</a>
-      <a
-        href="/handbuch"
-        class={`hidden sm:inline ${link} ${aktiv === 'handbuch' ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}
-        aria-current={aktiv === 'handbuch' ? 'page' : undefined}>Handbuch</a
-      >
-      <a
-        href="/blog"
-        class={`${link} ${aktiv === 'blog' ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}
-        aria-current={aktiv === 'blog' ? 'page' : undefined}>Blog</a
-      >
-      <a href={`${APP_URL}/login`} class={`hidden sm:inline ${link} text-[var(--color-text-muted)]`}>Login</a>
-      <a href={`${APP_URL}/registrieren`} class="px-4 sm:px-5 py-2 bg-linke hover:bg-linke-light text-white rounded-lg text-sm font-bold transition-all whitespace-nowrap">Testen</a>
+    <nav class="hidden lg:flex items-center gap-7" aria-label="Hauptnavigation">
+      <details class="relative group/dd">
+        <summary class={`${link('funktionen')} list-none cursor-pointer flex items-center gap-1.5`}>
+          Funktionen <i class="pi pi-chevron-down text-[10px] transition-transform group-open/dd:rotate-180" aria-hidden="true"></i>
+        </summary>
+        <div class={menue}>
+          {
+            FUNKTIONEN.map((f) => (
+              <a href={`/funktionen/${f.slug}`} class="flex gap-3 rounded-xl p-3 hover:bg-[var(--color-surface-raised)]">
+                <i class={`pi ${f.icon} text-akzent mt-0.5`} aria-hidden="true" />
+                <span>
+                  <span class="block text-sm font-semibold">{f.name}</span>
+                  <span class="block text-xs text-[var(--color-text-muted)] leading-snug mt-0.5">{f.kurz}</span>
+                </span>
+              </a>
+            ))
+          }
+          <a href="/funktionen" class="block text-xs font-semibold text-akzent px-3 pt-2 pb-1 hover:underline">Alle Funktionen im Überblick →</a>
+        </div>
+      </details>
+      <details class="relative group/dd">
+        <summary class={`${link('zielgruppen')} list-none cursor-pointer flex items-center gap-1.5`}>
+          Für wen <i class="pi pi-chevron-down text-[10px] transition-transform group-open/dd:rotate-180" aria-hidden="true"></i>
+        </summary>
+        <div class={menue}>
+          {
+            ZIELGRUPPEN.map((z) => (
+              <a href={`/${z.slug}`} class="flex items-center gap-3 rounded-xl p-3 hover:bg-[var(--color-surface-raised)]">
+                <i class={`pi ${z.icon} text-akzent`} aria-hidden="true" />
+                <span class="text-sm font-semibold">{z.name}</span>
+              </a>
+            ))
+          }
+        </div>
+      </details>
+      <a href="/preise" class={link('preise')} aria-current={aktiv === 'preise' ? 'page' : undefined}>Preise</a>
+      <a href="/blog" class={link('blog')} aria-current={aktiv === 'blog' ? 'page' : undefined}>Blog</a>
+      <a href="/handbuch" class={link('handbuch')} aria-current={aktiv === 'handbuch' ? 'page' : undefined}>Handbuch</a>
     </nav>
+
+    <div class="flex items-center gap-2 sm:gap-4">
+      <a href={`${APP_URL}/login`} class="hidden sm:inline text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)]">Anmelden</a>
+      <a href={`${APP_URL}/registrieren`} class="btn-primaer !px-4 !py-2 text-sm whitespace-nowrap">Kostenlos starten</a>
+      <details class="lg:hidden relative">
+        <summary class="list-none cursor-pointer w-10 h-10 flex items-center justify-center rounded-lg border border-[var(--color-border)]" aria-label="Menü">
+          <i class="pi pi-bars" aria-hidden="true"></i>
+        </summary>
+        <nav class="absolute right-0 top-full mt-3 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-2xl" aria-label="Menü">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Funktionen</p>
+          {FUNKTIONEN.map((f) => <a href={`/funktionen/${f.slug}`} class="block py-2 text-sm">{f.name}</a>)}
+          <p class="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mt-4 mb-2">Für wen</p>
+          {ZIELGRUPPEN.map((z) => <a href={`/${z.slug}`} class="block py-2 text-sm">{z.name}</a>)}
+          <div class="border-t border-[var(--color-border)] mt-4 pt-3 grid grid-cols-2 gap-1 text-sm">
+            <a href="/preise" class="py-2">Preise</a>
+            <a href="/blog" class="py-2">Blog</a>
+            <a href="/handbuch" class="py-2">Handbuch</a>
+            <a href="/sicherheit" class="py-2">Sicherheit</a>
+            <a href={`${APP_URL}/login`} class="py-2">Anmelden</a>
+          </div>
+        </nav>
+      </details>
+    </div>
   </div>
 </header>
