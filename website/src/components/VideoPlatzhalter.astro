@@ -27,8 +27,8 @@ const { src, poster, titel, untertitel, nachweis } = Astro.props;
           {untertitel && <track kind="captions" src={untertitel} srclang="de" label="Deutsch" default />}
         </video>
         <button type="button" data-video-play class="group absolute inset-0 flex items-center justify-center cursor-pointer" aria-label={`${titel} abspielen`}>
-          <span class="w-16 h-16 rounded-full bg-cta flex items-center justify-center shadow-xl transition-transform group-hover:scale-110 motion-reduce:transition-none" aria-hidden="true">
-            <i class="pi pi-play text-white text-2xl ml-1" />
+          <span class="w-20 h-20 rounded-full bg-white/10 backdrop-blur-md border border-white/25 flex items-center justify-center shadow-xl transition-transform group-hover:scale-110 motion-reduce:transition-none" aria-hidden="true">
+            <i class="pi pi-play text-cta text-2xl ml-1" />
           </span>
         </button>
       </div>
@@ -51,12 +51,5 @@ const { src, poster, titel, untertitel, nachweis } = Astro.props;
   }
 </figure>
 
-<script>
-  document.querySelectorAll<HTMLButtonElement>('[data-video-play]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const video = button.parentElement?.querySelector('video');
-      button.remove();
-      video?.play();
-    });
-  });
-</script>
+<!-- Statische Datei statt gebündeltem Inline-Script: die CSP der Website (script-src 'self') blockiert Inline-Scripts. -->
+<script is:inline defer src="/js/video-play.js"></script>

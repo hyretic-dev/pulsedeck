@@ -8,6 +8,7 @@ import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
 import { AuthService, LoginCheckResult } from '../../shared/services/auth.service';
 import { PulseLogoComponent } from '../../shared/components/pulse-logo.component';
+import { environment } from '../../../environments/environment';
 
 type LoginStep = 'email' | 'password' | 'invitation-sent' | 'not-found';
 
@@ -293,6 +294,27 @@ export class LoginComponent {
 
   goBack() {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-    this.router.navigateByUrl(returnUrl || '/');
+
+    if (returnUrl) {
+      // Letzte Seite lag hinter dem Login (Guard-Umleitung): zurück auf die öffentliche Seite der Organisation.
+      const dashboard = returnUrl.match(/^\/([^/?#]+)\/dashboard(?:[/?#]|$)/);
+      if (dashboard) {
+        this.router.navigateByUrl(`/${dashboard[1]}`);
+        return;
+      }
+
+      // Organisations-Auswahl und Legacy-Dashboard erfordern ebenfalls eine Anmeldung; ohne Login führt der Weg zur Hauptseite.
+      if (/^\/(dashboard|organisationen)(?:[/?#]|$)/.test(returnUrl)) {
+        window.location.assign(environment.websiteUrl);
+        return;
+      }
+
+      // Öffentliche Routen (z. B. Event-Details, Organisations-Seite) sind ohne Anmeldung erreichbar.
+      this.router.navigateByUrl(returnUrl);
+      return;
+    }
+
+    // Ohne bekanntes Ziel: Hauptseite der Website.
+    window.location.assign(environment.websiteUrl);
   }
 }
