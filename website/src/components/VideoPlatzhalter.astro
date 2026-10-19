@@ -21,11 +21,18 @@ const { src, poster, titel, untertitel, nachweis } = Astro.props;
   {
     src ? (
       <>
+      <div class="relative">
         <video controls preload="none" playsinline poster={poster.src} width={poster.width} height={poster.height} class="block w-full h-auto" aria-label={titel}>
           <source src={src} type="video/mp4" />
           {untertitel && <track kind="captions" src={untertitel} srclang="de" label="Deutsch" default />}
         </video>
-        {nachweis && <figcaption class="px-4 py-2.5 border-t border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">{nachweis}</figcaption>}
+        <button type="button" data-video-play class="group absolute inset-0 flex items-center justify-center cursor-pointer" aria-label={`${titel} abspielen`}>
+          <span class="w-16 h-16 rounded-full bg-cta flex items-center justify-center shadow-xl transition-transform group-hover:scale-110 motion-reduce:transition-none" aria-hidden="true">
+            <i class="pi pi-play text-white text-2xl ml-1" />
+          </span>
+        </button>
+      </div>
+      {nachweis && <figcaption class="px-4 py-2.5 border-t border-[var(--color-border)] text-xs text-[var(--color-text-muted)]">{nachweis}</figcaption>}
       </>
     ) : (
       <div class="relative">
@@ -43,3 +50,13 @@ const { src, poster, titel, untertitel, nachweis } = Astro.props;
     )
   }
 </figure>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-video-play]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const video = button.parentElement?.querySelector('video');
+      button.remove();
+      video?.play();
+    });
+  });
+</script>
