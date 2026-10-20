@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { BcryptPasswordHasher } from '../auth/password-hasher';
 import { buildPgTestApp, type PgTestApp } from '../../test/pg-app';
-import { createTestDatabase, dropTestDatabase } from '../../test/pg-test-db';
+import { ADMIN_URL, createTestDatabase, dropTestDatabase } from '../../test/pg-test-db';
 
 /**
  * Mandanten-Negativtests gegen echtes PostgreSQL und die echte Nest-App (Gesamtauftrag §6, §15):
@@ -296,7 +296,7 @@ describe('Mandantenkontext (echtes PostgreSQL, echte HTTP-Kette)', () => {
 
     it('läuft die Runtime-Rolle ohne DDL-Rechte auf den neuen Tabellen (kein Umbau durch das Backend)', async () => {
       const runtime = new Client({
-        connectionString: `postgres://pulsedeck_runtime:runtime-test@127.0.0.1:5433/${DB}`,
+        connectionString: `postgres://pulsedeck_runtime:runtime-test@${new URL(ADMIN_URL).host}/${DB}`,
       });
       await runtime.connect();
       try {

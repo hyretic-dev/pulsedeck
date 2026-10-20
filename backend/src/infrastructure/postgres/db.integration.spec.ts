@@ -16,8 +16,7 @@ import { ADMIN_URL, createTestDatabase } from '../../../test/pg-test-db';
  * Ablaufprüfung, begrenzter Pool ohne offene Handles, Rollen-Trennung.
  * Unit-Tests mit Mocks gelten für diese Nachweise nicht.
  */
-const RUNTIME_URL =
-  'postgres://pulsedeck_runtime:runtime-test@127.0.0.1:5433/pulsedeck_test';
+const RUNTIME_URL = `postgres://pulsedeck_runtime:runtime-test@${new URL(ADMIN_URL).host}/pulsedeck_test`;
 
 function hash(token: string): string {
   return createHash('sha256').update(token).digest('hex');

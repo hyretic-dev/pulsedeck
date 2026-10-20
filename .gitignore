@@ -59,3 +59,9 @@ backups/
 
 # Lokale MCP-Konfiguration (Zugänge zu Produktionssystemen): nie einchecken
 .mcp.json
+
+# Interne Vertriebs- und Preisplanung (Repo ist öffentlich): nie einchecken
+/GO-TO-MARKET.md
+
+# Weitere interne Vertriebsunterlagen (Pipeline, Pitch-Prompt): nie einchecken
+/intern/

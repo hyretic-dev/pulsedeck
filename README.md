@@ -91,7 +91,7 @@ PulseDeck setzt auf moderne, robuste Technologien:
 5.  **Tests:**
     ```bash
     cd app && npm test -- --watch=false              # Anwendung
-    cd backend && npx tsc --noEmit && npm test      # Backend, braucht PostgreSQL auf Port 5433 (backend/scripts/test-db-setup.mjs)
+    cd backend && npx tsc --noEmit && npm test      # Backend, braucht PostgreSQL auf Port 5433 (backend/scripts/test-db-setup.mjs); anderer Server: TEST_ADMIN_DATABASE_URL=postgres://postgres:…@127.0.0.1:<port>/postgres
     bash scripts/smoke-compose.sh                   # Compose-Stack Ende-zu-Ende
     ```
 

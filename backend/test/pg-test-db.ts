@@ -13,6 +13,9 @@ export const ADMIN_URL =
 
 const BACKEND_ROOT = join(import.meta.dirname, '..');
 
+/** Host und Port des Test-Servers (aus ADMIN_URL), damit ein abweichender Port (TEST_ADMIN_DATABASE_URL) auch für die Rollen-URLs gilt. */
+const SERVER = new URL(ADMIN_URL).host;
+
 async function legeRolleAn(admin: Client, name: string, passwort: string): Promise<void> {
   try {
     await admin.query(`CREATE ROLE ${name} LOGIN PASSWORD '${passwort}'`);
@@ -58,7 +61,7 @@ export async function createTestDatabase(name: string): Promise<TestDatabase> {
       cwd: BACKEND_ROOT,
       env: {
         ...process.env,
-        MIGRATIONS_DATABASE_URL: `postgres://pulsedeck_migrations:migrations-test@127.0.0.1:5433/${name}`,
+        MIGRATIONS_DATABASE_URL: `postgres://pulsedeck_migrations:migrations-test@${SERVER}/${name}`,
       },
       stdio: 'pipe',
     }
@@ -67,7 +70,7 @@ export async function createTestDatabase(name: string): Promise<TestDatabase> {
   return {
     name,
     adminUrl: ADMIN_URL.replace(/\/[^/]*$/, `/${name}`),
-    runtimeUrl: `postgres://pulsedeck_runtime:runtime-test@127.0.0.1:5433/${name}`,
+    runtimeUrl: `postgres://pulsedeck_runtime:runtime-test@${SERVER}/${name}`,
   };
 }
 
