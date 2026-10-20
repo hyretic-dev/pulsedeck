@@ -58,6 +58,22 @@ nichts). Erwartung: `postgres`, `backend`, `frontend`, `website` **healthy**; `h
 | 502 Bad Gateway auf der Domain | Domain hängt am falschen Dienst (siehe §1.3) |
 | Domain-Konflikt beim Speichern | Domain ist noch einer anderen Ressource zugeordnet |
 
+### Überwachung von außen (Uptime Kuma)
+
+Der Prüfpunkt `GET https://app.pulsedeck.de/api/v1/public/health` läuft durch die ganze Kette (Proxy, Backend, Datenbank) und
+antwortet ohne Anmeldung mit `200 {"status":"ok"}`, bei nicht erreichbarer Datenbank mit `503` (ohne Fehlerdetails; die stehen im
+Backend-Log). Der nginx-Pfad `/health` prüft dagegen nur den Webserver selbst, deshalb nicht dafür verwenden.
+
+Monitore in Uptime Kuma (jeweils HTTP(s), Intervall 60 s, Wiederholungen 2):
+
+| Monitor | URL | Erwartung |
+|---|---|---|
+| App und API | `https://app.pulsedeck.de/api/v1/public/health` | Status 200, Schlüsselwort `ok` |
+| Website | `https://pulsedeck.de/health` | Status 200 |
+| Zertifikat | beide Domains | Ablauf-Warnung 14 Tage vorher |
+
+Der Server mit Uptime Kuma sollte nicht derselbe sein wie der von PulseDeck, sonst fällt die Überwachung mit dem Ausfall aus.
+
 ### Umzug von `pulsedeck.de` auf `app.pulsedeck.de`
 
 Bis zur Trennung lieferte `pulsedeck.de` die Anwendung aus. Danach gilt:
@@ -88,13 +104,39 @@ docker run --rm -v <ressource>_files-data:/data:ro -v "$PWD":/backup alpine tar 
 ```
 
 **Eingerichtet (2026-10-17):** `/root/pulsedeck-backups/backup.sh` per Root-Cron täglich 03:15 UTC (Datenbank + Datei-Volume, Dump wird
-mit `pg_restore --list` geprüft, Aufbewahrung 14 Tage, Protokoll `backup.log`). Die Sicherungen liegen auf **demselben Server** - eine
-Kopie außerhalb (z. B. Hetzner Storage Box) fehlt noch.
+mit `pg_restore --list` geprüft, Aufbewahrung 14 Tage, Protokoll `backup.log`). Die Sicherungen liegen auf **demselben Server**; eine
+Kopie außerhalb (z. B. Hetzner Storage Box) hat der Betreiber am 2026-10-20 als aktiviert gemeldet (Einrichtung hier ergänzen).
 
 Volume-Namen mit `docker volume ls` prüfen. Restore: `selfhosting.md` („Backup / Restore“). Die Umgebungsvariablen (vor allem
 `SECRETS_ENCRYPTION_KEY`) getrennt und geschützt sichern.
 
 ## 5. Offen
 
-Backup-Kopie außerhalb des Servers; SPF/DKIM der Domain prüfen (Zustellbarkeit); juristische Prüfung der Datenschutzerklärung (O12);
+SPF/DKIM der Domain prüfen (Zustellbarkeit); juristische Prüfung der Datenschutzerklärung (O12);
 Restore auf dem Zielserver proben.
+
+## 6. Pilotbetrieb: Demo-Organisation und Kennzahlen
+
+**Demo-Organisation „Ortsverband Musterstadt“** für Workshops und Gespräche (erfundene Personen, Adressen auf `.invalid`, Termine relativ
+zum heutigen Tag). Das Konto muss vorher normal registriert und bestätigt sein; es wird Admin der Demo.
+
+```bash
+B=$(docker ps --filter "name=backend-<ressource>" --format '{{.Names}}' | head -1)
+docker exec -e DATABASE_URL="$DATABASE_URL" "$B" node dist/demo/seed-demo.main.js --owner du@example.de            # anlegen
+docker exec -e DATABASE_URL="$DATABASE_URL" "$B" node dist/demo/seed-demo.main.js --owner du@example.de --reset    # neu anlegen (vor jedem Workshop)
+```
+
+`DATABASE_URL` ist die Verbindung der Laufzeit-Rolle (steht in der Umgebung des Backend-Containers, nicht ausgeben). Kürzel `demo-ortsverband`
+(über `--slug` änderbar); die öffentliche Seite liegt unter `https://app.pulsedeck.de/demo-ortsverband`.
+
+**Kennzahlen-Report** (nur lesend, nur Zähler je Organisation, keine Personendaten): `scripts/kpi-report.sql`, einmal pro Woche.
+
+```bash
+P=$(docker ps --filter "name=postgres-<ressource>" --format '{{.Names}}' | head -1)
+docker exec -i "$P" psql -U pulsedeck_admin -d pulsedeck -f - < scripts/kpi-report.sql
+```
+
+Im Skript stehen die Kürzel der internen Organisationen (Demo, „PulseDeck Piloten“), die nicht mitzählen (`\set intern`).
+
+**Plattform-Admin:** Das Konto braucht `auth_users.is_platform_admin = true` (einmalig per SQL setzen). Danach erscheint in der Seitenleiste
+das *Feedback-Board* (Meldungen, Themen nach Zahl der Organisationen, Herkunft und Pilot-Anfragen neuer Organisationen).
