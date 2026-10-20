@@ -324,17 +324,35 @@
                                     placeholder="Kurze Beschreibung deiner Organisation"></textarea>
                             </div>
 
-                            <!-- Primary Color -->
-                            <div>
-                                <label class="block text-sm font-medium text-[var(--color-text)] mb-2">
-                                    Primärfarbe
+                            <!-- Darstellung: Primärfarbe der Organisation -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-[var(--color-text)] mb-1">
+                                    Darstellung
                                 </label>
-                                <div class="flex items-center gap-3">
-                                    <input type="color" [(ngModel)]="orgForm().primary_color"
-                                        class="w-12 h-10 rounded border border-[var(--color-border)] cursor-pointer" />
-                                    <input type="text" pInputText [(ngModel)]="orgForm().primary_color" class="flex-1"
-                                        placeholder="#e3000f" />
+                                <p class="text-xs text-[var(--color-text-muted)] mb-3">
+                                    Die Primärfarbe gilt für Schaltflächen, Hervorhebungen und Menüs eurer Organisation, in der App, auf der
+                                    öffentlichen Seite und in Newslettern. Änderungen siehst du sofort als Vorschau; gespeichert wird erst mit „Speichern“.
+                                </p>
+                                <div class="flex flex-wrap gap-2 mb-3" role="group" aria-label="Farbvorschläge">
+                                    @for (v of farbVorschlaege; track v.farbe) {
+                                    <button type="button" (click)="farbeGeaendert(v.farbe)" [title]="v.name" [attr.aria-label]="v.name"
+                                        class="w-9 h-9 rounded-full border-2 cursor-pointer transition-transform hover:scale-110"
+                                        [style.background]="v.farbe"
+                                        [style.border-color]="orgForm().primary_color?.toLowerCase() === v.farbe ? 'var(--color-text)' : 'transparent'"></button>
+                                    }
                                 </div>
+                                <div class="flex items-center gap-3 max-w-md">
+                                    <input type="color" [ngModel]="orgForm().primary_color" (ngModelChange)="farbeGeaendert($event)"
+                                        aria-label="Primärfarbe wählen"
+                                        class="w-12 h-10 rounded border border-[var(--color-border)] cursor-pointer" />
+                                    <input type="text" pInputText [ngModel]="orgForm().primary_color" (ngModelChange)="farbeGeaendert($event)"
+                                        class="flex-1" placeholder="#e3000f" aria-label="Primärfarbe als Hex-Wert" />
+                                    <p-button label="Zurücksetzen" [text]="true" severity="secondary" size="small"
+                                        (onClick)="farbeGeaendert(standardFarbe)"></p-button>
+                                </div>
+                                @for (hinweis of farbHinweise(); track hinweis) {
+                                <p class="text-xs text-amber-500 mt-2"><i class="pi pi-exclamation-triangle mr-1"></i>{{ hinweis }}</p>
+                                }
                             </div>
 
                             <!-- Logo URL -->

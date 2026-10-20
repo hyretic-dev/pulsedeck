@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -28,6 +28,8 @@ import { OrganizationService, Organization } from '../../../shared/services/orga
 import { SkillService, Skill, SkillCategory } from '../../../shared/services/skill.service';
 import { FeedService, NewsletterConfig } from '../../../shared/services/feed.service';
 import { RolesService } from '../../../shared/services/roles.service';
+import { OrgThemeService } from '../../../shared/services/org-theme.service';
+import { farbHinweise, FARB_VORSCHLAEGE, normalisiereFarbe, STANDARD_FARBE } from '../../../shared/theme/org-theme';
 import { PermissionsService, PERMISSION_LABELS, ALL_PERMISSIONS } from '../../../shared/services/permissions.service';
 import { OrganizationRole, Permission } from '../../../shared/models/member.model';
 
@@ -58,7 +60,7 @@ import { OrganizationRole, Permission } from '../../../shared/models/member.mode
     providers: [MessageService, ConfirmationService],
     templateUrl: './settings.html',
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent implements OnInit, OnDestroy {
     readonly auth = inject(AuthService);
     readonly org = inject(OrganizationService);
     readonly skillService = inject(SkillService);
@@ -66,6 +68,7 @@ export class SettingsComponent implements OnInit {
     private readonly messageService = inject(MessageService);
     private readonly confirmationService = inject(ConfirmationService);
     readonly rolesService = inject(RolesService);
+    private readonly orgTheme = inject(OrgThemeService);
 
     loading = signal(false);
     activeTab = signal<string>('skills');
@@ -138,6 +141,22 @@ export class SettingsComponent implements OnInit {
     // ORGANIZATION
     // =========================================================================
     orgForm = signal<Partial<Organization>>({});
+
+    // Darstellung: Farbvorschläge, Live-Vorschau und Kontrast-Hinweise
+    readonly farbVorschlaege = FARB_VORSCHLAEGE;
+    readonly standardFarbe = STANDARD_FARBE;
+    farbHinweise = signal<string[]>([]);
+
+    /** Eingabe geändert (Farbwähler, Textfeld, Vorschlag): sofort in der ganzen Oberfläche zeigen, noch ohne zu speichern. */
+    farbeGeaendert(farbe: string): void {
+        this.orgForm.update((f) => ({ ...f, primary_color: farbe }));
+        this.farbHinweise.set(farbHinweise(farbe));
+        this.orgTheme.zeigeVorschau(normalisiereFarbe(farbe));
+    }
+
+    ngOnDestroy(): void {
+        this.orgTheme.zeigeVorschau(null); // ungespeicherte Vorschau verwerfen
+    }
 
     async ngOnInit(): Promise<void> {
         this.loading.set(true);
@@ -315,15 +334,21 @@ export class SettingsComponent implements OnInit {
         if (!orgId) return;
 
         const form = this.orgForm();
+        const farbe = normalisiereFarbe(form.primary_color);
+        if (!farbe) {
+            this.messageService.add({ severity: 'error', summary: 'Ungültige Farbe', detail: 'Bitte eine Farbe wie #e3000f angeben.' });
+            return;
+        }
 
         let error: Error | null = null;
         try {
             await this.org.update(orgId, {
                 name: form.name,
                 description: form.description,
-                primary_color: form.primary_color,
+                primary_color: farbe,
                 logo_url: form.logo_url,
             });
+            this.orgTheme.zeigeVorschau(null); // ab jetzt gilt die gespeicherte Farbe
         } catch (e) {
             error = e as Error;
         }

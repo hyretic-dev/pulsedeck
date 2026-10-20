@@ -24,6 +24,12 @@
     --linke-dunkelrot: #6F003C;
 
     /* Aliases/Additional Shades matching Tailwind config */
+    /* rgb-Werte für Tailwind (Deckkraft-Klassen wie bg-linke/10); OrgThemeService überschreibt sie je Organisation */
+    --linke-rgb: 255 0 0;
+    --linke-light-rgb: 255 80 80;
+    --linke-dark-rgb: 111 0 60;
+    --linke-darker-rgb: 26 0 15;
+
     --linke: var(--linke-rot);
     --linke-light: #FF5050;
     --linke-dark: var(--linke-dunkelrot);
@@ -1164,4 +1170,4 @@ section {
 .mobile-sidebar-drawer .p-drawer-content {
     padding: 0 !important;
     overflow: visible !important;
-}
+}

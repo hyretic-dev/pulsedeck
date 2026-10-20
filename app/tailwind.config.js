@@ -12,11 +12,12 @@ module.exports = {
                 // ═══════════════════════════════════════════════════════════
 
                 // Primary Red
+                // Folgt der Primärfarbe der Organisation (OrgThemeService setzt die Variablen, Standardwerte in styles.css)
                 'linke': {
-                    DEFAULT: '#FF0000',
-                    light: '#FF5050',
-                    dark: '#6F003C',          // Dunkelrot
-                    darker: '#1A000F',        // Very dark for dark mode backgrounds
+                    DEFAULT: 'rgb(var(--linke-rgb) / <alpha-value>)',
+                    light: 'rgb(var(--linke-light-rgb) / <alpha-value>)',
+                    dark: 'rgb(var(--linke-dark-rgb) / <alpha-value>)',
+                    darker: 'rgb(var(--linke-darker-rgb) / <alpha-value>)',
                 },
 
                 // Dunkelgrün / Türkis pair
