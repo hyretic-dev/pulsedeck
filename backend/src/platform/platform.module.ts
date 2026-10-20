@@ -5,7 +5,7 @@ import { MAIL_SENDER, MAINTENANCE_PURGER, READINESS_CHECK } from '../auth/auth.t
 import type { MailSender } from '../auth/mail.sender';
 import { APP_CONFIG, loadAppConfig } from '../config/configuration';
 import type { AppConfig } from '../config/configuration';
-import { HealthController } from '../health/health.controller';
+import { HealthController, PublicHealthController } from '../health/health.controller';
 import { PgMaintenance } from '../infrastructure/postgres/pg.maintenance';
 import { PG_POOL, createPgPool } from '../infrastructure/postgres/pg.pool';
 import { MAIL_DISPATCHER, TransportMailDispatcher, createMailTransport } from '../mail/mail-dispatcher';
@@ -30,7 +30,7 @@ export class PgPoolCloser implements OnModuleDestroy {
  */
 @Global()
 @Module({
-  controllers: [HealthController, MaintenanceController],
+  controllers: [HealthController, PublicHealthController, MaintenanceController],
   providers: [
     { provide: APP_CONFIG, useFactory: () => loadAppConfig(process.env) },
     {
