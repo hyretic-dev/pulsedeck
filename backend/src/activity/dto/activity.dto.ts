@@ -32,6 +32,33 @@ export class UpdateFeedbackDto {
   @ApiProperty({ enum: ['new', 'in_progress', 'done'] }) @IsIn(['new', 'in_progress', 'done']) status!: 'new' | 'in_progress' | 'done';
 }
 
+export const FEEDBACK_ENTSCHEIDUNGEN = ['bauen', 'parken', 'abgelehnt'] as const;
+const THEMA = /^[a-z0-9-]{1,60}$/;
+
+/** Eintrag aus einem Gespräch oder einer Mail im Feedback-Board (nur Plattformadministratoren). */
+export class CreateBoardEntryDto {
+  @ApiProperty({ enum: ['bug', 'suggestion'] }) @IsIn(['bug', 'suggestion']) type!: 'bug' | 'suggestion';
+  @ApiProperty({ description: 'Wörtliches Zitat' }) @IsString() @IsNotEmpty() @MaxLength(5000) description!: string;
+  @ApiPropertyOptional({ enum: ['gespraech', 'mail'] }) @IsOptional() @IsIn(['gespraech', 'mail']) source?: 'gespraech' | 'mail';
+  @ApiPropertyOptional({ format: 'uuid' }) @IsOptional() @IsUUID() organization_id?: string;
+  @ApiPropertyOptional({ description: 'Eigentliches Problem: Was wollten sie damit erreichen?' }) @IsOptional() @IsString() @MaxLength(2000) problem?: string;
+  @ApiPropertyOptional({ example: 'aufgaben-ohne-termin' }) @IsOptional() @Matches(THEMA) topic?: string;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() blocks_activation?: boolean;
+}
+
+export class UpdateBoardEntryDto {
+  @ApiPropertyOptional({ enum: ['new', 'in_progress', 'done', 'live'] }) @IsOptional() @IsIn(['new', 'in_progress', 'done', 'live']) status?: 'new' | 'in_progress' | 'done' | 'live';
+  @ApiPropertyOptional({ nullable: true }) @IsOptional() @IsString() @MaxLength(2000) problem?: string | null;
+  @ApiPropertyOptional({ nullable: true }) @IsOptional() @Matches(THEMA) topic?: string | null;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() blocks_activation?: boolean;
+  @ApiPropertyOptional({ enum: FEEDBACK_ENTSCHEIDUNGEN, nullable: true }) @IsOptional() @IsIn(FEEDBACK_ENTSCHEIDUNGEN) decision?: (typeof FEEDBACK_ENTSCHEIDUNGEN)[number] | null;
+}
+
+export class ReplyFeedbackDto {
+  @ApiProperty() @IsString() @IsNotEmpty() @MaxLength(3000) text!: string;
+  @ApiPropertyOptional({ description: 'false: nur als beantwortet markieren (z. B. am Telefon zurückgemeldet), keine Mail' }) @IsOptional() @IsBoolean() send?: boolean;
+}
+
 export class PresenceDto {
   @ApiProperty({ description: 'Aktueller App-Pfad (nur Pfad, keine URL)' }) @Matches(/^\/[^\s?#]{0,298}$/) current_path!: string;
 }

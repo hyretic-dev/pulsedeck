@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 import { AuditService } from './audit.service';
-import { PageQuery, UpdateFeedbackDto } from './dto/activity.dto';
+import { CreateBoardEntryDto, PageQuery, ReplyFeedbackDto, UpdateBoardEntryDto } from './dto/activity.dto';
+import { FeedbackBoardService } from './feedback-board.service';
 import { PlatformAdminGuard } from './platform-admin.guard';
 import { TelemetryService } from './telemetry.service';
 
@@ -16,7 +17,8 @@ import { TelemetryService } from './telemetry.service';
 export class PlatformController {
   constructor(
     private readonly audit: AuditService,
-    private readonly telemetrie: TelemetryService
+    private readonly telemetrie: TelemetryService,
+    private readonly board: FeedbackBoardService
   ) {}
 
   @Get('organizations')
@@ -36,12 +38,28 @@ export class PlatformController {
 
   @Get('feedback')
   feedback(@Query() q: PageQuery) {
-    return this.telemetrie.feedbackListe(q.org_id ?? null, q);
+    return this.board.liste({ orgId: q.org_id, limit: q.limit, offset: q.offset });
+  }
+
+  /** Themen nach Zahl der Organisationen (Bau-Regel). Vor `feedback/:feedbackId`, damit „topics“ nicht als ID gilt. */
+  @Get('feedback/topics')
+  themen() {
+    return this.board.themen();
+  }
+
+  @Post('feedback')
+  eintragen(@Body() dto: CreateBoardEntryDto) {
+    return this.board.anlegen(dto);
   }
 
   @Patch('feedback/:feedbackId')
-  feedbackStatus(@Param('feedbackId', ParseUUIDPipe) feedbackId: string, @Body() dto: UpdateFeedbackDto) {
-    return this.telemetrie.feedbackStatus(null, feedbackId, dto.status);
+  feedbackAendern(@Param('feedbackId', ParseUUIDPipe) feedbackId: string, @Body() dto: UpdateBoardEntryDto) {
+    return this.board.aendern(feedbackId, dto);
+  }
+
+  @Post('feedback/:feedbackId/reply')
+  antworten(@Param('feedbackId', ParseUUIDPipe) feedbackId: string, @Body() dto: ReplyFeedbackDto) {
+    return this.board.antworten(feedbackId, { text: dto.text, senden: dto.send ?? true });
   }
 
   @Get('online-users')

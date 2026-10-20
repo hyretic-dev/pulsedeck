@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsHexColor, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
+import { IsBoolean, IsHexColor, IsIn, IsNotEmpty, IsOptional, IsString, IsUrl, Matches, MaxLength } from 'class-validator';
+
+import { HERKUNFTSQUELLEN } from '../organization-defaults';
 
 export class CreateOrganizationDto {
   @ApiProperty({ example: 'Musterverein e. V.' })
@@ -20,6 +22,27 @@ export class CreateOrganizationDto {
   @IsNotEmpty()
   @MaxLength(120)
   owner_name?: string;
+
+  @ApiPropertyOptional({ enum: HERKUNFTSQUELLEN, description: 'Wie die Organisation auf PulseDeck aufmerksam wurde (nur intern, wird nie ausgeliefert).' })
+  @IsOptional()
+  @IsIn(HERKUNFTSQUELLEN)
+  acquisition_source?: string;
+
+  @ApiPropertyOptional({ example: 'kv-nord', description: 'Kennung aus dem Werbelink (?ref=), nur Kleinbuchstaben, Ziffern, - und _.' })
+  @IsOptional()
+  @Matches(/^[a-z0-9_-]{1,40}$/)
+  acquisition_ref?: string;
+
+  @ApiPropertyOptional({ description: 'Die Organisation möchte Pilot werden und PulseDeck gemeinsam einrichten.' })
+  @IsOptional()
+  @IsBoolean()
+  pilot_requested?: boolean;
+
+  @ApiPropertyOptional({ description: 'Wunschzeitraum für das Einrichtungsgespräch.' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  pilot_wish?: string;
 }
 
 /** Nur diese Felder darf die Organisationsverwaltung ändern; Tarif, Besitzer und Slug nicht. */

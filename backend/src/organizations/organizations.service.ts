@@ -38,6 +38,14 @@ export interface UpdateInput {
   logo_url?: string | null;
 }
 
+/** Herkunft und Pilot-Wunsch aus der Registrierung; bleiben intern (nicht in ORG_SPALTEN). */
+export interface Herkunft {
+  acquisition_source?: string;
+  acquisition_ref?: string;
+  pilot_requested?: boolean;
+  pilot_wish?: string;
+}
+
 const SLUG_MUSTER = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** Datum wie `toLocaleDateString('de-DE')` im Bestand (Europe/Berlin). */
@@ -93,7 +101,7 @@ export class OrganizationsService {
    */
   async anlegen(
     userId: string,
-    eingabe: { name: string; slug: string; ownerName?: string }
+    eingabe: { name: string; slug: string; ownerName?: string; herkunft?: Herkunft }
   ): Promise<Organisation> {
     const slug = this.pruefeSlug(eingabe.slug);
     const name = eingabe.name.trim();
@@ -107,9 +115,18 @@ export class OrganizationsService {
     try {
       return await inTransaction(this.pool, async (db) => {
         const org = await db.query<Organisation & { owner_id: string }>(
-          `INSERT INTO organizations (slug, name, owner_id) VALUES ($1, $2, $3)
+          `INSERT INTO organizations (slug, name, owner_id, acquisition_source, acquisition_ref, pilot_requested, pilot_wish)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
            RETURNING ${ORG_SPALTEN}, owner_id`,
-          [slug, name, userId]
+          [
+            slug,
+            name,
+            userId,
+            eingabe.herkunft?.acquisition_source ?? null,
+            eingabe.herkunft?.acquisition_ref ?? null,
+            eingabe.herkunft?.pilot_requested ?? false,
+            eingabe.herkunft?.pilot_wish?.trim() || null,
+          ]
         );
         const angelegt = org.rows[0];
 

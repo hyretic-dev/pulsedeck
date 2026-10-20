@@ -22,7 +22,17 @@ export class OrganizationsController {
   @UseGuards(JwtAuthGuard)
   @ApiCreatedResponse({ type: OrganizationDto })
   anlegen(@CurrentUserId() userId: string, @Body() dto: CreateOrganizationDto): Promise<Organisation> {
-    return this.organisationen.anlegen(userId, { name: dto.name, slug: dto.slug, ownerName: dto.owner_name });
+    return this.organisationen.anlegen(userId, {
+      name: dto.name,
+      slug: dto.slug,
+      ownerName: dto.owner_name,
+      herkunft: {
+        acquisition_source: dto.acquisition_source,
+        acquisition_ref: dto.acquisition_ref,
+        pilot_requested: dto.pilot_requested,
+        pilot_wish: dto.pilot_wish,
+      },
+    });
   }
 
   @Get('me/organizations')

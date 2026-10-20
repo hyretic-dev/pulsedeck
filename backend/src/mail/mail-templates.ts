@@ -112,3 +112,33 @@ export function gastEinladungMail(e: GastEinladung): MailContent {
   ].join('\n');
   return { subject: `Einladung von ${e.gastgeber}: ${e.titel}`, text, html };
 }
+
+/** Absätze aus Leerzeilen; einzelne Zeilenumbrüche bleiben als <br> erhalten. */
+function absaetze(text: string): string {
+  return text
+    .split(/\n{2,}/)
+    .map((a) => `<p>${maskiere(a.trim()).replaceAll('\n', '<br>')}</p>`)
+    .join('\n');
+}
+
+/** Persönliche Rückmeldung auf eine Meldung („ist jetzt live“); der Text kommt vom Plattformadministrator. */
+export function feedbackRueckmeldungMail(text: string, ursprung: string): MailContent {
+  const zitat = ursprung.trim().slice(0, 500);
+  const klartext = [
+    text.trim(),
+    '',
+    'Deine Meldung damals:',
+    ...zitat.split('\n').map((z) => `> ${z}`),
+    '',
+    'Danke, dass du PulseDeck mitgestaltest.',
+    '',
+    'Dein PulseDeck-Team',
+  ].join('\n');
+  const html = [
+    absaetze(text),
+    `<p><em>Deine Meldung damals:</em></p><blockquote>${maskiere(zitat).replaceAll('\n', '<br>')}</blockquote>`,
+    '<p>Danke, dass du PulseDeck mitgestaltest.</p>',
+    '<p>Dein PulseDeck-Team</p>',
+  ].join('\n');
+  return { subject: 'Rückmeldung zu deinem Feedback bei PulseDeck', text: klartext, html };
+}

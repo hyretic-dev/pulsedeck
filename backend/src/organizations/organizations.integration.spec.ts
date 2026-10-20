@@ -29,6 +29,58 @@ describe('Organisationen (echtes PostgreSQL)', () => {
       expect(antwort.status).toBe(401);
     });
 
+    it('speichert Herkunft und Pilot-Wunsch nur intern: nie in Antworten, sichtbar nur für Plattformadministratoren', async () => {
+      const eva = '00000000-0000-4000-8000-0000000000e1';
+      await f.admin.query("INSERT INTO auth_users (id, email, password_hash, email_verified) VALUES ($1, 'eva@example.org', 'x', true)", [eva]);
+      await f.tokenFuer(eva);
+
+      const antwort = await f.api('post', '/api/v1/orgs', eva, {
+        name: 'Ortsverband Nord',
+        slug: 'ov-nord',
+        acquisition_source: 'workshop',
+        acquisition_ref: 'kv-nord',
+        pilot_requested: true,
+        pilot_wish: 'Gern im Januar, abends',
+      });
+
+      expect(antwort.status).toBe(201);
+      for (const feld of ['acquisition_source', 'acquisition_ref', 'pilot_requested', 'pilot_wish']) expect(antwort.body).not.toHaveProperty(feld);
+      const zeile = (await f.admin.query('SELECT acquisition_source, acquisition_ref, pilot_requested, pilot_wish FROM organizations WHERE id = $1', [antwort.body.id])).rows[0];
+      expect(zeile).toEqual({ acquisition_source: 'workshop', acquisition_ref: 'kv-nord', pilot_requested: true, pilot_wish: 'Gern im Januar, abends' });
+
+      expect(JSON.stringify((await f.api('get', `/api/v1/orgs/${antwort.body.id}`, eva)).body)).not.toContain('kv-nord');
+      expect(JSON.stringify((await f.api('get', '/api/v1/public/organizations/ov-nord', null)).body)).not.toContain('kv-nord');
+      expect(JSON.stringify((await f.api('get', '/api/v1/me/organizations', eva)).body)).not.toContain('kv-nord');
+
+      expect((await f.api('get', '/api/v1/platform/organizations', eva)).status).toBe(403);
+      await f.admin.query('UPDATE auth_users SET is_platform_admin = true WHERE id = $1', [eva]);
+      const plattform = (await f.api('get', '/api/v1/platform/organizations', eva)).body.find((x: { slug: string }) => x.slug === 'ov-nord');
+      expect(plattform).toMatchObject({ name: 'Ortsverband Nord', acquisition_source: 'workshop', acquisition_ref: 'kv-nord', pilot_requested: true, pilot_wish: 'Gern im Januar, abends' });
+      await f.admin.query('UPDATE auth_users SET is_platform_admin = false WHERE id = $1', [eva]);
+    });
+
+    it('lässt die Herkunftsangaben weg, ohne dass das Anlegen scheitert, und lehnt ungültige Werte ab', async () => {
+      const frau = '00000000-0000-4000-8000-0000000000e2';
+      await f.admin.query("INSERT INTO auth_users (id, email, password_hash, email_verified) VALUES ($1, 'frieda@example.org', 'x', true)", [frau]);
+      await f.tokenFuer(frau);
+
+      const ohne = await f.api('post', '/api/v1/orgs', frau, { name: 'Ohne Angaben', slug: 'ohne-angaben' });
+      expect(ohne.status).toBe(201);
+      const leer = (await f.admin.query('SELECT acquisition_source, acquisition_ref, pilot_requested, pilot_wish FROM organizations WHERE id = $1', [ohne.body.id])).rows[0];
+      expect(leer).toEqual({ acquisition_source: null, acquisition_ref: null, pilot_requested: false, pilot_wish: null });
+
+      const basis = { name: 'Ungültig', slug: 'ungueltig-x' };
+      for (const falsch of [
+        { acquisition_source: 'zufall' },
+        { acquisition_ref: 'Groß Und Leer' },
+        { acquisition_ref: 'x'.repeat(41) },
+        { pilot_wish: 'x'.repeat(301) },
+        { pilot_requested: 'ja' },
+      ]) {
+        expect((await f.api('post', '/api/v1/orgs', frau, { ...basis, ...falsch })).status, JSON.stringify(falsch)).toBe(400);
+      }
+    });
+
     it('legt Organisation, Standardrollen, Standard-Skills und das Besitzer-Mitglied atomar an', async () => {
       const meineVorher = await f.api('get', '/api/v1/me/organizations', ids.dora);
       expect(meineVorher.body).toEqual([]);

@@ -41,6 +41,9 @@ export const STANDARD_SKILLS: ReadonlyArray<{ name: string; category: string; ic
   { name: 'Mit PKW mobil', category: 'availability', icon: 'pi-car', sortOrder: 43 },
 ];
 
+/** Antworten auf „Wie seid ihr auf PulseDeck gekommen?“ (Registrierung); identisch mit der CHECK-Bedingung in Migration 000018. */
+export const HERKUNFTSQUELLEN = ['workshop', 'empfehlung', 'suche', 'blog', 'event_gast', 'social', 'sonstiges'] as const;
+
 /**
  * Slugs, die Frontend-Routen verdecken würden (feste Routen stehen vor `/:slug`).
  * Im Bestand nicht geprüft: eine Organisation „login“ wäre unerreichbar.

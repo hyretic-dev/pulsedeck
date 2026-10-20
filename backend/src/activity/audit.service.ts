@@ -18,8 +18,11 @@ export class AuditService {
     return rows;
   }
 
-  async organisationen(): Promise<Array<{ id: string; name: string }>> {
-    const { rows } = await this.pool.query('SELECT id, name FROM organizations ORDER BY name');
+  /** Alle Organisationen für die Plattformverwaltung, mit Herkunft und Pilot-Wunsch aus der Registrierung. */
+  async organisationen(): Promise<Array<{ id: string; name: string; slug: string; created_at: Date; acquisition_source: string | null; acquisition_ref: string | null; pilot_requested: boolean; pilot_wish: string | null }>> {
+    const { rows } = await this.pool.query(
+      'SELECT id, name, slug, created_at, acquisition_source, acquisition_ref, pilot_requested, pilot_wish FROM organizations ORDER BY name'
+    );
     return rows;
   }
 }

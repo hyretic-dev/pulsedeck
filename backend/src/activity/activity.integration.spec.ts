@@ -235,4 +235,141 @@ describe('Aktivität (echtes PostgreSQL)', () => {
       expect((await f.api('get', pfade[0], ids.dora)).status).toBe(403); // sofort wirksam, selbes Token
     });
   });
+  describe('Feedback-Board (Plattform)', () => {
+    const platform = (methode: 'get' | 'post' | 'patch', pfad: string, body?: unknown) => f.api(methode, `/api/v1/platform${pfad}`, ids.dora, body);
+
+    beforeAll(async () => {
+      await f.admin.query('UPDATE auth_users SET is_platform_admin = true WHERE id = $1', [ids.dora]);
+    });
+    afterAll(async () => {
+      await f.admin.query('UPDATE auth_users SET is_platform_admin = false WHERE id = $1', [ids.dora]);
+    });
+    beforeEach(async () => {
+      await f.admin.query('DELETE FROM feedback_submissions');
+      await f.admin.query("DELETE FROM mail_outbox WHERE kind = 'feedback_reply'");
+    });
+
+    const eintrag = async (felder: Record<string, unknown>): Promise<string> =>
+      (await platform('post', '/feedback', { type: 'suggestion', description: 'Wir brauchen Aufgaben ohne Termin', ...felder })).body.id;
+
+    it('legt Einträge aus Gesprächen an, nur für Plattformadministratoren, mit geprüfter Organisation und Quelle', async () => {
+      const neu = await platform('post', '/feedback', {
+        type: 'suggestion',
+        description: '„Wir verteilen Aufgaben im Chat und vergessen sie.“',
+        problem: 'Zuständigkeiten sind nirgends festgehalten',
+        topic: 'aufgaben-ohne-termin',
+        organization_id: ids.alpha,
+        blocks_activation: true,
+      });
+
+      expect(neu.status).toBe(201);
+      expect(neu.body).toMatchObject({ source: 'gespraech', topic: 'aufgaben-ohne-termin', organization_id: ids.alpha, blocks_activation: true, status: 'new', user_id: null, decision: null, replied_at: null });
+      expect((await f.api('post', '/api/v1/platform/feedback', ids.olga, { type: 'bug', description: 'x' })).status).toBe(403);
+
+      for (const falsch of [
+        { source: 'app' },
+        { topic: 'Groß Geschrieben' },
+        { organization_id: ids.unbekannt },
+        { type: 'frage' },
+        { description: '' },
+        { problem: 'x'.repeat(2001) },
+      ]) {
+        const antwort = await platform('post', '/feedback', { type: 'bug', description: 'Beschreibung', ...falsch });
+        expect([400, 404], JSON.stringify(falsch)).toContain(antwort.status);
+      }
+      expect((await f.admin.query('SELECT count(*)::int AS n FROM feedback_submissions')).rows[0].n).toBe(1);
+    });
+
+    it('listet mit Organisation und meldender Person und trennt interne Felder von der Sicht der Organisation', async () => {
+      await f.admin.query(
+        "INSERT INTO feedback_submissions (type, description, user_id, organization_id, topic, decision, reply_text) VALUES ('bug', 'Kalender hängt', $1, $2, 'kalender', 'bauen', 'intern')",
+        [ids.anna, ids.alpha]
+      );
+
+      const liste = (await platform('get', '/feedback')).body;
+      expect(liste).toHaveLength(1);
+      expect(liste[0]).toMatchObject({ description: 'Kalender hängt', organization_name: 'Alpha e. V.', reporter_name: 'Anna', can_reply: true, topic: 'kalender', decision: 'bauen' });
+
+      const sichtOrg = (await f.api('get', o(ids.alpha, '/feedback'), ids.olga)).body[0];
+      for (const intern of ['topic', 'decision', 'reply_text', 'problem', 'blocks_activation', 'replied_at', 'source']) expect(sichtOrg, intern).not.toHaveProperty(intern);
+    });
+
+    it('ändert Problem, Thema, Entscheidung und Status, prüft die Werte und kennt den Status live', async () => {
+      const id = await eintrag({ organization_id: ids.alpha });
+
+      const geaendert = await platform('patch', `/feedback/${id}`, { problem: 'Wer macht was?', topic: 'zustaendigkeiten', blocks_activation: true, decision: 'bauen', status: 'live' });
+      expect(geaendert.body).toMatchObject({ problem: 'Wer macht was?', topic: 'zustaendigkeiten', blocks_activation: true, decision: 'bauen', status: 'live' });
+      expect((await platform('patch', `/feedback/${id}`, { topic: null, decision: null })).body).toMatchObject({ topic: null, decision: null, status: 'live' });
+
+      for (const falsch of [{ decision: 'vielleicht' }, { status: 'fertig' }, { topic: 'A B' }, { blocks_activation: 'ja' }, { reply_text: 'direkt schreiben' }]) {
+        expect((await platform('patch', `/feedback/${id}`, falsch)).status, JSON.stringify(falsch)).toBe(400);
+      }
+      expect((await platform('patch', `/feedback/${ids.unbekannt}`, { decision: 'parken' })).status).toBe(404);
+      expect((await f.api('patch', `/api/v1/platform/feedback/${id}`, ids.olga, { decision: 'parken' })).status).toBe(403);
+
+      // Organisationsadmins können live nicht setzen (nur die Plattform entscheidet, wann etwas bei allen angekommen ist)
+      const alpha = (await f.admin.query("INSERT INTO feedback_submissions (type, description, organization_id) VALUES ('bug', 'x', $1) RETURNING id", [ids.alpha])).rows[0].id;
+      expect((await f.api('patch', o(ids.alpha, `/feedback/${alpha}`), ids.olga, { status: 'live' })).status).toBe(400);
+    });
+
+    it('zählt je Thema die Organisationen unabhängig voneinander, nicht die Meldungen', async () => {
+      await eintrag({ topic: 'aufgaben-ohne-termin', organization_id: ids.alpha });
+      await eintrag({ topic: 'aufgaben-ohne-termin', organization_id: ids.alpha, blocks_activation: true });
+      await eintrag({ topic: 'aufgaben-ohne-termin', organization_id: ids.beta });
+      await eintrag({ topic: 'dunkelmodus', organization_id: ids.beta });
+      await eintrag({ topic: 'dunkelmodus' }); // ohne Organisation zählt nicht als eigene Organisation
+      await eintrag({}); // ohne Thema erscheint nicht
+      const erledigt = await eintrag({ topic: 'dunkelmodus', organization_id: ids.alpha });
+      await platform('patch', `/feedback/${erledigt}`, { status: 'live' });
+
+      const themen = (await platform('get', '/feedback/topics')).body;
+
+      expect(themen).toEqual([
+        { topic: 'aufgaben-ohne-termin', organizations: 2, entries: 3, blocking: 1, open: 3 },
+        { topic: 'dunkelmodus', organizations: 2, entries: 3, blocking: 0, open: 2 },
+      ]);
+      expect((await f.api('get', '/api/v1/platform/feedback/topics', ids.olga)).status).toBe(403);
+    });
+
+    it('antwortet der meldenden Person per Mail-Outbox, einmal, mit maskiertem Text', async () => {
+      const id = (await f.admin.query("INSERT INTO feedback_submissions (type, description, user_id, organization_id, status) VALUES ('suggestion', 'Dunkelmodus <b>bitte</b>', $1, $2, 'live') RETURNING id", [ids.anna, ids.alpha])).rows[0].id;
+
+      const antwort = await platform('post', `/feedback/${id}/reply`, { text: 'Du hattest den Dunkelmodus gemeldet, der ist jetzt live. <script>x</script>' });
+
+      expect(antwort.status).toBe(201);
+      expect(antwort.body.replied_at).toBeTruthy();
+      const mails = (await f.admin.query("SELECT recipient, subject, text_body, html_body, organization_id, use_org_smtp FROM mail_outbox WHERE kind = 'feedback_reply'")).rows;
+      expect(mails).toHaveLength(1);
+      expect(mails[0]).toMatchObject({ recipient: 'anna@example.org', organization_id: ids.alpha, use_org_smtp: false });
+      expect(mails[0].text_body).toContain('Du hattest den Dunkelmodus gemeldet');
+      expect(mails[0].html_body).toContain('&lt;script&gt;x&lt;/script&gt;');
+      expect(mails[0].html_body).not.toContain('<script>');
+      expect(mails[0].html_body).toContain('Dunkelmodus &lt;b&gt;bitte&lt;/b&gt;'); // eigene Meldung als Zitat, ebenfalls maskiert
+      expect((await f.admin.query('SELECT reply_text, replied_at FROM feedback_submissions WHERE id = $1', [id])).rows[0].reply_text).toContain('Dunkelmodus gemeldet');
+
+      expect((await platform('post', `/feedback/${id}/reply`, { text: 'noch einmal' })).status).toBe(409); // keine Doppel-Mail
+      expect((await f.admin.query("SELECT 1 FROM mail_outbox WHERE kind = 'feedback_reply'")).rowCount).toBe(1);
+    });
+
+    it('verlangt einen Text und einen Empfänger, und lässt Gespräche ohne Konto manuell als beantwortet markieren', async () => {
+      const mitKonto = (await f.admin.query("INSERT INTO feedback_submissions (type, description, user_id) VALUES ('bug', 'x', $1) RETURNING id", [ids.anna])).rows[0].id;
+      const ohneKonto = await eintrag({ organization_id: ids.alpha });
+
+      expect((await platform('post', `/feedback/${mitKonto}/reply`, { text: '  ' })).status).toBe(400);
+      expect((await platform('post', `/feedback/${mitKonto}/reply`, {})).status).toBe(400);
+      expect((await platform('post', `/feedback/${mitKonto}/reply`, { text: 'x'.repeat(3001) })).status).toBe(400);
+      expect((await platform('post', `/feedback/${ids.unbekannt}/reply`, { text: 'Hallo' })).status).toBe(404);
+      expect((await f.api('post', `/api/v1/platform/feedback/${mitKonto}/reply`, ids.olga, { text: 'Hallo' })).status).toBe(403);
+
+      const keinEmpfaenger = await platform('post', `/feedback/${ohneKonto}/reply`, { text: 'Hallo' });
+      expect(keinEmpfaenger.status).toBe(409);
+      expect(keinEmpfaenger.body.code).toBe('no_recipient');
+      expect((await f.admin.query("SELECT 1 FROM mail_outbox WHERE kind = 'feedback_reply'")).rowCount).toBe(0);
+
+      const manuell = await platform('post', `/feedback/${ohneKonto}/reply`, { text: 'Am Telefon zurückgemeldet', send: false });
+      expect(manuell.status).toBe(201);
+      expect(manuell.body.replied_at).toBeTruthy();
+      expect((await f.admin.query("SELECT 1 FROM mail_outbox WHERE kind = 'feedback_reply'")).rowCount).toBe(0);
+    });
+  });
 });
