@@ -51,6 +51,7 @@ export class IssueTrackerComponent implements OnInit, OnDestroy {
             case 'in_progress':
                 return 'warn';
             case 'done':
+            case 'live':
                 return 'success';
             default:
                 return 'secondary';
@@ -65,6 +66,8 @@ export class IssueTrackerComponent implements OnInit, OnDestroy {
                 return 'In Bearbeitung';
             case 'done':
                 return 'Erledigt';
+            case 'live':
+                return 'Live';
             default:
                 return status;
         }

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './shared/guards/admin.guard';
 import { issueTrackerGuard } from './shared/guards/issue-tracker.guard';
+import { platformAdminGuard } from './shared/guards/platform-admin.guard';
 
 import { organizationGuard } from './shared/guards/organization.guard';
 import { startGuard } from './shared/guards/start.guard';
@@ -82,6 +83,7 @@ export const routes: Routes = [
                     { path: 'files', title: 'Dateien', loadComponent: () => import('./features/dashboard/files/files.component').then(m => m.FilesComponent) },
                     { path: 'profile', title: 'Profil', loadComponent: () => import('./features/dashboard/profile/profile').then(m => m.ProfileComponent) },
                     { path: 'issue-tracker', title: 'Feedback', canActivate: [issueTrackerGuard], loadComponent: () => import('./features/dashboard/issue-tracker/issue-tracker.component').then(m => m.IssueTrackerComponent) },
+                    { path: 'feedback-board', title: 'Feedback-Board', canActivate: [platformAdminGuard], loadComponent: () => import('./features/dashboard/feedback-board/feedback-board.component').then(m => m.FeedbackBoardComponent) },
                     { path: 'roadmap', title: 'Roadmap', loadComponent: () => import('./features/dashboard/roadmap/roadmap.component').then(m => m.RoadmapComponent) },
                     { path: 'settings', title: 'Einstellungen', canActivate: [adminGuard], loadComponent: () => import('./features/dashboard/settings/settings').then(m => m.SettingsComponent) },
                     { path: 'logs', redirectTo: 'audit' }, // Alias

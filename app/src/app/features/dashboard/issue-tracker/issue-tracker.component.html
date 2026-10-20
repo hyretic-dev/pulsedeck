@@ -98,8 +98,8 @@
                             [class.text-linke]="feedback.status === 'new'"
                             [class.bg-amber-500/20]="feedback.status === 'in_progress'"
                             [class.text-amber-500]="feedback.status === 'in_progress'"
-                            [class.bg-emerald-500/20]="feedback.status === 'done'"
-                            [class.text-emerald-500]="feedback.status === 'done'">
+                            [class.bg-emerald-500/20]="feedback.status === 'done' || feedback.status === 'live'"
+                            [class.text-emerald-500]="feedback.status === 'done' || feedback.status === 'live'">
                             @if (feedback.status === 'new') {
                             <i class="pi pi-circle-fill text-[6px] mr-2"></i>
                             } @else if (feedback.status === 'in_progress') {

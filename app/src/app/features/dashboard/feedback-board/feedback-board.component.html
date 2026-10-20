@@ -1,0 +1,223 @@
+<div class="p-6 fade-in">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h1 class="text-3xl font-bold text-[var(--color-text)]">Feedback-Board</h1>
+            <p class="text-[var(--color-text-muted)] mt-1">
+                Meldungen aus App, Gesprächen und Mails. Gebaut wird, was die Aktivierung blockiert oder von mindestens 3 Organisationen unabhängig voneinander kommt.
+            </p>
+        </div>
+        <button type="button" (click)="neu.set(!neu())"
+            class="px-4 py-2 rounded-lg bg-linke text-[var(--p-button-primary-color,#fff)] text-sm font-semibold hover:opacity-90">
+            <i class="pi pi-plus mr-1"></i> Eintrag aus Gespräch
+        </button>
+    </div>
+
+    @if (fehler()) {
+    <p class="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 px-4 py-2 text-sm" role="alert">{{ fehler() }}</p>
+    }
+
+    @if (neu()) {
+    <form (ngSubmit)="anlegen()" class="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-5 grid gap-4 md:grid-cols-2">
+        <label class="text-sm text-[var(--color-text)]">Art
+            <select [(ngModel)]="formular.type" name="type" class="mt-1 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+                <option value="suggestion">Vorschlag</option>
+                <option value="bug">Fehler</option>
+            </select>
+        </label>
+        <label class="text-sm text-[var(--color-text)]">Quelle
+            <select [(ngModel)]="formular.source" name="source" class="mt-1 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+                <option value="gespraech">Gespräch</option>
+                <option value="mail">Mail</option>
+            </select>
+        </label>
+        <label class="text-sm text-[var(--color-text)] md:col-span-2">Organisation
+            <select [(ngModel)]="formular.organization_id" name="organization_id" class="mt-1 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
+                <option value="">(keine / unbekannt)</option>
+                @for (o of organisationen(); track o.id) {
+                <option [value]="o.id">{{ o.name }}</option>
+                }
+            </select>
+        </label>
+        <label class="text-sm text-[var(--color-text)] md:col-span-2">Zitat (wörtlich)
+            <textarea [(ngModel)]="formular.description" name="description" rows="3" maxlength="5000" required
+                class="mt-1 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2"></textarea>
+        </label>
+        <label class="text-sm text-[var(--color-text)] md:col-span-2">Eigentliches Problem: Was wollten sie damit erreichen?
+            <textarea [(ngModel)]="formular.problem" name="problem" rows="2" maxlength="2000"
+                class="mt-1 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2"></textarea>
+        </label>
+        <label class="text-sm text-[var(--color-text)]">Thema
+            <input [(ngModel)]="formular.topic" name="topic" list="board-themen" placeholder="z. B. aufgaben-ohne-termin"
+                class="mt-1 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2" />
+        </label>
+        <label class="text-sm text-[var(--color-text)] flex items-end gap-2 pb-2">
+            <input type="checkbox" [(ngModel)]="formular.blocks_activation" name="blocks_activation" /> Blockiert die Aktivierung
+        </label>
+        <div class="md:col-span-2 flex justify-end gap-2">
+            <button type="button" (click)="neu.set(false)" class="px-4 py-2 rounded-lg text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">Abbrechen</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-linke text-[var(--p-button-primary-color,#fff)] text-sm font-semibold">Eintragen</button>
+        </div>
+    </form>
+    }
+
+    <datalist id="board-themen">
+        @for (t of themen(); track t.topic) {
+        <option [value]="t.topic"></option>
+        }
+    </datalist>
+
+    <div class="mb-4 flex gap-2" role="tablist">
+        @for (r of [['meldungen', 'Meldungen'], ['themen', 'Themen'], ['organisationen', 'Organisationen']]; track r[0]) {
+        <button type="button" role="tab" [attr.aria-selected]="reiter() === r[0]" (click)="reiter.set($any(r[0]))"
+            class="px-4 py-2 rounded-lg text-sm font-semibold border transition-colors"
+            [class.bg-linke]="reiter() === r[0]" [class.text-white]="reiter() === r[0]" [class.border-linke]="reiter() === r[0]"
+            [class.border-[var(--color-border)]]="reiter() !== r[0]" [class.text-[var(--color-text-muted)]]="reiter() !== r[0]">
+            {{ r[1] }}
+            @if (r[0] === 'meldungen' && ohneRueckmeldung() > 0) {
+            <span class="ml-1 rounded-full bg-amber-500 text-black text-xs px-1.5" title="Umgesetzt, aber noch nicht zurückgemeldet">{{ ohneRueckmeldung() }}</span>
+            }
+            @if (r[0] === 'organisationen' && pilotAnfragen().length > 0) {
+            <span class="ml-1 rounded-full bg-emerald-500 text-black text-xs px-1.5" title="Pilot-Anfragen">{{ pilotAnfragen().length }}</span>
+            }
+        </button>
+        }
+    </div>
+
+    @if (laedt()) {
+    <p class="text-[var(--color-text-muted)]"><i class="pi pi-spin pi-spinner mr-2"></i>Lade …</p>
+    } @else if (reiter() === 'meldungen') {
+    <div class="mb-4 flex flex-wrap gap-4 text-sm text-[var(--color-text)]">
+        <label class="flex items-center gap-2"><input type="checkbox" [checked]="filter().nurOffene" (change)="setzeFilter('nurOffene', $any($event.target).checked)" /> nur offene</label>
+        <label class="flex items-center gap-2"><input type="checkbox" [checked]="filter().nurBlockierend" (change)="setzeFilter('nurBlockierend', $any($event.target).checked)" /> blockiert Aktivierung</label>
+        <label class="flex items-center gap-2"><input type="checkbox" [checked]="filter().nurOhneRueckmeldung" (change)="setzeFilter('nurOhneRueckmeldung', $any($event.target).checked)" /> noch nicht zurückgemeldet</label>
+    </div>
+
+    @for (e of sichtbar(); track e.id) {
+    <article class="mb-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-5">
+        <header class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-muted)]">
+            <span class="font-semibold" [class.text-rose-400]="e.type === 'bug'" [class.text-teal]="e.type === 'suggestion'">{{ e.type === 'bug' ? 'Fehler' : 'Vorschlag' }}</span>
+            <span>{{ e.organization_name || 'ohne Organisation' }}</span>
+            @if (e.reporter_name) { <span>{{ e.reporter_name }}</span> }
+            <span>{{ e.source === 'app' ? 'aus der App' : e.source === 'gespraech' ? 'aus einem Gespräch' : 'per Mail' }}</span>
+            <time [attr.datetime]="e.created_at">{{ e.created_at | date: 'dd.MM.yyyy, HH:mm' }}</time>
+            @if (themaFuer(e); as t) {
+            @if (bauRegelErfuellt(t)) { <span class="rounded-full bg-emerald-500/20 text-emerald-400 px-2 py-0.5 font-semibold" title="{{ t.organizations }} Organisation(en), {{ t.blocking }} blockierend">Bau-Regel erfüllt</span> }
+            }
+        </header>
+        <blockquote class="mt-2 text-[var(--color-text)] whitespace-pre-wrap border-l-2 border-[var(--color-border-light)] pl-3">{{ e.description }}</blockquote>
+
+        <div class="mt-4 grid gap-3 md:grid-cols-2">
+            <label class="text-xs text-[var(--color-text-muted)] md:col-span-2">Eigentliches Problem
+                <textarea rows="2" maxlength="2000" [value]="e.problem ?? ''" (blur)="aendereProblem(e, $any($event.target).value)"
+                    class="mt-1 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] px-3 py-2 text-sm"></textarea>
+            </label>
+            <label class="text-xs text-[var(--color-text-muted)]">Thema
+                <input list="board-themen" [value]="e.topic ?? ''" (change)="aendereThema(e, $any($event.target).value)"
+                    class="mt-1 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] px-3 py-2 text-sm" />
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="text-xs text-[var(--color-text-muted)]">Entscheidung
+                    <select [value]="e.decision ?? ''" (change)="aendere(e, { decision: $any($event.target).value || null })"
+                        class="mt-1 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] px-3 py-2 text-sm">
+                        <option value="">offen</option>
+                        <option value="bauen">bauen</option>
+                        <option value="parken">parken</option>
+                        <option value="abgelehnt">abgelehnt</option>
+                    </select>
+                </label>
+                <label class="text-xs text-[var(--color-text-muted)]">Status
+                    <select [value]="e.status" (change)="aendere(e, { status: $any($event.target).value })"
+                        class="mt-1 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] px-3 py-2 text-sm">
+                        @for (s of statusListe; track s) {
+                        <option [value]="s" [selected]="s === e.status">{{ statusNamen[s] }}</option>
+                        }
+                    </select>
+                </label>
+            </div>
+            <label class="text-sm text-[var(--color-text)] flex items-center gap-2 md:col-span-2">
+                <input type="checkbox" [checked]="e.blocks_activation" (change)="aendere(e, { blocks_activation: $any($event.target).checked })" /> Blockiert die Aktivierung
+            </label>
+        </div>
+
+        <footer class="mt-4 text-sm">
+            @if (e.replied_at) {
+            <p class="text-emerald-400"><i class="pi pi-check mr-1"></i>Zurückgemeldet am {{ e.replied_at | date: 'dd.MM.yyyy' }}: „{{ e.reply_text }}“</p>
+            } @else if (offeneRueckmeldung() === e.id) {
+            <textarea rows="3" maxlength="3000" [value]="entwuerfe()[e.id]" (input)="setzeEntwurf(e.id, $any($event.target).value)" aria-label="Rückmeldung"
+                class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] px-3 py-2"></textarea>
+            <div class="mt-2 flex flex-wrap gap-2">
+                @if (e.can_reply) {
+                <button type="button" (click)="antworte(e, true)" class="px-3 py-1.5 rounded-lg bg-linke text-[var(--p-button-primary-color,#fff)] font-semibold">Per Mail senden</button>
+                } @else {
+                <span class="text-xs text-[var(--color-text-muted)] self-center">Kein Konto hinterlegt: Mail nicht möglich.</span>
+                }
+                <button type="button" (click)="antworte(e, false)" class="px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-text)]">Als beantwortet markieren</button>
+                <button type="button" (click)="offeneRueckmeldung.set(null)" class="px-3 py-1.5 text-[var(--color-text-muted)]">Abbrechen</button>
+            </div>
+            } @else {
+            <button type="button" (click)="oeffneRueckmeldung(e)"
+                class="px-3 py-1.5 rounded-lg border text-sm"
+                [class.border-amber-500]="brauchtRueckmeldung(e)" [class.text-amber-500]="brauchtRueckmeldung(e)"
+                [class.border-[var(--color-border)]]="!brauchtRueckmeldung(e)" [class.text-[var(--color-text-muted)]]="!brauchtRueckmeldung(e)">
+                <i class="pi pi-send mr-1"></i>{{ brauchtRueckmeldung(e) ? 'Jetzt zurückmelden' : 'Rückmeldung schreiben' }}
+            </button>
+            }
+        </footer>
+    </article>
+    } @empty {
+    <p class="text-[var(--color-text-muted)]">Keine Einträge mit diesen Filtern.</p>
+    }
+    } @else if (reiter() === 'themen') {
+    <div class="overflow-x-auto rounded-xl border border-[var(--color-border)]">
+        <table class="w-full text-sm text-[var(--color-text)]">
+            <thead class="bg-[var(--color-surface-raised)] text-left">
+                <tr><th class="p-3">Thema</th><th class="p-3">Organisationen</th><th class="p-3">Meldungen</th><th class="p-3">Blockiert</th><th class="p-3">Offen</th><th class="p-3">Bau-Regel</th></tr>
+            </thead>
+            <tbody>
+                @for (t of themen(); track t.topic) {
+                <tr class="border-t border-[var(--color-border)]">
+                    <td class="p-3 font-semibold">{{ t.topic }}</td>
+                    <td class="p-3">{{ t.organizations }}</td>
+                    <td class="p-3">{{ t.entries }}</td>
+                    <td class="p-3">{{ t.blocking }}</td>
+                    <td class="p-3">{{ t.open }}</td>
+                    <td class="p-3">
+                        @if (bauRegelErfuellt(t)) {
+                        <span class="rounded-full bg-emerald-500/20 text-emerald-400 px-2 py-0.5 text-xs font-semibold">erfüllt</span>
+                        } @else {
+                        <span class="text-[var(--color-text-muted)] text-xs">noch {{ 3 - t.organizations }} Organisation(en)</span>
+                        }
+                    </td>
+                </tr>
+                } @empty {
+                <tr><td colspan="6" class="p-6 text-center text-[var(--color-text-muted)]">Noch keine Themen vergeben.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    } @else {
+    <div class="overflow-x-auto rounded-xl border border-[var(--color-border)]">
+        <table class="w-full text-sm text-[var(--color-text)]">
+            <thead class="bg-[var(--color-surface-raised)] text-left">
+                <tr><th class="p-3">Organisation</th><th class="p-3">Angelegt</th><th class="p-3">Herkunft</th><th class="p-3">Link-Kennung</th><th class="p-3">Pilot</th></tr>
+            </thead>
+            <tbody>
+                @for (o of organisationen(); track o.id) {
+                <tr class="border-t border-[var(--color-border)]">
+                    <td class="p-3 font-semibold">{{ o.name }}<span class="block text-xs font-normal text-[var(--color-text-muted)]">{{ o.slug }}</span></td>
+                    <td class="p-3">{{ o.created_at | date: 'dd.MM.yyyy' }}</td>
+                    <td class="p-3">{{ herkunftName(o.acquisition_source) }}</td>
+                    <td class="p-3">{{ o.acquisition_ref || '–' }}</td>
+                    <td class="p-3">
+                        @if (o.pilot_requested) {
+                        <span class="rounded-full bg-emerald-500/20 text-emerald-400 px-2 py-0.5 text-xs font-semibold">Anfrage</span>
+                        @if (o.pilot_wish) { <span class="block text-xs text-[var(--color-text-muted)]">{{ o.pilot_wish }}</span> }
+                        } @else { – }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>
