@@ -355,7 +355,7 @@ import { RichTextRendererComponent } from '../../../shared/components/rich-text-
                             <i class="pi pi-shield text-linke"></i>
                             <span>Datensicher organisiert mit <strong>PulseDeck</strong></span>
                         </div>
-                        <a [href]="websiteUrl" class="text-xs font-semibold text-linke hover:underline whitespace-nowrap flex items-center gap-1 border-l border-[var(--color-border)] pl-3 ml-1">
+                        <a [href]="websiteUrl + '/?ref=orgseite'" class="text-xs font-semibold text-linke hover:underline whitespace-nowrap flex items-center gap-1 border-l border-[var(--color-border)] pl-3 ml-1">
                             <span>Eigenen Verein digitalisieren</span>
                             <i class="pi pi-arrow-right text-[10px]"></i>
                         </a>

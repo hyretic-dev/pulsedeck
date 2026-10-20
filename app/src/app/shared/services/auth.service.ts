@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { ApiError, ApiService } from '../../core/api.service';
 import { SessionService, type StoredSession } from '../../core/session.service';
 import { Member, AppRole, Permission } from '../models/member.model';
-import { OrganizationService } from './organization.service';
+import { Herkunft, OrganizationService } from './organization.service';
 
 /**
  * Represents a user's membership in an organization
@@ -284,11 +284,11 @@ export class AuthService {
         const roh = localStorage.getItem('pendingOrganization');
         if (!roh) return null;
         try {
-            const vorgemerkt = JSON.parse(roh) as { orgName: string; slug: string; userName?: string; email: string };
+            const vorgemerkt = JSON.parse(roh) as { orgName: string; slug: string; userName?: string; email: string; herkunft?: Herkunft };
             await this.ladevorgang;
             if (vorgemerkt.email?.toLowerCase() !== this.account()?.email?.toLowerCase()) return null; // gehört zu einem anderen Konto
             localStorage.removeItem('pendingOrganization');
-            const org = await this.orgService.create(vorgemerkt.orgName, vorgemerkt.slug, vorgemerkt.userName);
+            const org = await this.orgService.create(vorgemerkt.orgName, vorgemerkt.slug, vorgemerkt.userName, vorgemerkt.herkunft);
             await this.refreshMember();
             return org.slug;
         } catch (e) {

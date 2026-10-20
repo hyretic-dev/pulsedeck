@@ -31,6 +31,20 @@ describe('Nutzlasten der API-Dienste', () => {
         expect(api.post).toHaveBeenCalledWith('/orgs/org-1/events', { title: 'Neu', date: '2026-11-01', start_time: '19:00', location: 'Halle' });
     });
 
+    it('Organisation anlegen: Herkunft und Pilot-Wunsch nur senden, wenn angegeben; leerer Wunschzeitraum entfällt', async () => {
+        const orgs = TestBed.inject(OrganizationService);
+
+        await orgs.create('Ortsverband Nord', 'ov nord', 'Dora');
+        await orgs.create('Ortsverband Süd', 'ov-sued', undefined, { acquisition_source: 'workshop', acquisition_ref: 'kv-nord', pilot_requested: true, pilot_wish: '  abends  ' });
+        await orgs.create('Verein Ost', 'verein-ost', undefined, { acquisition_source: 'blog', pilot_requested: false, pilot_wish: 'wird ignoriert' });
+        await orgs.create('Verein West', 'verein-west', undefined, { acquisition_source: 'suche', pilot_requested: true, pilot_wish: '   ' });
+
+        expect(api.post).toHaveBeenNthCalledWith(1, '/orgs', { name: 'Ortsverband Nord', slug: 'ov-nord', owner_name: 'Dora' });
+        expect(api.post).toHaveBeenNthCalledWith(2, '/orgs', { name: 'Ortsverband Süd', slug: 'ov-sued', acquisition_source: 'workshop', acquisition_ref: 'kv-nord', pilot_requested: true, pilot_wish: 'abends' });
+        expect(api.post).toHaveBeenNthCalledWith(3, '/orgs', { name: 'Verein Ost', slug: 'verein-ost', acquisition_source: 'blog' });
+        expect(api.post).toHaveBeenNthCalledWith(4, '/orgs', { name: 'Verein West', slug: 'verein-west', acquisition_source: 'suche', pilot_requested: true });
+    });
+
     it('Kontakte: leeres Telefon und leere Bildadresse werden null', async () => {
         await TestBed.inject(ContactsService).addContact({ name: 'M', role: 'R', description: 'D', email: 'm@example.org', location: 'L', phone: '', image_url: '' });
 

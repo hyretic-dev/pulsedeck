@@ -5,6 +5,14 @@ import { ApiError, ApiService } from '../../core/api.service';
 
 export type SubscriptionTier = 'free' | 'pro' | 'pro_bono';
 
+/** Antworten der Registrierung auf „Wie seid ihr auf PulseDeck gekommen?“ sowie der Pilot-Wunsch (bleibt intern, wird nicht angezeigt). */
+export interface Herkunft {
+    acquisition_source?: string;
+    acquisition_ref?: string;
+    pilot_requested?: boolean;
+    pilot_wish?: string;
+}
+
 export interface Organization {
     id: string;
     slug: string;
@@ -56,9 +64,16 @@ export class OrganizationService {
     /**
      * Create a new organization. Das Backend legt Organisation, Standardrollen und das Mitglied des Besitzers atomar an.
      */
-    async create(name: string, slug: string, ownerName?: string): Promise<Organization> {
+    async create(name: string, slug: string, ownerName?: string, herkunft?: Herkunft): Promise<Organization> {
         try {
-            return await this.api.post<Organization>('/orgs', { name, slug: this.slugify(slug), ...(ownerName ? { owner_name: ownerName } : {}) });
+            return await this.api.post<Organization>('/orgs', {
+                name,
+                slug: this.slugify(slug),
+                ...(ownerName ? { owner_name: ownerName } : {}),
+                ...(herkunft?.acquisition_source ? { acquisition_source: herkunft.acquisition_source } : {}),
+                ...(herkunft?.acquisition_ref ? { acquisition_ref: herkunft.acquisition_ref } : {}),
+                ...(herkunft?.pilot_requested ? { pilot_requested: true, ...(herkunft.pilot_wish?.trim() ? { pilot_wish: herkunft.pilot_wish.trim() } : {}) } : {}),
+            });
         } catch (e) {
             if (e instanceof ApiError && e.status === 409) throw new Error('Diese URL ist bereits vergeben');
             throw e;

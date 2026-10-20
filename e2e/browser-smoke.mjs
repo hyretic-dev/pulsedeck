@@ -55,7 +55,7 @@ const oeffne = async (pfad, knopf) => {
 const dialogKnopf = (name) => seite.locator('.p-dialog button:visible', { hasText: new RegExp(`^\\s*${name}\\s*$`) }).first();
 
 aktuell = 'Registrierung';
-await seite.goto(`${BASIS}/registrieren`);
+await seite.goto(`${BASIS}/registrieren?ref=e2e-smoke`);
 await seite.getByPlaceholder('Max Mustermann').fill('E2E Tester');
 await seite.getByPlaceholder('max@example.de').fill(email);
 // Passwort ist optional (Standard: Magic Link); der Test legt eins fest, um später die Passwort-Anmeldung zu prüfen
@@ -67,6 +67,9 @@ await seite.getByPlaceholder('z.B. Verein Musterstadt e.V.').fill(`E2E Verein ${
 await seite.getByPlaceholder('mein-verein').fill(slug);
 await seite.getByPlaceholder('mein-verein').blur();
 await seite.waitForTimeout(500);
+await seite.getByLabel('Wie seid ihr auf PulseDeck gekommen?').selectOption('workshop'); // Pflichtangabe
+await seite.getByLabel(/Wir möchten Pilot-Organisation werden/).check();
+await seite.getByLabel('Wunschzeitraum für das Gespräch').fill('abends');
 await seite.getByRole('button', { name: /Organisation erstellen/ }).click();
 await sichtbar('Registrierung verlangt E-Mail-Bestätigung', 'Bitte bestätige damit deine E-Mail-Adresse');
 

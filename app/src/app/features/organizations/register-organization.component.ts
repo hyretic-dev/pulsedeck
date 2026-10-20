@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
 // PrimeNG
@@ -14,7 +14,7 @@ import { StepsModule } from 'primeng/steps';
 
 // Services
 import { AuthService } from '../../shared/services/auth.service';
-import { OrganizationService } from '../../shared/services/organization.service';
+import { Herkunft, OrganizationService } from '../../shared/services/organization.service';
 
 @Component({
     selector: 'app-register-organization',
@@ -139,6 +139,28 @@ import { OrganizationService } from '../../shared/services/organization.service'
                             }
                         </div>
 
+                        <div class="space-y-2">
+                            <label for="registrieren-herkunft" class="text-sm font-medium text-[var(--color-text)]">Wie seid ihr auf PulseDeck gekommen?</label>
+                            <select id="registrieren-herkunft" [(ngModel)]="herkunft" name="herkunft"
+                                class="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] px-3 py-2 text-sm">
+                                <option value="" disabled>Bitte wählen</option>
+                                @for (o of herkunftOptionen; track o.wert) {
+                                <option [value]="o.wert">{{ o.name }}</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="rounded-lg border border-[var(--color-border)] p-3 space-y-2">
+                            <label class="flex items-start gap-2 text-sm text-[var(--color-text)] cursor-pointer">
+                                <input type="checkbox" [(ngModel)]="pilot" name="pilot" class="mt-1" />
+                                <span>Wir möchten Pilot-Organisation werden: Ich richte PulseDeck gemeinsam mit euch ein (kostenlos, in einem kurzen Gespräch).</span>
+                            </label>
+                            @if (pilot) {
+                            <input pInputText [(ngModel)]="pilotWunsch" name="pilotWunsch" maxlength="300" class="w-full"
+                                aria-label="Wunschzeitraum für das Gespräch" placeholder="Wann passt es euch? (z. B. abends, nächste Woche)" />
+                            }
+                        </div>
+
                         @if (gesendet()) {
                         <p-message severity="success" styleClass="w-full"
                             text="Fast geschafft: Wir haben dir einen Link geschickt. Bitte bestätige damit deine E-Mail-Adresse, danach wird deine Organisation automatisch erstellt." />
@@ -177,6 +199,7 @@ export class RegisterOrganizationComponent {
     private auth = inject(AuthService);
     private orgService = inject(OrganizationService);
     private router = inject(Router);
+    private route = inject(ActivatedRoute);
 
     // Step state
     step = signal(1);
@@ -198,6 +221,24 @@ export class RegisterOrganizationComponent {
     orgName = '';
     slug = '';
     slugAvailable: boolean | null = null;
+
+    // Herkunft und Pilot-Wunsch (bleiben intern); `ref` stammt aus dem Link, mit dem die Person gekommen ist
+    readonly herkunftOptionen = [
+        { wert: 'workshop', name: 'Workshop oder Vortrag' },
+        { wert: 'empfehlung', name: 'Empfehlung' },
+        { wert: 'suche', name: 'Suchmaschine' },
+        { wert: 'blog', name: 'Ratgeber oder Blog auf pulsedeck.de' },
+        { wert: 'event_gast', name: 'Termin oder Einladung einer anderen Organisation' },
+        { wert: 'social', name: 'Social Media' },
+        { wert: 'sonstiges', name: 'Sonstiges' },
+    ];
+    herkunft = '';
+    pilot = false;
+    pilotWunsch = '';
+    private readonly ref = (() => {
+        const roh = (this.route.snapshot.queryParamMap.get('ref') ?? '').toLowerCase();
+        return /^[a-z0-9_-]{1,40}$/.test(roh) ? roh : undefined;
+    })();
 
     canProceedStep1(): boolean {
         return (
@@ -255,6 +296,7 @@ export class RegisterOrganizationComponent {
             this.orgName.trim().length >= 3 &&
             this.slug.length >= 3 &&
             this.slugAvailable === true &&
+            this.herkunft !== '' &&
             !this.loading() &&
             !this.gesendet()
         );
@@ -293,7 +335,17 @@ export class RegisterOrganizationComponent {
                 slug: this.slug,
                 userName: this.userName.trim(),
                 email: this.email.trim().toLowerCase(),
+                herkunft: this.herkunftAngaben(),
             })
         );
+    }
+
+    /** Angaben für die Organisation; `ref` und Pilot-Wunsch nur, wenn vorhanden. */
+    herkunftAngaben(): Herkunft {
+        return {
+            acquisition_source: this.herkunft,
+            ...(this.ref ? { acquisition_ref: this.ref } : {}),
+            ...(this.pilot ? { pilot_requested: true, pilot_wish: this.pilotWunsch.trim().slice(0, 300) } : {}),
+        };
     }
 }
