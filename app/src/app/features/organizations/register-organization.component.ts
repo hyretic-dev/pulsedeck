@@ -153,7 +153,7 @@ import { Herkunft, OrganizationService } from '../../shared/services/organizatio
                         <div class="rounded-lg border border-[var(--color-border)] p-3 space-y-2">
                             <label class="flex items-start gap-2 text-sm text-[var(--color-text)] cursor-pointer">
                                 <input type="checkbox" [(ngModel)]="pilot" name="pilot" class="mt-1" />
-                                <span>Wir möchten Pilot-Organisation werden: Ich richte PulseDeck gemeinsam mit euch ein (kostenlos, in einem kurzen Gespräch).</span>
+                                <span>Wir möchten Pilot-Organisation werden: Wir richten PulseDeck gemeinsam mit euch ein (kostenlos, in einem kurzen Gespräch).</span>
                             </label>
                             @if (pilot) {
                             <input pInputText [(ngModel)]="pilotWunsch" name="pilotWunsch" maxlength="300" class="w-full"

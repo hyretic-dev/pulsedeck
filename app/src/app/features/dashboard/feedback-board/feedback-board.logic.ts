@@ -59,7 +59,7 @@ export function filtere(eintraege: BoardEintrag[], f: BoardFilter): BoardEintrag
 export function rueckmeldungsEntwurf(beschreibung: string): string {
     const kurz = beschreibung.replace(/\s+/g, ' ').trim();
     const zitat = kurz.length > 140 ? `${kurz.slice(0, 137).trimEnd()}…` : kurz;
-    return `Du hattest „${zitat}“ gemeldet, das ist jetzt live. Schau gern rein und sag mir, ob es so passt.`;
+    return `Du hattest „${zitat}“ gemeldet, das ist jetzt live. Schau gern rein und sagt uns, ob es so passt.`;
 }
 
 /** Kürzel für Themen: Kleinbuchstaben, Ziffern, Bindestriche (wie die Server-Prüfung). */

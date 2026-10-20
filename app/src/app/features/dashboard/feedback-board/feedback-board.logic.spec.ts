@@ -37,7 +37,7 @@ describe('Feedback-Board: Logik', () => {
     });
 
     it('schreibt einen Rückmeldungs-Entwurf mit gekürztem Zitat', () => {
-        expect(rueckmeldungsEntwurf('Dunkelmodus\n  bitte')).toBe('Du hattest „Dunkelmodus bitte“ gemeldet, das ist jetzt live. Schau gern rein und sag mir, ob es so passt.');
+        expect(rueckmeldungsEntwurf('Dunkelmodus\n  bitte')).toBe('Du hattest „Dunkelmodus bitte“ gemeldet, das ist jetzt live. Schau gern rein und sagt uns, ob es so passt.');
         const lang = rueckmeldungsEntwurf('x'.repeat(300));
         expect(lang).toContain('…“');
         expect(lang.length).toBeLessThan(260);
