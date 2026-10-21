@@ -7,7 +7,7 @@ import Logo from './Logo.astro';
 const jahr = new Date().getFullYear();
 const link = 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors';
 const spalten = [
-  { titel: 'Produkt', links: [...FUNKTIONEN.map((f) => ({ name: f.name, href: `/funktionen/${f.slug}` })), { name: 'Preise', href: '/preise' }] },
+  { titel: 'Produkt', links: [...FUNKTIONEN.map((f) => ({ name: f.name, href: `/funktionen/${f.slug}` })), { name: 'Kosten', href: '/preise' }] },
   { titel: 'Für wen', links: ZIELGRUPPEN.map((z) => ({ name: z.name, href: `/${z.slug}` })) },
   { titel: 'Wissen', links: [{ name: 'Blog', href: '/blog' }, { name: 'Handbuch', href: '/handbuch' }, { name: 'Häufige Fragen', href: '/faq' }] },
   { titel: 'Vertrauen', links: [{ name: 'Sicherheit & Datenschutz', href: '/sicherheit' }, { name: 'Datenschutzerklärung', href: '/datenschutz' }, { name: 'Impressum', href: '/impressum' }, { name: 'Seitenübersicht', href: '/sitemap' }] },
@@ -24,7 +24,7 @@ const spalten = [
         </a>
         <p class="text-sm text-[var(--color-text-muted)] mt-3 max-w-xs">Termine, Helferschichten und Vereinswissen an einem Ort. Gehostet in Deutschland.</p>
         <p class="text-sm mt-4"><a href={`mailto:${KONTAKT}`} class={link}>{KONTAKT}</a></p>
-        <a href={`${APP_URL}/registrieren`} class="btn-primaer !px-4 !py-2 text-sm mt-5">Kostenlos starten</a>
+        <a href={`${APP_URL}/registrieren`} class="btn-primaer !px-4 !py-2 text-sm mt-5">Jetzt ausprobieren</a>
       </div>
       {
         spalten.map((s) => (

@@ -10,9 +10,9 @@ import { FUNKTIONEN } from '../data/funktionen';
 import { FAQ_ALLGEMEIN, FAQ_PREISE } from '../data/faq';
 import { brotkrumen, faqSchema, SOFTWARE_ID } from '../seo';
 
-const titel = 'Preise: im Early Access kostenlos - PulseDeck';
+const titel = 'Kosten: im Early Access kostenlos - PulseDeck';
 const beschreibung =
-  'Was PulseDeck kostet: Im Early Access alle Funktionen kostenlos und ohne Mitgliederlimit. Danach dauerhaft kostenlos bis 10 Mitglieder, faire Staffelpreise darüber.';
+  'Was PulseDeck kostet: Im Early Access alle Funktionen kostenlos und ohne Mitgliederlimit. Wie es danach weitergeht, ist noch offen.';
 const fragen = [FAQ_ALLGEMEIN.find((f) => f.frage === 'Was kostet PulseDeck?')!, ...FAQ_PREISE];
 const url = `${SITE_URL}/preise`;
 const jsonLd = [
@@ -36,7 +36,7 @@ const jsonLd = [
     url,
   },
   faqSchema(url, fragen),
-  brotkrumen([{ name: 'Preise', pfad: '/preise' }]),
+  brotkrumen([{ name: 'Kosten', pfad: '/preise' }]),
 ];
 const enthalten = [...FUNKTIONEN.map((f) => f.name), 'Rollen und Rechte', 'Optionaler KI-Assistent', 'Datenexport'];
 ---
@@ -45,10 +45,10 @@ const enthalten = [...FUNKTIONEN.map((f) => f.name), 'Rollen und Rechte', 'Optio
   <SiteHeader aktiv="preise" />
   <main>
     <SeitenKopf
-      kicker="Preise"
+      kicker="Kosten"
       titel="Im Early Access kostenlos. Mit allen Funktionen."
-      text="Während des Early Access zahlt ihr nichts, egal wie groß eure Organisation ist. Danach bleibt PulseDeck für kleine Organisationen dauerhaft kostenlos."
-      pfad={[{ name: 'Preise' }]}
+      text="Während des Early Access zahlt ihr nichts, egal wie groß eure Organisation ist. Wie es danach weitergeht, ist noch offen."
+      pfad={[{ name: 'Kosten' }]}
     />
 
     <section class="px-4 sm:px-6 pb-20" aria-label="Tarife">
@@ -63,33 +63,33 @@ const enthalten = [...FUNKTIONEN.map((f) => f.name), 'Rollen und Rechte', 'Optio
           <ul class="mt-6 grid gap-2.5 sm:grid-cols-2">
             {enthalten.map((p) => <li class="flex gap-2.5"><i class="pi pi-check text-green-500 mt-1 text-sm" aria-hidden="true" />{p}</li>)}
           </ul>
-          <a href={`${APP_URL}/registrieren`} class="btn-primaer mt-8 w-full sm:w-auto">Kostenlos starten <i class="pi pi-arrow-right" aria-hidden="true"></i></a>
+          <a href={`${APP_URL}/registrieren`} class="btn-primaer mt-8 w-full sm:w-auto">Jetzt ausprobieren <i class="pi pi-arrow-right" aria-hidden="true"></i></a>
         </article>
 
         <article class="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8">
           <p class="inline-flex rounded-full border border-[var(--color-border)] px-3 py-1 text-xs font-semibold text-[var(--color-text-muted)]">Nach dem Early Access</p>
-          <h2 class="text-2xl font-bold mt-5">So geht es weiter</h2>
+          <h2 class="text-2xl font-bold mt-5">Das ist noch offen</h2>
           <dl class="mt-6 space-y-6">
             <div>
-              <dt class="font-semibold">Bis 10 Mitglieder</dt>
-              <dd class="text-[var(--color-text-muted)] mt-1">Dauerhaft kostenlos, mit allen Kernfunktionen.</dd>
+              <dt class="font-semibold">Wie geht es danach weiter?</dt>
+              <dd class="text-[var(--color-text-muted)] mt-1">Das wissen wir selbst noch nicht. PulseDeck entsteht gemeinsam mit den ersten Organisationen, und wir wollen erst verstehen, was euch wirklich hilft.</dd>
             </div>
             <div>
-              <dt class="font-semibold">Größere Organisationen</dt>
-              <dd class="text-[var(--color-text-muted)] mt-1">Faire, transparente Staffelpreise nach Größe, gedacht für gemeinnützige Budgets.</dd>
+              <dt class="font-semibold">Wir sagen es rechtzeitig</dt>
+              <dd class="text-[var(--color-text-muted)] mt-1">Bevor sich etwas ändert, informieren wir euch per E-Mail.</dd>
             </div>
             <div>
-              <dt class="font-semibold">Euer Wechsel, eure Entscheidung</dt>
-              <dd class="text-[var(--color-text-muted)] mt-1">Wir kündigen Preise rechtzeitig vorher an. Ohne eure Zustimmung wird nichts kostenpflichtig.</dd>
+              <dt class="font-semibold">Eure Daten gehören euch</dt>
+              <dd class="text-[var(--color-text-muted)] mt-1">Ihr könnt sie jederzeit exportieren. PulseDeck ist Open Source (AGPLv3).</dd>
             </div>
           </dl>
-          <a href={`mailto:${KONTAKT}?subject=Preise%20PulseDeck`} class="inline-flex items-center gap-1.5 mt-8 font-semibold text-akzent hover:underline"><i class="pi pi-envelope text-sm" aria-hidden="true"></i> Fragen zu Preisen</a>
+          <a href={`mailto:${KONTAKT}?subject=Kosten%20PulseDeck`} class="inline-flex items-center gap-1.5 mt-8 font-semibold text-akzent hover:underline"><i class="pi pi-envelope text-sm" aria-hidden="true"></i> Fragen zu den Kosten</a>
         </article>
       </div>
     </section>
 
     <section class="px-4 sm:px-6 py-20 bg-[var(--color-surface)] border-t border-[var(--color-border)]">
-      <div class="max-w-3xl mx-auto"><FaqListe fragen={fragen} titel="Fragen zu Preisen und Early Access" /></div>
+      <div class="max-w-3xl mx-auto"><FaqListe fragen={fragen} titel="Fragen zu Kosten und Early Access" /></div>
     </section>
 
     <CtaAbschluss />

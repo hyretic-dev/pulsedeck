@@ -152,7 +152,7 @@ export class OrganizationService {
      */
     getTierLabel(tier: SubscriptionTier): string {
         const labels: Record<SubscriptionTier, string> = {
-            free: 'Free (bis 10 Mitglieder)',
+            free: 'Early Access (kostenlos)',
             pro: 'Pro',
             pro_bono: 'Pro Bono (gemeinnützig)',
         };

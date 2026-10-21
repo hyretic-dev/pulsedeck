@@ -15,7 +15,7 @@ export const GET: APIRoute = async () => {
   const zeilen = [
     '# PulseDeck',
     '',
-    '> PulseDeck ist eine webbasierte Plattform für Vereine, Parteigliederungen, NGOs und Aktionsbündnisse im deutschsprachigen Raum: Termine mit Helferslots, Mitgliederverwaltung mit Rollen und Rechten, Arbeitsgruppen, Newsfeed mit Umfragen, E-Mail-Newsletter, Wiki, Dateiablage und ein optionaler KI-Assistent. Gehostet in der EU (Deutschland), Open Source (AGPLv3). Im Early Access alle Funktionen kostenlos und ohne Mitgliederlimit; danach dauerhaft kostenlos bis 10 Mitglieder, Staffelpreise für größere Organisationen.',
+    '> PulseDeck ist eine webbasierte Plattform für Vereine, Parteigliederungen, NGOs und Aktionsbündnisse im deutschsprachigen Raum: Termine mit Helferslots, Mitgliederverwaltung mit Rollen und Rechten, Arbeitsgruppen, Newsfeed mit Umfragen, E-Mail-Newsletter, Wiki, Dateiablage und ein optionaler KI-Assistent. Gehostet in der EU (Deutschland), Open Source (AGPLv3). Im Early Access alle Funktionen kostenlos und ohne Mitgliederlimit; wie es danach weitergeht, ist offen.',
     '',
     `- Website: ${SITE_URL}/`,
     `- Anwendung (Anmeldung, Registrierung): ${APP_URL}/`,
@@ -26,7 +26,7 @@ export const GET: APIRoute = async () => {
     '',
     `- [Funktionen](${SITE_URL}/funktionen): Überblick über alle Funktionen`,
     ...FUNKTIONEN.map((f) => `- [${f.name}](${SITE_URL}/funktionen/${f.slug}): ${f.kurz}`),
-    `- [Preise](${SITE_URL}/preise): Early Access kostenlos, danach dauerhaft kostenlos bis 10 Mitglieder`,
+    `- [Kosten](${SITE_URL}/preise): im Early Access kostenlos, danach noch offen`,
     `- [Datenschutz & Sicherheit](${SITE_URL}/sicherheit): Hosting, Auftragsverarbeitung, Rechte, KI, Open Source`,
     `- [Häufige Fragen](${SITE_URL}/faq)`,
     '',

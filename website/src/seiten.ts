@@ -27,7 +27,7 @@ export async function alleSeiten(): Promise<Seite[]> {
     { pfad: '/funktionen', titel: 'Funktionen', gruppe: 'Funktionen' },
     ...FUNKTIONEN.map((f) => ({ pfad: `/funktionen/${f.slug}`, titel: f.name, gruppe: 'Funktionen' as const, bild: SITE_URL + f.bild.src })),
     ...ZIELGRUPPEN.map((z) => ({ pfad: `/${z.slug}`, titel: `PulseDeck für ${z.name}`, gruppe: 'Für wen' as const })),
-    { pfad: '/preise', titel: 'Preise', gruppe: 'Allgemein' },
+    { pfad: '/preise', titel: 'Kosten', gruppe: 'Allgemein' },
     { pfad: '/sicherheit', titel: 'Datenschutz & Sicherheit', gruppe: 'Allgemein' },
     { pfad: '/faq', titel: 'Häufige Fragen', gruppe: 'Allgemein' },
     { pfad: '/blog', titel: 'Blog', gruppe: 'Blog', geaendert: posts[0]?.data.updated ?? posts[0]?.data.date },

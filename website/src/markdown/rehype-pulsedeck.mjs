@@ -44,7 +44,7 @@ export function rehypeKontextCta({ appUrl }) {
       el('p', { className: ['kontext-cta-titel'] }, [text(cta.titel)]),
       el('p', {}, [text(cta.text)]),
       el('p', { className: ['kontext-cta-aktionen'] }, [
-        el('a', { href: `${appUrl}/registrieren`, className: ['btn-primaer'] }, [text('Kostenlos starten')]),
+        el('a', { href: `${appUrl}/registrieren`, className: ['btn-primaer'] }, [text('Jetzt ausprobieren')]),
         el('a', { href: cta.link, className: ['kontext-cta-link'] }, [text(cta.linkText)]),
       ]),
     ]);

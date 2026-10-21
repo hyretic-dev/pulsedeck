@@ -14,7 +14,7 @@ const beschreibung = 'Antworten zu PulseDeck: WhatsApp, Kosten im Early Access, 
 const url = `${SITE_URL}/faq`;
 const gruppen = [
   { titel: 'Allgemein', fragen: FAQ_ALLGEMEIN },
-  { titel: 'Preise und Early Access', fragen: FAQ_PREISE },
+  { titel: 'Kosten und Early Access', fragen: FAQ_PREISE },
   { titel: 'Datenschutz und Sicherheit', fragen: FAQ_SICHERHEIT },
 ];
 const jsonLd = [faqSchema(url, gruppen.flatMap((g) => g.fragen)), brotkrumen([{ name: 'Häufige Fragen', pfad: '/faq' }])];

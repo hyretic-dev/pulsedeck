@@ -1,6 +1,6 @@
 /**
  * Häufige Fragen (Startseite, /faq, /preise). Nur belegbare Antworten; Preise und Grenzen wie in der App umgesetzt.
- * Early Access: alle Funktionen kostenlos, max_members 9999 (Migration 000017). Dauerhaft kostenloser Tarif danach: bis 10 Mitglieder.
+ * Early Access: alle Funktionen kostenlos, max_members 9999 (Migration 000017). Wie es danach weitergeht, ist bewusst offen; keine Preise oder Tarife nennen.
  */
 export interface Frage {
   frage: string;
@@ -14,7 +14,7 @@ export const FAQ_ALLGEMEIN: Frage[] = [
   },
   {
     frage: 'Was kostet PulseDeck?',
-    antwort: 'Während des Early Access nichts: Alle Funktionen sind kostenlos. Danach bleibt ein dauerhaft kostenloser Tarif für Organisationen bis 10 Mitglieder. Für größere Organisationen kommen faire, transparente Staffelpreise; wer im Early Access dabei ist, erfährt die Preise rechtzeitig vorher und entscheidet dann selbst.',
+    antwort: 'Im Early Access nichts: Alle Funktionen sind kostenlos. Wie es danach weitergeht, ist noch offen. Sollte sich etwas ändern, erfahrt ihr es rechtzeitig vorher per E-Mail, und eure Daten könnt ihr jederzeit exportieren.',
   },
   {
     frage: 'Wo liegen unsere Daten?',
@@ -41,11 +41,11 @@ export const FAQ_ALLGEMEIN: Frage[] = [
 export const FAQ_PREISE: Frage[] = [
   {
     frage: 'Gibt es im Early Access ein Mitgliederlimit?',
-    antwort: 'Nein. Im Early Access nutzt ihr alle Funktionen kostenlos, auch mit mehr als 10 Mitgliedern. Die Grenze von 10 Mitgliedern gilt erst für den dauerhaft kostenlosen Tarif nach dem Early Access.',
+    antwort: 'Nein. Im Early Access nutzt ihr alle Funktionen kostenlos, egal wie groß eure Organisation ist.',
   },
   {
     frage: 'Was passiert, wenn der Early Access endet?',
-    antwort: 'Wir kündigen das Ende und die Preise rechtzeitig per E-Mail an. Organisationen bis 10 Mitglieder nutzen PulseDeck weiter kostenlos. Größere Organisationen wählen einen der Staffelpreise oder exportieren ihre Daten. Ohne eure Zustimmung wird nichts kostenpflichtig.',
+    antwort: 'Das ist noch offen: Wir wissen heute nicht, ob und wann sich etwas ändert. Bevor es so weit ist, informieren wir euch rechtzeitig per E-Mail. Eure Daten könnt ihr jederzeit exportieren.',
   },
   {
     frage: 'Brauchen wir eine Kreditkarte?',
