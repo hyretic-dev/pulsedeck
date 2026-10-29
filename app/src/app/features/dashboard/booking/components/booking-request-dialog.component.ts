@@ -1,7 +1,7 @@
 import {
     ChangeDetectionStrategy, Component, computed, effect, input, model, output, signal, untracked, viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -88,7 +88,11 @@ export class BookingRequestDialogComponent {
         return Array.from({ length: bis - von + 1 }, (_, i) => ({ label: `${uhrzeit(von + i)} Uhr`, value: von + i }));
     }
 
-    protected readonly heute = new Date();
+    /** Früheste wählbare Tag für Buchende: heute ab Mitternacht (mit Uhrzeit wäre der heutige Tag „vergangen“ und würde geleert). */
+    protected readonly heute = (() => {
+        const h = berlinUhr(new Date());
+        return new Date(h.jahr, h.monat - 1, h.tag);
+    })();
 
     /** Zeitraum aus dem Formular; null, solange Datum fehlt. */
     private readonly zeitraum = computed(() => {
@@ -130,6 +134,11 @@ export class BookingRequestDialogComponent {
     });
 
     constructor() {
+        // Wird der Beginn auf einen späteren Tag gelegt, zieht das Ende mit (sonst bliebe „Ende vor Beginn“ stehen)
+        this.form.controls.beginnDatum.valueChanges.pipe(takeUntilDestroyed()).subscribe((beginn) => {
+            const ende = this.form.controls.endeDatum.value;
+            if (beginn && (!ende || ende < beginn)) this.form.controls.endeDatum.setValue(beginn);
+        });
         // Beim Öffnen zurücksetzen; nur `sichtbar` löst aus, sonst würde jede Änderung von Plan oder Einträgen die Eingaben verwerfen
         effect(() => {
             if (!this.sichtbar()) return;

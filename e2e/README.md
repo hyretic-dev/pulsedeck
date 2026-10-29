@@ -6,7 +6,8 @@ API-Antwort (4xx/5xx), jeden Konsolen- und Seitenfehler:
 1. Organisation über das Registrierungsformular anlegen, Bestätigungslink aus dem Backend-Log einlösen (Mail-Transport `log`),
 2. alle Dashboard-Seiten öffnen,
 3. Kontakt, Termin, Beitrag, Arbeitsgruppe, Wiki-Artikel, Mitglied und Datei über die Dialoge anlegen,
-4. abmelden und mit Passwort anmelden.
+4. Belegung: Plan anlegen, zweite Person (das Mitglied aus Schritt 3, über die Registrierung mit derselben E-Mail verknüpft) als Buchende benennen, anfragen, annehmen, Termin mit reserviertem Ort (auch der belegte Fall), öffentliche Seite anonym,
+5. abmelden und mit Passwort anmelden.
 
 ```bash
 # Stack starten (eigenes Projekt, Mail-Transport log)
@@ -14,6 +15,8 @@ docker compose -p pulsedeck-e2e --env-file e2e.env up -d --build
 cd e2e && npm install && npx playwright install chromium
 E2E_BASE_URL=http://localhost:18095 E2E_COMPOSE="docker compose -p pulsedeck-e2e --env-file ../e2e.env" npm run smoke
 ```
+
+Mit `E2E_SHOTS=<Ordner>` legt der Lauf Screenshots der Belegung ab (Jahr, Eingang, Monat, Termin-Dialog mit Ort, öffentliche Seite, Mobil).
 
 Exit-Code 0 nur ohne Auffälligkeiten. Erwartung: `AUTH_MIN_RESPONSE_MS=0` im Stack (kürzere Wartezeiten).
 
