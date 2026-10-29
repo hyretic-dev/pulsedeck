@@ -16,6 +16,8 @@ import { datumsSchluessel } from '../../../../shared/booking/feiertage';
 import { berlinUhr } from '../../../../shared/booking/zeitraum';
 import type { SerieEingabe, SerienVorschau } from '../domain/booking.repository';
 
+const VORSCHAU_VERZOEGERUNG_MS = 300;
+
 /** Serie anlegen (nur Leitung): Wochentage, Rhythmus, Uhrzeit, Zeitraum, mit Vorschau vor dem Speichern. */
 @Component({
     selector: 'app-booking-series-form',
@@ -56,6 +58,8 @@ export class BookingSeriesFormComponent {
     protected readonly vonStunden = computed(() => this.stundenListe(this.plan().window_start, this.plan().window_end - 1));
     protected readonly bisStunden = computed(() => this.stundenListe(this.plan().window_start + 1, this.plan().window_end));
     protected readonly vorschau = signal<SerienVorschau | null>(null);
+    protected readonly vorschauFehler = signal<string | null>(null);
+    protected readonly vorschauLaedt = signal(false);
 
     private stundenListe(von: number, bis: number): { label: string; value: number }[] {
         return Array.from({ length: bis - von + 1 }, (_, i) => ({ label: `${uhrzeit(von + i)} Uhr`, value: von + i }));
@@ -87,6 +91,8 @@ export class BookingSeriesFormComponent {
     readonly kannSpeichern = computed(() => !!this.serie() && !!this.vorschau()?.dates.length);
 
     protected readonly fehler = computed(() => {
+        const server = this.vorschauFehler();
+        if (server) return server;
         const w = this.werte();
         if ((w.hour_to ?? 0) <= (w.hour_from ?? 0)) return 'Das Ende muss nach dem Beginn liegen.';
         if (w.valid_from && w.valid_to) {
@@ -109,13 +115,24 @@ export class BookingSeriesFormComponent {
             const plan = this.plan();
             this.form.patchValue({ hour_from: Math.max(plan.window_start, 18), hour_to: Math.min(plan.window_end, 20) }, { emitEvent: false });
         });
-        effect(() => {
+        // Vorschau vom Server, entprellt; Antworten veralteter Eingaben werden verworfen
+        effect((aufraeumen) => {
             const s = this.serie();
-            if (!s) {
-                this.vorschau.set(null);
-                return;
-            }
-            void this.vorschauLader()(s).then((v) => this.vorschau.set(v));
+            this.vorschau.set(null);
+            this.vorschauFehler.set(null);
+            if (!s) return;
+            let veraltet = false;
+            const timer = setTimeout(() => {
+                this.vorschauLaedt.set(true);
+                this.vorschauLader()(s)
+                    .then((v) => !veraltet && this.vorschau.set(v))
+                    .catch((fehler: Error) => !veraltet && this.vorschauFehler.set(fehler.message))
+                    .finally(() => !veraltet && this.vorschauLaedt.set(false));
+            }, VORSCHAU_VERZOEGERUNG_MS);
+            aufraeumen(() => {
+                veraltet = true;
+                clearTimeout(timer);
+            });
         });
     }
 

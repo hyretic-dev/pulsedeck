@@ -45,7 +45,7 @@ interface Ziehen {
 
 /**
  * Monatsraster: eine Zeile je Tag, eine Spalte je Stunde im Zeitfenster des Plans. Dieselbe Komponente zeigt auch
- * einen einzelnen Tag (`nurTag`, z. B. im Termin-Dialog) und auf schmalen Bildschirmen die senkrechte Tagesliste (`kompakt`).
+ * einen einzelnen Tag (`nurTag`, z. B. im Termin-Dialog). Auf schmalen Bildschirmen gilt stattdessen `BookingDayListComponent`.
  */
 @Component({
     selector: 'app-booking-month-grid',
@@ -61,7 +61,6 @@ export class BookingMonthGridComponent {
     readonly plan = input.required<BookingPlan>();
     readonly eintraege = input.required<ReadonlyArray<BookingEntry>>();
     readonly nurTag = input<number | null>(null);
-    readonly kompakt = input(false);
     /** Zeitraum, der zusätzlich markiert wird (z. B. der Termin im Dialog). */
     readonly markierung = input<{ start_at: string; end_at: string } | null>(null);
     /** Ohne Auswahl per Klick (reine Anzeige, z. B. in der Vorschau). */
@@ -69,7 +68,6 @@ export class BookingMonthGridComponent {
 
     readonly stundenGewaehlt = output<StundenAuswahl>();
     readonly eintragGewaehlt = output<BookingEntry>();
-    readonly tagGewaehlt = output<number>();
 
     protected readonly ziehen = signal<Ziehen | null>(null);
     private mausBehandelt = false;
@@ -138,10 +136,6 @@ export class BookingMonthGridComponent {
         const e = b.eintrag;
         const wer = e.title ?? 'Belegt';
         return `${wer}, ${uhrzeit(b.von)} bis ${uhrzeit(b.bis)}, ${STATUS_TEXT[e.status]}${e.is_mine ? ', deine Anfrage' : ''}`;
-    }
-
-    protected kurz(b: TagesBalken): string {
-        return `${String(b.von).padStart(2, '0')}–${String(b.bis).padStart(2, '0')}`;
     }
 
     protected stundeBeschriftung(zeile: TagesZeile, stunde: number): string {

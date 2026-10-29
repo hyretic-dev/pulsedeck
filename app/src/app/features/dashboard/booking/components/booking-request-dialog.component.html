@@ -7,7 +7,7 @@
             <i class="pi pi-{{ plan().kind === 'place' ? 'building' : 'box' }} mr-1"></i>{{ plan().name }}
         </p>
 
-        @if (leitung()) {
+        @if (leitung() && !bearbeitet()) {
         <p-selectButton [options]="modusOptionen" [ngModel]="modus()" (ngModelChange)="modus.set($event)"
             optionLabel="label" optionValue="value" [allowEmpty]="false" size="small" ariaLabel="Art der Belegung" />
         }

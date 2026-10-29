@@ -1,4 +1,3 @@
-@if (!kompakt()) {
 <div class="monat" [class.einzeltag]="nurTag() !== null" role="grid" [attr.aria-label]="'Belegung ' + titel()" (pointerup)="ziehenEnde()"
     (pointerleave)="ziehen.set(null)" [style.--stunden]="stunden().length">
     <div class="kopf" role="row">
@@ -46,36 +45,3 @@
     </div>
     }
 </div>
-} @else {
-<div class="liste" role="list" [attr.aria-label]="'Belegung ' + titel()">
-    @for (zeile of zeilen(); track zeile.tag) {
-    <div class="liste-zeile" role="listitem" [class.wochenende]="zeile.wochenende" [class.feiertag]="!!zeile.feiertag"
-        [class.heute]="zeile.heute">
-        <button type="button" class="liste-tag" [attr.aria-label]="zeile.beschriftung + ' öffnen'"
-            (click)="tagGewaehlt.emit(zeile.tag)">
-            <span class="wt">{{ zeile.wochentag }}</span>
-            <span class="datum">{{ zeile.tag }}.</span>
-        </button>
-        <div class="liste-inhalt">
-            @if (zeile.feiertag) {
-            <span class="ft-name">{{ zeile.feiertag }}</span>
-            }
-            @for (b of zeile.balken; track b.balken.eintrag.id) {
-            <button type="button" class="chip balken" [attr.data-status]="b.balken.eintrag.status"
-                [class.eigene]="b.balken.eintrag.is_mine" [class.unbekannt]="b.balken.eintrag.title === null"
-                [attr.aria-label]="b.beschriftung" (click)="eintragGewaehlt.emit(b.balken.eintrag)">
-                @if (b.balken.eintrag.series_id) {
-                <i class="pi pi-sync serie" aria-hidden="true"></i>
-                }
-                <span class="chip-zeit">{{ kurz(b.balken) }}</span>
-                <span class="balken-text">{{ b.balken.eintrag.title ?? 'Belegt' }}</span>
-            </button>
-            }
-        </div>
-        <button type="button" class="liste-oeffnen" tabindex="-1" aria-hidden="true" (click)="tagGewaehlt.emit(zeile.tag)">
-            <i class="pi pi-angle-right"></i>
-        </button>
-    </div>
-    }
-</div>
-}

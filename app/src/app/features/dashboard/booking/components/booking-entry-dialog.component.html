@@ -33,15 +33,26 @@
             }
             @if (e.event_id) {
             <dt class="text-[var(--color-text-muted)]"><i class="pi pi-calendar mr-1"></i>Termin</dt>
-            <dd class="text-[var(--color-text)]">Zeit über den Termin ändern</dd>
+            <dd class="text-[var(--color-text)]">
+                <a routerLink="../calendar" class="text-linke hover:underline" (click)="sichtbar.set(false)">Zeit über den Termin ändern</a>
+            </dd>
             }
         </dl>
+        @if (e.series_id && istLeitung()) {
+        <div class="flex flex-wrap gap-2 pt-1">
+            <p-button label="Serie umbenennen" icon="pi pi-pencil" severity="secondary" size="small" [outlined]="true" (click)="serieUmbenennen.emit(e)" />
+            <p-button label="Serie ab diesem Termin beenden" icon="pi pi-stop-circle" severity="secondary" size="small" [outlined]="true" (click)="serieBeenden.emit(e)" />
+        </div>
+        }
         @if (e.title === null) {
         <p class="text-xs text-[var(--color-text-muted)]"><i class="pi pi-lock mr-1"></i>Titel und Person siehst du nur, wenn du die Veranstaltung sehen darfst.</p>
         }
     </div>
 
     <ng-template #footer>
+        @if (kannBearbeiten()) {
+        <p-button label="Bearbeiten" severity="secondary" [text]="true" icon="pi pi-pencil" (click)="bearbeiten.emit(e)" />
+        }
         @if (kannEntscheiden()) {
         <p-button label="Ablehnen" severity="secondary" [text]="true" icon="pi pi-times" (click)="ablehnen.emit(e)" />
         <p-button label="Annehmen" icon="pi pi-check" (click)="annehmen.emit(e)" />
@@ -53,6 +64,7 @@
         @if (entscheidet()) {
         <p-button label="Löschen" severity="danger" [text]="true" icon="pi pi-trash" (click)="loeschen.emit(e)" />
         }
+
         }
     </ng-template>
     }

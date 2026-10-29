@@ -9,8 +9,15 @@
             <p class="text-[var(--color-text-muted)] text-sm hidden md:block">Räume, Hallen und Gegenstände buchen.</p>
         </div>
         <div class="flex items-center gap-2">
+            @if (istAdmin() && store.plaene().length) {
+            <button type="button" (click)="neuerPlan()"
+                class="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors border border-[var(--color-border)]"
+                aria-label="Neuen Belegungsplan anlegen" title="Neuen Plan anlegen">
+                <i class="pi pi-plus-circle text-sm"></i>
+            </button>
+            }
             @if (store.plan()?.my_role === 'lead') {
-            <button type="button"
+            <button type="button" (click)="planEinstellungen()"
                 class="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-overlay)] transition-colors border border-[var(--color-border)]"
                 aria-label="Einstellungen des Belegungsplans" title="Einstellungen des Plans">
                 <i class="pi pi-cog text-sm"></i>
@@ -23,7 +30,11 @@
         </div>
     </div>
 
-    @if (store.laedt()) {
+    @if (ladeFehler(); as f) {
+    <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-error)] bg-[var(--color-error)]/10 text-sm text-[var(--color-text)]" role="alert">
+        <i class="pi pi-times-circle text-[var(--color-error)] mt-0.5"></i><span>Die Belegungspläne konnten nicht geladen werden: {{ f }}</span>
+    </div>
+    } @else if (store.laedt()) {
     <div class="flex justify-center items-center py-8">
         <p-progressSpinner strokeWidth="4" ariaLabel="Lade Belegungspläne..." />
     </div>
@@ -32,8 +43,12 @@
     <div class="text-center py-12 bg-[var(--color-surface-raised)] rounded-lg border border-[var(--color-border)]">
         <i class="pi pi-building text-4xl text-[var(--color-text-muted)] mb-3"></i>
         <p class="text-[var(--color-text)] font-medium">Noch kein Belegungsplan.</p>
+        @if (istAdmin()) {
         <p class="text-sm text-[var(--color-text-muted)] mb-4">Lege Räume, Hallen oder Gegenstände an, die ihr bucht.</p>
-        <p-button label="Plan anlegen" icon="pi pi-plus" severity="danger" size="small" />
+        <p-button label="Plan anlegen" icon="pi pi-plus" severity="danger" size="small" (click)="neuerPlan()" />
+        } @else {
+        <p class="text-sm text-[var(--color-text-muted)]">Die Administratoren eurer Organisation legen Belegungspläne an.</p>
+        }
     </div>
     } @else {
 
@@ -133,10 +148,15 @@
                 (tagGewaehlt)="tagImJahr($event)" (monatGewaehlt)="store.oeffneMonat($event)" />
             } @else {
             <div class="rounded-lg border border-[var(--color-border)] overflow-hidden">
-                <app-booking-month-grid [jahr]="store.jahr()" [monat]="store.monat()" [plan]="plan"
-                    [eintraege]="store.eintraege()" [kompakt]="schmal()" [nurAnsicht]="!darfAnfragen()"
-                    (stundenGewaehlt)="neueAnfrage($event)" (eintragGewaehlt)="zeigeDetail($event)"
+                @if (schmal()) {
+                <app-booking-day-list [jahr]="store.jahr()" [monat]="store.monat()" [plan]="plan"
+                    [eintraege]="store.eintraege()" (eintragGewaehlt)="zeigeDetail($event)"
                     (tagGewaehlt)="oeffneTagesPanel(store.jahr(), store.monat(), $event)" />
+                } @else {
+                <app-booking-month-grid [jahr]="store.jahr()" [monat]="store.monat()" [plan]="plan"
+                    [eintraege]="store.eintraege()" [nurAnsicht]="!darfAnfragen()"
+                    (stundenGewaehlt)="neueAnfrage($event)" (eintragGewaehlt)="zeigeDetail($event)" />
+                }
             </div>
             }
             <div class="mt-3">
@@ -183,7 +203,11 @@
                         <p class="mt-2 text-xs text-[var(--color-text-muted)]">{{ z.eintrag.note }}</p>
                         }
                     </div>
-                    <div class="flex items-center gap-2 flex-shrink-0">
+                    <div class="flex items-center gap-2 flex-shrink-0 flex-wrap">
+                        @if (!z.eintrag.event_id) {
+                        <p-button icon="pi pi-pencil" severity="secondary" [text]="true" size="small" label="Bearbeiten"
+                            (click)="bearbeiten(z.eintrag)" />
+                        }
                         <p-button label="Ablehnen" icon="pi pi-times" severity="secondary" [text]="true" size="small"
                             (click)="ablehnenFragen(z.eintrag)" />
                         <p-button label="Annehmen" icon="pi pi-check" size="small" (click)="annehmen(z.eintrag)" />
@@ -227,12 +251,13 @@
 
 @if (store.plan(); as plan) {
 <app-booking-request-dialog [(sichtbar)]="anfrageSichtbar" [plan]="plan" [eintraege]="store.eintraege()"
-    [vorgabe]="vorgabe()" [vorschauLader]="ladeLader" [speichernBusy]="speichert()" (gespeichert)="speichern($event)"
-    (serieGespeichert)="serieSpeichern($event)" />
+    [vorgabe]="vorgabe()" [eintrag]="bearbeitenEintrag()" [vorschauLader]="ladeLader" [speichernBusy]="speichert()"
+    (gespeichert)="speichern($event)" (geaendert)="aenderungSpeichern($event)" (serieGespeichert)="serieSpeichern($event)" />
 
 <app-booking-entry-dialog [(sichtbar)]="detailSichtbar" [eintrag]="detail()" [plan]="plan"
-    (annehmen)="annehmen($event)" (ablehnen)="ablehnenFragen($event)" (zurueckziehen)="zurueckziehen($event)"
-    (loeschen)="loeschen($event)" />
+    (annehmen)="annehmen($event)" (ablehnen)="ablehnenFragen($event)" (zurueckziehen)="stornieren($event)"
+    (loeschen)="loeschen($event)" (bearbeiten)="bearbeiten($event)" (serieUmbenennen)="serieUmbenennenFragen($event)"
+    (serieBeenden)="serieBeendenFragen($event)" />
 
 <!-- Schmal: Tag im Seitenpanel -->
 <p-drawer [(visible)]="tagesPanelSichtbar" position="bottom" [header]="tagesPanelTitel()" styleClass="!h-[75vh]">
@@ -257,5 +282,21 @@
     <ng-template #footer>
         <p-button label="Abbrechen" severity="secondary" [text]="true" (click)="ablehnenSichtbar.set(false)" />
         <p-button label="Ablehnen" icon="pi pi-times" severity="danger" (click)="ablehnen()" />
+    </ng-template>
+</p-dialog>
+
+<app-booking-calendar-dialog [(sichtbar)]="planDialogSichtbar" [plan]="planDialogNeu() ? null : store.plan()"
+    [istAdmin]="istAdmin()" [speichernBusy]="speichert()" (gespeichert)="planSpeichern($event)" (loeschen)="planLoeschenFragen()" />
+
+<p-dialog header="Serie umbenennen" [(visible)]="serieDialogSichtbar" [modal]="true" [draggable]="false" [resizable]="false"
+    maskStyleClass="backdrop-blur-sm bg-black/50" [style]="{width: '440px', maxWidth: '95vw'}">
+    <div>
+        <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="serie-neuer-name">Neuer Name</label>
+        <input pInputText id="serie-neuer-name" [(ngModel)]="serieTitel" class="w-full" maxlength="120" />
+        <p class="text-xs text-[var(--color-text-muted)] mt-1 ml-1">Gilt für alle Termine der Serie.</p>
+    </div>
+    <ng-template #footer>
+        <p-button label="Abbrechen" severity="secondary" [text]="true" (click)="serieDialogSichtbar.set(false)" />
+        <p-button label="Umbenennen" icon="pi pi-check" (click)="serieUmbenennen()" [disabled]="!serieTitel.trim()" />
     </ng-template>
 </p-dialog>

@@ -5,7 +5,7 @@ import { AuthService, UserMembership } from '../../shared/services/auth.service'
 import { ThemeService } from '../../shared/services/theme.service';
 import { OrganizationService } from '../../shared/services/organization.service';
 import { PulseLogoComponent } from '../../shared/components/pulse-logo.component';
-import { BeispielBelegungStore } from '../../shared/booking/booking-beispieldaten';
+import { OPEN_BOOKING_REQUESTS } from '../../shared/booking/open-booking-requests';
 
 @Component({
   selector: 'app-sidebar-left',
@@ -19,8 +19,8 @@ export class SidebarLeft {
   public theme = inject(ThemeService);
   public orgService = inject(OrganizationService);
   private router = inject(Router);
-  /** PROTOTYP: Zahl offener Anfragen aus den Beispieldaten; später ein Dienst auf der API. */
-  public offeneBelegungen = inject(BeispielBelegungStore).offeneFuerMich;
+  /** Offene Belegungsanfragen, über die die Person entscheiden darf (Badge am Menüpunkt). */
+  public offeneBelegungen = inject(OPEN_BOOKING_REQUESTS).count;
 
   showOrgSwitcher = signal(false);
 

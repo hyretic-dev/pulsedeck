@@ -1,13 +1,17 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 
 import type { BookingEntry, BookingPlan } from '../../../../shared/booking/booking.models';
-import { berlinUhr, berlinZeitpunkt } from '../../../../shared/booking/zeitraum';
-import { BOOKING_REPOSITORY, BuchungEingabe, SerieEingabe } from '../domain/booking.repository';
+import { berlinUhr } from '../../../../shared/booking/zeitraum';
+import {
+    BOOKING_REPOSITORY, BuchungAenderung, BuchungEingabe, PlanEingabe, SerieEingabe, SerienErgebnis, SerienVorschau,
+} from '../domain/booking.repository';
 
 export type Ansicht = 'jahr' | 'monat';
 export type Bereich = 'plan' | 'eingang' | 'meine';
 
 const SCHLUESSEL = 'pulsedeck.belegung';
+/** Echtzeit-Meldungen kommen gebündelt (eine Annahme ändert mehrere Buchungen); ein Neuladen genügt. */
+const NACHLADE_VERZOEGERUNG_MS = 150;
 
 function gespeichert(): { plan?: string; ansicht?: Ansicht } {
     try {
@@ -37,26 +41,44 @@ export class BookingStore {
         this.eintraege().filter((e) => e.is_mine).sort((a, b) => b.start_at.localeCompare(a.start_at)),
     );
 
-    async start(): Promise<void> {
+    private nachladen: ReturnType<typeof setTimeout> | null = null;
+
+    async start(destroyRef: DestroyRef): Promise<void> {
         const merk = gespeichert();
         if (merk.ansicht === 'jahr' || merk.ansicht === 'monat') this.ansicht.set(merk.ansicht);
-        const plaene = await this.repo.plaene();
-        this.plaene.set(plaene);
-        this.planId.set(plaene.find((p) => p.id === merk.plan)?.id ?? plaene[0]?.id ?? null);
-        await this.neuLaden();
-        this.laedt.set(false);
+        const abmelden = this.repo.aenderungen(() => this.nachladenPlanen());
+        destroyRef.onDestroy(() => {
+            abmelden();
+            if (this.nachladen) clearTimeout(this.nachladen);
+        });
+        try {
+            const plaene = await this.repo.plaene();
+            this.plaene.set(plaene);
+            this.planId.set(plaene.find((p) => p.id === merk.plan)?.id ?? plaene[0]?.id ?? null);
+            await this.neuLaden();
+        } finally {
+            this.laedt.set(false);
+        }
     }
 
-    /** Lädt das ganze Jahr samt Rand, damit Jahresansicht, Monatswechsel und Dialoge ohne Nachladen auskommen. */
+    private nachladenPlanen(): void {
+        if (this.nachladen) clearTimeout(this.nachladen);
+        this.nachladen = setTimeout(() => void this.neuLaden().catch(() => undefined), NACHLADE_VERZOEGERUNG_MS);
+    }
+
+    /** Lädt Pläne und das ganze Jahr samt Rand, damit Jahresansicht, Monatswechsel und Dialoge ohne Nachladen auskommen. */
     async neuLaden(): Promise<void> {
+        const plaene = await this.repo.plaene();
+        this.plaene.set(plaene);
+        // der gewählte Plan kann inzwischen gelöscht sein
+        if (!plaene.some((p) => p.id === this.planId())) this.planId.set(plaene[0]?.id ?? null);
         const id = this.planId();
         if (!id) {
             this.eintraege.set([]);
             return;
         }
         const j = this.jahr();
-        this.eintraege.set(await this.repo.eintraege(id, berlinZeitpunkt(j - 1, 12, 1, 0), berlinZeitpunkt(j + 1, 1, 31, 0)));
-        this.plaene.set(await this.repo.plaene());
+        this.eintraege.set(await this.repo.eintraege(id, `${j - 1}-12-01`, `${j + 1}-01-31`));
     }
 
     private merke(): void {
@@ -105,13 +127,38 @@ export class BookingStore {
         if (altesJahr !== h.jahr) await this.neuLaden();
     }
 
-    async anfragen(eingabe: BuchungEingabe): Promise<void> {
-        await this.repo.anfragen(this.planIdPflicht(), eingabe);
+    // ── Pläne ───────────────────────────────────────────────────────────────────
+
+    async planAnlegen(eingabe: PlanEingabe): Promise<BookingPlan> {
+        const plan = await this.repo.planAnlegen(eingabe);
+        this.planId.set(plan.id);
+        this.merke();
+        await this.neuLaden();
+        return plan;
+    }
+
+    async planAendern(aenderung: Partial<PlanEingabe>): Promise<void> {
+        await this.repo.planAendern(this.planIdPflicht(), aenderung);
         await this.neuLaden();
     }
 
-    async eintragen(eingabe: BuchungEingabe): Promise<void> {
-        await this.repo.eintragen(this.planIdPflicht(), eingabe);
+    async planLoeschen(): Promise<void> {
+        await this.repo.planLoeschen(this.planIdPflicht());
+        this.planId.set(null);
+        await this.neuLaden();
+    }
+
+    // ── Buchungen ───────────────────────────────────────────────────────────────
+
+    /** Verwaltung und Leitung tragen direkt ein, alle anderen fragen an; das Ergebnis nennt den Status. */
+    async buchen(eingabe: BuchungEingabe): Promise<BookingEntry> {
+        const eintrag = await this.repo.buchen(this.planIdPflicht(), eingabe);
+        await this.neuLaden();
+        return eintrag;
+    }
+
+    async bearbeiten(id: string, aenderung: BuchungAenderung): Promise<void> {
+        await this.repo.bearbeiten(id, aenderung);
         await this.neuLaden();
     }
 
@@ -125,8 +172,8 @@ export class BookingStore {
         await this.neuLaden();
     }
 
-    async zurueckziehen(id: string): Promise<void> {
-        await this.repo.zurueckziehen(id);
+    async stornieren(id: string): Promise<void> {
+        await this.repo.stornieren(id);
         await this.neuLaden();
     }
 
@@ -135,14 +182,27 @@ export class BookingStore {
         await this.neuLaden();
     }
 
-    serieVorschau(serie: SerieEingabe) {
+    // ── Serien ──────────────────────────────────────────────────────────────────
+
+    serieVorschau(serie: SerieEingabe): Promise<SerienVorschau> {
         return this.repo.serieVorschau(this.planIdPflicht(), serie);
     }
 
-    async serieAnlegen(serie: SerieEingabe): Promise<number> {
-        const anzahl = await this.repo.serieAnlegen(this.planIdPflicht(), serie);
+    async serieAnlegen(serie: SerieEingabe): Promise<SerienErgebnis> {
+        const ergebnis = await this.repo.serieAnlegen(this.planIdPflicht(), serie);
         await this.neuLaden();
-        return anzahl;
+        return ergebnis;
+    }
+
+    async serieUmbenennen(serieId: string, titel: string): Promise<void> {
+        await this.repo.serieUmbenennen(serieId, titel);
+        await this.neuLaden();
+    }
+
+    async serieBeenden(serieId: string, ab: string): Promise<number> {
+        const entfernt = await this.repo.serieBeenden(serieId, ab);
+        await this.neuLaden();
+        return entfernt;
     }
 
     private planIdPflicht(): string {

@@ -1,0 +1,31 @@
+<div class="liste" role="list" [attr.aria-label]="'Belegung ' + titel()">
+    @for (zeile of zeilen(); track zeile.tag) {
+    <div class="liste-zeile" role="listitem" [class.wochenende]="zeile.wochenende" [class.feiertag]="!!zeile.feiertag"
+        [class.heute]="zeile.heute">
+        <button type="button" class="liste-tag" [attr.aria-label]="zeile.beschriftung + ' öffnen'"
+            (click)="tagGewaehlt.emit(zeile.tag)">
+            <span class="wt">{{ zeile.wochentag }}</span>
+            <span class="datum">{{ zeile.tag }}.</span>
+        </button>
+        <div class="liste-inhalt">
+            @if (zeile.feiertag) {
+            <span class="ft-name">{{ zeile.feiertag }}</span>
+            }
+            @for (c of zeile.chips; track c.balken.eintrag.id) {
+            <button type="button" class="chip" [attr.data-status]="c.balken.eintrag.status"
+                [class.eigene]="c.balken.eintrag.is_mine" [class.unbekannt]="c.balken.eintrag.title === null"
+                [attr.aria-label]="c.beschriftung" (click)="eintragGewaehlt.emit(c.balken.eintrag)">
+                @if (c.balken.eintrag.series_id) {
+                <i class="pi pi-sync serie" aria-hidden="true"></i>
+                }
+                <span class="chip-zeit">{{ c.kurz }}</span>
+                <span class="chip-text">{{ c.balken.eintrag.title ?? 'Belegt' }}</span>
+            </button>
+            }
+        </div>
+        <button type="button" class="liste-oeffnen" tabindex="-1" aria-hidden="true" (click)="tagGewaehlt.emit(zeile.tag)">
+            <i class="pi pi-angle-right"></i>
+        </button>
+    </div>
+    }
+</div>

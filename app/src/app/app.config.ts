@@ -9,6 +9,7 @@ import Aura from '@primeng/themes/aura';
 import { routes } from './app.routes';
 import { provideServiceWorker } from '@angular/service-worker';
 import { SeitentitelStrategie } from './shared/routing/seitentitel.strategy';
+import { BOOKING_PROVIDERS } from './features/dashboard/booking/booking.providers';
 
 // Datums- und Zahlenformate auf Deutsch (DatePipe zeigte sonst englische Monatsnamen wie „OCT“)
 registerLocaleData(localeDe);
@@ -16,6 +17,7 @@ registerLocaleData(localeDe);
 export const appConfig: ApplicationConfig = {
   providers: [
     { provide: LOCALE_ID, useValue: 'de-DE' },
+    ...BOOKING_PROVIDERS,
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withInMemoryScrolling({
         anchorScrolling: 'enabled',

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 
@@ -11,7 +12,7 @@ import { berlinUhr, wochentag } from '../../../../shared/booking/zeitraum';
 @Component({
     selector: 'app-booking-entry-dialog',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [DialogModule, ButtonModule, BookingStatusChipComponent],
+    imports: [DialogModule, ButtonModule, RouterLink, BookingStatusChipComponent],
     templateUrl: './booking-entry-dialog.component.html',
 })
 export class BookingEntryDialogComponent {
@@ -23,8 +24,17 @@ export class BookingEntryDialogComponent {
     readonly ablehnen = output<BookingEntry>();
     readonly zurueckziehen = output<BookingEntry>();
     readonly loeschen = output<BookingEntry>();
+    readonly bearbeiten = output<BookingEntry>();
+    readonly serieUmbenennen = output<BookingEntry>();
+    readonly serieBeenden = output<BookingEntry>();
 
     protected readonly entscheidet = computed(() => darfEntscheiden(this.plan()));
+    protected readonly istLeitung = computed(() => this.plan().my_role === 'lead');
+    /** Bearbeiten und Verschieben: nur Verwaltung und Leitung, nicht bei verknüpften Buchungen (die folgen dem Termin). */
+    protected readonly kannBearbeiten = computed(() => {
+        const e = this.eintrag();
+        return this.entscheidet() && !!e && !e.event_id && (e.status === 'requested' || e.status === 'approved');
+    });
     protected readonly kannEntscheiden = computed(() => this.entscheidet() && this.eintrag()?.status === 'requested');
     protected readonly kannZurueckziehen = computed(() => {
         const e = this.eintrag();

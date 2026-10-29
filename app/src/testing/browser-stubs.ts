@@ -23,6 +23,22 @@ export function stubMatchMedia(): void {
     ({ ...minimalList, media: query }) as MediaQueryList;
 }
 
+/** Test-Stub für jsdom: ResizeObserver existiert dort nicht (PrimeNG-Tabs beobachten damit ihre Größe). */
+export function stubResizeObserver(): void {
+  if (typeof globalThis.ResizeObserver === 'function') return;
+  globalThis.ResizeObserver = class {
+    observe(): void {
+      // Größenänderungen gibt es im Test nicht
+    }
+    unobserve(): void {
+      // siehe observe
+    }
+    disconnect(): void {
+      // siehe observe
+    }
+  };
+}
+
 /** Test-Provider für SwPush ohne Service-Worker-Umgebung. */
 export const SW_PUSH_STUB = {
   provide: SwPush,

@@ -62,6 +62,10 @@
     <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-error)] bg-[var(--color-error)]/10 text-sm text-[var(--color-text)]" role="alert">
         <i class="pi pi-times-circle text-[var(--color-error)] mt-0.5"></i><span>{{ f }}</span>
     </div>
+    } @else if (vorschauLaedt()) {
+    <div class="p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-overlay)] text-sm text-[var(--color-text-muted)]" role="status">
+        <i class="pi pi-spin pi-spinner mr-1.5 text-xs"></i>Vorschau wird berechnet …
+    </div>
     } @else if (vorschau(); as v) {
     <div class="p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-overlay)] text-sm text-[var(--color-text)] space-y-1.5" role="status">
         <div class="font-semibold"><i class="pi pi-sync mr-1.5 text-xs"></i>{{ v.dates.length }} {{ v.dates.length === 1 ? 'Termin' : 'Termine' }} werden angelegt</div>

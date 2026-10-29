@@ -1,0 +1,130 @@
+<p-dialog [header]="ueberschrift()" [(visible)]="sichtbar" [modal]="true" [draggable]="false" [resizable]="false"
+    maskStyleClass="backdrop-blur-sm bg-black/50" [style]="{width: '600px', maxWidth: '95vw'}"
+    [contentStyle]="{'max-height': 'calc(100vh - 150px)', 'overflow-y': 'auto'}" [closable]="!speichernBusy()">
+
+    @if (bearbeitet()) {
+    <p-tabs [value]="reiter()" (valueChange)="reiterWaehlen($event)">
+        <p-tablist>
+            <p-tab value="einstellungen"><i class="pi pi-sliders-h mr-2 text-sm"></i>Einstellungen</p-tab>
+            <p-tab value="personen"><i class="pi pi-users mr-2 text-sm"></i>Personen</p-tab>
+        </p-tablist>
+    </p-tabs>
+    }
+
+    @if (reiter() === 'einstellungen') {
+    <form [formGroup]="form" class="space-y-3 pt-3" (ngSubmit)="speichern()">
+        <div>
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="plan-name">Name *</label>
+            <input pInputText id="plan-name" formControlName="name" class="w-full" placeholder="Bürgerhaus Saal" maxlength="80" />
+        </div>
+
+        <div>
+            <span class="block text-sm font-medium text-[var(--color-text)] mb-1" id="plan-art">Art</span>
+            <p-selectButton [options]="artOptionen" formControlName="kind" optionLabel="label" optionValue="value"
+                [allowEmpty]="false" size="small" aria-labelledby="plan-art" />
+            <p class="text-xs text-[var(--color-text-muted)] mt-1 ml-1">Nur Orte lassen sich beim Anlegen eines Termins reservieren.</p>
+        </div>
+
+        @if (istOrt()) {
+        <div>
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="plan-adresse">Adresse</label>
+            <input pInputText id="plan-adresse" formControlName="address" class="w-full" placeholder="Marktstraße 12, 50667 Köln" maxlength="200" />
+            <p class="text-xs text-[var(--color-text-muted)] mt-1 ml-1">Wird beim Reservieren als Ort des Termins eingetragen, wenn dieser leer ist.</p>
+        </div>
+        }
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="min-w-0">
+                <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Buchbar ab</label>
+                <p-select formControlName="window_start" [options]="startStunden" optionLabel="label" optionValue="value"
+                    appendTo="body" styleClass="w-full" ariaLabel="Buchbar ab" />
+            </div>
+            <div class="min-w-0">
+                <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Buchbar bis</label>
+                <p-select formControlName="window_end" [options]="endStunden" optionLabel="label" optionValue="value"
+                    appendTo="body" styleClass="w-full" ariaLabel="Buchbar bis" />
+            </div>
+        </div>
+        @if (fensterFehler(); as f) {
+        <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-error)] bg-[var(--color-error)]/10 text-sm text-[var(--color-text)]" role="alert">
+            <i class="pi pi-times-circle text-[var(--color-error)] mt-0.5"></i><span>{{ f }}</span>
+        </div>
+        }
+
+        <div>
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Feiertage</label>
+            <p-select formControlName="state" [options]="bundeslaender" optionLabel="name" optionValue="kuerzel"
+                appendTo="body" styleClass="w-full" ariaLabel="Bundesland für Feiertage" />
+        </div>
+
+        <div class="flex items-center gap-3">
+            <p-toggleswitch formControlName="all_members_can_request" inputId="plan-alle" />
+            <label for="plan-alle" class="text-sm text-[var(--color-text)] cursor-pointer">
+                Alle Mitglieder dürfen anfragen
+                <span class="block text-xs text-[var(--color-text-muted)]">Sonst dürfen nur Personen mit einer Rolle im Plan anfragen.</span>
+            </label>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Öffentliche Anzeige</label>
+            <p-select formControlName="public_view" [options]="anzeigeOptionen" optionLabel="label" optionValue="value"
+                appendTo="body" styleClass="w-full" ariaLabel="Öffentliche Anzeige" />
+            <p class="text-xs text-[var(--color-text-muted)] mt-1 ml-1">Auf der öffentlichen Seite siehst du nur bestätigte, öffentliche Belegungen mit Titel und Zeitraum, nie Namen oder Notizen.</p>
+        </div>
+
+        @if (bearbeitet() && istAdmin()) {
+        <div class="pt-3 border-t border-[var(--color-border)]">
+            <p-button label="Plan löschen" icon="pi pi-trash" severity="danger" [text]="true" size="small" (click)="loeschen.emit()"
+                [disabled]="speichernBusy()" />
+            <p class="text-xs text-[var(--color-text-muted)] mt-1">Löscht den Plan mit allen Buchungen, Serien und Rollen.</p>
+        </div>
+        }
+    </form>
+    } @else {
+    <div class="space-y-3 pt-3">
+        <p class="text-sm text-[var(--color-text-muted)]">
+            Administratoren der Organisation sind in jedem Plan automatisch Leitung. Hier benennst du weitere Personen.
+        </p>
+
+        @if (personFehler(); as f) {
+        <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-error)] bg-[var(--color-error)]/10 text-sm text-[var(--color-text)]" role="alert">
+            <i class="pi pi-times-circle text-[var(--color-error)] mt-0.5"></i><span>{{ f }}</span>
+        </div>
+        }
+
+        <ul class="space-y-2" aria-label="Personen mit Rolle im Plan">
+            @for (r of rollenDienst.rollen(); track r.member_id) {
+            <li class="flex items-center gap-2 p-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+                <i class="pi pi-user text-[var(--color-text-muted)] text-sm"></i>
+                <span class="flex-1 min-w-0 truncate text-sm text-[var(--color-text)]">{{ r.name }}</span>
+                <p-select [ngModel]="r.role" (ngModelChange)="rolleAendern(r.member_id, $event)" [options]="rollenOptionen"
+                    optionLabel="label" optionValue="value" appendTo="body" styleClass="w-40" [ariaLabel]="'Rolle von ' + r.name" />
+                <p-button icon="pi pi-times" severity="secondary" [text]="true" size="small" [ariaLabel]="r.name + ' entfernen'"
+                    (click)="rolleEntfernen(r.member_id)" />
+            </li>
+            } @empty {
+            <li class="text-sm text-[var(--color-text-muted)]">Noch niemand benannt.</li>
+            }
+        </ul>
+
+        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--color-border)]">
+            <p-select [ngModel]="neuePerson()" (ngModelChange)="neuePerson.set($event)" [options]="verfuegbarePersonen()"
+                optionLabel="name" optionValue="id" [filter]="true" filterBy="name" placeholder="Person wählen" appendTo="body"
+                styleClass="w-56" ariaLabel="Person hinzufügen" />
+            <p-select [ngModel]="neueRolle()" (ngModelChange)="neueRolle.set($event)" [options]="rollenOptionen"
+                optionLabel="label" optionValue="value" appendTo="body" styleClass="w-40" ariaLabel="Rolle der neuen Person" />
+            <p-button label="Hinzufügen" icon="pi pi-plus" size="small" [disabled]="!neuePerson()" (click)="personHinzufuegen()" />
+        </div>
+    </div>
+    }
+
+    <ng-template #footer>
+        @if (reiter() === 'einstellungen') {
+        <p-button label="Abbrechen" severity="secondary" [text]="true" (click)="sichtbar.set(false)" [disabled]="speichernBusy()" />
+        <p-button [label]="bearbeitet() ? 'Speichern' : 'Anlegen'" icon="pi pi-check" (click)="speichern()"
+            [disabled]="!kannSpeichern()" [loading]="speichernBusy()" />
+        } @else {
+        <p-button label="Fertig" (click)="sichtbar.set(false)" />
+        }
+    </ng-template>
+</p-dialog>

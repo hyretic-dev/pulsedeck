@@ -43,11 +43,14 @@ export class BookingRequestDialogComponent {
     readonly plan = input.required<BookingPlan>();
     readonly eintraege = input.required<ReadonlyArray<BookingEntry>>();
     readonly vorgabe = input<Vorgabe | null>(null);
+    /** Gesetzt = diese Buchung bearbeiten (Verwaltung, Leitung). */
+    readonly eintrag = input<BookingEntry | null>(null);
     readonly vorschauLader = input.required<(serie: SerieEingabe) => Promise<SerienVorschau>>();
     readonly speichernBusy = input(false);
     protected readonly serieForm = viewChild(BookingSeriesFormComponent);
 
     readonly gespeichert = output<BuchungEingabe>();
+    readonly geaendert = output<BuchungEingabe>();
     readonly serieGespeichert = output<SerieEingabe>();
 
     protected readonly modus = signal<Modus>('einzeln');
@@ -67,10 +70,13 @@ export class BookingRequestDialogComponent {
     });
     private readonly werte = toSignal(this.form.valueChanges, { initialValue: this.form.value });
 
-    protected readonly leitung = computed(() => this.plan().my_role === 'lead');
+    protected readonly bearbeitet = computed(() => !!this.eintrag());
+    protected readonly leitung = computed(() => this.plan().my_role === 'lead' && !this.eintrag());
     protected readonly entscheidet = computed(() => this.plan().my_role === 'lead' || this.plan().my_role === 'manager');
-    protected readonly ueberschrift = computed(() => (this.entscheidet() ? 'Belegung eintragen' : 'Anfrage stellen'));
-    protected readonly knopf = computed(() => (this.entscheidet() ? 'Eintragen' : 'Anfragen'));
+    protected readonly ueberschrift = computed(() =>
+        this.bearbeitet() ? 'Belegung bearbeiten' : this.entscheidet() ? 'Belegung eintragen' : 'Anfrage stellen',
+    );
+    protected readonly knopf = computed(() => (this.bearbeitet() ? 'Speichern' : this.entscheidet() ? 'Eintragen' : 'Anfragen'));
     protected readonly speichernMoeglich = computed(() =>
         this.modus() === 'serie' ? !!this.serieForm()?.kannSpeichern() : this.kannSpeichern(),
     );
@@ -115,7 +121,7 @@ export class BookingRequestDialogComponent {
             return { art: 'fehler', text: `Beginn und Ende liegen im Zeitfenster ${uhrzeit(plan.window_start)}–${uhrzeit(plan.window_end)} Uhr.` };
         }
         if (!this.entscheidet() && z.beginn < new Date()) return { art: 'fehler', text: 'Anfragen sind nur für die Zukunft möglich.' };
-        return { art: 'ergebnis', ergebnis: pruefeVerfuegbarkeit(this.eintraege(), z.beginn, z.ende) };
+        return { art: 'ergebnis', ergebnis: pruefeVerfuegbarkeit(this.eintraege(), z.beginn, z.ende, this.eintrag()?.id ?? null) };
     });
 
     protected readonly kannSpeichern = computed(() => {
@@ -132,6 +138,24 @@ export class BookingRequestDialogComponent {
     }
 
     private zuruecksetzen(): void {
+        const e = this.eintrag();
+        if (e) {
+            const b = berlinUhr(e.start_at);
+            const en = berlinUhr(e.end_at);
+            // Mitternacht ist „24 Uhr“ des Vortags
+            const mitternacht = en.stunde === 0 && en.minute === 0;
+            this.modus.set('einzeln');
+            this.form.reset({
+                beginnDatum: new Date(b.jahr, b.monat - 1, b.tag),
+                beginnStunde: b.stunde,
+                endeDatum: new Date(en.jahr, en.monat - 1, mitternacht ? en.tag - 1 : en.tag),
+                endeStunde: mitternacht ? 24 : en.stunde,
+                title: e.title ?? '',
+                note: e.note ?? '',
+                is_public: e.is_public,
+            });
+            return;
+        }
         const v = this.vorgabe();
         const plan = this.plan();
         const heute = berlinUhr(new Date());
@@ -167,12 +191,14 @@ export class BookingRequestDialogComponent {
             return;
         }
         const w = this.form.getRawValue();
-        this.gespeichert.emit({
+        const eingabe: BuchungEingabe = {
             title: w.title.trim(),
             note: w.note.trim() || null,
             start_at: z.beginn.toISOString(),
             end_at: z.ende.toISOString(),
             is_public: w.is_public,
-        });
+        };
+        if (this.bearbeitet()) this.geaendert.emit(eingabe);
+        else this.gespeichert.emit(eingabe);
     }
 }

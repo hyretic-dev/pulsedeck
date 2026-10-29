@@ -10,18 +10,22 @@ import { TabsModule } from 'primeng/tabs';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { FormsModule } from '@angular/forms';
+import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { BookingLegendComponent } from '../../../../shared/booking/booking-legend.component';
 import { MONATSNAMEN, WOCHENTAG_LANG, uhrzeit } from '../../../../shared/booking/booking-labels';
+import { BookingDayListComponent } from '../../../../shared/booking/booking-day-list.component';
 import { BookingMonthGridComponent, StundenAuswahl } from '../../../../shared/booking/booking-month-grid.component';
 import { BookingStatusChipComponent } from '../../../../shared/booking/booking-status-chip.component';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { BookingYearGridComponent, TagAuswahl } from '../../../../shared/booking/booking-year-grid.component';
 import { BookingEntry, darfAnfragen, darfEntscheiden } from '../../../../shared/booking/booking.models';
 import { BUNDESLAENDER } from '../../../../shared/booking/feiertage';
 import { berlinUhr, ueberschneiden, wochentag } from '../../../../shared/booking/zeitraum';
 import { Ansicht, Bereich, BookingStore } from '../application/booking.store';
-import type { BuchungEingabe, SerieEingabe } from '../domain/booking.repository';
+import type { BuchungEingabe, PlanEingabe, SerieEingabe } from '../domain/booking.repository';
+import { BookingCalendarDialogComponent } from './booking-calendar-dialog.component';
 import { BookingDayHoursComponent } from './booking-day-hours.component';
 import { BookingEntryDialogComponent } from './booking-entry-dialog.component';
 import { BookingRequestDialogComponent, Vorgabe } from './booking-request-dialog.component';
@@ -31,11 +35,11 @@ import { BookingRequestDialogComponent, Vorgabe } from './booking-request-dialog
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         FormsModule, ButtonModule, ConfirmDialogModule, DialogModule, DrawerModule, ProgressSpinnerModule,
-        SelectModule, SelectButtonModule, TabsModule, TextareaModule, ToastModule,
-        BookingLegendComponent, BookingMonthGridComponent, BookingStatusChipComponent, BookingYearGridComponent,
-        BookingDayHoursComponent, BookingEntryDialogComponent, BookingRequestDialogComponent,
+        SelectModule, SelectButtonModule, TabsModule, TextareaModule, ToastModule, InputTextModule,
+        BookingLegendComponent, BookingDayListComponent, BookingMonthGridComponent, BookingStatusChipComponent, BookingYearGridComponent,
+        BookingDayHoursComponent, BookingEntryDialogComponent, BookingRequestDialogComponent, BookingCalendarDialogComponent,
     ],
-    providers: [ConfirmationService, MessageService],
+    providers: [BookingStore, ConfirmationService, MessageService],
     templateUrl: './booking-page.component.html',
     styleUrl: './booking-page.component.css',
 })
@@ -44,12 +48,22 @@ export class BookingPageComponent implements OnInit {
     private readonly confirm = inject(ConfirmationService);
     private readonly toast = inject(MessageService);
     private readonly destroyRef = inject(DestroyRef);
+    private readonly auth = inject(AuthService);
+
+    protected readonly istAdmin = this.auth.isAdmin;
+    protected readonly ladeFehler = signal<string | null>(null);
 
     /** Unter `md` (768 px) gilt die schmale Darstellung; Android-App eingeschlossen. */
     protected readonly schmal = signal(false);
 
     protected readonly anfrageSichtbar = signal(false);
     protected readonly vorgabe = signal<Vorgabe | null>(null);
+    protected readonly bearbeitenEintrag = signal<BookingEntry | null>(null);
+    protected readonly planDialogSichtbar = signal(false);
+    protected readonly planDialogNeu = signal(false);
+    protected readonly serieDialogSichtbar = signal(false);
+    protected readonly serieZiel = signal<BookingEntry | null>(null);
+    protected serieTitel = '';
     protected readonly speichert = signal(false);
     protected readonly detail = signal<BookingEntry | null>(null);
     protected readonly detailSichtbar = signal(false);
@@ -108,7 +122,11 @@ export class BookingPageComponent implements OnInit {
         const handler = (e: MediaQueryListEvent) => this.schmal.set(e.matches);
         mq.addEventListener('change', handler);
         this.destroyRef.onDestroy(() => mq.removeEventListener('change', handler));
-        await this.store.start();
+        try {
+            await this.store.start(this.destroyRef);
+        } catch (fehler) {
+            this.ladeFehler.set((fehler as Error).message);
+        }
     }
 
     protected symbol(art: 'place' | 'item'): string {
@@ -135,7 +153,15 @@ export class BookingPageComponent implements OnInit {
     }
 
     protected neueAnfrage(auswahl: StundenAuswahl | null = null): void {
+        this.bearbeitenEintrag.set(null);
         this.vorgabe.set(auswahl);
+        this.anfrageSichtbar.set(true);
+    }
+
+    protected bearbeiten(e: BookingEntry): void {
+        this.detailSichtbar.set(false);
+        this.vorgabe.set(null);
+        this.bearbeitenEintrag.set(e);
         this.anfrageSichtbar.set(true);
     }
 
@@ -151,27 +177,49 @@ export class BookingPageComponent implements OnInit {
         this.detailSichtbar.set(true);
     }
 
-    protected async speichern(eingabe: BuchungEingabe): Promise<void> {
+    /** Führt eine Aktion aus; Fehler des Servers (z. B. „schon belegt“) erscheinen als Meldung statt als Absturz. */
+    private async ausfuehren(aktion: () => Promise<void>): Promise<boolean> {
         this.speichert.set(true);
         try {
-            if (this.entscheidet()) await this.store.eintragen(eingabe);
-            else await this.store.anfragen(eingabe);
-            this.anfrageSichtbar.set(false);
-            this.meldung('success', this.entscheidet() ? 'Eingetragen' : 'Angefragt', this.entscheidet() ? 'Die Belegung gilt sofort.' : 'Die Verwaltung entscheidet und du bekommst eine Mail.');
+            await aktion();
+            return true;
+        } catch (fehler) {
+            this.toast.add({ severity: 'error', summary: 'Das hat nicht geklappt', detail: (fehler as Error).message, life: 6000 });
+            return false;
         } finally {
             this.speichert.set(false);
         }
     }
 
+    protected async speichern(eingabe: BuchungEingabe): Promise<void> {
+        const ok = await this.ausfuehren(async () => {
+            const eintrag = await this.store.buchen(eingabe);
+            this.meldung(
+                'success',
+                eintrag.status === 'approved' ? 'Eingetragen' : 'Angefragt',
+                eintrag.status === 'approved' ? 'Die Belegung gilt sofort.' : 'Die Verwaltung entscheidet und du bekommst eine Mail.',
+            );
+        });
+        if (ok) this.anfrageSichtbar.set(false);
+    }
+
+    protected async aenderungSpeichern(eingabe: BuchungEingabe): Promise<void> {
+        const ziel = this.bearbeitenEintrag();
+        if (!ziel) return;
+        const ok = await this.ausfuehren(async () => {
+            await this.store.bearbeiten(ziel.id, eingabe);
+            this.meldung('success', 'Gespeichert', 'Die Belegung ist geändert.');
+        });
+        if (ok) this.anfrageSichtbar.set(false);
+    }
+
     protected async serieSpeichern(serie: SerieEingabe): Promise<void> {
-        this.speichert.set(true);
-        try {
-            const anzahl = await this.store.serieAnlegen(serie);
-            this.anfrageSichtbar.set(false);
-            this.meldung('success', 'Serie angelegt', `${anzahl} Termine sind eingetragen.`);
-        } finally {
-            this.speichert.set(false);
-        }
+        const ok = await this.ausfuehren(async () => {
+            const ergebnis = await this.store.serieAnlegen(serie);
+            const abgelehnt = ergebnis.declined_requests ? ` ${ergebnis.declined_requests} offene Anfrage(n) wurden abgelehnt.` : '';
+            this.meldung('success', 'Serie angelegt', `${ergebnis.created} Termine sind eingetragen.${abgelehnt}`);
+        });
+        if (ok) this.anfrageSichtbar.set(false);
     }
 
     protected annehmen(e: BookingEntry): void {
@@ -184,12 +232,13 @@ export class BookingPageComponent implements OnInit {
             rejectLabel: 'Abbrechen',
             rejectButtonProps: { severity: 'secondary', text: true },
             message: betroffen.length
-                ? `„${e.title}“ wird bestätigt. Dabei ${betroffen.length === 1 ? 'wird diese überschneidende Anfrage' : 'werden diese überschneidenden Anfragen'} abgelehnt: ${betroffen.map((x) => `„${x.title}“ (${x.requester_name})`).join(', ')}.`
-                : `„${e.title}“ wird bestätigt und die anfragende Person bekommt eine Mail.`,
-            accept: async () => {
-                await this.store.annehmen(e.id);
-                this.meldung('success', 'Angenommen', betroffen.length ? `${betroffen.length} überschneidende Anfrage(n) abgelehnt.` : 'Die Belegung ist bestätigt.');
-            },
+                ? `„${e.title ?? 'Belegt'}“ wird bestätigt. Dabei ${betroffen.length === 1 ? 'wird diese überschneidende Anfrage' : 'werden diese überschneidenden Anfragen'} abgelehnt: ${betroffen.map((x) => `„${x.title ?? 'Belegt'}“${x.requester_name ? ` (${x.requester_name})` : ''}`).join(', ')}.`
+                : `„${e.title ?? 'Belegt'}“ wird bestätigt und die anfragende Person bekommt eine Mail.`,
+            accept: () =>
+                void this.ausfuehren(async () => {
+                    await this.store.annehmen(e.id);
+                    this.meldung('success', 'Angenommen', betroffen.length ? `${betroffen.length} überschneidende Anfrage(n) abgelehnt.` : 'Die Belegung ist bestätigt.');
+                }),
         });
     }
 
@@ -203,14 +252,19 @@ export class BookingPageComponent implements OnInit {
     protected async ablehnen(): Promise<void> {
         const e = this.ablehnenZiel();
         if (!e) return;
-        await this.store.ablehnen(e.id, this.ablehnenGrund.trim() || null);
-        this.ablehnenSichtbar.set(false);
-        this.meldung('info', 'Abgelehnt', 'Die anfragende Person bekommt eine Mail.');
+        const ok = await this.ausfuehren(async () => {
+            await this.store.ablehnen(e.id, this.ablehnenGrund.trim() || null);
+            this.meldung('info', 'Abgelehnt', 'Die anfragende Person bekommt eine Mail.');
+        });
+        if (ok) this.ablehnenSichtbar.set(false);
     }
 
-    protected zurueckziehen(e: BookingEntry): void {
+    protected stornieren(e: BookingEntry): void {
         this.detailSichtbar.set(false);
-        void this.store.zurueckziehen(e.id).then(() => this.meldung('info', 'Zurückgezogen', 'Der Zeitraum ist wieder frei.'));
+        void this.ausfuehren(async () => {
+            await this.store.stornieren(e.id);
+            this.meldung('info', e.status === 'requested' ? 'Zurückgezogen' : 'Storniert', 'Der Zeitraum ist wieder frei.');
+        });
     }
 
     protected loeschen(e: BookingEntry): void {
@@ -223,10 +277,97 @@ export class BookingPageComponent implements OnInit {
             rejectLabel: 'Abbrechen',
             rejectButtonProps: { severity: 'secondary', text: true },
             message: `„${e.title ?? 'Belegt'}“ wird gelöscht. Der Zeitraum ist danach wieder frei.`,
-            accept: async () => {
-                await this.store.loeschen(e.id);
-                this.meldung('info', 'Gelöscht', 'Der Zeitraum ist wieder frei.');
-            },
+            accept: () =>
+                void this.ausfuehren(async () => {
+                    await this.store.loeschen(e.id);
+                    this.meldung('info', 'Gelöscht', 'Der Zeitraum ist wieder frei.');
+                }),
+        });
+    }
+
+    // ── Serien verwalten (Leitung) ──────────────────────────────────────────────
+
+    protected serieUmbenennenFragen(e: BookingEntry): void {
+        this.detailSichtbar.set(false);
+        this.serieTitel = e.title ?? '';
+        this.serieZiel.set(e);
+        this.serieDialogSichtbar.set(true);
+    }
+
+    protected async serieUmbenennen(): Promise<void> {
+        const e = this.serieZiel();
+        const titel = this.serieTitel.trim();
+        if (!e?.series_id || !titel) return;
+        const ok = await this.ausfuehren(async () => {
+            await this.store.serieUmbenennen(e.series_id as string, titel);
+            this.meldung('success', 'Umbenannt', 'Alle Termine der Serie tragen jetzt den neuen Namen.');
+        });
+        if (ok) this.serieDialogSichtbar.set(false);
+    }
+
+    protected serieBeendenFragen(e: BookingEntry): void {
+        this.detailSichtbar.set(false);
+        const ab = berlinUhr(e.start_at);
+        const datum = `${ab.jahr}-${String(ab.monat).padStart(2, '0')}-${String(ab.tag).padStart(2, '0')}`;
+        this.confirm.confirm({
+            header: 'Serie beenden',
+            icon: 'pi pi-stop-circle',
+            acceptButtonProps: { severity: 'danger' },
+            acceptLabel: 'Beenden',
+            rejectLabel: 'Abbrechen',
+            rejectButtonProps: { severity: 'secondary', text: true },
+            message: `Alle Termine von „${e.title ?? 'Belegt'}“ ab dem ${ab.tag}.${ab.monat}.${ab.jahr} (einschließlich) entfallen. Frühere bleiben bestehen.`,
+            accept: () =>
+                void this.ausfuehren(async () => {
+                    const entfernt = await this.store.serieBeenden(e.series_id as string, datum);
+                    this.meldung('info', 'Serie beendet', `${entfernt} Termine sind entfallen.`);
+                }),
+        });
+    }
+
+    // ── Pläne verwalten ─────────────────────────────────────────────────────────
+
+    protected neuerPlan(): void {
+        this.planDialogNeu.set(true);
+        this.planDialogSichtbar.set(true);
+    }
+
+    protected planEinstellungen(): void {
+        this.planDialogNeu.set(false);
+        this.planDialogSichtbar.set(true);
+    }
+
+    protected async planSpeichern(eingabe: PlanEingabe): Promise<void> {
+        const neu = this.planDialogNeu();
+        const ok = await this.ausfuehren(async () => {
+            if (neu) {
+                const plan = await this.store.planAnlegen(eingabe);
+                this.meldung('success', 'Plan angelegt', `„${plan.name}“ ist bereit. Benenne unter „Einstellungen“ die Personen, die buchen dürfen.`);
+            } else {
+                await this.store.planAendern(eingabe);
+                this.meldung('success', 'Gespeichert', 'Die Einstellungen gelten sofort.');
+            }
+        });
+        if (ok) this.planDialogSichtbar.set(false);
+    }
+
+    protected planLoeschenFragen(): void {
+        const plan = this.store.plan();
+        if (!plan) return;
+        this.confirm.confirm({
+            header: 'Belegungsplan löschen',
+            icon: 'pi pi-trash',
+            acceptButtonProps: { severity: 'danger' },
+            acceptLabel: 'Löschen',
+            rejectLabel: 'Abbrechen',
+            rejectButtonProps: { severity: 'secondary', text: true },
+            message: `„${plan.name}“ wird mit allen Buchungen, Serien und Rollen gelöscht. Das lässt sich nicht rückgängig machen.`,
+            accept: () =>
+                void this.ausfuehren(async () => {
+                    await this.store.planLoeschen();
+                    this.planDialogSichtbar.set(false);
+                    this.meldung('info', 'Plan gelöscht', 'Der Belegungsplan ist entfernt.');
+                }),
         });
     }
 
