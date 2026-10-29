@@ -61,6 +61,7 @@ interface ContactPerson {
 type LoginStep = 'email' | 'password' | 'invitation-sent' | 'not-found';
 
 import { RichTextRendererComponent } from '../../../shared/components/rich-text-renderer/rich-text-renderer.component';
+import { PublicBookingComponent } from '../public-booking/components/public-booking.component';
 
 @Component({
     selector: 'app-org-public-page',
@@ -76,7 +77,8 @@ import { RichTextRendererComponent } from '../../../shared/components/rich-text-
         PasswordModule,
         MessageModule,
         DialogModule,
-        RichTextRendererComponent
+        RichTextRendererComponent,
+        PublicBookingComponent
     ],
     styleUrl: './org-public-page.component.css',
     template: `
@@ -145,6 +147,11 @@ import { RichTextRendererComponent } from '../../../shared/components/rich-text-
                     </div>
                 </div>
             </div>
+
+            <!-- Belegung: öffentliche Pläne, volle Breite vor den Terminen -->
+            @if (org()) {
+            <app-public-booking [slug]="slug()" [farbe]="org()?.primary_color ?? null" />
+            }
 
             <!-- 2. Main Dashboard Content -->
             <main class="max-w-7xl mx-auto px-4 md:px-8 py-12">

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, output, signal } from '@angular/core';
 
 import { MONATSNAMEN, STATUS_TEXT, WOCHENTAG_KUERZEL, WOCHENTAG_LANG, uhrzeit } from './booking-labels';
-import type { BookingEntry, BookingPlan } from './booking.models';
+import type { BookingEntry, RasterPlan } from './booking.models';
 import { datumsSchluessel, feiertageImJahr } from './feiertage';
 import {
     TagesBalken, balkenFuerTag, berlinUhr, istWochenende, tageImMonat, verteileAufBahnen, wochentag,
@@ -58,7 +58,7 @@ export class BookingMonthGridComponent {
 
     readonly jahr = input.required<number>();
     readonly monat = input.required<number>();
-    readonly plan = input.required<BookingPlan>();
+    readonly plan = input.required<RasterPlan>();
     readonly eintraege = input.required<ReadonlyArray<BookingEntry>>();
     readonly nurTag = input<number | null>(null);
     /** Zeitraum, der zusätzlich markiert wird (z. B. der Termin im Dialog). */

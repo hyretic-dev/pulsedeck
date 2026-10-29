@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, output } from '@angular/core';
 
 import { MONATSKUERZEL, MONATSNAMEN, WOCHENTAG_LANG } from './booking-labels';
-import type { BookingEntry, BookingPlan } from './booking.models';
+import type { BookingEntry, RasterPlan } from './booking.models';
 import { datumsSchluessel, feiertageImJahr } from './feiertage';
 import {
     balkenFuerTag, belegungsStufe, berlinUhr, hatOffeneAnfrage, istWochenende, tageImMonat, wochentag,
@@ -44,7 +44,7 @@ export class BookingYearGridComponent {
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
     readonly jahr = input.required<number>();
-    readonly plan = input.required<BookingPlan>();
+    readonly plan = input.required<RasterPlan>();
     readonly eintraege = input.required<ReadonlyArray<BookingEntry>>();
 
     readonly tagGewaehlt = output<TagAuswahl>();

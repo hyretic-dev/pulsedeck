@@ -23,6 +23,9 @@ export interface BookingPlan {
     open_requests: number;
 }
 
+/** Was die Raster vom Plan brauchen (Zeitfenster und Bundesland für die Feiertage); die öffentliche Seite kennt nicht mehr. */
+export type RasterPlan = Pick<BookingPlan, 'window_start' | 'window_end' | 'state'>;
+
 export interface BookingEntry {
     id: string;
     plan_id: string;

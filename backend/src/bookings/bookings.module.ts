@@ -8,12 +8,14 @@ import { BookingNotifier } from './booking-notifier';
 import { BookingsController } from './bookings.controller';
 import { BookingsService } from './bookings.service';
 import { CalendarsService } from './calendars.service';
+import { PublicBookingsController } from './public-bookings.controller';
+import { PublicBookingsService } from './public-bookings.service';
 import { SeriesService } from './series.service';
 
 @Module({
   imports: [TenancyModule],
-  controllers: [BookingsController],
-  providers: [BookingAccessService, BookingNotifier, BookingLinkService, CalendarsService, BookingsService, SeriesService],
+  controllers: [BookingsController, PublicBookingsController],
+  providers: [BookingAccessService, BookingNotifier, BookingLinkService, CalendarsService, BookingsService, SeriesService, PublicBookingsService],
   exports: [BookingLinkService],
 })
 export class BookingsModule {}

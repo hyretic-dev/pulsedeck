@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 import { MONATSNAMEN, STATUS_TEXT, WOCHENTAG_KUERZEL, WOCHENTAG_LANG, uhrzeit } from './booking-labels';
-import type { BookingEntry, BookingPlan } from './booking.models';
+import type { BookingEntry, RasterPlan } from './booking.models';
 import { datumsSchluessel, feiertageImJahr } from './feiertage';
 import { TagesBalken, balkenFuerTag, berlinUhr, istWochenende, tageImMonat, wochentag } from './zeitraum';
 
@@ -31,7 +31,7 @@ interface ListenZeile {
 export class BookingDayListComponent {
     readonly jahr = input.required<number>();
     readonly monat = input.required<number>();
-    readonly plan = input.required<BookingPlan>();
+    readonly plan = input.required<RasterPlan>();
     readonly eintraege = input.required<ReadonlyArray<BookingEntry>>();
 
     readonly eintragGewaehlt = output<BookingEntry>();
