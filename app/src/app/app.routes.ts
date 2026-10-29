@@ -5,6 +5,7 @@ import { platformAdminGuard } from './shared/guards/platform-admin.guard';
 
 import { organizationGuard } from './shared/guards/organization.guard';
 import { startGuard } from './shared/guards/start.guard';
+import { BOOKING_PROVIDERS } from './features/dashboard/booking/booking.providers';
 
 export const routes: Routes = [
     // Startseite der Anwendung: leitet je nach Anmeldung weiter. Die Produktseite (Startseite, Handbuch, Impressum, Datenschutz)
@@ -78,6 +79,7 @@ export const routes: Routes = [
                     { path: 'wiki', title: 'Wiki', loadComponent: () => import('./features/dashboard/wiki/wiki').then(m => m.WikiComponent) },
                     { path: 'members', title: 'Mitglieder', canActivate: [adminGuard], loadComponent: () => import('./features/dashboard/members/members').then(m => m.MembersComponent) },
                     { path: 'calendar', title: 'Termine', loadComponent: () => import('./features/dashboard/calendar/calendar').then(m => m.CalendarComponent) },
+                    { path: 'belegung', title: 'Belegung', loadComponent: () => import('./features/dashboard/booking/components/booking-page.component').then(m => m.BookingPageComponent), providers: BOOKING_PROVIDERS },
                     { path: 'gruppen', title: 'Gruppen', loadComponent: () => import('./features/dashboard/working-groups/working-groups').then(m => m.WorkingGroupsComponent) },
                     { path: 'contacts', title: 'Kontakte', loadComponent: () => import('./features/dashboard/contacts/contacts').then(m => m.ContactsComponent) },
                     { path: 'files', title: 'Dateien', loadComponent: () => import('./features/dashboard/files/files.component').then(m => m.FilesComponent) },

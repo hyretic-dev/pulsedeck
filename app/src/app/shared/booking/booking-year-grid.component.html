@@ -1,0 +1,37 @@
+<div class="jahr" role="grid" aria-label="Jahresübersicht {{ jahr() }}">
+    <div class="jahr-kopf" role="row">
+        <span class="monat-name"></span>
+        @for (tag of tageKopf; track tag) {
+        <span class="tag-kopf" role="columnheader" [class.selten]="tag !== 1 && tag % 5 !== 0">{{ tag }}</span>
+        }
+    </div>
+    @for (zeile of zeilen(); track zeile.monat) {
+    <div class="jahr-zeile" role="row">
+        <button type="button" class="monat-name" (click)="monatGewaehlt.emit(zeile.monat)"
+            [attr.aria-label]="zeile.name + ' ' + jahr() + ' öffnen'">
+            <span class="hidden md:inline">{{ zeile.name }}</span>
+            <span class="md:hidden">{{ zeile.kuerzel }}</span>
+            @if (zeile.offene > 0) {
+            <span class="zaehler" [attr.aria-label]="zeile.offene + ' Tage mit offener Anfrage'">{{ zeile.offene }}</span>
+            }
+        </button>
+        @for (zelle of zeile.zellen; track $index) {
+        @if (zelle) {
+        <button type="button" role="gridcell" class="tag" [attr.data-monat]="zeile.monat" [attr.data-tag]="zelle.tag"
+            [class.stufe-1]="zelle.stufe === 1" [class.stufe-2]="zelle.stufe === 2"
+            [class.stufe-3]="zelle.stufe === 3" [class.stufe-4]="zelle.stufe === 4"
+            [class.wochenende]="zelle.wochenende" [class.feiertag]="!!zelle.feiertag" [class.heute]="zelle.heute"
+            [attr.title]="tooltip(zelle)" [attr.aria-label]="zelle.beschriftung"
+            (click)="tagGewaehlt.emit({ jahr: jahr(), monat: zeile.monat, tag: zelle.tag })"
+            (keydown)="taste($event, zeile.monat, zelle.tag)">
+            @if (zelle.offen) {
+            <span class="marker"></span>
+            }
+        </button>
+        } @else {
+        <span class="leer"></span>
+        }
+        }
+    </div>
+    }
+</div>

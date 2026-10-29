@@ -1,0 +1,102 @@
+<p-dialog [header]="ueberschrift()" [(visible)]="sichtbar" [modal]="true" [draggable]="false" [resizable]="false"
+    maskStyleClass="backdrop-blur-sm bg-black/50" [style]="{width: '600px', maxWidth: '95vw'}"
+    [contentStyle]="{'max-height': 'calc(100vh - 150px)', 'overflow-y': 'auto'}" [closable]="!speichernBusy()">
+
+    <div class="space-y-3 pt-1">
+        <p class="text-sm text-[var(--color-text-muted)]">
+            <i class="pi pi-{{ plan().kind === 'place' ? 'building' : 'box' }} mr-1"></i>{{ plan().name }}
+        </p>
+
+        @if (leitung()) {
+        <p-selectButton [options]="modusOptionen" [ngModel]="modus()" (ngModelChange)="modus.set($event)"
+            optionLabel="label" optionValue="value" [allowEmpty]="false" size="small" ariaLabel="Art der Belegung" />
+        }
+
+        @if (modus() === 'einzeln') {
+        <form [formGroup]="form" class="space-y-3" (ngSubmit)="speichern()">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="col-span-2 sm:col-span-1 min-w-0">
+                    <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="beginn-datum">Beginn *</label>
+                    <div class="grid grid-cols-[minmax(0,1fr)_8.5rem] gap-2">
+                        <p-datepicker formControlName="beginnDatum" dateFormat="dd.mm.yy" inputId="beginn-datum"
+                            [fluid]="true" appendTo="body" [minDate]="entscheidet() ? null : heute" />
+                        <p-select formControlName="beginnStunde" [options]="startStunden()" optionLabel="label"
+                            optionValue="value" appendTo="body" styleClass="w-full" ariaLabel="Beginn Uhrzeit" />
+                    </div>
+                </div>
+                <div class="col-span-2 sm:col-span-1 min-w-0">
+                    <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="ende-datum">Ende *</label>
+                    <div class="grid grid-cols-[minmax(0,1fr)_8.5rem] gap-2">
+                        <p-datepicker formControlName="endeDatum" dateFormat="dd.mm.yy" inputId="ende-datum"
+                            [fluid]="true" appendTo="body" [minDate]="entscheidet() ? null : heute" />
+                        <p-select formControlName="endeStunde" [options]="endStunden()" optionLabel="label"
+                            optionValue="value" appendTo="body" styleClass="w-full" ariaLabel="Ende Uhrzeit" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verfügbarkeit: schon beim Ausfüllen sichtbar -->
+            @if (pruefung(); as p) {
+            @if (p.art === 'fehler') {
+            <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-error)] bg-[var(--color-error)]/10 text-sm text-[var(--color-text)]" role="alert">
+                <i class="pi pi-times-circle text-[var(--color-error)] mt-0.5"></i>
+                <span>{{ p.text }}</span>
+            </div>
+            } @else if (p.ergebnis.art === 'frei') {
+            <div class="flex items-start gap-2 p-3 rounded-lg border border-teal/50 bg-teal/10 text-sm text-[var(--color-text)]" role="status">
+                <i class="pi pi-check-circle text-teal mt-0.5"></i>
+                <span><strong>Frei.</strong> In diesem Zeitraum ist nichts eingetragen.</span>
+            </div>
+            } @else if (p.ergebnis.art === 'ueberschneidung') {
+            <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-warning)] bg-[var(--color-warning)]/10 text-sm text-[var(--color-text)]" role="status">
+                <i class="pi pi-exclamation-triangle text-[var(--color-warning)] mt-0.5"></i>
+                <div>
+                    <strong>Planung überschneidet sich.</strong>
+                    @for (e of p.ergebnis.mit; track e.id) {
+                    <div>{{ beschreibe(e) }}</div>
+                    }
+                    <div class="text-xs text-[var(--color-text-muted)] mt-1">Du kannst trotzdem anfragen und dich absprechen. Entschieden wird später.</div>
+                </div>
+            </div>
+            } @else {
+            <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-error)] bg-[var(--color-error)]/10 text-sm text-[var(--color-text)]" role="alert">
+                <i class="pi pi-times-circle text-[var(--color-error)] mt-0.5"></i>
+                <div><strong>Belegt.</strong> {{ beschreibe(p.ergebnis.durch) }}</div>
+            </div>
+            }
+            }
+
+            <div>
+                <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="belegung-titel">Titel *</label>
+                <input pInputText id="belegung-titel" formControlName="title" class="w-full"
+                    placeholder="Kreismitgliederversammlung" maxlength="120" />
+                <p class="text-xs text-[var(--color-text-muted)] mt-1 ml-1">Wofür wird gebucht?</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="belegung-notiz">Notiz</label>
+                <textarea pTextarea id="belegung-notiz" formControlName="note" class="w-full" rows="2"
+                    placeholder="z. B. Bestuhlung für 60 Personen"></textarea>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <p-toggleswitch formControlName="is_public" inputId="belegung-oeffentlich" />
+                <label for="belegung-oeffentlich" class="text-sm text-[var(--color-text)] cursor-pointer">
+                    Öffentlich anzeigen
+                    <span class="block text-xs text-[var(--color-text-muted)]">Titel und Zeitraum erscheinen auf der öffentlichen Seite, sobald die Belegung bestätigt ist.</span>
+                </label>
+            </div>
+        </form>
+        } @else {
+        <app-booking-series-form class="block pt-2" [plan]="plan()" [vorschauLader]="vorschauLader()"
+            (gespeichert)="serieGespeichert.emit($event)" />
+        }
+    </div>
+
+    <ng-template #footer>
+        <p-button label="Abbrechen" severity="secondary" [text]="true" (click)="sichtbar.set(false)"
+            [disabled]="speichernBusy()" />
+        <p-button [label]="modus() === 'serie' ? 'Serie anlegen' : knopf()" icon="pi pi-check"
+            (click)="speichernAuswahl()" [disabled]="!speichernMoeglich()" [loading]="speichernBusy()" />
+    </ng-template>
+</p-dialog>

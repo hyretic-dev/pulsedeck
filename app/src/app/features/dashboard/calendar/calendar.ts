@@ -1,6 +1,6 @@
 import {
   Component, inject, OnInit,
-  OnDestroy, signal, effect
+  OnDestroy, signal, effect, computed
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -22,6 +22,11 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { BOOKING_AVAILABILITY } from '../../../shared/booking/booking-availability';
+import { BookingLegendComponent } from '../../../shared/booking/booking-legend.component';
+import { BookingMonthGridComponent } from '../../../shared/booking/booking-month-grid.component';
+import type { BookingEntry, BookingPlan } from '../../../shared/booking/booking.models';
+import { berlinUhr, pruefeVerfuegbarkeit, terminZuBelegung } from '../../../shared/booking/zeitraum';
 import {
   InviteGuestOrgDialogComponent
 } from '../../../shared/components/invite-guest-org-dialog.component';
@@ -69,6 +74,8 @@ import { AnalyticsService } from '../../../shared/services/analytics.service';
     MultiSelectModule,
     CheckboxModule,
     InviteGuestOrgDialogComponent,
+    BookingMonthGridComponent,
+    BookingLegendComponent,
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './calendar.html',
@@ -111,6 +118,59 @@ export class CalendarComponent implements OnInit, OnDestroy {
     this.getEmptyEvent();
   eventDate: Date | null = null;
   tempVisibility = 'public';
+
+  // Ort reservieren (Belegungsplan der Art Ort). PROTOTYP: nur Anzeige, gespeichert wird noch keine Buchung.
+  private readonly availability = inject(BOOKING_AVAILABILITY);
+  readonly orte = signal<BookingPlan[]>([]);
+  readonly reservierungPlanId = signal<string | null>(null);
+  private readonly reservierungEintraege = signal<BookingEntry[]>([]);
+  readonly reservierungEintraegeListe = this.reservierungEintraege.asReadonly();
+  private readonly terminZeit = signal<{ datum: Date | null; start: string | null; ende: string | null }>({
+    datum: null, start: null, ende: null,
+  });
+
+  readonly reservierungPlan = computed(() => this.orte().find((p) => p.id === this.reservierungPlanId()) ?? null);
+
+  /** Belegungszeitraum und Verfügbarkeit des Termins im gewählten Ort; null, solange Ort oder Datum fehlen. */
+  readonly reservierung = computed(() => {
+    const plan = this.reservierungPlan();
+    const t = this.terminZeit();
+    if (!plan || !t.datum) return null;
+    const zeitraum = terminZuBelegung(
+      { jahr: t.datum.getFullYear(), monat: t.datum.getMonth() + 1, tag: t.datum.getDate() }, t.start, t.ende,
+    );
+    if (!zeitraum) return { plan, ohneEnde: true as const };
+    const beginn = berlinUhr(zeitraum.beginn);
+    const ende = berlinUhr(zeitraum.ende);
+    const bis = ende.stunde === 0 ? 24 : ende.stunde;
+    return {
+      plan,
+      ohneEnde: false as const,
+      imFenster: beginn.stunde >= plan.window_start && bis <= plan.window_end,
+      von: beginn.stunde,
+      bis,
+      tag: { jahr: beginn.jahr, monat: beginn.monat, tag: beginn.tag },
+      markierung: { start_at: zeitraum.beginn.toISOString(), end_at: zeitraum.ende.toISOString() },
+      status: pruefeVerfuegbarkeit(this.reservierungEintraege(), zeitraum.beginn, zeitraum.ende),
+    };
+  });
+
+  terminGeaendert(): void {
+    this.terminZeit.set({
+      datum: this.eventDate,
+      start: this.currentEvent.start_time ?? null,
+      ende: this.currentEvent.end_time ?? null,
+    });
+  }
+
+  async waehleOrt(id: string | null): Promise<void> {
+    this.reservierungPlanId.set(id);
+    this.reservierungEintraege.set(id ? await this.availability.eintraege(id) : []);
+  }
+
+  private async ladeOrte(): Promise<void> {
+    this.orte.set(await this.availability.orte());
+  }
 
   // Recurring events
   isRecurring = signal(false);
@@ -260,6 +320,9 @@ export class CalendarComponent implements OnInit, OnDestroy {
     this.isRecurring.set(false);
     this.showCreateAnother.set(false);
     this.editMode.set(false);
+    void this.waehleOrt(null);
+    void this.ladeOrte();
+    this.terminGeaendert();
     this.dialogVisible.set(true);
   }
 

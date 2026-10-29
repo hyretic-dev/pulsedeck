@@ -1,0 +1,81 @@
+@if (!kompakt()) {
+<div class="monat" [class.einzeltag]="nurTag() !== null" role="grid" [attr.aria-label]="'Belegung ' + titel()" (pointerup)="ziehenEnde()"
+    (pointerleave)="ziehen.set(null)" [style.--stunden]="stunden().length">
+    <div class="kopf" role="row">
+        <span class="tag-label"></span>
+        @for (h of stunden(); track h) {
+        <span class="stunden-kopf" role="columnheader">{{ h }}</span>
+        }
+    </div>
+    @for (zeile of zeilen(); track zeile.tag) {
+    <div class="zeile" role="row" [class.wochenende]="zeile.wochenende" [class.feiertag]="!!zeile.feiertag"
+        [class.heute]="zeile.heute" [style.--bahnen]="zeile.bahnen">
+        <div class="tag-label" role="rowheader" [attr.title]="zeile.feiertag">
+            <span class="wt">{{ zeile.wochentag }}</span>
+            <span class="datum">{{ zeile.tag }}.</span>
+            @if (zeile.feiertag) {
+            <span class="ft-name">{{ zeile.feiertag }}</span>
+            }
+        </div>
+        @for (h of stunden(); track h; let i = $index) {
+        <button type="button" role="gridcell" class="stunde" [class.markiert]="zeile.markiert.has(h)"
+            [style.grid-column]="i + 2" [attr.data-tag]="zeile.tag" [attr.data-stunde]="h"
+            [attr.aria-label]="stundeBeschriftung(zeile, h)" [disabled]="nurAnsicht()"
+            (pointerdown)="ziehenStart($event, zeile.tag, h)" (pointerenter)="ziehenWeiter(zeile.tag, h)"
+            (click)="stundeKlick(zeile.tag, h)" (keydown)="taste($event, zeile.tag, h)"></button>
+        }
+        @for (b of zeile.balken; track b.balken.eintrag.id) {
+        <button type="button" class="balken" [attr.data-status]="b.balken.eintrag.status"
+            [class.eigene]="b.balken.eintrag.is_mine" [class.fort-vorher]="b.balken.setztFortVorher"
+            [class.fort-nachher]="b.balken.setztFortNachher" [class.unbekannt]="b.balken.eintrag.title === null"
+            [style.grid-column]="b.spalteVon + ' / ' + b.spalteBis" [style.grid-row]="b.bahn + 1"
+            [attr.aria-label]="b.beschriftung" [attr.title]="b.beschriftung"
+            (click)="eintragGewaehlt.emit(b.balken.eintrag)">
+            @if (b.balken.setztFortVorher) {
+            <i class="pi pi-angle-left fort"></i>
+            }
+            @if (b.balken.eintrag.series_id) {
+            <i class="pi pi-sync serie" aria-hidden="true"></i>
+            }
+            <span class="balken-text">{{ b.balken.eintrag.title ?? 'Belegt' }}</span>
+            @if (b.balken.setztFortNachher) {
+            <i class="pi pi-angle-right fort"></i>
+            }
+        </button>
+        }
+    </div>
+    }
+</div>
+} @else {
+<div class="liste" role="list" [attr.aria-label]="'Belegung ' + titel()">
+    @for (zeile of zeilen(); track zeile.tag) {
+    <div class="liste-zeile" role="listitem" [class.wochenende]="zeile.wochenende" [class.feiertag]="!!zeile.feiertag"
+        [class.heute]="zeile.heute">
+        <button type="button" class="liste-tag" [attr.aria-label]="zeile.beschriftung + ' öffnen'"
+            (click)="tagGewaehlt.emit(zeile.tag)">
+            <span class="wt">{{ zeile.wochentag }}</span>
+            <span class="datum">{{ zeile.tag }}.</span>
+        </button>
+        <div class="liste-inhalt">
+            @if (zeile.feiertag) {
+            <span class="ft-name">{{ zeile.feiertag }}</span>
+            }
+            @for (b of zeile.balken; track b.balken.eintrag.id) {
+            <button type="button" class="chip balken" [attr.data-status]="b.balken.eintrag.status"
+                [class.eigene]="b.balken.eintrag.is_mine" [class.unbekannt]="b.balken.eintrag.title === null"
+                [attr.aria-label]="b.beschriftung" (click)="eintragGewaehlt.emit(b.balken.eintrag)">
+                @if (b.balken.eintrag.series_id) {
+                <i class="pi pi-sync serie" aria-hidden="true"></i>
+                }
+                <span class="chip-zeit">{{ kurz(b.balken) }}</span>
+                <span class="balken-text">{{ b.balken.eintrag.title ?? 'Belegt' }}</span>
+            </button>
+            }
+        </div>
+        <button type="button" class="liste-oeffnen" tabindex="-1" aria-hidden="true" (click)="tagGewaehlt.emit(zeile.tag)">
+            <i class="pi pi-angle-right"></i>
+        </button>
+    </div>
+    }
+</div>
+}

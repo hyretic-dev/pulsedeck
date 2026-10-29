@@ -1,0 +1,94 @@
+<form [formGroup]="form" class="space-y-3" (ngSubmit)="speichern()">
+    <div>
+        <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="serie-titel">Titel *</label>
+        <input pInputText id="serie-titel" formControlName="title" class="w-full" placeholder="Frauencafé" maxlength="120" />
+    </div>
+
+    <div>
+        <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="serie-notiz">Notiz</label>
+        <textarea pTextarea id="serie-notiz" formControlName="note" class="w-full" rows="2"></textarea>
+    </div>
+
+    <div>
+        <span class="block text-sm font-medium text-[var(--color-text)] mb-1" id="serie-tage">Wochentage *</span>
+        <p-selectButton [options]="wochentage" formControlName="weekdays" optionLabel="label" optionValue="value"
+            [multiple]="true" size="small" aria-labelledby="serie-tage" />
+    </div>
+
+    <div class="grid grid-cols-3 gap-3">
+        <div class="col-span-3 sm:col-span-1">
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Rhythmus</label>
+            <p-select formControlName="every_n_weeks" [options]="rhythmen" optionLabel="label" optionValue="value"
+                appendTo="body" styleClass="w-full" ariaLabel="Rhythmus" />
+        </div>
+        <div class="col-span-3 sm:col-span-1">
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Von</label>
+            <p-select formControlName="hour_from" [options]="vonStunden()" optionLabel="label" optionValue="value"
+                appendTo="body" styleClass="w-full" ariaLabel="Uhrzeit von" />
+        </div>
+        <div class="col-span-3 sm:col-span-1">
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-1">Bis</label>
+            <p-select formControlName="hour_to" [options]="bisStunden()" optionLabel="label" optionValue="value"
+                appendTo="body" styleClass="w-full" ariaLabel="Uhrzeit bis" />
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+        <div>
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="serie-von">Gültig von *</label>
+            <p-datepicker formControlName="valid_from" dateFormat="dd.mm.yy" inputId="serie-von" [fluid]="true"
+                appendTo="body" />
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="serie-bis">Gültig bis *</label>
+            <p-datepicker formControlName="valid_to" dateFormat="dd.mm.yy" inputId="serie-bis" [fluid]="true"
+                appendTo="body" [maxDate]="datumsBereich()" />
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-2">
+            <p-checkbox formControlName="skip_holidays" [binary]="true" inputId="serie-feiertage" />
+            <label for="serie-feiertage" class="text-sm text-[var(--color-text)] cursor-pointer">Feiertage auslassen</label>
+        </div>
+        <div class="flex items-center gap-3">
+            <p-toggleswitch formControlName="is_public" inputId="serie-oeffentlich" />
+            <label for="serie-oeffentlich" class="text-sm text-[var(--color-text)] cursor-pointer">Öffentlich anzeigen</label>
+        </div>
+    </div>
+
+    <!-- Vorschau vor dem Speichern -->
+    @if (fehler(); as f) {
+    <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-error)] bg-[var(--color-error)]/10 text-sm text-[var(--color-text)]" role="alert">
+        <i class="pi pi-times-circle text-[var(--color-error)] mt-0.5"></i><span>{{ f }}</span>
+    </div>
+    } @else if (vorschau(); as v) {
+    <div class="p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-overlay)] text-sm text-[var(--color-text)] space-y-1.5" role="status">
+        <div class="font-semibold"><i class="pi pi-sync mr-1.5 text-xs"></i>{{ v.dates.length }} {{ v.dates.length === 1 ? 'Termin' : 'Termine' }} werden angelegt</div>
+        @if (v.dates.length) {
+        <div class="text-xs text-[var(--color-text-muted)]">
+            {{ datumLang(v.dates[0]) }}@if (v.dates.length > 1) { bis {{ datumLang(v.dates[v.dates.length - 1]) }}}
+        </div>
+        }
+        @if (v.skipped_booked.length) {
+        <div class="text-xs"><i class="pi pi-exclamation-triangle text-[var(--color-warning)] mr-1"></i>
+            <strong>Übersprungen, weil schon belegt:</strong>&nbsp;
+            @for (d of v.skipped_booked; track d; let last = $last) {{{ datumLang(d) }}@if (!last) {, }}
+        </div>
+        }
+        @if (v.skipped_holidays.length) {
+        <div class="text-xs text-[var(--color-text-muted)]"><i class="pi pi-calendar-times mr-1"></i>
+            Feiertage ausgelassen:
+            @for (d of v.skipped_holidays; track d; let last = $last) {{{ datumLang(d) }}@if (!last) {, }}
+        </div>
+        }
+        @if (v.declined_requests.length) {
+        <div class="text-xs"><i class="pi pi-times-circle text-[var(--color-error)] mr-1"></i>
+            <strong>{{ v.declined_requests.length }} offene {{ v.declined_requests.length === 1 ? 'Anfrage wird' : 'Anfragen werden' }} abgelehnt:</strong>
+            @for (e of v.declined_requests; track e.id; let last = $last) {„{{ e.title ?? 'Belegt' }}“@if (!last) {, }}
+        </div>
+        }
+    </div>
+    }
+
+</form>

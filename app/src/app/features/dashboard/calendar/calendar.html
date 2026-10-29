@@ -257,6 +257,7 @@
                 </label>
                 <p-datepicker
                     [(ngModel)]="eventDate"
+                    (ngModelChange)="terminGeaendert()"
                     dateFormat="dd.mm.yy"
                     styleClass="w-full" />
             </div>
@@ -296,6 +297,7 @@
                 </label>
                 <input pInputText
                     [(ngModel)]="currentEvent.start_time"
+                    (ngModelChange)="terminGeaendert()"
                     class="w-full"
                     placeholder="19:00" />
             </div>
@@ -305,6 +307,7 @@
                 </label>
                 <input pInputText
                     [(ngModel)]="currentEvent.end_time"
+                    (ngModelChange)="terminGeaendert()"
                     class="w-full"
                     placeholder="21:00" />
             </div>
@@ -348,6 +351,66 @@
             Zoom-Meeting-Link einfügen
             }
         </p>
+        }
+
+        <!-- Ort reservieren: Belegungsplan der Art Ort, nur bei „Vor Ort“ -->
+        @if (currentEvent.location_type === 'onsite' && orte().length) {
+        <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 space-y-3">
+            <div>
+                <label class="block text-sm font-medium text-[var(--color-text)] mb-1" for="ort-reservieren">
+                    <i class="pi pi-calendar-clock mr-1 text-xs"></i>Ort reservieren
+                </label>
+                <p-select
+                    inputId="ort-reservieren"
+                    [ngModel]="reservierungPlanId()"
+                    (ngModelChange)="waehleOrt($event)"
+                    [options]="orte()"
+                    optionLabel="name"
+                    optionValue="id"
+                    placeholder="Keinen Ort reservieren"
+                    [showClear]="true"
+                    appendTo="body"
+                    styleClass="w-full" />
+            </div>
+            @if (reservierung(); as r) {
+            @if (r.ohneEnde) {
+            <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-warning)] bg-[var(--color-warning)]/10 text-sm text-[var(--color-text)]" role="status">
+                <i class="pi pi-exclamation-triangle text-[var(--color-warning)] mt-0.5"></i>
+                <span>Für die Reservierung brauchst du eine <strong>Endzeit</strong>.</span>
+            </div>
+            } @else {
+            @if (!r.imFenster) {
+            <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-error)] bg-[var(--color-error)]/10 text-sm text-[var(--color-text)]" role="alert">
+                <i class="pi pi-times-circle text-[var(--color-error)] mt-0.5"></i>
+                <span>{{ r.plan.name }} ist von {{ r.plan.window_start }} bis {{ r.plan.window_end }} Uhr buchbar.</span>
+            </div>
+            } @else if (r.status.art === 'frei') {
+            <div class="flex items-start gap-2 p-3 rounded-lg border border-teal/50 bg-teal/10 text-sm text-[var(--color-text)]" role="status">
+                <i class="pi pi-check-circle text-teal mt-0.5"></i>
+                <span><strong>Frei</strong> von {{ r.von }} bis {{ r.bis }} Uhr. @if (r.plan.my_role === 'lead' || r.plan.my_role === 'manager') {Die Belegung gilt sofort.} @else {Beim Speichern wird eine Anfrage gestellt.}</span>
+            </div>
+            } @else if (r.status.art === 'ueberschneidung') {
+            <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-warning)] bg-[var(--color-warning)]/10 text-sm text-[var(--color-text)]" role="status">
+                <i class="pi pi-exclamation-triangle text-[var(--color-warning)] mt-0.5"></i>
+                <span><strong>Planung überschneidet sich</strong> mit
+                    @for (e of r.status.mit; track e.id; let last = $last) {der Anfrage von {{ e.requester_name }} („{{ e.title ?? 'Belegt' }}“)@if (!last) {, }}.
+                    Du kannst trotzdem anfragen.</span>
+            </div>
+            } @else {
+            <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-error)] bg-[var(--color-error)]/10 text-sm text-[var(--color-text)]" role="alert">
+                <i class="pi pi-times-circle text-[var(--color-error)] mt-0.5"></i>
+                <span><strong>Belegt</strong> durch „{{ r.status.durch.title ?? 'Belegt' }}“. Wähle eine andere Zeit oder einen anderen Ort.</span>
+            </div>
+            }
+            <div class="rounded-lg border border-[var(--color-border)] overflow-hidden">
+                <app-booking-month-grid [jahr]="r.tag.jahr" [monat]="r.tag.monat" [plan]="r.plan"
+                    [eintraege]="reservierungEintraegeListe()" [nurTag]="r.tag.tag" [markierung]="r.markierung"
+                    [nurAnsicht]="true" />
+            </div>
+            <app-booking-legend ansicht="monat" />
+            }
+            }
+        </div>
         }
 
         <div>

@@ -98,6 +98,15 @@
             <i class="pi pi-calendar group-hover:text-linke text-sm"></i>
             <span class="font-medium">Termine</span>
         </a>
+        <a routerLink="belegung" routerLinkActive="bg-linke/10 text-linke"
+            class="group flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer text-[var(--color-text-muted)] hover:text-[var(--color-text)] text-sm">
+            <i class="pi pi-calendar-clock group-hover:text-linke text-sm"></i>
+            <span class="font-medium">Belegung</span>
+            @if (offeneBelegungen() > 0) {
+            <span class="ml-auto min-w-5 h-5 px-1.5 rounded-full bg-[var(--color-warning)] text-white text-[10px] font-bold inline-flex items-center justify-center"
+                [attr.aria-label]="offeneBelegungen() + ' offene Anfragen'">{{ offeneBelegungen() }}</span>
+            }
+        </a>
         <a routerLink="wiki" routerLinkActive="bg-linke/10 text-linke"
             class="group flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer text-[var(--color-text-muted)] hover:text-[var(--color-text)] text-sm">
             <i class="pi pi-book group-hover:text-linke text-sm"></i>

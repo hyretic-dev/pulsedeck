@@ -1,0 +1,21 @@
+<ul class="legende text-xs text-[var(--color-text-muted)]" aria-label="Legende">
+    @if (ansicht() === 'monat') {
+    <li><span class="probe angenommen"></span>Bestätigt</li>
+    <li><span class="probe angefragt"></span>Angefragt (Planung, darf sich überschneiden)</li>
+    <li><span class="probe eigene"></span>Deine Anfrage</li>
+    <li><i class="pi pi-sync text-[10px]"></i>Serie</li>
+    } @else {
+    <li>
+        Belegung
+        <span class="stufen" aria-hidden="true">
+            <span class="probe stufe-0"></span><span class="probe stufe-1"></span><span class="probe stufe-2"></span>
+            <span class="probe stufe-3"></span><span class="probe stufe-4"></span>
+        </span>
+        frei bis ausgebucht
+    </li>
+    <li><span class="punkt anfrage"></span>Offene Anfrage</li>
+    }
+    <li><span class="probe wochenende"></span>Wochenende</li>
+    <li><span class="probe feiertag"></span>Feiertag</li>
+    <li><span class="probe heute"></span>Heute</li>
+</ul>

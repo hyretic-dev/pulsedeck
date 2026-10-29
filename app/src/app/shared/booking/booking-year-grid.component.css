@@ -1,0 +1,163 @@
+:host {
+    display: block;
+}
+
+.jahr {
+    --tag-breite: minmax(0, 1fr);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.jahr-kopf,
+.jahr-zeile {
+    display: grid;
+    grid-template-columns: 2.25rem repeat(31, var(--tag-breite));
+    gap: 2px;
+    align-items: stretch;
+}
+
+@media (min-width: 768px) {
+    .jahr-kopf,
+    .jahr-zeile {
+        grid-template-columns: 6.5rem repeat(31, var(--tag-breite));
+    }
+}
+
+.tag-kopf {
+    font-size: 0.625rem;
+    line-height: 1.25rem;
+    text-align: center;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+/* Schmal: nur jede fünfte Zahl, sonst überlappen sich die Beschriftungen */
+@media (max-width: 767px) {
+    .tag-kopf.selten {
+        visibility: hidden;
+    }
+}
+
+.monat-name {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem;
+    padding: 0 0.5rem 0 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text);
+    text-align: left;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.monat-name:hover {
+    color: rgb(var(--linke-rgb));
+}
+
+.zaehler {
+    min-width: 1rem;
+    padding: 0 0.25rem;
+    font-size: 0.625rem;
+    line-height: 1rem;
+    text-align: center;
+    border-radius: 9999px;
+    color: var(--color-warning);
+    border: 1px solid var(--color-warning);
+}
+
+.tag,
+.leer {
+    position: relative;
+    height: 1.75rem;
+    min-width: 0;
+    padding: 0;
+    border-radius: 3px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-raised);
+}
+
+@media (min-width: 768px) {
+    .tag,
+    .leer {
+        height: 2rem;
+    }
+}
+
+.leer {
+    border-color: transparent;
+    background: transparent;
+}
+
+.tag {
+    cursor: pointer;
+    transition: border-color 120ms;
+}
+
+.tag:hover {
+    border-color: rgb(var(--linke-rgb));
+}
+
+.tag:focus-visible {
+    outline: 2px solid rgb(var(--linke-rgb));
+    outline-offset: 1px;
+    z-index: 1;
+}
+
+.tag.wochenende {
+    background: color-mix(in srgb, var(--color-text) 7%, var(--color-surface-raised));
+}
+
+.tag.feiertag {
+    background: color-mix(in srgb, var(--teal) 16%, transparent);
+    border-color: color-mix(in srgb, var(--teal) 55%, transparent);
+}
+
+.tag.feiertag::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    width: 4px;
+    height: 4px;
+    margin-left: -2px;
+    border-radius: 9999px;
+    background: var(--teal);
+}
+
+.tag.stufe-1 {
+    background: rgb(var(--linke-rgb) / 0.3);
+}
+
+.tag.stufe-2 {
+    background: rgb(var(--linke-rgb) / 0.55);
+}
+
+.tag.stufe-3 {
+    background: rgb(var(--linke-rgb) / 0.8);
+}
+
+.tag.stufe-4 {
+    background: rgb(var(--linke-rgb));
+}
+
+/* heute: Rahmen in Organisationsfarbe, auch auf gefüllten Zellen sichtbar */
+.tag.heute {
+    border: 2px solid rgb(var(--linke-rgb));
+    box-shadow: 0 0 0 1px var(--color-surface-raised) inset;
+}
+
+.marker {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: var(--color-warning);
+    box-shadow: 0 0 0 1.5px var(--color-surface-raised);
+}
