@@ -32,6 +32,7 @@ export const PG_FEHLER = {
   FREMDSCHLUESSEL: '23503',
   PRUEFUNG: '23514',
   NICHT_NULL: '23502',
+  AUSSCHLUSS: '23P01',
 } as const;
 
 export function istPgFehler(fehler: unknown, code: string): boolean {

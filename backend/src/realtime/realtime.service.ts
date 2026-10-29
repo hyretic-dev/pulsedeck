@@ -12,6 +12,7 @@ import { MEMBERSHIP_REPOSITORY } from '../tenancy/tenancy.tokens';
 export const REALTIME_TABELLEN = [
   'events', 'event_registrations', 'event_slots', 'event_slot_signups', 'event_guest_organizations',
   'feedback_submissions', 'feed_items', 'poll_votes', 'feed_item_reads', 'newsletter_config', 'wiki_docs', 'wiki_categories', 'contacts',
+  'booking_calendars', 'booking_calendar_members', 'booking_series', 'bookings',
   'files', 'folders', 'members', 'organization_roles', 'working_groups', 'ag_memberships', 'working_group_members', 'skills', 'member_skills',
 ] as const;
 

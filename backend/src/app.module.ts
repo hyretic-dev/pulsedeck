@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { ChatModule } from './chat/chat.module';
 import { ContactsModule } from './contacts/contacts.module';
+import { BookingsModule } from './bookings/bookings.module';
 import { EventsModule } from './events/events.module';
 import { FeedModule } from './feed/feed.module';
 import { JobsModule } from './jobs/jobs.module';
@@ -25,6 +26,6 @@ import { WorkingGroupsModule } from './working-groups/working-groups.module';
 
 /** Wurzelmodul: Querschnitt, Authentifizierung, Mandantenkontext und die Fachmodule. */
 @Module({
-  imports: [PlatformModule, AuthModule, AccountModule, TenancyModule, OrganizationsModule, MembersModule, SkillsModule, WorkingGroupsModule, EventsModule, FeedModule, WikiModule, ContactsModule, NewsletterModule, JobsModule, PushModule, FilesModule, KnowledgeModule, ChatModule, ActivityModule, CalendarModule, SeoModule, RealtimeModule],
+  imports: [PlatformModule, AuthModule, AccountModule, TenancyModule, OrganizationsModule, MembersModule, SkillsModule, WorkingGroupsModule, EventsModule, BookingsModule, FeedModule, WikiModule, ContactsModule, NewsletterModule, JobsModule, PushModule, FilesModule, KnowledgeModule, ChatModule, ActivityModule, CalendarModule, SeoModule, RealtimeModule],
 })
 export class AppModule {}
