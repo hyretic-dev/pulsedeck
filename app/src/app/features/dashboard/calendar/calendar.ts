@@ -22,11 +22,12 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { BOOKING_AVAILABILITY } from '../../../shared/booking/booking-availability';
 import { BookingLegendComponent } from '../../../shared/booking/booking-legend.component';
 import { BookingMonthGridComponent } from '../../../shared/booking/booking-month-grid.component';
-import type { BookingEntry, BookingPlan } from '../../../shared/booking/booking.models';
+import { BookingStatusChipComponent } from '../../../shared/booking/booking-status-chip.component';
 import { berlinUhr, pruefeVerfuegbarkeit, terminZuBelegung } from '../../../shared/booking/zeitraum';
+import { PlaceReservationService } from './application/place-reservation.service';
+import { CALENDAR_PROVIDERS } from './calendar.providers';
 import {
   InviteGuestOrgDialogComponent
 } from '../../../shared/components/invite-guest-org-dialog.component';
@@ -76,8 +77,9 @@ import { AnalyticsService } from '../../../shared/services/analytics.service';
     InviteGuestOrgDialogComponent,
     BookingMonthGridComponent,
     BookingLegendComponent,
+    BookingStatusChipComponent,
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService, MessageService, ...CALENDAR_PROVIDERS],
   templateUrl: './calendar.html',
   styleUrl: './calendar.css',
 })
@@ -119,17 +121,29 @@ export class CalendarComponent implements OnInit, OnDestroy {
   eventDate: Date | null = null;
   tempVisibility = 'public';
 
-  // Ort reservieren (Belegungsplan der Art Ort). PROTOTYP: nur Anzeige, gespeichert wird noch keine Buchung.
-  private readonly availability = inject(BOOKING_AVAILABILITY);
-  readonly orte = signal<BookingPlan[]>([]);
-  readonly reservierungPlanId = signal<string | null>(null);
-  private readonly reservierungEintraege = signal<BookingEntry[]>([]);
-  readonly reservierungEintraegeListe = this.reservierungEintraege.asReadonly();
+  // Ort reservieren: Belegungsplan der Art Ort. Termin und Buchung speichert der Server in einer Transaktion.
+  protected readonly ortsreservierung = inject(PlaceReservationService);
+  readonly orte = this.ortsreservierung.orte;
+  readonly reservierungPlanId = this.ortsreservierung.planId;
+  readonly reservierungEintraegeListe = this.ortsreservierung.eintraege;
   private readonly terminZeit = signal<{ datum: Date | null; start: string | null; ende: string | null }>({
     datum: null, start: null, ende: null,
   });
+  /** Buchung, die der bearbeitete Termin schon hat (zählt bei der Verfügbarkeit nicht als belegt). */
+  private readonly eigeneBuchung = signal<{ id: string; calendarId: string } | null>(null);
 
-  readonly reservierungPlan = computed(() => this.orte().find((p) => p.id === this.reservierungPlanId()) ?? null);
+  readonly reservierungPlan = this.ortsreservierung.plan;
+
+  /**
+   * Datum und Uhrzeit sind gesperrt, wenn der Termin schon eine Buchung hat und die Person im Plan keine Rolle hat: Der Server
+   * lehnt die Änderung ab (403), der Dialog sagt es vorher.
+   */
+  readonly zeitGesperrt = computed(() => {
+    const eigene = this.eigeneBuchung();
+    if (!eigene) return false;
+    const plan = this.ortsreservierung.planMitId(eigene.calendarId);
+    return !plan || plan.my_role === null;
+  });
 
   /** Belegungszeitraum und Verfügbarkeit des Termins im gewählten Ort; null, solange Ort oder Datum fehlen. */
   readonly reservierung = computed(() => {
@@ -151,25 +165,49 @@ export class CalendarComponent implements OnInit, OnDestroy {
       bis,
       tag: { jahr: beginn.jahr, monat: beginn.monat, tag: beginn.tag },
       markierung: { start_at: zeitraum.beginn.toISOString(), end_at: zeitraum.ende.toISOString() },
-      status: pruefeVerfuegbarkeit(this.reservierungEintraege(), zeitraum.beginn, zeitraum.ende),
+      status: pruefeVerfuegbarkeit(this.ortsreservierung.eintraege(), zeitraum.beginn, zeitraum.ende, this.eigeneBuchung()?.id ?? null),
     };
   });
 
+  /** Berliner Tag des Termins als `JJJJ-MM-TT` für die Abfrage der Belegung. */
+  private terminTag(): string | null {
+    const d = this.terminZeit().datum;
+    return d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : null;
+  }
+
   terminGeaendert(): void {
+    const vorher = this.terminTag();
     this.terminZeit.set({
       datum: this.eventDate,
       start: this.currentEvent.start_time ?? null,
       ende: this.currentEvent.end_time ?? null,
     });
+    if (this.terminTag() !== vorher) void this.ortsreservierung.ladeTag(this.terminTag());
   }
 
   async waehleOrt(id: string | null): Promise<void> {
-    this.reservierungPlanId.set(id);
-    this.reservierungEintraege.set(id ? await this.availability.eintraege(id) : []);
+    await this.ortsreservierung.waehle(id, this.terminTag());
   }
 
-  private async ladeOrte(): Promise<void> {
-    this.orte.set(await this.availability.orte());
+  /** Oberfläche für „Ort des Treffens“ geändert: ohne „Vor Ort“ entfällt die Reservierung. */
+  ortsartGeaendert(): void {
+    if (this.currentEvent.location_type !== 'onsite' && this.reservierungPlanId()) void this.waehleOrt(null);
+  }
+
+  /** Belegungsplan für das Speichern: gewählter Plan, bei Änderung gegenüber dem bestehenden Termin (null = entfernen). */
+  private reservierungFuerSpeichern(): string | null | undefined {
+    const gewaehlt = this.currentEvent.location_type === 'onsite' ? this.reservierungPlanId() : null;
+    const bisher = this.eigeneBuchung()?.calendarId ?? null;
+    if (this.editMode()) return gewaehlt === bisher ? undefined : gewaehlt;
+    return gewaehlt;
+  }
+
+  private async bereiteOrtsreservierungVor(event: CalendarEvent | null): Promise<void> {
+    const aktiv = event?.booking && (event.booking.status === 'requested' || event.booking.status === 'approved') ? event.booking : null;
+    this.eigeneBuchung.set(aktiv ? { id: aktiv.id, calendarId: aktiv.calendar_id } : null);
+    this.terminGeaendert();
+    await this.ortsreservierung.ladeOrte();
+    await this.waehleOrt(aktiv?.calendar_id ?? null);
   }
 
   // Recurring events
@@ -290,7 +328,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
   getEmptyEvent(): Partial<CalendarEvent> {
     return {
       title: '',
-      date: new Date().toISOString().split('T')[0],
+      date: this.lokalesDatum(new Date()),
       start_time: '19:00',
       end_time: null,
       location: '',
@@ -320,9 +358,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
     this.isRecurring.set(false);
     this.showCreateAnother.set(false);
     this.editMode.set(false);
-    void this.waehleOrt(null);
-    void this.ladeOrte();
-    this.terminGeaendert();
+    void this.bereiteOrtsreservierungVor(null);
     this.dialogVisible.set(true);
   }
 
@@ -336,7 +372,13 @@ export class CalendarComponent implements OnInit, OnDestroy {
       this.tempVisibility = this.getVisibilityFromRoles(event.allowed_roles);
     }
     this.editMode.set(true);
+    void this.bereiteOrtsreservierungVor(event);
     this.dialogVisible.set(true);
+  }
+
+  /** `JJJJ-MM-TT` aus dem lokalen Datum der Auswahl (`toISOString` würde östlich von UTC einen Tag zurückspringen). */
+  private lokalesDatum(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
   async saveEvent() {
@@ -352,9 +394,16 @@ export class CalendarComponent implements OnInit, OnDestroy {
     }
 
     if (this.eventDate) {
-      this.currentEvent.date =
-        this.eventDate.toISOString().split('T')[0];
+      this.currentEvent.date = this.lokalesDatum(this.eventDate);
     }
+
+    // Ortsreservierung: Plan nur senden, wenn er sich ändert (null = Reservierung entfernen)
+    const plan = this.reservierungFuerSpeichern();
+    if (plan && !this.currentEvent.end_time) {
+      this.messageService.add({ severity: 'warn', summary: 'Endzeit fehlt', detail: 'Für die Ortsreservierung brauchst du eine Endzeit.' });
+      return;
+    }
+    this.currentEvent.booking_calendar_id = plan === null && !this.editMode() ? undefined : plan;
 
     // Handle AG-only visibility
     if (this.tempVisibility === 'ag-only') {
@@ -445,6 +494,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
     this.currentEvent = this.getEmptyEvent();
     this.currentEvent.working_group_id = keepWgId;
     this.eventDate = keepDate;
+    void this.bereiteOrtsreservierungVor(null);
     this.isRecurring.set(false);
     this.showCreateAnother.set(false);
   }

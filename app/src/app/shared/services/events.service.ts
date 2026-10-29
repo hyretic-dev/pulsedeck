@@ -12,6 +12,7 @@ import { CalendarEvent } from '../models/calendar-event.model';
 const TERMIN_FELDER = [
     'title', 'date', 'start_time', 'end_time', 'location', 'description', 'working_group_id', 'allowed_roles',
     'max_participants', 'registration_required', 'meeting_reason', 'location_type', 'is_recurring', 'recurrence_interval',
+    'booking_calendar_id',
 ] as const;
 /** Optionale Felder, die die Oberfläche leer lässt (der Server erwartet dann `null`). */
 const TERMIN_LEER_ALS_NULL = ['end_time', 'description', 'working_group_id', 'meeting_reason', 'location_type', 'recurrence_interval'] as const;

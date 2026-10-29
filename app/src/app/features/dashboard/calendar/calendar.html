@@ -93,6 +93,9 @@
                                     <span class="truncate max-w-[200px]">{{ event.location }}</span>
                                 </span>
                                 }
+                                @if (event.booking) {
+                                <app-booking-status-chip [status]="event.booking.status" [planName]="event.booking.calendar_name" />
+                                }
                             </div>
                         </div>
 
@@ -258,6 +261,7 @@
                 <p-datepicker
                     [(ngModel)]="eventDate"
                     (ngModelChange)="terminGeaendert()"
+                    [disabled]="zeitGesperrt()"
                     dateFormat="dd.mm.yy"
                     styleClass="w-full" />
             </div>
@@ -298,6 +302,7 @@
                 <input pInputText
                     [(ngModel)]="currentEvent.start_time"
                     (ngModelChange)="terminGeaendert()"
+                    [disabled]="zeitGesperrt()"
                     class="w-full"
                     placeholder="19:00" />
             </div>
@@ -308,10 +313,18 @@
                 <input pInputText
                     [(ngModel)]="currentEvent.end_time"
                     (ngModelChange)="terminGeaendert()"
+                    [disabled]="zeitGesperrt()"
                     class="w-full"
                     placeholder="21:00" />
             </div>
         </div>
+
+        @if (zeitGesperrt()) {
+        <div class="flex items-start gap-2 p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-overlay)] text-sm text-[var(--color-text-muted)]" role="status">
+            <i class="pi pi-lock mt-0.5"></i>
+            <span>Datum und Uhrzeit gehören zur Ortsreservierung. Ändern kann sie nur, wer im Belegungsplan eine Rolle hat.</span>
+        </div>
+        }
 
         <!-- Ort des Treffens -->
         <div class="grid grid-cols-2 gap-3">
@@ -321,6 +334,7 @@
                 </label>
                 <p-select
                     [(ngModel)]="currentEvent.location_type"
+                    (ngModelChange)="ortsartGeaendert()"
                     [options]="locationTypeOptions"
                     optionLabel="label"
                     optionValue="value"
@@ -337,7 +351,7 @@
                 <input pInputText
                     [(ngModel)]="currentEvent.location"
                     class="w-full"
-                    [placeholder]="getLocationPlaceholder()" />
+                    [placeholder]="reservierungPlan() ? 'Leer: ' + reservierungPlan()?.name : getLocationPlaceholder()" />
             </div>
         </div>
 

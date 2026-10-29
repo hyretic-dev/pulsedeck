@@ -16,6 +16,14 @@ export type RecurrenceInterval =
     | 'monthly'
     | 'quarterly';
 
+/** Ortsreservierung eines Termins (nur für Mitglieder; Status wie bei der Belegung). */
+export interface EventBooking {
+    id: string;
+    calendar_id: string;
+    calendar_name: string;
+    status: 'requested' | 'approved' | 'declined' | 'cancelled';
+}
+
 export interface CalendarEvent {
     id?: string;
     organization_id?: string;
@@ -40,6 +48,10 @@ export interface CalendarEvent {
     recurrence_interval?: RecurrenceInterval | null;
     /** Parent event ID for recurring series */
     recurrence_parent_id?: string | null;
+    /** Ortsreservierung des Termins; liefert der Server beim Lesen. */
+    booking?: EventBooking | null;
+    /** Beim Speichern: Belegungsplan (Art Ort) reservieren; null entfernt eine bestehende Reservierung. */
+    booking_calendar_id?: string | null;
 }
 
 /**

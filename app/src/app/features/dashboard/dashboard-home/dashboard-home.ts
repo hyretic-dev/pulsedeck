@@ -14,6 +14,7 @@ import { CalendarEvent, getEventType } from '../../../shared/models/calendar-eve
 import { WorkingGroup } from '../../../shared/models/working-group.model';
 import { MikrotaskService } from '../../../shared/services/mikrotask.service';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { BookingStatusChipComponent } from '../../../shared/booking/booking-status-chip.component';
 import { 
   GuestInvitationsCardComponent 
 } from '../../../shared/components/guest-invitations-card.component';
@@ -27,6 +28,7 @@ import {
     ProgressBarModule,
     TooltipModule,
     GuestInvitationsCardComponent,
+    BookingStatusChipComponent,
   ],
   templateUrl: './dashboard-home.html',
   styleUrl: './dashboard-home.css',

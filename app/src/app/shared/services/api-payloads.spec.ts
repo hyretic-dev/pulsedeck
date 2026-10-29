@@ -31,6 +31,19 @@ describe('Nutzlasten der API-Dienste', () => {
         expect(api.post).toHaveBeenCalledWith('/orgs/org-1/events', { title: 'Neu', date: '2026-11-01', start_time: '19:00', location: 'Halle' });
     });
 
+    it('Termine: sendet den Belegungsplan nur, wenn er gesetzt ist; null entfernt eine Reservierung, nicht gesetzt lässt sie unverändert', async () => {
+        const events = TestBed.inject(EventsService);
+
+        await events.addEvent({ title: 'Mit Ort', date: '2026-11-01', start_time: '19:00', end_time: '21:00', location: '', location_type: 'onsite', booking_calendar_id: 'p1', booking: { id: 'b' } } as never);
+        expect(api.post).toHaveBeenLastCalledWith('/orgs/org-1/events', { title: 'Mit Ort', date: '2026-11-01', start_time: '19:00', end_time: '21:00', location: '', location_type: 'onsite', booking_calendar_id: 'p1' });
+
+        await events.updateEvent('e1', { title: 'Nur Titel', booking: { id: 'b' } } as never);
+        expect(api.patch).toHaveBeenLastCalledWith('/orgs/org-1/events/e1', { title: 'Nur Titel' });
+
+        await events.updateEvent('e1', { booking_calendar_id: null } as never);
+        expect(api.patch).toHaveBeenLastCalledWith('/orgs/org-1/events/e1', { booking_calendar_id: null });
+    });
+
     it('Organisation anlegen: Herkunft und Pilot-Wunsch nur senden, wenn angegeben; leerer Wunschzeitraum entfällt', async () => {
         const orgs = TestBed.inject(OrganizationService);
 
