@@ -39,6 +39,7 @@
     "@primeng/themes": "^21.0.2",
     "@types/dompurify": "^3.0.5",
     "dompurify": "^3.4.9",
+    "feiertagejs": "1.5.1",
     "marked": "^17.0.1",
     "primeicons": "^7.0.0",
     "primeng": "^21.0.2",

@@ -27,7 +27,7 @@ export const appConfig: ApplicationConfig = {
       theme: {
         preset: Aura,
         options: {
-          darkModeSelector: 'system', // or '.dark' if you handle dark mode manually
+          darkModeSelector: '.dark', // ThemeService setzt die Klasse auf <html>; 'system' ignorierte die App-Einstellung
           cssLayer: {
             name: 'primeng',
             order: 'tailwind-base, primeng, tailwind-utilities'
