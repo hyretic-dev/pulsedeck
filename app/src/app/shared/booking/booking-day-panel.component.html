@@ -1,0 +1,49 @@
+<p-drawer [(visible)]="sichtbar" [position]="unten() ? 'bottom' : 'right'" [styleClass]="unten() ? '!h-[78vh]' : '!w-[26rem] max-w-full'">
+    <ng-template #header>
+        <div class="flex items-center gap-1 min-w-0">
+            <p-button icon="pi pi-chevron-left" [text]="true" severity="secondary" size="small" ariaLabel="Vorheriger Tag" (click)="springe(-1)" />
+            <div class="min-w-0 px-1">
+                <div class="text-base font-bold text-[var(--color-text)] leading-tight" aria-live="polite">{{ titel() }}</div>
+                @if (feiertag(); as f) {
+                <div class="text-xs text-[var(--teal)]"><i class="pi pi-calendar text-[10px] mr-1"></i>{{ f }}</div>
+                }
+            </div>
+            <p-button icon="pi pi-chevron-right" [text]="true" severity="secondary" size="small" ariaLabel="Nächster Tag" (click)="springe(1)" />
+        </div>
+    </ng-template>
+
+    <ul class="flex flex-col" aria-label="Stunden des Tages">
+        @for (z of zeilen(); track z.stunde) {
+        <li class="flex items-stretch border-b border-[var(--color-border)] min-h-11">
+            <span class="w-14 flex-none py-2 text-xs text-[var(--color-text-muted)]">{{ uhr(z.stunde) }}</span>
+            @if (z.beginnen.length || z.laufen.length) {
+            <div class="flex flex-1 flex-col gap-1 py-1.5 min-w-0">
+                @for (b of z.beginnen; track b.eintrag.id) {
+                <button type="button" class="chip" [attr.data-status]="b.eintrag.status" [class.eigene]="b.eintrag.is_mine"
+                    [class.unbekannt]="b.eintrag.title === null" (click)="eintragGewaehlt.emit(b.eintrag)">
+                    @if (b.eintrag.series_id) {
+                    <i class="pi pi-sync text-[10px]"></i>
+                    }
+                    <span class="chip-zeit">{{ zeit(b) }}</span>
+                    <span class="truncate">{{ b.eintrag.title ?? 'Belegt' }}</span>
+                </button>
+                }
+                @for (b of z.laufen; track b.eintrag.id) {
+                <button type="button" class="fortsetzung" [attr.data-status]="b.eintrag.status" (click)="eintragGewaehlt.emit(b.eintrag)"
+                    [attr.aria-label]="(b.eintrag.title ?? 'Belegt') + ' läuft weiter'">
+                    <span class="truncate">↳ {{ b.eintrag.title ?? 'Belegt' }}</span>
+                </button>
+                }
+            </div>
+            } @else if (darfAnfragen()) {
+            <button type="button" class="flex-1 text-left text-xs text-[var(--color-text-muted)] hover:text-linke py-2"
+                [attr.aria-label]="uhr(z.stunde) + ' Uhr anfragen'" (click)="waehleStunde(z.stunde)">
+                <i class="pi pi-plus text-[10px] mr-1"></i>frei
+            </button>
+            } @else {
+            <span class="flex-1 py-2 text-xs text-[var(--color-text-muted)]">frei</span>
+            }
+        </li>
+        }
+    </ul>
+</p-drawer>

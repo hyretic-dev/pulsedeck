@@ -6,22 +6,30 @@
         <span class="stunden-kopf" role="columnheader">{{ h }}</span>
         }
     </div>
-    @for (zeile of zeilen(); track zeile.tag) {
+    @for (zeile of zeilen(); track zeile.index) {
     <div class="zeile" role="row" [class.wochenende]="zeile.wochenende" [class.feiertag]="!!zeile.feiertag"
         [class.heute]="zeile.heute" [style.--bahnen]="zeile.bahnen">
         <div class="tag-label" role="rowheader" [attr.title]="zeile.feiertag">
+            @if (nurAnsicht() || nurTag() !== null) {
             <span class="wt">{{ zeile.wochentag }}</span>
             <span class="datum">{{ zeile.tag }}.</span>
+            } @else {
+            <button type="button" class="tag-knopf" [attr.aria-label]="zeile.beschriftung + ' öffnen'"
+                (click)="tagGewaehlt.emit({ jahr: zeile.jahr, monat: zeile.monat, tag: zeile.tag })">
+                <span class="wt">{{ zeile.wochentag }}</span>
+                <span class="datum">{{ zeile.tag }}.</span>
+            </button>
+            }
             @if (zeile.feiertag) {
             <span class="ft-name">{{ zeile.feiertag }}</span>
             }
         </div>
         @for (h of stunden(); track h; let i = $index) {
         <button type="button" role="gridcell" class="stunde" [class.markiert]="zeile.markiert.has(h)"
-            [style.grid-column]="i + 2" [attr.data-tag]="zeile.tag" [attr.data-stunde]="h"
+            [style.grid-column]="i + 2" [attr.data-zeile]="zeile.index" [attr.data-tag]="zeile.tag" [attr.data-stunde]="h"
             [attr.aria-label]="stundeBeschriftung(zeile, h)" [disabled]="nurAnsicht()"
-            (pointerdown)="ziehenStart($event, zeile.tag, h)" (pointerenter)="ziehenWeiter(zeile.tag, h)"
-            (click)="stundeKlick(zeile.tag, h)" (keydown)="taste($event, zeile.tag, h)"></button>
+            (pointerdown)="ziehenStart($event, zeile, h)" (pointerenter)="ziehenWeiter(zeile, h)"
+            (click)="stundeKlick(zeile, h)" (keydown)="taste($event, zeile.index, h)"></button>
         }
         @for (b of zeile.balken; track b.balken.eintrag.id) {
         <button type="button" class="balken" [attr.data-status]="b.balken.eintrag.status"

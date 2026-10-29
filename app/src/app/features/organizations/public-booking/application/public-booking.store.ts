@@ -1,10 +1,10 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
-import { berlinUhr } from '../../../../shared/booking/zeitraum';
+import { TagRef, berlinUhr, heuteBerlin, isoKalenderwoche, montagDerWoche, plusTage, wochenTage } from '../../../../shared/booking/zeitraum';
 import type { BookingEntry } from '../../../../shared/booking/booking.models';
 import { PUBLIC_BOOKING_REPOSITORY, type PublicBookingPlan } from '../domain/public-booking.repository';
 
-export type Ansicht = 'jahr' | 'monat';
+export type Ansicht = 'jahr' | 'monat' | 'woche';
 
 /** Zustand der öffentlichen Belegungsansicht: Pläne, Zeitraum und Einträge. Ohne öffentliche Pläne bleibt alles leer. */
 @Injectable()
@@ -19,6 +19,10 @@ export class PublicBookingStore {
     readonly jahr = signal(berlinUhr(new Date()).jahr);
     readonly monat = signal(berlinUhr(new Date()).monat);
     readonly fehler = signal(false);
+    /** Montag der angezeigten Woche; die Wochenansicht startet immer mit der laufenden Kalenderwoche. */
+    readonly woche = signal<TagRef>(montagDerWoche(heuteBerlin()));
+    readonly wochenTage = computed(() => wochenTage(this.woche()));
+    readonly kalenderwoche = computed(() => isoKalenderwoche(this.woche()));
 
     readonly plan = computed(() => this.plaene().find((p) => p.id === this.planId()) ?? null);
 
@@ -59,8 +63,18 @@ export class PublicBookingStore {
         }
     }
 
-    ansichtWaehlen(ansicht: Ansicht): void {
+    async ansichtWaehlen(ansicht: Ansicht): Promise<void> {
         this.ansicht.set(ansicht);
+        if (ansicht === 'woche') await this.zeigeWoche(montagDerWoche(heuteBerlin()));
+    }
+
+    private async zeigeWoche(montag: TagRef): Promise<void> {
+        this.woche.set(montag);
+        const jahr = isoKalenderwoche(montag).jahr;
+        if (jahr !== this.jahr()) {
+            this.jahr.set(jahr);
+            await this.laden();
+        }
     }
 
     oeffneMonat(monat: number, jahr = this.jahr()): void {
@@ -70,6 +84,10 @@ export class PublicBookingStore {
     }
 
     async weiter(schritt: 1 | -1): Promise<void> {
+        if (this.ansicht() === 'woche') {
+            await this.zeigeWoche(plusTage(this.woche(), 7 * schritt));
+            return;
+        }
         const altesJahr = this.jahr();
         if (this.ansicht() === 'jahr') {
             this.jahr.update((j) => j + schritt);
@@ -83,9 +101,13 @@ export class PublicBookingStore {
 
     async heute(): Promise<void> {
         const h = berlinUhr(new Date());
+        this.monat.set(h.monat);
+        if (this.ansicht() === 'woche') {
+            await this.zeigeWoche(montagDerWoche(heuteBerlin()));
+            return;
+        }
         const altesJahr = this.jahr();
         this.jahr.set(h.jahr);
-        this.monat.set(h.monat);
         if (altesJahr !== h.jahr) await this.laden();
     }
 }

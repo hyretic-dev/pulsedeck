@@ -76,4 +76,21 @@ describe('PublicBookingStore', () => {
         expect([store.jahr(), store.monat()]).toEqual([2025, 12]);
         expect(repo.eintraege).toHaveBeenCalledTimes(1);
     });
+
+    it('zeigt in der Wochenansicht die laufende KW und blättert wochenweise', async () => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(new Date('2026-10-29T10:00:00Z'));
+        try {
+            const { store } = einrichten();
+            await store.start('alpha');
+            await store.ansichtWaehlen('woche');
+            expect(store.kalenderwoche()).toEqual({ woche: 44, jahr: 2026 });
+            await store.weiter(1);
+            expect(store.woche()).toEqual({ jahr: 2026, monat: 11, tag: 2 });
+            await store.heute();
+            expect(store.woche()).toEqual({ jahr: 2026, monat: 10, tag: 26 });
+        } finally {
+            vi.useRealTimers();
+        }
+    });
 });

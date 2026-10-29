@@ -1,9 +1,9 @@
 <div class="liste" role="list" [attr.aria-label]="'Belegung ' + titel()">
-    @for (zeile of zeilen(); track zeile.tag) {
+    @for (zeile of zeilen(); track zeile.jahr + '-' + zeile.monat + '-' + zeile.tag) {
     <div class="liste-zeile" role="listitem" [class.wochenende]="zeile.wochenende" [class.feiertag]="!!zeile.feiertag"
         [class.heute]="zeile.heute">
         <button type="button" class="liste-tag" [attr.aria-label]="zeile.beschriftung + ' öffnen'"
-            (click)="tagGewaehlt.emit(zeile.tag)">
+            (click)="tagGewaehlt.emit({ jahr: zeile.jahr, monat: zeile.monat, tag: zeile.tag })">
             <span class="wt">{{ zeile.wochentag }}</span>
             <span class="datum">{{ zeile.tag }}.</span>
         </button>
@@ -23,7 +23,7 @@
             </button>
             }
         </div>
-        <button type="button" class="liste-oeffnen" tabindex="-1" aria-hidden="true" (click)="tagGewaehlt.emit(zeile.tag)">
+        <button type="button" class="liste-oeffnen" tabindex="-1" aria-hidden="true" (click)="tagGewaehlt.emit({ jahr: zeile.jahr, monat: zeile.monat, tag: zeile.tag })">
             <i class="pi pi-angle-right"></i>
         </button>
     </div>

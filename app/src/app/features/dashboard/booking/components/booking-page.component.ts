@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, injec
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
-import { DrawerModule } from 'primeng/drawer';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -16,17 +15,17 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { BookingLegendComponent } from '../../../../shared/booking/booking-legend.component';
 import { MONATSNAMEN, WOCHENTAG_LANG, uhrzeit } from '../../../../shared/booking/booking-labels';
 import { BookingDayListComponent } from '../../../../shared/booking/booking-day-list.component';
+import { BookingDayPanelComponent, TagesStunde } from '../../../../shared/booking/booking-day-panel.component';
 import { BookingMonthGridComponent, StundenAuswahl } from '../../../../shared/booking/booking-month-grid.component';
 import { BookingStatusChipComponent } from '../../../../shared/booking/booking-status-chip.component';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { BookingYearGridComponent, TagAuswahl } from '../../../../shared/booking/booking-year-grid.component';
 import { BookingEntry, darfAnfragen, darfEntscheiden } from '../../../../shared/booking/booking.models';
 import { BUNDESLAENDER } from '../../../../shared/booking/feiertage';
-import { berlinUhr, ueberschneiden, wochentag } from '../../../../shared/booking/zeitraum';
+import { TagRef, berlinUhr, ueberschneiden, wochentag } from '../../../../shared/booking/zeitraum';
 import { Ansicht, Bereich, BookingStore } from '../application/booking.store';
 import type { BuchungEingabe, PlanEingabe, SerieEingabe } from '../domain/booking.repository';
 import { BookingCalendarDialogComponent } from './booking-calendar-dialog.component';
-import { BookingDayHoursComponent } from './booking-day-hours.component';
 import { BookingEntryDialogComponent } from './booking-entry-dialog.component';
 import { BookingRequestDialogComponent, Vorgabe } from './booking-request-dialog.component';
 
@@ -34,10 +33,10 @@ import { BookingRequestDialogComponent, Vorgabe } from './booking-request-dialog
     selector: 'app-booking-page',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
-        FormsModule, ButtonModule, ConfirmDialogModule, DialogModule, DrawerModule, ProgressSpinnerModule,
+        FormsModule, ButtonModule, ConfirmDialogModule, DialogModule, ProgressSpinnerModule,
         SelectModule, SelectButtonModule, TabsModule, TextareaModule, ToastModule, InputTextModule,
         BookingLegendComponent, BookingDayListComponent, BookingMonthGridComponent, BookingStatusChipComponent, BookingYearGridComponent,
-        BookingDayHoursComponent, BookingEntryDialogComponent, BookingRequestDialogComponent, BookingCalendarDialogComponent,
+        BookingDayPanelComponent, BookingEntryDialogComponent, BookingRequestDialogComponent, BookingCalendarDialogComponent,
     ],
     providers: [BookingStore, ConfirmationService, MessageService],
     templateUrl: './booking-page.component.html',
@@ -67,7 +66,7 @@ export class BookingPageComponent implements OnInit {
     protected readonly speichert = signal(false);
     protected readonly detail = signal<BookingEntry | null>(null);
     protected readonly detailSichtbar = signal(false);
-    protected readonly tagesPanel = signal<{ jahr: number; monat: number; tag: number } | null>(null);
+    protected readonly tagesPanel = signal<TagRef | null>(null);
     protected readonly tagesPanelSichtbar = signal(false);
     protected readonly ablehnenZiel = signal<BookingEntry | null>(null);
     protected readonly ablehnenSichtbar = signal(false);
@@ -76,6 +75,7 @@ export class BookingPageComponent implements OnInit {
     protected readonly ansichtOptionen: { label: string; value: Ansicht }[] = [
         { label: 'Jahr', value: 'jahr' },
         { label: 'Monat', value: 'monat' },
+        { label: 'Woche', value: 'woche' },
     ];
 
     protected readonly entscheidet = computed(() => {
@@ -101,9 +101,19 @@ export class BookingPageComponent implements OnInit {
         return alle;
     });
 
-    protected readonly titelZeile = computed(() =>
-        this.store.ansicht() === 'jahr' ? String(this.store.jahr()) : `${MONATSNAMEN[this.store.monat() - 1]} ${this.store.jahr()}`,
-    );
+    protected readonly titelZeile = computed(() => {
+        switch (this.store.ansicht()) {
+            case 'jahr':
+                return String(this.store.jahr());
+            case 'monat':
+                return `${MONATSNAMEN[this.store.monat() - 1]} ${this.store.jahr()}`;
+            case 'woche': {
+                const tage = this.store.wochenTage();
+                const [von, bis] = [tage[0], tage[6]];
+                return `KW ${this.store.kalenderwoche().woche} · ${von.tag}.${von.monat}. – ${bis.tag}.${bis.monat}.${bis.jahr}`;
+            }
+        }
+    });
 
     /** Offene Anfragen mit den Anfragen, mit denen sie sich überschneiden. */
     protected readonly eingang = computed(() => {
@@ -137,19 +147,10 @@ export class BookingPageComponent implements OnInit {
         if (typeof id === 'string') void this.store.planWaehlen(id);
     }
 
-    /** Schmal ist die Jahresansicht nur eine Übersicht: jedes Tippen öffnet den Monat, der Tag folgt dort im Seitenpanel. */
-    protected tagImJahr(a: TagAuswahl): void {
-        this.store.oeffneMonat(a.monat, a.jahr);
-    }
-
-    protected oeffneTagesPanel(jahr: number, monat: number, tag: number): void {
-        this.tagesPanel.set({ jahr, monat, tag });
+    /** Ein Tag in Jahr, Monat oder Woche öffnet die Tagesansicht als Seitenpanel; die Ansicht dahinter bleibt. */
+    protected oeffneTagesPanel(tag: TagRef | TagAuswahl): void {
+        this.tagesPanel.set({ jahr: tag.jahr, monat: tag.monat, tag: tag.tag });
         this.tagesPanelSichtbar.set(true);
-    }
-
-    protected tagesPanelTitel(): string {
-        const t = this.tagesPanel();
-        return t ? `${WOCHENTAG_LANG[wochentag(t.jahr, t.monat, t.tag)]}, ${t.tag}. ${MONATSNAMEN[t.monat - 1]}` : '';
     }
 
     protected neueAnfrage(auswahl: StundenAuswahl | null = null): void {
@@ -165,11 +166,9 @@ export class BookingPageComponent implements OnInit {
         this.anfrageSichtbar.set(true);
     }
 
-    protected stundeAusPanel(stunde: number): void {
-        const t = this.tagesPanel();
-        if (!t) return;
-        this.tagesPanelSichtbar.set(false);
-        this.neueAnfrage({ ...t, von: stunde, bis: stunde + 1 });
+    /** Freie Stunde im Tagespanel: Anfrage-Dialog, das Panel bleibt offen und zeigt danach die neue Belegung. */
+    protected stundeAusPanel(auswahl: TagesStunde): void {
+        this.neueAnfrage(auswahl);
     }
 
     protected zeigeDetail(e: BookingEntry): void {

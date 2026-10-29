@@ -4,7 +4,7 @@ import { MONATSNAMEN, STATUS_TEXT, WOCHENTAG_KUERZEL, WOCHENTAG_LANG, uhrzeit } 
 import type { BookingEntry, RasterPlan } from './booking.models';
 import { datumsSchluessel, feiertageImJahr } from './feiertage';
 import {
-    TagesBalken, balkenFuerTag, berlinUhr, istWochenende, tageImMonat, verteileAufBahnen, wochentag,
+    TagRef, TagesBalken, balkenFuerTag, berlinUhr, istWochenende, tageImMonat, verteileAufBahnen, wochentag,
 } from './zeitraum';
 
 export interface StundenAuswahl {
@@ -25,6 +25,9 @@ interface BalkenZeile {
 }
 
 interface TagesZeile {
+    index: number;
+    jahr: number;
+    monat: number;
     tag: number;
     wochentag: string;
     wochenende: boolean;
@@ -38,14 +41,16 @@ interface TagesZeile {
 }
 
 interface Ziehen {
-    tag: number;
+    /** Index der Zeile (Tage können über Monatsgrenzen laufen, die Tageszahl allein ist nicht eindeutig). */
+    zeile: number;
     anker: number;
     aktuell: number;
 }
 
 /**
  * Monatsraster: eine Zeile je Tag, eine Spalte je Stunde im Zeitfenster des Plans. Dieselbe Komponente zeigt auch
- * einen einzelnen Tag (`nurTag`, z. B. im Termin-Dialog). Auf schmalen Bildschirmen gilt stattdessen `BookingDayListComponent`.
+ * einen einzelnen Tag (`nurTag`, z. B. im Termin-Dialog) oder eine Woche (`tage`). Auf schmalen Bildschirmen gilt stattdessen
+ * `BookingDayListComponent`.
  */
 @Component({
     selector: 'app-booking-month-grid',
@@ -61,6 +66,8 @@ export class BookingMonthGridComponent {
     readonly plan = input.required<RasterPlan>();
     readonly eintraege = input.required<ReadonlyArray<BookingEntry>>();
     readonly nurTag = input<number | null>(null);
+    /** Beliebige Tage (z. B. eine Woche, auch über Monatsgrenzen); ersetzt dann die Tage des Monats. */
+    readonly tage = input<ReadonlyArray<TagRef> | null>(null);
     /** Zeitraum, der zusätzlich markiert wird (z. B. der Termin im Dialog). */
     readonly markierung = input<{ start_at: string; end_at: string } | null>(null);
     /** Ohne Auswahl per Klick (reine Anzeige, z. B. in der Vorschau). */
@@ -68,6 +75,8 @@ export class BookingMonthGridComponent {
 
     readonly stundenGewaehlt = output<StundenAuswahl>();
     readonly eintragGewaehlt = output<BookingEntry>();
+    /** Klick auf den Tag in der Zeilenbeschriftung: die Tagesansicht öffnet sich, die Ansicht bleibt. */
+    readonly tagGewaehlt = output<TagRef>();
 
     protected readonly ziehen = signal<Ziehen | null>(null);
     private mausBehandelt = false;
@@ -80,16 +89,22 @@ export class BookingMonthGridComponent {
     protected readonly titel = computed(() => `${MONATSNAMEN[this.monat() - 1]} ${this.jahr()}`);
 
     protected readonly zeilen = computed<TagesZeile[]>(() => {
-        const jahr = this.jahr();
-        const monat = this.monat();
         const plan = this.plan();
         const nur = this.nurTag();
-        const feiertage = feiertageImJahr(jahr, plan.state);
+        const vorgabe = this.tage();
+        const jahr0 = this.jahr();
+        const monat0 = this.monat();
+        const tage: TagRef[] = vorgabe
+            ? [...vorgabe]
+            : nur
+              ? [{ jahr: jahr0, monat: monat0, tag: nur }]
+              : Array.from({ length: tageImMonat(jahr0, monat0) }, (_, i) => ({ jahr: jahr0, monat: monat0, tag: i + 1 }));
+        const feiertagsJahre = new Map<number, ReadonlyMap<string, string>>();
         const heute = berlinUhr(new Date());
         const ziehen = this.ziehen();
         const markierung = this.markierung();
-        const tage = nur ? [nur] : Array.from({ length: tageImMonat(jahr, monat) }, (_, i) => i + 1);
-        return tage.map((tag): TagesZeile => {
+        return tage.map((t, index): TagesZeile => {
+            const { jahr, monat, tag } = t;
             const balken = balkenFuerTag(this.eintraege(), jahr, monat, tag, plan.window_start, plan.window_end);
             const verteilt = verteileAufBahnen(balken).map((v): BalkenZeile => ({
                 balken: v.balken,
@@ -99,7 +114,7 @@ export class BookingMonthGridComponent {
                 beschriftung: this.beschrifteBalken(v.balken),
             }));
             const markiert = new Set<number>();
-            if (ziehen && ziehen.tag === tag) {
+            if (ziehen && ziehen.zeile === index) {
                 for (let h = Math.min(ziehen.anker, ziehen.aktuell); h <= Math.max(ziehen.anker, ziehen.aktuell); h++) markiert.add(h);
             }
             if (markierung) {
@@ -109,10 +124,11 @@ export class BookingMonthGridComponent {
                 )[0];
                 if (m) for (let h = m.von; h < m.bis; h++) markiert.add(h);
             }
-            const feiertag = feiertage.get(datumsSchluessel(jahr, monat, tag)) ?? null;
+            if (!feiertagsJahre.has(jahr)) feiertagsJahre.set(jahr, feiertageImJahr(jahr, plan.state));
+            const feiertag = feiertagsJahre.get(jahr)?.get(datumsSchluessel(jahr, monat, tag)) ?? null;
             const wt = wochentag(jahr, monat, tag);
             return {
-                tag,
+                index, jahr, monat, tag,
                 wochentag: WOCHENTAG_KUERZEL[wt],
                 wochenende: istWochenende(jahr, monat, tag),
                 feiertag,
@@ -142,14 +158,14 @@ export class BookingMonthGridComponent {
         return `${zeile.beschriftung}, ${uhrzeit(stunde)} bis ${uhrzeit(stunde + 1)}, frei`;
     }
 
-    protected ziehenStart(ereignis: PointerEvent, tag: number, stunde: number): void {
+    protected ziehenStart(ereignis: PointerEvent, zeile: TagesZeile, stunde: number): void {
         if (this.nurAnsicht() || ereignis.pointerType !== 'mouse' || ereignis.button !== 0) return;
-        this.ziehen.set({ tag, anker: stunde, aktuell: stunde });
+        this.ziehen.set({ zeile: zeile.index, anker: stunde, aktuell: stunde });
     }
 
-    protected ziehenWeiter(tag: number, stunde: number): void {
+    protected ziehenWeiter(zeile: TagesZeile, stunde: number): void {
         const z = this.ziehen();
-        if (z && z.tag === tag) this.ziehen.set({ ...z, aktuell: stunde });
+        if (z && z.zeile === zeile.index) this.ziehen.set({ ...z, aktuell: stunde });
     }
 
     protected ziehenEnde(): void {
@@ -157,23 +173,24 @@ export class BookingMonthGridComponent {
         if (!z) return;
         this.ziehen.set(null);
         this.mausBehandelt = true;
-        this.waehle(z.tag, Math.min(z.anker, z.aktuell), Math.max(z.anker, z.aktuell) + 1);
+        const zeile = this.zeilen()[z.zeile];
+        if (zeile) this.waehle(zeile, Math.min(z.anker, z.aktuell), Math.max(z.anker, z.aktuell) + 1);
     }
 
     /** Klick per Touch oder Tastatur; Mausklicks hat `ziehenEnde` bereits abgehandelt. */
-    protected stundeKlick(tag: number, stunde: number): void {
+    protected stundeKlick(zeile: TagesZeile, stunde: number): void {
         if (this.mausBehandelt) {
             this.mausBehandelt = false;
             return;
         }
-        if (!this.nurAnsicht()) this.waehle(tag, stunde, stunde + 1);
+        if (!this.nurAnsicht()) this.waehle(zeile, stunde, stunde + 1);
     }
 
-    private waehle(tag: number, von: number, bis: number): void {
-        this.stundenGewaehlt.emit({ jahr: this.jahr(), monat: this.monat(), tag, von, bis });
+    private waehle(zeile: TagesZeile, von: number, bis: number): void {
+        this.stundenGewaehlt.emit({ jahr: zeile.jahr, monat: zeile.monat, tag: zeile.tag, von, bis });
     }
 
-    protected taste(ereignis: KeyboardEvent, tag: number, stunde: number): void {
+    protected taste(ereignis: KeyboardEvent, zeile: number, stunde: number): void {
         const schritt: Record<string, [number, number]> = {
             ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0],
         };
@@ -181,7 +198,7 @@ export class BookingMonthGridComponent {
         if (!s) return;
         ereignis.preventDefault();
         this.host.nativeElement
-            .querySelector<HTMLElement>(`[data-tag="${tag + s[0]}"][data-stunde="${stunde + s[1]}"]`)
+            .querySelector<HTMLElement>(`[data-zeile="${zeile + s[0]}"][data-stunde="${stunde + s[1]}"]`)
             ?.focus();
     }
 }

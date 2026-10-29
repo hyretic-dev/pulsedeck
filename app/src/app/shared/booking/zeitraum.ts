@@ -194,3 +194,38 @@ export function tagesSchluessel(d: Date): string {
     const u = berlinUhr(d);
     return datumsSchluessel(u.jahr, u.monat, u.tag);
 }
+
+/** Ein Berliner Kalendertag. */
+export interface TagRef {
+    jahr: number;
+    monat: number;
+    tag: number;
+}
+
+export function plusTage(t: TagRef, tage: number): TagRef {
+    const d = new Date(Date.UTC(t.jahr, t.monat - 1, t.tag + tage));
+    return { jahr: d.getUTCFullYear(), monat: d.getUTCMonth() + 1, tag: d.getUTCDate() };
+}
+
+/** Der Montag der Woche, in der der Tag liegt (Wochen laufen von Montag bis Sonntag). */
+export function montagDerWoche(t: TagRef): TagRef {
+    return plusTage(t, -wochentag(t.jahr, t.monat, t.tag));
+}
+
+/** Die sieben Tage der Woche ab dem Montag. */
+export function wochenTage(montag: TagRef): TagRef[] {
+    return Array.from({ length: 7 }, (_, i) => plusTage(montag, i));
+}
+
+/** ISO-8601-Kalenderwoche samt Wochenjahr (die Woche gehört zum Jahr ihres Donnerstags). */
+export function isoKalenderwoche(t: TagRef): { woche: number; jahr: number } {
+    const donnerstag = plusTage(montagDerWoche(t), 3);
+    const ersterJanuar = Date.UTC(donnerstag.jahr, 0, 1);
+    const tageSeitJahresbeginn = (Date.UTC(donnerstag.jahr, donnerstag.monat - 1, donnerstag.tag) - ersterJanuar) / 86_400_000;
+    return { woche: Math.floor(tageSeitJahresbeginn / 7) + 1, jahr: donnerstag.jahr };
+}
+
+export function heuteBerlin(): TagRef {
+    const h = berlinUhr(new Date());
+    return { jahr: h.jahr, monat: h.monat, tag: h.tag };
+}

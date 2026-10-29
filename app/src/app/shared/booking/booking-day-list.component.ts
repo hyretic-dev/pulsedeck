@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 import { MONATSNAMEN, STATUS_TEXT, WOCHENTAG_KUERZEL, WOCHENTAG_LANG, uhrzeit } from './booking-labels';
 import type { BookingEntry, RasterPlan } from './booking.models';
 import { datumsSchluessel, feiertageImJahr } from './feiertage';
-import { TagesBalken, balkenFuerTag, berlinUhr, istWochenende, tageImMonat, wochentag } from './zeitraum';
+import { TagRef, TagesBalken, balkenFuerTag, berlinUhr, istWochenende, tageImMonat, wochentag } from './zeitraum';
 
 interface ListenChip {
     balken: TagesBalken;
@@ -12,6 +12,8 @@ interface ListenChip {
 }
 
 interface ListenZeile {
+    jahr: number;
+    monat: number;
     tag: number;
     wochentag: string;
     wochenende: boolean;
@@ -33,29 +35,35 @@ export class BookingDayListComponent {
     readonly monat = input.required<number>();
     readonly plan = input.required<RasterPlan>();
     readonly eintraege = input.required<ReadonlyArray<BookingEntry>>();
+    /** Beliebige Tage (z. B. eine Woche); ersetzt dann die Tage des Monats. */
+    readonly tage = input<ReadonlyArray<TagRef> | null>(null);
 
     readonly eintragGewaehlt = output<BookingEntry>();
-    readonly tagGewaehlt = output<number>();
+    readonly tagGewaehlt = output<TagRef>();
 
     protected readonly titel = computed(() => `${MONATSNAMEN[this.monat() - 1]} ${this.jahr()}`);
 
     protected readonly zeilen = computed<ListenZeile[]>(() => {
-        const jahr = this.jahr();
-        const monat = this.monat();
         const plan = this.plan();
-        const feiertage = feiertageImJahr(jahr, plan.state);
+        const jahr0 = this.jahr();
+        const monat0 = this.monat();
+        const tage: TagRef[] = this.tage()
+            ? [...(this.tage() as ReadonlyArray<TagRef>)]
+            : Array.from({ length: tageImMonat(jahr0, monat0) }, (_, i) => ({ jahr: jahr0, monat: monat0, tag: i + 1 }));
+        const feiertagsJahre = new Map<number, ReadonlyMap<string, string>>();
         const heute = berlinUhr(new Date());
-        return Array.from({ length: tageImMonat(jahr, monat) }, (_, i) => {
-            const tag = i + 1;
+        return tage.map((t): ListenZeile => {
+            const { jahr, monat, tag } = t;
             const wt = wochentag(jahr, monat, tag);
-            const feiertag = feiertage.get(datumsSchluessel(jahr, monat, tag)) ?? null;
+            if (!feiertagsJahre.has(jahr)) feiertagsJahre.set(jahr, feiertageImJahr(jahr, plan.state));
+            const feiertag = feiertagsJahre.get(jahr)?.get(datumsSchluessel(jahr, monat, tag)) ?? null;
             const chips = balkenFuerTag(this.eintraege(), jahr, monat, tag, plan.window_start, plan.window_end).map((balken) => ({
                 balken,
                 kurz: `${String(balken.von).padStart(2, '0')}–${String(balken.bis).padStart(2, '0')}`,
                 beschriftung: `${balken.eintrag.title ?? 'Belegt'}, ${uhrzeit(balken.von)} bis ${uhrzeit(balken.bis)}, ${STATUS_TEXT[balken.eintrag.status]}${balken.eintrag.is_mine ? ', deine Anfrage' : ''}`,
             }));
             return {
-                tag,
+                jahr, monat, tag,
                 wochentag: WOCHENTAG_KUERZEL[wt],
                 wochenende: istWochenende(jahr, monat, tag),
                 feiertag,

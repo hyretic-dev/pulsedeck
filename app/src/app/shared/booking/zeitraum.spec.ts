@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { BookingEntry } from './booking.models';
 import {
     aufVolleStunden, balkenFuerTag, belegungsStufe, berlinUhr, berlinZeitpunkt, pruefeVerfuegbarkeit,
-    stundenDesTages, tageImMonat, terminZuBelegung, verteileAufBahnen, wochentag,
+    isoKalenderwoche, montagDerWoche, plusTage, stundenDesTages, tageImMonat, terminZuBelegung, verteileAufBahnen, wochentag,
 } from './zeitraum';
 
 function eintrag(id: string, start: string, ende: string, status: BookingEntry['status'] = 'approved'): BookingEntry {
@@ -114,5 +114,18 @@ describe('Zeitraum', () => {
         expect(terminZuBelegung(tag, '21:00', '19:00')).toBeNull();
         expect(terminZuBelegung(tag, '19:10', '19:40')).not.toBeNull(); // 19 bis 20 Uhr
         expect(terminZuBelegung(tag, 'abends', '21:00')).toBeNull();
+    });
+
+    it('findet den Montag und die ISO-Kalenderwoche, auch über Monats- und Jahresgrenzen', () => {
+        expect(montagDerWoche({ jahr: 2026, monat: 10, tag: 29 })).toEqual({ jahr: 2026, monat: 10, tag: 26 }); // Donnerstag
+        expect(montagDerWoche({ jahr: 2026, monat: 11, tag: 1 })).toEqual({ jahr: 2026, monat: 10, tag: 26 }); // Sonntag gehört zur Woche davor
+        expect(montagDerWoche({ jahr: 2026, monat: 10, tag: 26 })).toEqual({ jahr: 2026, monat: 10, tag: 26 });
+        expect(isoKalenderwoche({ jahr: 2026, monat: 10, tag: 29 })).toEqual({ woche: 44, jahr: 2026 });
+        expect(isoKalenderwoche({ jahr: 2026, monat: 1, tag: 1 })).toEqual({ woche: 1, jahr: 2026 }); // Donnerstag
+        expect(isoKalenderwoche({ jahr: 2027, monat: 1, tag: 1 })).toEqual({ woche: 53, jahr: 2026 }); // Freitag, Woche 53 von 2026
+        expect(isoKalenderwoche({ jahr: 2024, monat: 12, tag: 30 })).toEqual({ woche: 1, jahr: 2025 }); // Montag
+        expect(isoKalenderwoche({ jahr: 2028, monat: 2, tag: 29 })).toEqual({ woche: 9, jahr: 2028 }); // Schaltjahr
+        expect(plusTage({ jahr: 2026, monat: 12, tag: 31 }, 1)).toEqual({ jahr: 2027, monat: 1, tag: 1 });
+        expect(plusTage({ jahr: 2028, monat: 2, tag: 28 }, 1)).toEqual({ jahr: 2028, monat: 2, tag: 29 });
     });
 });

@@ -145,22 +145,23 @@
         <div class="px-3 pb-3">
             @if (store.ansicht() === 'jahr') {
             <app-booking-year-grid [jahr]="store.jahr()" [plan]="plan" [eintraege]="store.eintraege()"
-                (tagGewaehlt)="tagImJahr($event)" (monatGewaehlt)="store.oeffneMonat($event)" />
+                (tagGewaehlt)="oeffneTagesPanel($event)" (monatGewaehlt)="store.oeffneMonat($event)" />
             } @else {
             <div class="rounded-lg border border-[var(--color-border)] overflow-hidden">
                 @if (schmal()) {
                 <app-booking-day-list [jahr]="store.jahr()" [monat]="store.monat()" [plan]="plan"
-                    [eintraege]="store.eintraege()" (eintragGewaehlt)="zeigeDetail($event)"
-                    (tagGewaehlt)="oeffneTagesPanel(store.jahr(), store.monat(), $event)" />
+                    [tage]="store.ansicht() === 'woche' ? store.wochenTage() : null" [eintraege]="store.eintraege()"
+                    (eintragGewaehlt)="zeigeDetail($event)" (tagGewaehlt)="oeffneTagesPanel($event)" />
                 } @else {
                 <app-booking-month-grid [jahr]="store.jahr()" [monat]="store.monat()" [plan]="plan"
-                    [eintraege]="store.eintraege()" [nurAnsicht]="!darfAnfragen()"
-                    (stundenGewaehlt)="neueAnfrage($event)" (eintragGewaehlt)="zeigeDetail($event)" />
+                    [tage]="store.ansicht() === 'woche' ? store.wochenTage() : null" [eintraege]="store.eintraege()"
+                    [nurAnsicht]="!darfAnfragen()" (stundenGewaehlt)="neueAnfrage($event)" (eintragGewaehlt)="zeigeDetail($event)"
+                    (tagGewaehlt)="oeffneTagesPanel($event)" />
                 }
             </div>
             }
             <div class="mt-3">
-                <app-booking-legend [ansicht]="store.ansicht()" />
+                <app-booking-legend [ansicht]="store.ansicht() === 'jahr' ? 'jahr' : 'monat'" />
             </div>
         </div>
         }
@@ -259,14 +260,9 @@
     (loeschen)="loeschen($event)" (bearbeiten)="bearbeiten($event)" (serieUmbenennen)="serieUmbenennenFragen($event)"
     (serieBeenden)="serieBeendenFragen($event)" />
 
-<!-- Schmal: Tag im Seitenpanel -->
-<p-drawer [(visible)]="tagesPanelSichtbar" position="bottom" [header]="tagesPanelTitel()" styleClass="!h-[75vh]">
-    @if (tagesPanel(); as t) {
-    <app-booking-day-hours [plan]="plan" [eintraege]="store.eintraege()" [jahr]="t.jahr" [monat]="t.monat" [tag]="t.tag"
-        [darfAnfragen]="darfAnfragen()" (stundeGewaehlt)="stundeAusPanel($event)"
-        (eintragGewaehlt)="tagesPanelSichtbar.set(false); zeigeDetail($event)" />
-    }
-</p-drawer>
+<!-- Tagesansicht als Seitenpanel (rechts, schmal unten); die Ansicht dahinter bleibt -->
+<app-booking-day-panel [(sichtbar)]="tagesPanelSichtbar" [(tag)]="tagesPanel" [plan]="plan" [eintraege]="store.eintraege()"
+    [darfAnfragen]="darfAnfragen()" [unten]="schmal()" (stundeGewaehlt)="stundeAusPanel($event)" (eintragGewaehlt)="zeigeDetail($event)" />
 }
 
 <p-dialog header="Anfrage ablehnen" [(visible)]="ablehnenSichtbar" [modal]="true" [draggable]="false" [resizable]="false"

@@ -1,12 +1,12 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 
 import type { BookingEntry, BookingPlan } from '../../../../shared/booking/booking.models';
-import { berlinUhr } from '../../../../shared/booking/zeitraum';
+import { TagRef, berlinUhr, heuteBerlin, isoKalenderwoche, montagDerWoche, plusTage, wochenTage } from '../../../../shared/booking/zeitraum';
 import {
     BOOKING_REPOSITORY, BuchungAenderung, BuchungEingabe, PlanEingabe, SerieEingabe, SerienErgebnis, SerienVorschau,
 } from '../domain/booking.repository';
 
-export type Ansicht = 'jahr' | 'monat';
+export type Ansicht = 'jahr' | 'monat' | 'woche';
 export type Bereich = 'plan' | 'eingang' | 'meine';
 
 const SCHLUESSEL = 'pulsedeck.belegung';
@@ -34,6 +34,10 @@ export class BookingStore {
     readonly bereich = signal<Bereich>('plan');
     readonly jahr = signal(berlinUhr(new Date()).jahr);
     readonly monat = signal(berlinUhr(new Date()).monat);
+    /** Montag der angezeigten Woche; die Wochenansicht startet immer mit der laufenden Kalenderwoche. */
+    readonly woche = signal<TagRef>(montagDerWoche(heuteBerlin()));
+    readonly wochenTage = computed(() => wochenTage(this.woche()));
+    readonly kalenderwoche = computed(() => isoKalenderwoche(this.woche()));
 
     readonly plan = computed(() => this.plaene().find((p) => p.id === this.planId()) ?? null);
     readonly offeneAnfragen = computed(() => this.eintraege().filter((e) => e.status === 'requested'));
@@ -45,7 +49,7 @@ export class BookingStore {
 
     async start(destroyRef: DestroyRef): Promise<void> {
         const merk = gespeichert();
-        if (merk.ansicht === 'jahr' || merk.ansicht === 'monat') this.ansicht.set(merk.ansicht);
+        if (merk.ansicht === 'jahr' || merk.ansicht === 'monat' || merk.ansicht === 'woche') this.ansicht.set(merk.ansicht);
         const abmelden = this.repo.aenderungen(() => this.nachladenPlanen());
         destroyRef.onDestroy(() => {
             abmelden();
@@ -96,18 +100,34 @@ export class BookingStore {
         await this.neuLaden();
     }
 
-    ansichtWaehlen(ansicht: Ansicht): void {
+    /** Wechselt die Ansicht; die Wochenansicht zeigt dabei immer die laufende Kalenderwoche. */
+    async ansichtWaehlen(ansicht: Ansicht): Promise<void> {
         this.ansicht.set(ansicht);
         this.merke();
+        if (ansicht === 'woche') await this.zeigeWoche(montagDerWoche(heuteBerlin()));
+    }
+
+    /** Setzt die Woche; gehört sie zu einem anderen Jahr (Jahreswechsel), wird nachgeladen. */
+    private async zeigeWoche(montag: TagRef): Promise<void> {
+        this.woche.set(montag);
+        const jahr = isoKalenderwoche(montag).jahr;
+        if (jahr !== this.jahr()) {
+            this.jahr.set(jahr);
+            await this.neuLaden();
+        }
     }
 
     oeffneMonat(monat: number, jahr = this.jahr()): void {
         this.jahr.set(jahr);
         this.monat.set(monat);
-        this.ansichtWaehlen('monat');
+        void this.ansichtWaehlen('monat');
     }
 
     async weiter(schritt: 1 | -1): Promise<void> {
+        if (this.ansicht() === 'woche') {
+            await this.zeigeWoche(plusTage(this.woche(), 7 * schritt));
+            return;
+        }
         const altesJahr = this.jahr();
         if (this.ansicht() === 'jahr') {
             this.jahr.update((j) => j + schritt);
@@ -121,9 +141,13 @@ export class BookingStore {
 
     async heute(): Promise<void> {
         const h = berlinUhr(new Date());
+        this.monat.set(h.monat);
+        if (this.ansicht() === 'woche') {
+            await this.zeigeWoche(montagDerWoche(heuteBerlin()));
+            return;
+        }
         const altesJahr = this.jahr();
         this.jahr.set(h.jahr);
-        this.monat.set(h.monat);
         if (altesJahr !== h.jahr) await this.neuLaden();
     }
 

@@ -162,4 +162,58 @@ describe('BookingStore', () => {
         expect(store.eintraege()).toEqual([]);
         expect(repo.eintraege).not.toHaveBeenCalled();
     });
+
+    it('zeigt in der Wochenansicht immer die laufende Kalenderwoche und blättert wochenweise', async () => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(new Date('2026-10-29T10:00:00Z')); // Donnerstag, KW 44
+        try {
+            einrichten();
+            await store.start(ref());
+            await store.ansichtWaehlen('woche');
+            expect(store.woche()).toEqual({ jahr: 2026, monat: 10, tag: 26 });
+            expect(store.kalenderwoche()).toEqual({ woche: 44, jahr: 2026 });
+            expect(store.wochenTage().map((t) => t.tag)).toEqual([26, 27, 28, 29, 30, 31, 1]); // über die Monatsgrenze
+            await store.weiter(1);
+            expect(store.woche()).toEqual({ jahr: 2026, monat: 11, tag: 2 });
+            await store.weiter(-1);
+            await store.weiter(-1);
+            expect(store.woche()).toEqual({ jahr: 2026, monat: 10, tag: 19 });
+            // „Heute“ springt zur laufenden KW zurück, auch wenn man weit weg ist
+            await store.weiter(-1);
+            await store.heute();
+            expect(store.kalenderwoche().woche).toBe(44);
+            // Wechsel weg und zurück beginnt wieder mit der laufenden Woche
+            await store.weiter(1);
+            await store.ansichtWaehlen('monat');
+            await store.ansichtWaehlen('woche');
+            expect(store.woche()).toEqual({ jahr: 2026, monat: 10, tag: 26 });
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('lädt beim Blättern über den Jahreswechsel nach (KW 53 gehört zu 2026, die folgende Woche zu 2027)', async () => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(new Date('2026-12-28T10:00:00Z')); // Montag der KW 53
+        try {
+            einrichten();
+            await store.start(ref());
+            await store.ansichtWaehlen('woche');
+            expect(store.kalenderwoche()).toEqual({ woche: 53, jahr: 2026 });
+            repo.eintraege.mockClear();
+            await store.weiter(1); // Montag 4.1.2027, KW 1
+            expect(store.kalenderwoche()).toEqual({ woche: 1, jahr: 2027 });
+            expect(store.jahr()).toBe(2027);
+            expect(repo.eintraege).toHaveBeenCalledWith('p1', '2026-12-01', '2028-01-31');
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('bleibt beim Öffnen eines Monats in der Monatsansicht', async () => {
+        einrichten();
+        await store.start(ref());
+        store.oeffneMonat(3, 2027);
+        expect([store.ansicht(), store.monat(), store.jahr()]).toEqual(['monat', 3, 2027]);
+    });
 });
