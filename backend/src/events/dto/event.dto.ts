@@ -44,6 +44,8 @@ export class CreateEventDto {
   @ApiPropertyOptional({ enum: ORTS_ARTEN }) @IsOptional() @IsIn(ORTS_ARTEN) location_type?: string | null;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() is_recurring?: boolean;
   @ApiPropertyOptional({ enum: WIEDERHOLUNGEN }) @IsOptional() @IsIn(WIEDERHOLUNGEN) recurrence_interval?: string | null;
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, description: 'Belegungsplan (Art Ort), der für den Termin reserviert wird; nur bei „Vor Ort“ und mit Endzeit' })
+  @IsOptional() @IsUUID() booking_calendar_id?: string | null;
 }
 
 export class UpdateEventDto extends PartialType(CreateEventDto) {}

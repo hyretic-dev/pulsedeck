@@ -5,6 +5,7 @@ import { schreibeAudit } from '../common/audit';
 import { meldeAenderung } from '../common/changes';
 import { inTransaction } from '../common/db';
 import { konflikt, nichtGefunden, ungueltig, verboten } from '../common/http-error';
+import { BookingLinkService, type TerminZeit } from '../bookings/booking-link.service';
 import { PG_POOL } from '../infrastructure/postgres/pg.pool';
 import type { Membership } from '../tenancy/membership';
 import { reihePushEin } from '../push/push-queue';
@@ -16,6 +17,15 @@ export const EVENT_SPALTEN = `e.id, e.organization_id, e.title, e.date, e.start_
   COALESCE(g.name, e.ag_name) AS ag_name, e.working_group_id, e.allowed_roles, e.max_participants, e.registration_required,
   e.meeting_reason, e.location_type, e.is_recurring, e.recurrence_interval, e.recurrence_parent_id, e.created_at, e.updated_at`;
 const EVENT_FROM = 'FROM events e LEFT JOIN working_groups g ON g.id = e.working_group_id';
+/** Ortsreservierung des Termins (Plan und Status) für Chips in Liste, Detail und Dashboard; nur für Mitglieder, nie öffentlich. */
+const BUCHUNG_SPALTE = `CASE WHEN bk.id IS NULL THEN NULL
+       ELSE jsonb_build_object('id', bk.id, 'calendar_id', bk.calendar_id, 'calendar_name', bk.calendar_name, 'status', bk.status) END AS booking`;
+const BUCHUNG_JOIN = `LEFT JOIN LATERAL (
+    SELECT b.id, b.status, b.calendar_id, c.name AS calendar_name FROM bookings b JOIN booking_calendars c ON c.id = b.calendar_id
+     WHERE b.event_id = e.id AND b.organization_id = e.organization_id
+     ORDER BY (b.status IN ('requested', 'approved')) DESC, b.updated_at DESC LIMIT 1) bk ON true`;
+const MIT_BUCHUNG = `${EVENT_SPALTEN}, ${BUCHUNG_SPALTE}`;
+const FROM_MIT_BUCHUNG = `${EVENT_FROM} ${BUCHUNG_JOIN}`;
 
 export interface EventEingabe {
   title?: string;
@@ -32,6 +42,8 @@ export interface EventEingabe {
   location_type?: string | null;
   is_recurring?: boolean;
   recurrence_interval?: string | null;
+  /** Belegungsplan (Art Ort), der für den Termin reserviert wird; null entfernt die Reservierung. */
+  booking_calendar_id?: string | null;
 }
 const FELDER = [
   'title', 'date', 'start_time', 'end_time', 'location', 'description', 'working_group_id', 'allowed_roles',
@@ -67,7 +79,10 @@ export function serienTermine(startDatum: string, intervall: string): string[] {
 
 @Injectable()
 export class EventsService {
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+  constructor(
+    @Inject(PG_POOL) private readonly pool: Pool,
+    private readonly buchungen: BookingLinkService
+  ) {}
 
   /** Arbeitsgruppen des Aufrufers (beide Mitgliedschaftstabellen). */
   async agIds(db: Db, memberId: string): Promise<string[]> {
@@ -101,14 +116,14 @@ export class EventsService {
       params.push(sichtbarkeitsRang(aufrufer), await this.agIds(db, aufrufer.member.id));
       bedingung = `AND ${sichtbarkeitsBedingung(3)}`;
     }
-    const { rows } = await db.query(`SELECT ${EVENT_SPALTEN} ${EVENT_FROM} WHERE e.id = $1 AND e.organization_id = $2 ${bedingung}`, params);
+    const { rows } = await db.query(`SELECT ${MIT_BUCHUNG} ${FROM_MIT_BUCHUNG} WHERE e.id = $1 AND e.organization_id = $2 ${bedingung}`, params);
     if (!rows[0]) throw nichtGefunden('Termin');
     return rows[0];
   }
 
   async liste(orgId: string, aufrufer: Membership): Promise<Record<string, unknown>[]> {
     const { rows } = await this.pool.query(
-      `SELECT ${EVENT_SPALTEN} ${EVENT_FROM}
+      `SELECT ${MIT_BUCHUNG} ${FROM_MIT_BUCHUNG}
         WHERE e.organization_id = $1 AND ${sichtbarkeitsBedingung(2)}
         ORDER BY e.date ASC, e.start_time ASC`,
       [orgId, sichtbarkeitsRang(aufrufer), await this.agIds(this.pool, aufrufer.member.id)]
@@ -124,7 +139,7 @@ export class EventsService {
   async kommendeAgTermine(orgId: string, aufrufer: Membership): Promise<Record<string, unknown>[]> {
     const heute = new Date().toISOString().split('T')[0];
     const { rows } = await this.pool.query(
-      `SELECT ${EVENT_SPALTEN} ${EVENT_FROM}
+      `SELECT ${MIT_BUCHUNG} ${FROM_MIT_BUCHUNG}
         WHERE e.organization_id = $1 AND e.working_group_id IS NOT NULL AND e.date >= $4 AND ${sichtbarkeitsBedingung(2)}
         ORDER BY e.date ASC, e.start_time ASC`,
       [orgId, sichtbarkeitsRang(aufrufer), await this.agIds(this.pool, aufrufer.member.id), heute]
@@ -151,10 +166,18 @@ export class EventsService {
     return rows[0].name;
   }
 
-  /** Legt einen Termin an und bei Serien alle Folgetermine in derselben Transaktion (Bestand: zwei getrennte Aufrufe). */
+  /** Ortsreservierung gibt es nur bei „Vor Ort“ und mit Endzeit (die Buchung umfasst die vollen Stunden um den Termin). */
+  private pruefeOrtsreservierung(locationType: string | null | undefined, endTime: string | null | undefined): void {
+    if (locationType !== 'onsite') throw ungueltig('Ein Ort lässt sich nur bei „Vor Ort“ reservieren');
+    if (!endTime) throw ungueltig('Für die Ortsreservierung brauchst du eine Endzeit');
+  }
+
+  /** Legt einen Termin an, bei Serien alle Folgetermine, und reserviert auf Wunsch den Ort: alles in einer Transaktion. */
   async anlegen(userId: string, orgId: string, aufrufer: Membership, eingabe: EventEingabe): Promise<Record<string, unknown>> {
     if (!(await this.darfVerwalten(this.pool, aufrufer, eingabe.working_group_id ?? null))) throw verboten();
     if (eingabe.is_recurring && !eingabe.recurrence_interval) throw ungueltig('Für Serientermine fehlt das Wiederholungsintervall');
+    const calId = eingabe.booking_calendar_id ?? null;
+    if (calId) this.pruefeOrtsreservierung(eingabe.location_type, eingabe.end_time);
     return inTransaction(this.pool, async (db) => {
       const gruppenname = await this.pruefeGruppe(db, orgId, eingabe.working_group_id);
       const werte: Record<string, unknown> = {
@@ -162,6 +185,8 @@ export class EventsService {
         ...Object.fromEntries(FELDER.filter((k) => eingabe[k] !== undefined && eingabe[k] !== null && eingabe[k] !== '').map((k) => [k, eingabe[k]])),
         ag_name: gruppenname,
       };
+      // Ist das Ortsfeld leer, steht dort Name und Adresse des Plans
+      if (calId && !eingabe.location?.trim()) werte.location = await this.buchungen.ortsangabe(db, orgId, calId, aufrufer);
       if (!eingabe.is_recurring) delete werte.recurrence_interval;
       const spalten = Object.keys(werte);
       const eltern = await db.query<{ id: string }>(
@@ -169,19 +194,21 @@ export class EventsService {
         [orgId, ...spalten.map((s) => werte[s])]
       );
       const id = eltern.rows[0].id;
+      const termine: TerminZeit[] = [{ id, title: String(werte.title), date: String(werte.date), start_time: String(werte.start_time), end_time: eingabe.end_time }];
       if (eingabe.is_recurring && eingabe.recurrence_interval && eingabe.date) {
-        const termine = serienTermine(eingabe.date, eingabe.recurrence_interval);
-        for (const datum of termine) {
-          await db.query(
+        for (const datum of serienTermine(eingabe.date, eingabe.recurrence_interval)) {
+          const kind = await db.query<{ id: string }>(
             `INSERT INTO events (organization_id, title, date, start_time, end_time, location, description, ag_name, working_group_id,
                allowed_roles, max_participants, registration_required, meeting_reason, location_type, is_recurring, recurrence_interval, recurrence_parent_id)
              SELECT organization_id, title, $2, start_time, end_time, location, description, ag_name, working_group_id,
                allowed_roles, max_participants, registration_required, meeting_reason, location_type, true, recurrence_interval, id
-               FROM events WHERE id = $1`,
+               FROM events WHERE id = $1 RETURNING id`,
             [id, datum]
           );
+          termine.push({ ...termine[0], id: kind.rows[0].id, date: datum });
         }
       }
+      if (calId) await this.buchungen.reserviere(db, { userId, orgId, aufrufer }, calId, termine);
       const angelegt = await this.lade(db, orgId, id);
       await schreibeAudit(db, { table: 'events', operation: 'INSERT', recordId: id, newData: angelegt, performedBy: userId, organizationId: orgId });
       await meldeAenderung(db, { table: 'events', organizationId: orgId, operation: 'INSERT', id });
@@ -194,30 +221,81 @@ export class EventsService {
   async aendern(userId: string, orgId: string, aufrufer: Membership, eventId: string, eingabe: EventEingabe): Promise<Record<string, unknown>> {
     const felder = FELDER.filter((k) => eingabe[k] !== undefined);
     return inTransaction(this.pool, async (db) => {
-      const alt = await db.query<{ working_group_id: string | null }>('SELECT working_group_id FROM events WHERE id = $1 AND organization_id = $2 FOR UPDATE', [eventId, orgId]);
+      const alt = await db.query<{ working_group_id: string | null; title: string; date: string; start_time: string; end_time: string | null; location: string; location_type: string | null }>(
+        'SELECT working_group_id, title, date, start_time, end_time, location, location_type FROM events WHERE id = $1 AND organization_id = $2 FOR UPDATE',
+        [eventId, orgId]
+      );
       if (!alt.rows[0]) throw nichtGefunden('Termin');
       // Berechtigung für die bisherige UND (bei Wechsel) die neue Arbeitsgruppe
       if (!(await this.darfVerwalten(db, aufrufer, alt.rows[0].working_group_id))) throw verboten();
       const neueGruppe = eingabe.working_group_id !== undefined ? eingabe.working_group_id : alt.rows[0].working_group_id;
       if (neueGruppe !== alt.rows[0].working_group_id && !(await this.darfVerwalten(db, aufrufer, neueGruppe))) throw verboten();
       const vorher = await this.lade(db, orgId, eventId);
-      if (felder.length === 0) return vorher;
+      if (felder.length === 0 && eingabe.booking_calendar_id === undefined) return vorher;
 
-      const werte: Record<string, unknown> = Object.fromEntries(felder.map((k) => [k, eingabe[k]]));
-      if (eingabe.working_group_id !== undefined) {
-        werte.ag_name = await this.pruefeGruppe(db, orgId, eingabe.working_group_id);
+      if (felder.length > 0) {
+        const werte: Record<string, unknown> = Object.fromEntries(felder.map((k) => [k, eingabe[k]]));
+        if (eingabe.working_group_id !== undefined) {
+          werte.ag_name = await this.pruefeGruppe(db, orgId, eingabe.working_group_id);
+        }
+        if (eingabe.is_recurring === false) werte.recurrence_interval = null;
+        const spalten = Object.keys(werte);
+        await db.query(
+          `UPDATE events SET ${spalten.map((s, i) => `${s} = $${i + 3}`).join(', ')}, updated_at = now() WHERE id = $1 AND organization_id = $2`,
+          [eventId, orgId, ...spalten.map((s) => werte[s])]
+        );
       }
-      if (eingabe.is_recurring === false) werte.recurrence_interval = null;
-      const spalten = Object.keys(werte);
-      await db.query(
-        `UPDATE events SET ${spalten.map((s, i) => `${s} = $${i + 3}`).join(', ')}, updated_at = now() WHERE id = $1 AND organization_id = $2`,
-        [eventId, orgId, ...spalten.map((s) => werte[s])]
-      );
+      await this.gleicheOrtsreservierungAb(db, { userId, orgId, aufrufer }, eventId, alt.rows[0], eingabe);
+
       const neu = await this.lade(db, orgId, eventId);
       await schreibeAudit(db, { table: 'events', operation: 'UPDATE', recordId: eventId, oldData: vorher, newData: neu, performedBy: userId, organizationId: orgId });
       await meldeAenderung(db, { table: 'events', organizationId: orgId, operation: 'UPDATE', id: eventId });
       return neu;
     });
+  }
+
+  /**
+   * Hält die Buchung mit dem Termin synchron (selbe Transaktion): Ort entfernt oder gewechselt → alte Buchung storniert, ggf.
+   * neue angelegt; Datum oder Uhrzeit geändert → die Buchung zieht mit (braucht eine Rolle im Plan); kein „Vor Ort“ mehr → Buchung entfällt.
+   */
+  private async gleicheOrtsreservierungAb(
+    db: Db,
+    k: { userId: string; orgId: string; aufrufer: Membership },
+    eventId: string,
+    alt: { title: string; date: string; start_time: string; end_time: string | null; location: string; location_type: string | null },
+    eingabe: EventEingabe
+  ): Promise<void> {
+    const zeit = (x: string | null | undefined) => (x ?? '').slice(0, 5);
+    const neu: TerminZeit = {
+      id: eventId,
+      title: eingabe.title ?? alt.title,
+      date: eingabe.date ?? alt.date,
+      start_time: eingabe.start_time ?? alt.start_time,
+      end_time: eingabe.end_time !== undefined ? eingabe.end_time : alt.end_time,
+    };
+    const zeitGeaendert = neu.date !== alt.date || zeit(neu.start_time) !== zeit(alt.start_time) || zeit(neu.end_time) !== zeit(alt.end_time);
+    const ortsart = eingabe.location_type !== undefined ? eingabe.location_type : alt.location_type;
+    const aktive = await this.buchungen.aktive(db, k.orgId, eventId, true);
+    const neuerPlan = eingabe.booking_calendar_id;
+
+    if (neuerPlan !== undefined) {
+      const wechsel = !aktive || neuerPlan !== aktive.calendar_id;
+      if (aktive && (neuerPlan === null || wechsel)) await this.buchungen.entferne(db, k, eventId);
+      if (neuerPlan !== null && wechsel) {
+        this.pruefeOrtsreservierung(ortsart, neu.end_time);
+        await this.buchungen.reserviere(db, k, neuerPlan, [neu]);
+        const ort = eingabe.location !== undefined ? eingabe.location : alt.location;
+        if (!ort?.trim()) await db.query('UPDATE events SET location = $3 WHERE id = $1 AND organization_id = $2', [eventId, k.orgId, await this.buchungen.ortsangabe(db, k.orgId, neuerPlan, k.aufrufer)]);
+        return;
+      }
+      if (neuerPlan === null) return;
+    }
+    if (!aktive) return;
+    if (ortsart !== 'onsite') {
+      await this.buchungen.entferne(db, k, eventId);
+      return;
+    }
+    if (zeitGeaendert) await this.buchungen.verschiebe(db, k, neu);
   }
 
   async loeschen(userId: string, orgId: string, aufrufer: Membership, eventId: string): Promise<void> {

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { BookingsModule } from '../bookings/bookings.module';
 import { TenancyModule } from '../tenancy/tenancy.module';
 
 import { EventsController } from './events.controller';
@@ -11,7 +12,7 @@ import { SlotsController } from './slots.controller';
 import { SlotsService } from './slots.service';
 
 @Module({
-  imports: [TenancyModule],
+  imports: [TenancyModule, BookingsModule],
   controllers: [EventsController, SlotsController, GuestsController, PublicEventsController],
   providers: [EventsService, SlotsService, GuestsService],
   exports: [EventsService],
