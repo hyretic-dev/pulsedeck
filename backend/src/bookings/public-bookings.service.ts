@@ -15,7 +15,7 @@ export interface OeffentlicherPlan {
   state: string | null;
   window_start: number;
   window_end: number;
-  public_view: 'year' | 'month';
+  public_view: 'week' | 'month' | 'year';
 }
 
 export interface OeffentlicheBuchung {

@@ -26,6 +26,7 @@ import { ApiPublicBookingRepository } from '../infrastructure/api-public-booking
 @Component({
     selector: 'app-public-booking',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    host: { class: 'block' },
     imports: [
         FormsModule, ButtonModule, SelectModule, SelectButtonModule, TabsModule,
         BookingDayListComponent, BookingDayPanelComponent, BookingLegendComponent, BookingMonthGridComponent, BookingYearGridComponent,

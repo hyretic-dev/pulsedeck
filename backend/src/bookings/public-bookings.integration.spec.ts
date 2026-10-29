@@ -112,6 +112,13 @@ describe('Öffentliche Belegung (echtes PostgreSQL)', () => {
     expect(await q(30, 39)).not.toContain('Mehrtägig');
   });
 
+  it('kennt die Wochenansicht als öffentliche Startansicht und lehnt unbekannte Werte ab', async () => {
+    const woche = ok(await f.api('post', p(), ids.olga, { name: 'Wochenplan', kind: 'place', public_view: 'week' })).id;
+    expect((await f.api('get', pub('alpha'))).body.find((x: any) => x.id === woche)).toMatchObject({ public_view: 'week' });
+    expect((await f.api('patch', p(ids.alpha, `/${woche}`), ids.olga, { public_view: 'day' })).status).toBe(400);
+    ok(await f.api('delete', p(ids.alpha, `/${woche}`), ids.olga));
+  });
+
   it('nimmt den Plan aus der öffentlichen Ansicht, sobald die Leitung sie abschaltet', async () => {
     ok(await f.api('patch', p(ids.alpha, `/${oeffentlich}`), ids.olga, { public_view: 'none' }));
     expect((await f.api('get', pub('alpha'))).body).toEqual([]);

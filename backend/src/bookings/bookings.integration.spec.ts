@@ -82,7 +82,7 @@ describe('Belegung (echtes PostgreSQL)', () => {
 
   it('prüft die Eingabe der Pläne', async () => {
     for (const falsch of [
-      { name: '' }, { kind: 'raum' }, { state: 'XX' }, { window_start: 22, window_end: 8 }, { window_end: 25 }, { public_view: 'week' },
+      { name: '' }, { kind: 'raum' }, { state: 'XX' }, { window_start: 22, window_end: 8 }, { window_end: 25 }, { public_view: 'day' },
       { organization_id: ids.beta }, { id: ids.beta },
     ]) {
       expect((await f.api('post', p(ids.alpha), ids.olga, { name: 'X', kind: 'place', ...falsch })).status, JSON.stringify(falsch)).toBe(400);

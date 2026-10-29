@@ -38,6 +38,19 @@ describe('PublicBookingStore', () => {
         }
     });
 
+    it('startet bei Plänen mit Wochenanzeige in der laufenden Kalenderwoche', async () => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(new Date('2026-10-29T10:00:00Z'));
+        try {
+            const { store } = einrichten({ plaene: vi.fn(async () => [testOeffentlicherPlan({ public_view: 'week' })]) });
+            await store.start('alpha');
+            expect(store.ansicht()).toBe('woche');
+            expect(store.kalenderwoche()).toEqual({ woche: 44, jahr: 2026 });
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
     it('bleibt ohne öffentliche Pläne leer und lädt keine Einträge', async () => {
         const { repo, store } = einrichten({ plaene: vi.fn(async () => []) });
         await store.start('alpha');

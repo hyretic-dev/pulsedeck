@@ -52,8 +52,9 @@ export class BookingCalendarDialogComponent {
     protected readonly bundeslaender = [{ kuerzel: null, name: 'Nur bundesweite Feiertage' }, ...BUNDESLAENDER];
     protected readonly anzeigeOptionen: { label: string; value: OeffentlicheAnzeige }[] = [
         { label: 'Nicht öffentlich', value: 'none' },
-        { label: 'Jahresansicht', value: 'year' },
+        { label: 'Wochenansicht (laufende KW)', value: 'week' },
         { label: 'Monatsansicht', value: 'month' },
+        { label: 'Jahresansicht', value: 'year' },
     ];
     protected readonly rollenOptionen: { label: string; value: PlanRolle }[] = [
         { label: 'Leitung', value: 'lead' },

@@ -148,11 +148,6 @@ import { PublicBookingComponent } from '../public-booking/components/public-book
                 </div>
             </div>
 
-            <!-- Belegung: öffentliche Pläne, volle Breite vor den Terminen -->
-            @if (org()) {
-            <app-public-booking [slug]="slug()" [farbe]="org()?.primary_color ?? null" />
-            }
-
             <!-- 2. Main Dashboard Content -->
             <main class="max-w-7xl mx-auto px-4 md:px-8 py-12">
                 <div class="grid lg:grid-cols-12 gap-10">
@@ -204,6 +199,11 @@ import { PublicBookingComponent } from '../public-booking/components/public-book
                                 </div>
                             }
                         </section>
+
+                        <!-- Belegung: öffentliche Pläne, unter den Terminen in der Hauptspalte (die Seitenleiste bleibt oben) -->
+                        @if (org()) {
+                        <app-public-booking [slug]="slug()" [farbe]="org()?.primary_color ?? null" />
+                        }
 
                         <!-- News Section (Priority #2) -->
                         <section>

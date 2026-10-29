@@ -19,7 +19,7 @@ import {
 
 export const PLAN_ARTEN = ['place', 'item'] as const;
 export const PLAN_ROLLEN = ['lead', 'manager', 'requester'] as const;
-export const OEFFENTLICHE_ANZEIGEN = ['none', 'year', 'month'] as const;
+export const OEFFENTLICHE_ANZEIGEN = ['none', 'week', 'month', 'year'] as const;
 export const BUNDESLAENDER = ['BW', 'BY', 'BE', 'BB', 'HB', 'HH', 'HE', 'MV', 'NI', 'NW', 'RP', 'SL', 'SN', 'ST', 'SH', 'TH'] as const;
 const DATUM = /^\d{4}-\d{2}-\d{2}$/;
 

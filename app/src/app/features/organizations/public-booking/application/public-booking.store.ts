@@ -43,7 +43,11 @@ export class PublicBookingStore {
     async waehle(planId: string | null): Promise<void> {
         this.planId.set(planId);
         const plan = this.plan();
-        if (plan) this.ansicht.set(plan.public_view === 'month' ? 'monat' : 'jahr');
+        if (plan) {
+            this.ansicht.set(plan.public_view === 'week' ? 'woche' : plan.public_view === 'month' ? 'monat' : 'jahr');
+            // Die Wochenansicht zeigt immer die laufende Kalenderwoche
+            if (plan.public_view === 'week') await this.zeigeWoche(montagDerWoche(heuteBerlin()));
+        }
         await this.laden();
     }
 

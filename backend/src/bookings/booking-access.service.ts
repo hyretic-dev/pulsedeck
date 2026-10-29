@@ -19,7 +19,7 @@ export interface PlanZeile {
   window_start: number;
   window_end: number;
   all_members_can_request: boolean;
-  public_view: 'none' | 'year' | 'month';
+  public_view: 'none' | 'week' | 'month' | 'year';
   sort_order: number;
   created_at: Date;
   updated_at: Date;

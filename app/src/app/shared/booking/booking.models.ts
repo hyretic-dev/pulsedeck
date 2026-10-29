@@ -4,7 +4,7 @@ import type { Bundesland } from './feiertage';
 
 export type PlanArt = 'place' | 'item';
 export type PlanRolle = 'lead' | 'manager' | 'requester';
-export type OeffentlicheAnzeige = 'none' | 'year' | 'month';
+export type OeffentlicheAnzeige = 'none' | 'week' | 'month' | 'year';
 export type BuchungsStatus = 'requested' | 'approved' | 'declined' | 'cancelled';
 
 export interface BookingPlan {
