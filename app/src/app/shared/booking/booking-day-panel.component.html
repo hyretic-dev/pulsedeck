@@ -1,4 +1,8 @@
-<p-drawer [(visible)]="sichtbar" [position]="unten() ? 'bottom' : 'right'" [styleClass]="unten() ? '!h-[78vh]' : '!w-[26rem] max-w-full'">
+<!-- Eigene Hintergrundfläche: Die Maske des PrimeNG-Drawers (modal) blieb nach dem Schließen im DOM stehen und blockierte die Seite -->
+@if (sichtbar()) {
+<div class="hintergrund" aria-hidden="true" (click)="sichtbar.set(false)"></div>
+}
+<p-drawer [(visible)]="sichtbar" [modal]="false" [position]="unten() ? 'bottom' : 'right'" [styleClass]="unten() ? '!h-[78vh]' : '!w-[26rem] max-w-full'">
     <ng-template #header>
         <div class="flex items-center gap-1 min-w-0">
             <p-button icon="pi pi-chevron-left" [text]="true" severity="secondary" size="small" ariaLabel="Vorheriger Tag" (click)="springe(-1)" />

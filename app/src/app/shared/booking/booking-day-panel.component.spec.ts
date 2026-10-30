@@ -92,4 +92,24 @@ describe('BookingDayPanelComponent', () => {
         expect(knoepfe(/Uhr anfragen/)).toHaveLength(0);
         expect(text()).toContain('frei');
     });
+
+    it('schließt per Klick auf den Hintergrund und lässt keine Maske zurück, die die Seite blockiert', async () => {
+        const f = await rendern();
+        expect(document.querySelector('.hintergrund')).not.toBeNull();
+        (document.querySelector('.hintergrund') as HTMLElement).click();
+        f.detectChanges();
+        await f.whenStable();
+        f.detectChanges();
+        expect(f.componentInstance.sichtbar()).toBe(false);
+        expect(document.querySelector('.hintergrund')).toBeNull();
+        expect(document.querySelectorAll('.p-drawer-mask, .p-overlay-mask')).toHaveLength(0);
+        // erneut öffnen und schließen: wieder sauber
+        f.componentInstance.sichtbar.set(true);
+        f.detectChanges();
+        await f.whenStable();
+        expect(document.querySelectorAll('.hintergrund')).toHaveLength(1);
+        f.componentInstance.sichtbar.set(false);
+        f.detectChanges();
+        expect(document.querySelector('.hintergrund')).toBeNull();
+    });
 });
